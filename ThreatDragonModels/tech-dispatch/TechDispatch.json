@@ -1,0 +1,499 @@
+{
+    "version":  "2.0.0",
+    "summary":  {
+                    "title":  "Tech Dispatch",
+                    "owner":  "DIAL Engineering",
+                    "description":  "Technician job dispatch, assignment eligibility, and multi-role job AuthZ.",
+                    "id":  0
+                },
+    "detail":  {
+                   "contributors":  [
+                                        {
+                                            "name":  "DIAL Security (D-48)"
+                                        }
+                                    ],
+                   "diagrams":  [
+                                    {
+                                        "id":  0,
+                                        "title":  "Tech Dispatch — STRIDE",
+                                        "description":  "Technician job dispatch, assignment eligibility, and multi-role job AuthZ.",
+                                        "diagramType":  "STRIDE",
+                                        "placeholder":  "./public/content/images/thumbnail.stride.jpg",
+                                        "thumbnail":  "./public/content/images/thumbnail.stride.jpg",
+                                        "version":  "2.0.0",
+                                        "cells":  [
+                                                      {
+                                                          "position":  {
+                                                                           "y":  80,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "08cf3b8c-6c32-4677-9d98-de0674ddf0ca",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Technician App",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Technician App"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  280,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "c145e34f-9c4c-40b4-9987-f73050889c12",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Customer",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Customer"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  300
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "abc859a1-5afd-45b0-9199-d3034360dab4",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Tech Dispatch\n/ Jobs API",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Assignment eligibility; checklist runner",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "23c363e0-5611-4f73-9dbc-7a21de8d88e9",
+                                                                                           "mitigation":  "Object AuthZ on jobs; role from JWT only.",
+                                                                                           "title":  "Accept job for another tech",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "Technician claims jobId owned by peer.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Tech Dispatch\n/ Jobs API"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "1792a0be-7b74-4ab1-993f-5a62f55f2f96",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Assignment Engine",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Classification + eligibility tests",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "7d923062-ce1d-499b-93e8-94fc9a4fe518",
+                                                                                           "mitigation":  "Server-side eligibility; MapLibre/OSRM SoR — not client coords alone.",
+                                                                                           "title":  "Tampered geo eligibility",
+                                                                                           "type":  "Tampering",
+                                                                                           "description":  "Client spoofs location to win jobs.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Medium",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Assignment Engine"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  740
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "b45bcd00-679e-44a4-9f14-2c18f6fbb5f5",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "RLS multi-role",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Jobs / Vehicles",
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "206d5318-c56c-4a84-a7a2-d13103188162",
+                                                                                           "mitigation":  "RLS policy tests as CI failure; service_role gated.",
+                                                                                           "title":  "Missing RLS on jobs",
+                                                                                           "type":  "Information disclosure",
+                                                                                           "description":  "Jobs readable across customers/techs.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "red",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  3
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "Jobs / Vehicles"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "red",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  3
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "data":  {
+                                                                       "hasOpenThreats":  false,
+                                                                       "isTrustBoundary":  true,
+                                                                       "description":  "",
+                                                                       "name":  "Mobile trust boundary",
+                                                                       "type":  "tm.Boundary"
+                                                                   },
+                                                          "shape":  "trust-boundary-curve",
+                                                          "id":  "9c987983-da46-4d00-a0a5-370ff6afd048",
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "sourceMarker":  "",
+                                                                                     "targetMarker":  ""
+                                                                                 }
+                                                                    },
+                                                          "source":  {
+                                                                         "y":  20,
+                                                                         "x":  10
+                                                                     },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "y":  360,
+                                                                         "x":  10
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  180,
+                                                                               "x":  160
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  0,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "text":  {
+                                                                                                        "text":  "Mobile trust boundary"
+                                                                                                    }
+                                                                                       }
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "a2139f45-0470-4b10-ae9c-681ae8fa6d9f",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "08cf3b8c-6c32-4677-9d98-de0674ddf0ca"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Job offers / accept",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "abc859a1-5afd-45b0-9199-d3034360dab4"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  100,
+                                                                               "x":  170
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Job offers / accept"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "02cc8f8d-bcff-4625-a6d5-3c9be0d93037",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "c145e34f-9c4c-40b4-9987-f73050889c12"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Book / track",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "abc859a1-5afd-45b0-9199-d3034360dab4"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  240,
+                                                                               "x":  170
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Book / track"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "98b64dfb-7e4f-450c-9a62-6c0c93caee94",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "abc859a1-5afd-45b0-9199-d3034360dab4"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Eligibility check",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "1792a0be-7b74-4ab1-993f-5a62f55f2f96"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  420
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Eligibility check"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "43600155-4ab3-4afe-9580-6f4707217093",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "abc859a1-5afd-45b0-9199-d3034360dab4"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Read/write jobs",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "b45bcd00-679e-44a4-9f14-2c18f6fbb5f5"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  620
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Read/write jobs"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      }
+                                                  ]
+                                    }
+                                ],
+                   "diagramTop":  1,
+                   "reviewer":  "DIAL Security Review",
+                   "threatTop":  3
+               }
+}

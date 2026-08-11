@@ -1,0 +1,16 @@
+---
+description: API routes — AuthZ, INTERNAL_API_SECRET, webhook verify + idempotency
+globs: "**/apps/**/api/**/*.{ts,tsx},**/apps/**/webhooks/**/*.{ts,tsx},**/packages/**/adapters/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# API & webhooks (D-47)
+
+Inspired by Lazy Developer Lock-It-Down + ECC secrets discipline (MIT patterns; DIAL-authored).
+
+- Mutating / side-effect handlers need JWT, verified webhook signature, or fail-closed `INTERNAL_API_SECRET` (or mTLS).
+- Never take `userId` / `email` / `role` from body or query — session/JWT only.
+- After AuthN, call `assertResourceAccess` (or equiv) for object `:id` resources.
+- `/webhooks/*` (Paynow, ContiPay, EcoCash, PayPal, Meta WA, FDMS): verify signature **and** idempotency key before mutate.
+- Validate payloads with Zod at the boundary (forms, WA Flow data_exchange, PSP callbacks).
+- Prefer audit report (`docs/agent-audits/endpoint-audit.md`) before drive-by fixes.

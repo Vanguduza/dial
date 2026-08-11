@@ -1,0 +1,414 @@
+{
+    "version":  "2.0.0",
+    "summary":  {
+                    "title":  "WhatsApp Flows data_exchange",
+                    "owner":  "DIAL Engineering",
+                    "description":  "Official WhatsApp Cloud API + Flows data_exchange; ban unofficial clients; signature + passphrase hygiene.",
+                    "id":  0
+                },
+    "detail":  {
+                   "contributors":  [
+                                        {
+                                            "name":  "DIAL Security (D-48)"
+                                        }
+                                    ],
+                   "diagrams":  [
+                                    {
+                                        "id":  0,
+                                        "title":  "WhatsApp Flows data_exchange — STRIDE",
+                                        "description":  "Official WhatsApp Cloud API + Flows data_exchange; ban unofficial clients; signature + passphrase hygiene.",
+                                        "diagramType":  "STRIDE",
+                                        "placeholder":  "./public/content/images/thumbnail.stride.jpg",
+                                        "thumbnail":  "./public/content/images/thumbnail.stride.jpg",
+                                        "version":  "2.0.0",
+                                        "cells":  [
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "a5618de5-6c25-4e2f-b3e3-e8682d0f0f74",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "Official Cloud API only (D-40)",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Meta WhatsApp Cloud API",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Meta WhatsApp Cloud API"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  300
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "38e434c6-84b6-4a1a-b4cf-864632ca0024",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "WA Webhook\n+ Flows data_exchange",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Signature verify; Flows encryption",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "86b23227-2d16-42f1-b7c5-5b235ad14d4e",
+                                                                                           "mitigation":  "Semgrep ban baileys/whatsapp-web.js; D-40 lock.",
+                                                                                           "title":  "Baileys / whatsapp-web.js",
+                                                                                           "type":  "Spoofing",
+                                                                                           "description":  "Unofficial WA client imported.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       },
+                                                                                       {
+                                                                                           "id":  "85b0c168-91df-464a-8d80-738b202fd0a7",
+                                                                                           "mitigation":  "Verify Meta signature + idempotency before mutate.",
+                                                                                           "title":  "Unsigned Meta callback",
+                                                                                           "type":  "Spoofing",
+                                                                                           "description":  "Webhook without X-Hub-Signature-256 verify.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "WA Webhook\n+ Flows data_exchange"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "7fe2d2d2-9e88-498a-a346-a758bf7feb72",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Flows Business Logic",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "data_exchange endpoint",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "fb5c1b07-ef1a-490b-bae7-ba73f4ab0572",
+                                                                                           "mitigation":  "Server-only secrets; no NEXT_PUBLIC_ on WA tokens.",
+                                                                                           "title":  "Flows decrypt key leak",
+                                                                                           "type":  "Information disclosure",
+                                                                                           "description":  "WHATSAPP_FLOWS_PASSPHRASE in client bundle.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Flows Business Logic"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  740
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "629bc3df-ecdc-4d37-9f35-5622f21a3f86",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "WA session / consent meta",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "#333333",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  1.5
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "WA session / consent meta"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "#333333",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  1.5
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "data":  {
+                                                                       "hasOpenThreats":  false,
+                                                                       "isTrustBoundary":  true,
+                                                                       "description":  "",
+                                                                       "name":  "Meta edge",
+                                                                       "type":  "tm.Boundary"
+                                                                   },
+                                                          "shape":  "trust-boundary-curve",
+                                                          "id":  "5b041d9c-6245-45ca-84d3-581a7f5cb324",
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "sourceMarker":  "",
+                                                                                     "targetMarker":  ""
+                                                                                 }
+                                                                    },
+                                                          "source":  {
+                                                                         "y":  40,
+                                                                         "x":  10
+                                                                     },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "y":  320,
+                                                                         "x":  10
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  180,
+                                                                               "x":  140
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  0,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "text":  {
+                                                                                                        "text":  "Meta edge"
+                                                                                                    }
+                                                                                       }
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "e3dcbcbd-cab5-4736-95a1-afdb251b8118",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "a5618de5-6c25-4e2f-b3e3-e8682d0f0f74"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Cloud API webhook",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "38e434c6-84b6-4a1a-b4cf-864632ca0024"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  170
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Cloud API webhook"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "d56c4993-4755-43a2-a6d0-253cf0511c87",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "38e434c6-84b6-4a1a-b4cf-864632ca0024"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "data_exchange",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "7fe2d2d2-9e88-498a-a346-a758bf7feb72"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  420
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "data_exchange"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "4282ef7a-d4e5-42b3-9f92-1d04b04e0bc2",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "7fe2d2d2-9e88-498a-a346-a758bf7feb72"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Persist consent/state",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "629bc3df-ecdc-4d37-9f35-5622f21a3f86"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  640
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Persist consent/state"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      }
+                                                  ]
+                                    }
+                                ],
+                   "diagramTop":  1,
+                   "reviewer":  "DIAL Security Review",
+                   "threatTop":  3
+               }
+}

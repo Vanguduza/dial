@@ -1,0 +1,15 @@
+---
+description: Integer money, outbox, FDMS virtual, AI never writes money
+globs: "**/packages/{payments,ledger,pricing,orders,fiscal}/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Money & fiscal
+
+- Amounts: integer **minor units** + currency; no JS float for money.
+- Durable money/fiscal paths go through **Temporal** + **outbox** — not fire-and-forget HTTP.
+- AI may draft quotes for ops; **never** set customer-payable or ledger amounts.
+- FDMS: virtual device API lifecycle (`openDay` → `submitReceipt` → `closeDay`); no hardware printer dependency.
+- **D-59:** in-house ZIMRA Virtual Gateway default; CloudESD optional `FdmsSigner` only. Receipt classes `DIAL_FEE` / `GOODS_FORMAL` / `GOODS_INFORMAL` — no GMV VAT split-pot; registered goods VAT-inclusive; informal no goods VAT fiscal; WA shares `fdms_outbox`.
+- PSP adapters are Tier-3 capture rails; DIAL ledger remains SoR (D-43).
+- Before fixing money bugs: run skill `dial-money-path-review` (audit report first).

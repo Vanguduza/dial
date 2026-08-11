@@ -1,0 +1,20 @@
+---
+description: D-48 AppSec toolchain — Threat Dragon, Semgrep, Checkov, Renovate, Strix
+alwaysApply: true
+---
+
+# Security toolchain (D-48)
+
+Complementary AppSec stack — does **not** replace D-47 AuthZ/IDOR, money SoR, Promptfoo, or Appendix C.
+
+| Phase | Tool | In-repo |
+| --- | --- | --- |
+| Planning | OWASP Threat Dragon | `ThreatDragonModels/` + `docs/threat-models/` |
+| SAST | Semgrep CE | `semgrep.yml`, `semgrep/rules/` — CI job `semgrep-dial` **hard-fails** |
+| IaC | Checkov | `.github/workflows/checkov.yml` — hard-fail HIGH/CRITICAL |
+| Deps | Renovate primary | `renovate.json`; Dependabot **alerts only** |
+| Pre-prod | Strix (`usestrix/strix`) | `docs/security/strix-runbook.md` — **staging only**, never prod |
+
+Custom Semgrep echoes D-47: no body `userId`/email/role; no `NEXT_PUBLIC_`/`VITE_` secrets; webhook signature heuristic; ban Baileys/`whatsapp-web.js`; optional raw SQL concat.
+
+Authority: `DIAL_Security_Toolchain.md`. Catalog: `DIAL_Cursor_Rules_and_Skills.md`.

@@ -1,0 +1,33 @@
+---
+description: DIAL non-negotiables — money, AI, WA, maps, SoR locks D-38–D-60
+alwaysApply: true
+---
+
+# DIAL non-negotiables
+
+1. Money = `amountMinor` (integer/bigint) + `currency` — never float.
+2. **AI never writes payable amounts**; drafts only; human + pricing engine.
+3. Ledger / Job Reserve SoR = DIAL packages — not Medusa/OfferKit/Formance runtime.
+4. **WhatsApp = official Cloud API only** (D-40) — no Baileys / unofficial clients.
+5. **Maps = MapLibre + Nominatim/OSRM/VROOM** (D-44) — not Google/Mapbox as SoR.
+6. Delivery job SoR = `packages/delivery` + Temporal `DeliveryDispatchWorkflow` (D-45).
+7. Promotions = `@dial/promotions` patterns only (D-42); no cash-out of promo credit.
+8. Outbox for money / fiscal / search / notifications / AI cost events.
+9. Auth-first gateway; no voice UX; native Android+iOS+web (no Expo customer shell).
+10. FDMS = **virtual** fiscalisation via API (D-40a) — no physical printer required; **agency receipt model (D-58)**.
+11. UX donors = screen patterns only (D-38); DIAL APIs remain SoR.
+12. Secrets radioactive; never print `.env`; no `NEXT_PUBLIC_`/`VITE_` on service_role/PSP.
+13. **Agency + B2B hide informal (D-49 + D-58)** — DIAL is **agent**; informal stock never visible/sellable to B2B (filter search/Meili/APIs, not checkout-only).
+14. **Tech WHT 30% (D-50)** — ITF263 / `withholding_balances`; do not design as if WHT disappears.
+15. **No DIAL-owned principal SKUs (D-51 discarded by D-58)** — marketplace agency only; do not scaffold `DIAL_OWNED` / owned inventory/COGS; no marketplace-wide principal flip.
+16. **Tracer sequencing + feature DoD (D-52)** — Plan→Build thin vertical→Expand in-ticket→Done; tracer ≠ stub-as-MVP; ticket incomplete until DoD 100% (`dial-tracer-slice`).
+17. **v7-2 extensions (D-53)** — absorb only via `DIAL_v7_2_Adopted_Platform_Extensions.md`; v7 not SoR; T0–T9 stand; Kernel money stays DIAL packages; CERTIFIED–DORMANT ≠ public multi-phase MVP; no Unleash/OR-Tools as SoR.
+18. **Intelligence Factory + Command Centre (D-54)** — continuous learning with Promptfoo + human promote; no auto-publish checklists/AI; outcome-weighted datasets only; MetricContract registry; Actual vs Simulated — Simulated never auto-pays.
+19. **External skills utilization (D-55)** — selective habits only: `dial-diagram-editorial`; agency payments/webhook/evidence into money-path + tracer; anthropics skill anatomy + `dial-webapp-recon`; no full upstream tree vendors; never Anthropic ToS docx/pdf/pptx/xlsx.
+20. **Plan-phase grill + AI capability merge gate (D-56)** — `dial-grill-locks` in Plan before scaffold of money/WA/maps/AI/Catalogue Factory/Intelligence; `dial-ai-capability-review` before merge of `packages/ai`; Flash-Lite safety organ stays P1.
+21. **Spare USD browse + ZiG-at-checkout (D-57)** — Spare catalogue/cart `displayCurrency = USD` (web/native/WA); ZiG conversion only at checkout from ops daily rate (`fx_daily_rates` / `fx_rate_id`); admin Daily ZiG rate + audit; WA EcoCash + COD via required buttons/CTAs — not free-text only. Does not reopen D-5 ledger currency-of-record.
+22. **D-2 agency confirmed (D-58)** — agent characterisation; agency FDMS/e-invoices reflect tax; WA payments share ERP fiscal outbox; do not reintroduce owned-stock principal without new D-log.
+23. **Agency FDMS + in-house Gateway (D-59)** — `DIAL_FEE` / `GOODS_FORMAL` / `GOODS_INFORMAL` receipt rules from tax discussion; build ZIMRA Virtual Gateway; CloudESD optional adapter only; no GMV VAT split-pot.
+24. **IMTT = DIAL opex (D-60)** — never customer checkout line; COD settle USD; B2C informal visible; Flash-Lite P1.
+
+Full checklist: Agent Pack §2. Locks summary: D-38…D-50 + **D-51 discarded (D-58)** + **D-52**…**D-60**.

@@ -1,0 +1,112 @@
+# Strix (usestrix/strix) — authorized staging AI pentest (D-48)
+# Manual workflow_dispatch only. NEVER point at production money / PSP / FDMS rails.
+# Apache-2.0 — https://github.com/usestrix/strix
+# Runbook: docs/security/strix-runbook.md
+
+name: strix-staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Authorized staging URL (https://…staging…) or path — never production"
+        required: true
+        type: string
+      scan_mode:
+        description: "Scan depth"
+        required: false
+        default: quick
+        type: choice
+        options:
+          - quick
+          - standard
+          - deep
+      instruction:
+        description: "Optional focus (e.g. IDOR and webhook authZ)"
+        required: false
+        default: "Focus on IDOR, authZ bypass, and webhook signature abuse. Do not attempt production PSP/FDMS."
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  strix:
+    name: Strix staging pentest
+    runs-on: ubuntu-latest
+    # Enable when a real staging URL + runner secrets exist. Until then this job still
+    # validates inputs/secrets so misconfig fails loudly (no silent echo success).
+    # Set repository variable STRIX_ENABLED=true to run the actual scan.
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reject production-like targets
+        env:
+          TARGET: ${{ inputs.target }}
+        run: |
+          set -euo pipefail
+          echo "Target: ${TARGET}"
+          # Heuristic guardrails — adjust allowlist as staging hostnames are known
+          if echo "${TARGET}" | grep -Eiq '(^|://)(www\.)?dial\.(co\.zw|com)(/|$)|production|prod\.|api\.dial'; then
+            echo "::error::Refusing production-like target. Use authorized staging only (see docs/security/strix-runbook.md)."
+            exit 1
+          fi
+          if echo "${TARGET}" | grep -Eiq 'paypal\.com|paynow|contipay|ecocash|meta\.com|facebook\.com'; then
+            echo "::error::Refusing third-party production PSP/Meta hosts as Strix targets."
+            exit 1
+          fi
+
+      - name: Require Strix LLM secrets
+        env:
+          STRIX_LLM: ${{ secrets.STRIX_LLM }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+        run: |
+          set -euo pipefail
+          missing=0
+          if [ -z "${STRIX_LLM}" ]; then
+            echo "::error::Missing secret STRIX_LLM (e.g. gemini/gemini-2.0-flash or openai/gpt-4o)."
+            missing=1
+          fi
+          if [ -z "${LLM_API_KEY}" ]; then
+            echo "::error::Missing secret LLM_API_KEY (BYOK for Strix — staging runners only)."
+            missing=1
+          fi
+          if [ "$missing" -ne 0 ]; then
+            echo "Configure secrets per docs/security/strix-runbook.md — failing closed (no silent stub success)."
+            exit 1
+          fi
+          echo "Secrets present (values not printed)."
+
+      - name: Gate on STRIX_ENABLED
+        id: gate
+        run: |
+          set -euo pipefail
+          enabled="${{ vars.STRIX_ENABLED }}"
+          if [ "${enabled}" != "true" ]; then
+            echo "::error::Repository variable STRIX_ENABLED is not 'true'."
+            echo "Secrets and target checks passed, but the live Strix install/scan is gated until staging is ready."
+            echo "Set Actions variable STRIX_ENABLED=true when an authorized staging URL exists, then re-run."
+            echo "Full local/CI procedure: docs/security/strix-runbook.md"
+            exit 1
+          fi
+          echo "STRIX_ENABLED=true — proceeding with scan."
+
+      - name: Install Strix
+        run: curl -sSL https://strix.ai/install | bash
+
+      - name: Run Strix (non-interactive)
+        env:
+          STRIX_LLM: ${{ secrets.STRIX_LLM }}
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          # Never inject production PSP / FDMS / WA tokens into this job
+        run: |
+          set -euo pipefail
+          EXTRA=()
+          if [ -n "${{ inputs.instruction }}" ]; then
+            EXTRA+=(--instruction "${{ inputs.instruction }}")
+          fi
+          strix -n \
+            --target "${{ inputs.target }}" \
+            --scan-mode "${{ inputs.scan_mode }}" \
+            "${EXTRA[@]}"
+        # Exit non-zero when Strix reports vulnerabilities (usestrix CLI behaviour).

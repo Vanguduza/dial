@@ -1,0 +1,545 @@
+{
+    "version":  "2.0.0",
+    "summary":  {
+                    "title":  "FDMS Outbox (virtual fiscalisation)",
+                    "owner":  "DIAL Engineering",
+                    "description":  "D-40a virtual FDMS via API; outbox-driven submit; webhook signature + idempotency; no physical printer.",
+                    "id":  0
+                },
+    "detail":  {
+                   "contributors":  [
+                                        {
+                                            "name":  "DIAL Security (D-48)"
+                                        }
+                                    ],
+                   "diagrams":  [
+                                    {
+                                        "id":  0,
+                                        "title":  "FDMS Outbox (virtual fiscalisation) — STRIDE",
+                                        "description":  "D-40a virtual FDMS via API; outbox-driven submit; webhook signature + idempotency; no physical printer.",
+                                        "diagramType":  "STRIDE",
+                                        "placeholder":  "./public/content/images/thumbnail.stride.jpg",
+                                        "thumbnail":  "./public/content/images/thumbnail.stride.jpg",
+                                        "version":  "2.0.0",
+                                        "cells":  [
+                                                      {
+                                                          "position":  {
+                                                                           "y":  120,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "8c033de6-ee6c-44aa-b496-7526200f0042",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Ops / Fiscal Job",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Ops / Fiscal Job"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  120,
+                                                                           "x":  280
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "bd94e9c0-12c2-4077-baf0-0d4decafc094",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "FDMS Outbox\nWorker",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Virtual fiscalisation API (D-40a)",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "76bd31ff-0c90-489a-82e7-8d66f39fd330",
+                                                                                           "mitigation":  "Outbox idempotency keys; verify FDMS webhook signatures.",
+                                                                                           "title":  "Replay fiscal submit",
+                                                                                           "type":  "Repudiation",
+                                                                                           "description":  "Duplicate FDMS posts without idempotency.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "FDMS Outbox\nWorker"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  40,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "7e61998e-1822-41c3-a14d-3487bc4199ea",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "External ZIMRA/FDMS API — test keys only in staging",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "FDMS Virtual API",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "FDMS Virtual API"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  200,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "5cce734e-003f-4886-90ab-cdbfbb2c36dd",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "FDMS Webhook",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Signature + idempotency",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "76f440a8-a446-445f-b61a-d005ed1565dc",
+                                                                                           "mitigation":  "Verify signature; never production activation keys in Strix/CI.",
+                                                                                           "title":  "Forged fiscal receipt ack",
+                                                                                           "type":  "Spoofing",
+                                                                                           "description":  "Fake FDMS callback marks invoice fiscalised.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "FDMS Webhook"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  120,
+                                                                           "x":  740
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "2266ed4a-1f34-4bce-b494-349d5e917c66",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "amountMinor; audit trail",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Fiscal outbox + invoices",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "#333333",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  1.5
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "Fiscal outbox + invoices"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "#333333",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  1.5
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "data":  {
+                                                                       "hasOpenThreats":  false,
+                                                                       "isTrustBoundary":  true,
+                                                                       "description":  "",
+                                                                       "name":  "DIAL → FDMS",
+                                                                       "type":  "tm.Boundary"
+                                                                   },
+                                                          "shape":  "trust-boundary-curve",
+                                                          "id":  "7fdfe45c-0426-4e7e-9791-55330ede933f",
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "sourceMarker":  "",
+                                                                                     "targetMarker":  ""
+                                                                                 }
+                                                                    },
+                                                          "source":  {
+                                                                         "y":  10,
+                                                                         "x":  200
+                                                                     },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "y":  300,
+                                                                         "x":  200
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  150,
+                                                                               "x":  400
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  0,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "text":  {
+                                                                                                        "text":  "DIAL → FDMS"
+                                                                                                    }
+                                                                                       }
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "1d92f308-2b85-4393-8d46-38cab48af6fa",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "8c033de6-ee6c-44aa-b496-7526200f0042"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Drain outbox",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "bd94e9c0-12c2-4077-baf0-0d4decafc094"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  100,
+                                                                               "x":  160
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Drain outbox"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "4ae8d2dd-0d75-423b-8aad-952531bd4cc6",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "bd94e9c0-12c2-4077-baf0-0d4decafc094"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Submit fiscal doc",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "7e61998e-1822-41c3-a14d-3487bc4199ea"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  60,
+                                                                               "x":  400
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Submit fiscal doc"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "108b2232-03dd-4aad-9717-c80e9f97e965",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "7e61998e-1822-41c3-a14d-3487bc4199ea"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "FDMS callback",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "5cce734e-003f-4886-90ab-cdbfbb2c36dd"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  120,
+                                                                               "x":  520
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "FDMS callback"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "3495f49b-e441-4219-aa0e-66d2668e6aaa",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "5cce734e-003f-4886-90ab-cdbfbb2c36dd"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Update fiscal state",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "2266ed4a-1f34-4bce-b494-349d5e917c66"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  180,
+                                                                               "x":  640
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Update fiscal state"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "5f5e9e3d-8665-4d67-a827-a85048214fb3",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "bd94e9c0-12c2-4077-baf0-0d4decafc094"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Write outbox row",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "2266ed4a-1f34-4bce-b494-349d5e917c66"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  200,
+                                                                               "x":  520
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Write outbox row"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      }
+                                                  ]
+                                    }
+                                ],
+                   "diagramTop":  1,
+                   "reviewer":  "DIAL Security Review",
+                   "threatTop":  2
+               }
+}

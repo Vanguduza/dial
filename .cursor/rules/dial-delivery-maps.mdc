@@ -1,0 +1,14 @@
+---
+description: packages/delivery + Temporal D-45; MapLibre not Google SoR
+globs: "**/packages/delivery/**/*.{ts,tsx},**/apps/delivery-android/**/*,**/apps/admin-web/**/*delivery*"
+alwaysApply: false
+---
+
+# Delivery & maps (D-44 / D-45)
+
+- Job/offer/queue SoR = `packages/delivery` + Temporal `DeliveryDispatchWorkflow` + BullMQ.
+- Flow: eligibility→rank→offer; accept/reject/timeout→reassign; else **FIFO** queue.
+- VROOM = post-accept multi-stop only — not the assignment SoR.
+- Maps: **MapLibre** + Nominatim/OSRM/VROOM. Google Maps / Mapbox are **not** distance or courier-map SoR.
+- Fleetbase / foodhub-compose / Navigator = UX/lifecycle pattern only (AGPL donors: pattern, not SoR).
+- Algorithm donor ideas: AWS Last Mile Hyperlocal (MIT-0) — reimplement in TS; no AWS IoT/Step Functions as SoR.

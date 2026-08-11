@@ -1,0 +1,13 @@
+---
+description: @dial/promotions — computeActions only via pricing engine
+globs: "**/packages/promotions/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Promotions (D-41a / D-42)
+
+- Runtime SoR is in-repo `@dial/promotions` — **not** Medusa or OfferKit services.
+- Price effects only via pricing engine calling `computeActions` (or documented entrypoints) — no ad-hoc discount writes in UI/API handlers.
+- Promo credit is non-cash; **no cash-out**.
+- Supplier co-op (`SUPPLIER_COOP`) needs approval + statement lines; budget/fraud holds in admin.
+- Do not introduce a second commerce/money engine “because the donor had payments.”

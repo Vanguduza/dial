@@ -1,0 +1,589 @@
+{
+    "version":  "2.0.0",
+    "summary":  {
+                    "title":  "Delivery Dispatch (D-45)",
+                    "owner":  "DIAL Engineering",
+                    "description":  "packages/delivery + Temporal DeliveryDispatchWorkflow; MapLibre/OSRM/VROOM maps SoR; not Fleetbase.",
+                    "id":  0
+                },
+    "detail":  {
+                   "contributors":  [
+                                        {
+                                            "name":  "DIAL Security (D-48)"
+                                        }
+                                    ],
+                   "diagrams":  [
+                                    {
+                                        "id":  0,
+                                        "title":  "Delivery Dispatch (D-45) — STRIDE",
+                                        "description":  "packages/delivery + Temporal DeliveryDispatchWorkflow; MapLibre/OSRM/VROOM maps SoR; not Fleetbase.",
+                                        "diagramType":  "STRIDE",
+                                        "placeholder":  "./public/content/images/thumbnail.stride.jpg",
+                                        "thumbnail":  "./public/content/images/thumbnail.stride.jpg",
+                                        "version":  "2.0.0",
+                                        "cells":  [
+                                                      {
+                                                          "position":  {
+                                                                           "y":  80,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "9ecd6a60-985f-4dfe-a738-8c1da52c61bc",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Courier App",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Courier App"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  300,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "482e0b74-2a6a-4a99-b847-21da09fc0e8f",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Ops / Admin",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Ops / Admin"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  280
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "8b703057-9e95-4742-af8f-79ff77a97d8a",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Delivery API\n(packages/delivery)",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "SoR for delivery jobs/offers (D-45)",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "2536cf5e-91d2-4c20-8173-66caaef8ba15",
+                                                                                           "mitigation":  "assertResourceAccess on delivery_jobs/offers; user-scoped cache keys.",
+                                                                                           "title":  "IDOR on delivery_offer",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "Courier accepts another courier offer.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Delivery API\n(packages/delivery)"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "c11ed341-8320-4bd7-ad76-df8872b40bcf",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Temporal\nDeliveryDispatchWorkflow",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Workflow orchestration — not Fleetbase",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "09fbaf8a-f28c-43f5-ad3c-cde27ce5926b",
+                                                                                           "mitigation":  "Fail closed if INTERNAL_API_SECRET unset.",
+                                                                                           "title":  "Unauth internal activity HTTP",
+                                                                                           "type":  "Spoofing",
+                                                                                           "description":  "Worker/activity HTTP without INTERNAL_API_SECRET.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Temporal\nDeliveryDispatchWorkflow"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  320,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "8de789ea-ba6b-442c-8f2f-205a7023de76",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "OSRM / VROOM / MapLibre",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Distance/routing SoR (D-44)",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "OSRM / VROOM / MapLibre"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  740
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "cf4b6d6c-a05f-4a58-8d40-cc0c4d844309",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "Live locations — high sensitivity",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "courier_locations",
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "ca8d519f-2932-460d-aa28-1e3b2f339904",
+                                                                                           "mitigation":  "Object-level AuthZ + RLS; authorize before cache.",
+                                                                                           "title":  "Location stream leak",
+                                                                                           "type":  "Information disclosure",
+                                                                                           "description":  "Any auth user reads all courier_locations.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "red",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  3
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "courier_locations"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "red",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  3
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "data":  {
+                                                                       "hasOpenThreats":  false,
+                                                                       "isTrustBoundary":  true,
+                                                                       "description":  "",
+                                                                       "name":  "External clients",
+                                                                       "type":  "tm.Boundary"
+                                                                   },
+                                                          "shape":  "trust-boundary-curve",
+                                                          "id":  "74853891-0cbb-4c46-b79e-c26b9769d12f",
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "sourceMarker":  "",
+                                                                                     "targetMarker":  ""
+                                                                                 }
+                                                                    },
+                                                          "source":  {
+                                                                         "y":  10,
+                                                                         "x":  10
+                                                                     },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "y":  380,
+                                                                         "x":  10
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  190,
+                                                                               "x":  150
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  0,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "text":  {
+                                                                                                        "text":  "External clients"
+                                                                                                    }
+                                                                                       }
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "0a2acc47-0966-49cf-8fec-13250d49599e",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "9ecd6a60-985f-4dfe-a738-8c1da52c61bc"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Offers / GPS",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "8b703057-9e95-4742-af8f-79ff77a97d8a"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  100,
+                                                                               "x":  160
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Offers / GPS"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "87f3e6c8-5d36-4117-8b8f-9f3b499add61",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "482e0b74-2a6a-4a99-b847-21da09fc0e8f"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Ops override",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "8b703057-9e95-4742-af8f-79ff77a97d8a"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  250,
+                                                                               "x":  160
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Ops override"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "b76d963c-e897-45af-abc1-0b5d46c53e02",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "8b703057-9e95-4742-af8f-79ff77a97d8a"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Start workflow",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "gRPC/HTTP"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "c11ed341-8320-4bd7-ad76-df8872b40bcf"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  400
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Start workflow"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "ed9d94c4-fd98-4c1c-84f8-98ebb987dfb8",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "c11ed341-8320-4bd7-ad76-df8872b40bcf"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Route optimise",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTP"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "8de789ea-ba6b-442c-8f2f-205a7023de76"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  240,
+                                                                               "x":  520
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Route optimise"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "cbbaff6c-9a15-408e-8e0e-32760adf99f6",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "8b703057-9e95-4742-af8f-79ff77a97d8a"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Persist locations",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "cf4b6d6c-a05f-4a58-8d40-cc0c4d844309"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  620
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Persist locations"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      }
+                                                  ]
+                                    }
+                                ],
+                   "diagramTop":  1,
+                   "reviewer":  "DIAL Security Review",
+                   "threatTop":  3
+               }
+}

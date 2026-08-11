@@ -1,0 +1,7 @@
+# T0 TypeScript feedback loops (D-56 / Pack §2.2)
+pre-commit:
+  commands:
+    typecheck:
+      run: pnpm typecheck
+    test:
+      run: pnpm test

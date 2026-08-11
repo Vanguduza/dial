@@ -1,0 +1,593 @@
+{
+    "version":  "2.0.0",
+    "summary":  {
+                    "title":  "Spare Order \u0026 Checkout",
+                    "owner":  "DIAL Engineering",
+                    "description":  "Spare parts browse/cart/checkout trust boundaries; pricing SoR server-side; promotions D-42.",
+                    "id":  0
+                },
+    "detail":  {
+                   "contributors":  [
+                                        {
+                                            "name":  "DIAL Security (D-48)"
+                                        }
+                                    ],
+                   "diagrams":  [
+                                    {
+                                        "id":  0,
+                                        "title":  "Spare Order \u0026 Checkout — STRIDE",
+                                        "description":  "Spare parts browse/cart/checkout trust boundaries; pricing SoR server-side; promotions D-42.",
+                                        "diagramType":  "STRIDE",
+                                        "placeholder":  "./public/content/images/thumbnail.stride.jpg",
+                                        "thumbnail":  "./public/content/images/thumbnail.stride.jpg",
+                                        "version":  "2.0.0",
+                                        "cells":  [
+                                                      {
+                                                          "position":  {
+                                                                           "y":  100,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "d05ac09c-1b3a-42af-a595-293f464aabdc",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Spare Customer",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Spare Customer"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  100,
+                                                                           "x":  260
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "59672d0b-1149-4b5d-abc1-6af3a763d390",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Spare Web / App\nCheckout",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Mercur-patterned UI; no supplierId in client payloads",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "c028be17-0ee5-4bd1-8c35-77b1955c278c",
+                                                                                           "mitigation":  "Server pricing engine only; AI never writes payable amounts.",
+                                                                                           "title":  "Client-supplied price",
+                                                                                           "type":  "Tampering",
+                                                                                           "description":  "Checkout posts amountMinor from client.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Spare Web / App\nCheckout"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  100,
+                                                                           "x":  480
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "a05415c9-e6c3-42bd-8044-7dbc781510cd",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Orders / Checkout API",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "AuthZ object-level on cart/order",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "6772002c-bcc8-4333-9f5d-e029bfca026f",
+                                                                                           "mitigation":  "assertResourceAccess; RLS policies; dial-rls-idor-audit.",
+                                                                                           "title":  "BOLA on order id",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "Enumerate /orders/:id across tenants.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Orders / Checkout API"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  300,
+                                                                           "x":  480
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "3111d7d1-f64b-4f8b-8768-5f8102ea3034",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "@dial/promotions",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Promo credit — no cash-out",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "2830e312-3882-4d9d-898f-3efbf3b1fc22",
+                                                                                           "mitigation":  "D-42: computeActions via pricing only; ban cash-out.",
+                                                                                           "title":  "Promo credit cash-out",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "Promo credit converted to withdrawable balance.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "@dial/promotions"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  100,
+                                                                           "x":  700
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "486cd649-f447-4f9f-b83d-654d43812459",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Payments Adapter",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "PspAdapter registry (D-43)",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Payments Adapter"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  300,
+                                                                           "x":  700
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "b0e196c8-9805-4c1f-800f-8037e5a9681f",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "RLS on orders/customers",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Orders + Catalogue",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "#333333",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  1.5
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "Orders + Catalogue"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "#333333",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  1.5
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "data":  {
+                                                                       "hasOpenThreats":  false,
+                                                                       "isTrustBoundary":  true,
+                                                                       "description":  "",
+                                                                       "name":  "Public client",
+                                                                       "type":  "tm.Boundary"
+                                                                   },
+                                                          "shape":  "trust-boundary-curve",
+                                                          "id":  "6f806b7a-4300-4f94-85b4-ed2dafe3da4f",
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "sourceMarker":  "",
+                                                                                     "targetMarker":  ""
+                                                                                 }
+                                                                    },
+                                                          "source":  {
+                                                                         "y":  20,
+                                                                         "x":  10
+                                                                     },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "y":  380,
+                                                                         "x":  10
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  200,
+                                                                               "x":  150
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  0,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "text":  {
+                                                                                                        "text":  "Public client"
+                                                                                                    }
+                                                                                       }
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "f2dafa62-a329-4ab2-9b59-3353c9400945",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "d05ac09c-1b3a-42af-a595-293f464aabdc"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Browse/cart (TLS)",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "59672d0b-1149-4b5d-abc1-6af3a763d390"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  80,
+                                                                               "x":  150
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Browse/cart (TLS)"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "ba09796f-f951-4e69-be50-f8580a6cf614",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "59672d0b-1149-4b5d-abc1-6af3a763d390"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Create order",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "a05415c9-e6c3-42bd-8044-7dbc781510cd"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  80,
+                                                                               "x":  370
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Create order"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "e4f2c786-e153-4b22-aca5-520d355e6b09",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "a05415c9-e6c3-42bd-8044-7dbc781510cd"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Apply promo",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "3111d7d1-f64b-4f8b-8768-5f8102ea3034"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  200,
+                                                                               "x":  480
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Apply promo"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "2f212460-a2e5-4f98-b4f0-9cd54d7fd9c5",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "a05415c9-e6c3-42bd-8044-7dbc781510cd"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Initiate payment",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "486cd649-f447-4f9f-b83d-654d43812459"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  80,
+                                                                               "x":  600
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Initiate payment"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "fdf12709-56de-4eae-9344-b4bd040def9a",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "a05415c9-e6c3-42bd-8044-7dbc781510cd"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Persist order",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "b0e196c8-9805-4c1f-800f-8037e5a9681f"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  220,
+                                                                               "x":  600
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Persist order"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      }
+                                                  ]
+                                    }
+                                ],
+                   "diagramTop":  1,
+                   "reviewer":  "DIAL Security Review",
+                   "threatTop":  3
+               }
+}

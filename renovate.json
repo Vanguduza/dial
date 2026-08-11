@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommitsDisabled"
+  ],
+  "labels": ["dependencies", "d-48"],
+  "rangeStrategy": "bump",
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "timezone": "Africa/Harare",
+  "schedule": ["before 6am on monday"],
+  "packageRules": [
+    {
+      "description": "Group non-major npm/pnpm updates in monorepo",
+      "matchManagers": ["npm", "pnpm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "js-minor-patch"
+    },
+    {
+      "description": "Gradle (Android) — separate majors",
+      "matchManagers": ["gradle"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "android-gradle-minor-patch"
+    },
+    {
+      "description": "Swift / SPM",
+      "matchManagers": ["swift"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "ios-spm-minor-patch"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions"
+    },
+    {
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "groupName": "docker-base-images"
+    },
+    {
+      "description": "Majors require human review — do not automerge",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true
+  },
+  "osvVulnerabilityAlerts": true
+}

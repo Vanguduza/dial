@@ -1,0 +1,50 @@
+﻿# Secrets & credentials — never index for agents
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.p12
+**/*.pfx
+**/secrets/**
+**/credentials.json
+**/service-account*.json
+**/*service_role*
+**/*-private-key*
+
+# Agent tool dumps / local caches
+.cursor/projects/**
+**/agent-tools/**
+**/.cursor/agent-tools/**
+
+# Large binaries & media
+**/*.mp4
+**/*.mov
+**/*.avi
+**/*.zip
+**/*.tar
+**/*.tar.gz
+**/*.7z
+**/*.iso
+**/*.dmg
+**/*.apk
+**/*.aab
+**/*.ipa
+**/node_modules/**
+**/dist/**
+**/build/**
+**/.next/**
+**/coverage/**
+**/*.map
+
+# Maps / offline packs / model weights
+**/offline-packs/**
+**/*.mbtiles
+**/*.pmtiles
+**/*.onnx
+**/*.gguf
+**/models/**
+
+# OS / IDE noise
+**/.DS_Store
+**/Thumbs.db
+**/*.swp

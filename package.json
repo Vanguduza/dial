@@ -1,0 +1,20 @@
+{
+  "name": "dial",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "build": "turbo run build",
+    "lint": "turbo run lint --continue",
+    "dev:gateway": "pnpm --filter @dial/gateway-web dev"
+  },
+  "devDependencies": {
+    "lefthook": "^1.11.13",
+    "turbo": "^2.5.4",
+    "typescript": "^5.8.3"
+  }
+}

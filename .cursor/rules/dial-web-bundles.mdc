@@ -1,0 +1,13 @@
+---
+description: Customer vs admin JS split; no admin in marketing chunks
+globs: "**/apps/{gateway,spare-web,tech-web,admin-web,supplier-web}/**/*.{ts,tsx,js,jsx}"
+alwaysApply: false
+---
+
+# Web bundle split (Lazy Developer / ship-less-JS)
+
+- Customer/marketing entry (gateway, Spare, Tech public): **must not** import admin-web modules or money-ops dashboards.
+- Use route-level code splitting + Suspense/error boundaries; dynamic-import heavy admin-like widgets.
+- Admin-web is a separate app/entry — never ship it inside customer first-load JS.
+- SEO/AEO meta and crawlable content: **public Spare/Tech marketing surfaces only** — not admin/supplier.
+- Optional: bundle analyzer in CI; grep production customer bundles for `service_role` / PSP secret markers.

@@ -1,0 +1,14 @@
+---
+description: DIAL doc authority order and mandatory reading for agents
+alwaysApply: true
+---
+
+# Agent authority & reading order
+
+**Conflict order:** (1) `DIAL_Consolidated_Plan_v4.md` → (2) `DIAL_Development_Agent_Pack.md` → (3) Blueprint / checklists / stitch / WA / promotions / **D-53/D-54/D-55** companions → (4) these `.cursor/rules` (**D-47** + **D-48** toolchain rule).
+
+Before scaffolding or behaviour changes, follow Agent Pack §1 reading order. Prefer `.cursor/skills/dial-*` for money, IDOR/RLS, and PspAdapter reviews. Catalog: `DIAL_Cursor_Rules_and_Skills.md`. AppSec CI: `DIAL_Security_Toolchain.md` / `dial-security-toolchain.mdc`. v7-2 absorb: `DIAL_v7_2_Adopted_Platform_Extensions.md` (**D-53** / **D-54**) — never the v7 master draft as SoR. External skills: `DIAL_External_Skills_Repos_Utilization.md` (**D-55**). Plan-phase grill + AI capability merge: Pack §2.2 / **D-56**. Spare USD browse / ZiG-at-checkout / WA EcoCash+COD buttons: **D-57** / v4 §4.3. **D-58:** D-2 agency; D-51 owned-stock discarded. **D-59:** agency FDMS receipt model + in-house Gateway.
+
+**Do not reopen:** C-5 Expo/RN customer shells, Baileys/unofficial WA, Google/Mapbox as map/distance SoR, second money/promo SoR, AI writing payable amounts, Fleetbase as delivery job engine, marketplace-wide principal flip or informal→B2B visibility (**D-49**), designing tech payouts as if 30% WHT disappears (**D-50**), reintroducing discarded D-51 owned-stock principal (**D-58**), treating tracer/stub as MVP-complete or merging without feature DoD (**D-52** / `dial-tracer-slice`), v7 as SoR / Train 0–10 / Unleash or OR-Tools as SoR / CERTIFIED–DORMANT as public MVP ladder (**D-53**), auto-publish checklist/AI without human+Promptfoo / Command Centre Simulated as live money control / ad-hoc KPIs without MetricContract (**D-54**), full agency-agents / anthropics/skills / diagram-design asset tree dumps or Anthropic ToS document-skill vendoring (**D-55**), skipping plan-phase grill or merging `packages/ai` without `dial-ai-capability-review` (**D-56**), dual-displaying ZiG on Spare browse/cart or converting without ops-audited daily rate / skipping WA EcoCash+COD checkout buttons (**D-57**).
+
+Cite v4 / D-log section IDs in PRs for behavioural changes. Escalate conflicts; do not invent a fourth stack.

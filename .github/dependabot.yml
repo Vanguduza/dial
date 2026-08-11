@@ -1,0 +1,6 @@
+# Dependabot — alerts / security only posture (D-48)
+# Renovate owns version-update PRs (`renovate.json`).
+# Keep `updates: []` so Dependabot does not open version PRs (avoids dual bots).
+# Enable Dependabot *security* alerts / security updates in the GitHub repo Settings UI.
+version: 2
+updates: []

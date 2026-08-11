@@ -1,0 +1,706 @@
+{
+    "version":  "2.0.0",
+    "summary":  {
+                    "title":  "Job Reserve \u0026 PSP Webhooks",
+                    "owner":  "DIAL Engineering",
+                    "description":  "DIAL Job Reserve hold-and-release, ledger SoR, and Paynow/ContiPay/EcoCash/PayPal webhook trust boundaries (D-43/D-48).",
+                    "id":  0
+                },
+    "detail":  {
+                   "contributors":  [
+                                        {
+                                            "name":  "DIAL Security (D-48)"
+                                        }
+                                    ],
+                   "diagrams":  [
+                                    {
+                                        "id":  0,
+                                        "title":  "Job Reserve \u0026 PSP Webhooks — STRIDE",
+                                        "description":  "DIAL Job Reserve hold-and-release, ledger SoR, and Paynow/ContiPay/EcoCash/PayPal webhook trust boundaries (D-43/D-48).",
+                                        "diagramType":  "STRIDE",
+                                        "placeholder":  "./public/content/images/thumbnail.stride.jpg",
+                                        "thumbnail":  "./public/content/images/thumbnail.stride.jpg",
+                                        "version":  "2.0.0",
+                                        "cells":  [
+                                                      {
+                                                          "position":  {
+                                                                           "y":  40,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "36ac5490-9369-4dc1-903e-8451085ecf88",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "Authenticated customer or native app",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Customer / App",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Customer / App"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  320,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "794096f2-a8d6-4590-91ae-5ea229bcb19f",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "External payment service providers",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "PSP (Paynow/ContiPay/EcoCash/PayPal)",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "PSP (Paynow/ContiPay/EcoCash/PayPal)"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  80,
+                                                                           "x":  280
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "421f0251-422c-4f12-945d-1ec998130873",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Auth-first API Gateway",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "JWT/session AuthN; object AuthZ before money mutations",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "0741d887-5fc5-4b7d-aed6-9604d6ed74d3",
+                                                                                           "mitigation":  "assertResourceAccess / RLS + D-47 IDOR CI; never trust body userId.",
+                                                                                           "title":  "IDOR on Job Reserve id",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "Caller supplies another user jobReserveId and mutates hold/release.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Auth-first API Gateway"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  80,
+                                                                           "x":  500
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "b54d4ff9-84d0-4ba4-aa92-f49207e9499d",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Job Reserve\nState Machine",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "DIAL ledger SoR; amountMinor only; AI never writes payable amounts",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "ada70ca1-ee5b-4512-85cb-23f96d9776d4",
+                                                                                           "mitigation":  "Integer amountMinor+currency; AI drafts only; human+pricing engine.",
+                                                                                           "title":  "Float / AI-written payable amount",
+                                                                                           "type":  "Tampering",
+                                                                                           "description":  "Payable amount written as float or by AI draft path.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Job Reserve\nState Machine"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  300,
+                                                                           "x":  280
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "d09035e2-fdd4-4648-98f5-b88bd5b3f704",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "PSP Webhook\nReceiver",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Verify signature + idempotency before mutate",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "212cbdaa-0c2a-4baa-8b42-d88e4f961c96",
+                                                                                           "mitigation":  "Verify PSP signature AND idempotency key/store before mutating Job Reserve.",
+                                                                                           "title":  "Unsigned webhook replay",
+                                                                                           "type":  "Spoofing",
+                                                                                           "description":  "Attacker posts forged Paynow/ContiPay/EcoCash/PayPal callbacks.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "PSP Webhook\nReceiver"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  80,
+                                                                           "x":  720
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "e9e572fe-a56b-4b00-8012-7dc45b819086",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "Postgres with RLS; outbox for money events",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Ledger / Job Reserve DB",
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "f33979b1-2be8-4bf3-a094-eea93d817177",
+                                                                                           "mitigation":  "Never expose SUPABASE_SERVICE_ROLE_KEY via NEXT_PUBLIC_/VITE_; authorize before cache.",
+                                                                                           "title":  "Service-role bypass of RLS",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "service_role used from user-input path without signed context.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "red",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  3
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "Ledger / Job Reserve DB"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "red",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  3
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  280,
+                                                                           "x":  720
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "031fddc9-e098-4e3a-beed-b06ee86783fe",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "Outbox for money/fiscal/search events",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Money Outbox",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "#333333",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  1.5
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "Money Outbox"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "#333333",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  1.5
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "data":  {
+                                                                       "hasOpenThreats":  false,
+                                                                       "isTrustBoundary":  true,
+                                                                       "description":  "",
+                                                                       "name":  "Internet / untrusted",
+                                                                       "type":  "tm.Boundary"
+                                                                   },
+                                                          "shape":  "trust-boundary-curve",
+                                                          "id":  "2b6797a5-d41a-44b9-89d2-e8a9da20616a",
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "sourceMarker":  "",
+                                                                                     "targetMarker":  ""
+                                                                                 }
+                                                                    },
+                                                          "source":  {
+                                                                         "y":  10,
+                                                                         "x":  20
+                                                                     },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "y":  400,
+                                                                         "x":  20
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  200,
+                                                                               "x":  180
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  0,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "text":  {
+                                                                                                        "text":  "Internet / untrusted"
+                                                                                                    }
+                                                                                       }
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "781097c4-6eca-44e7-aac3-7ae544b70878",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "36ac5490-9369-4dc1-903e-8451085ecf88"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Authenticated API (TLS)",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "421f0251-422c-4f12-945d-1ec998130873"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  60,
+                                                                               "x":  160
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Authenticated API (TLS)"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "6872affb-24cd-4b08-accb-77d0f0ffa749",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "421f0251-422c-4f12-945d-1ec998130873"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Reserve / release cmds",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "b54d4ff9-84d0-4ba4-aa92-f49207e9499d"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  60,
+                                                                               "x":  400
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Reserve / release cmds"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "f0b42152-70e0-41e3-8f21-5302c4fbfeb5",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "b54d4ff9-84d0-4ba4-aa92-f49207e9499d"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Persist amountMinor",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "e9e572fe-a56b-4b00-8012-7dc45b819086"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  60,
+                                                                               "x":  620
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Persist amountMinor"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "cdc41f66-f2c8-4f6a-909b-2c2e57b20c47",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "794096f2-a8d6-4590-91ae-5ea229bcb19f"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "red",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  2.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "PSP webhook callback",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "a4d7f0ca-35da-4957-a5b8-145031b8fe26",
+                                                                                           "mitigation":  "Semgrep webhook heuristic + Appendix A.1 tests.",
+                                                                                           "title":  "Missing signature check",
+                                                                                           "type":  "Spoofing",
+                                                                                           "description":  "Handler accepts body without HMAC/sig verify.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "d09035e2-fdd4-4648-98f5-b88bd5b3f704"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  300,
+                                                                               "x":  160
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "PSP webhook callback"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "48655a4d-b908-4421-9bfe-444fb4449305",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "d09035e2-fdd4-4648-98f5-b88bd5b3f704"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Apply paid/failed",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "b54d4ff9-84d0-4ba4-aa92-f49207e9499d"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  220,
+                                                                               "x":  400
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Apply paid/failed"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "d2327b11-909f-4174-ab79-3cce265ba4e4",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "b54d4ff9-84d0-4ba4-aa92-f49207e9499d"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Enqueue money event",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "031fddc9-e098-4e3a-beed-b06ee86783fe"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  200,
+                                                                               "x":  620
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Enqueue money event"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      }
+                                                  ]
+                                    }
+                                ],
+                   "diagramTop":  1,
+                   "reviewer":  "DIAL Security Review",
+                   "threatTop":  5
+               }
+}

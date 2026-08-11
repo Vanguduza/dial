@@ -1,0 +1,27 @@
+---
+description: AuthZ/IDOR, webhooks, fail-closed secrets, no body identity
+alwaysApply: true
+---
+
+# Security — IDOR, webhooks, secrets
+
+Inspired by ECC common-security (MIT) + Lazy Developer Lock-It-Down; DIAL-tuned.
+
+## Identity & AuthZ
+
+- Authenticated ≠ authorized. After AuthN, **object-level** checks (`assertResourceAccess` or equiv) for jobs, orders, vehicles, promo_credits, delivery_jobs/offers, courier_locations.
+- **Never** trust `userId` / `email` / `role` from body or query — JWT/session only.
+- Authorize **before** cache read; user-scoped cache keys must include `userId`.
+
+## Internal & webhooks
+
+- Side-effect / worker / n8n / Temporal activity HTTP: fail closed if `INTERNAL_API_SECRET` (or mTLS) unset.
+- All `/webhooks/*` (Paynow, ContiPay, EcoCash, PayPal, Meta WA, FDMS): verify signature **and** idempotency key/store before mutating.
+
+## Secrets
+
+- Never read/print/paste `.env*`. Refer by name only.
+- Forbid `NEXT_PUBLIC_` / `VITE_` on `SUPABASE_SERVICE_ROLE_KEY`, PSP keys, WA tokens, FDMS activation.
+- Bundle-grep CI for `service_role`, `sk_live`, integration keys.
+
+Audit-only prompts: `docs/agent-audits/`. Skills: `dial-rls-idor-audit`.

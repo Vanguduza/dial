@@ -1,0 +1,531 @@
+{
+    "version":  "2.0.0",
+    "summary":  {
+                    "title":  "RLS \u0026 IDOR AuthZ",
+                    "owner":  "DIAL Engineering",
+                    "description":  "AuthN≠AuthZ; object-level checks; no body identity; RLS + service_role hygiene (D-47/D-48).",
+                    "id":  0
+                },
+    "detail":  {
+                   "contributors":  [
+                                        {
+                                            "name":  "DIAL Security (D-48)"
+                                        }
+                                    ],
+                   "diagrams":  [
+                                    {
+                                        "id":  0,
+                                        "title":  "RLS \u0026 IDOR AuthZ — STRIDE",
+                                        "description":  "AuthN≠AuthZ; object-level checks; no body identity; RLS + service_role hygiene (D-47/D-48).",
+                                        "diagramType":  "STRIDE",
+                                        "placeholder":  "./public/content/images/thumbnail.stride.jpg",
+                                        "thumbnail":  "./public/content/images/thumbnail.stride.jpg",
+                                        "version":  "2.0.0",
+                                        "cells":  [
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  40
+                                                                       },
+                                                          "zIndex":  1,
+                                                          "id":  "fd954542-fd52-45b4-8cfe-cce7cbac3d1e",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "AuthN ≠ AuthZ",
+                                                                       "type":  "tm.Actor",
+                                                                       "providesAuthentication":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Any authenticated user",
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "actor",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Any authenticated user"
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  280
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "de7a26d2-a5fd-4e50-b491-f23357dafd7e",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Resource API (:id)",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "jobs, orders, vehicles, promo_credits, delivery_*",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "c3cd7326-df0a-4ad9-b579-873073cdb63e",
+                                                                                           "mitigation":  "JWT/session only; Semgrep dial.no-body-identity.",
+                                                                                           "title":  "Trust body userId/email/role",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "Handler reads identity from request body/query.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       },
+                                                                                       {
+                                                                                           "id":  "3fba1e7b-46ae-4317-9f90-cef5773b5322",
+                                                                                           "mitigation":  "Object-level AuthZ before cache; dial-rls-idor-audit.",
+                                                                                           "title":  "Missing assertResourceAccess",
+                                                                                           "type":  "Elevation of privilege",
+                                                                                           "description":  "Fetches by id without ownership check.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Resource API (:id)"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  60,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "dbe7951f-270a-4efa-8226-931691e17e8f",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Cache layer",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "User-scoped keys required",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "8ebfaf91-0f22-4fff-bd96-8924de8a68f2",
+                                                                                           "mitigation":  "Authorize before cache read; include userId in key.",
+                                                                                           "title":  "Cache key without userId",
+                                                                                           "type":  "Information disclosure",
+                                                                                           "description":  "Shared cache returns other users resource.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "Cache layer"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  240,
+                                                                           "x":  520
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "6e174051-50ef-45d6-bcb3-4d730dd09c12",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "RLS mandatory; policy tests in CI",
+                                                                       "type":  "tm.Store",
+                                                                       "isALog":  false,
+                                                                       "isTrustBoundary":  false,
+                                                                       "storesCredentials":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Postgres + RLS",
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "19290cc6-7d7e-4203-af39-2d48a4cbd54f",
+                                                                                           "mitigation":  "Treat missing policy as build failure.",
+                                                                                           "title":  "Missing RLS policy",
+                                                                                           "type":  "Information disclosure",
+                                                                                           "description":  "New table without RLS.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ],
+                                                                       "isSigned":  false,
+                                                                       "isEncrypted":  true
+                                                                   },
+                                                          "shape":  "store",
+                                                          "attrs":  {
+                                                                        "topLine":  {
+                                                                                        "stroke":  "red",
+                                                                                        "strokeDasharray":  null,
+                                                                                        "strokeWidth":  3
+                                                                                    },
+                                                                        "text":  {
+                                                                                     "text":  "Postgres + RLS"
+                                                                                 },
+                                                                        "bottomLine":  {
+                                                                                           "stroke":  "red",
+                                                                                           "strokeDasharray":  null,
+                                                                                           "strokeWidth":  3
+                                                                                       }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  80,
+                                                                       "width":  160
+                                                                   }
+                                                      },
+                                                      {
+                                                          "position":  {
+                                                                           "y":  160,
+                                                                           "x":  740
+                                                                       },
+                                                          "zIndex":  2,
+                                                          "id":  "78b085a4-8930-49ce-8f6d-0a374a5beb56",
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "outOfScope":  false,
+                                                                       "name":  "service_role path",
+                                                                       "type":  "tm.Process",
+                                                                       "description":  "Privileged — fail closed",
+                                                                       "isTrustBoundary":  false,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "89487dd2-d102-48ad-9f5d-891f2891e7cc",
+                                                                                           "mitigation":  "Semgrep dial.no-client-secrets; bundle-grep CI.",
+                                                                                           "title":  "service_role in client bundle",
+                                                                                           "type":  "Information disclosure",
+                                                                                           "description":  "SUPABASE_SERVICE_ROLE_KEY referenced under NEXT_PUBLIC_/VITE_.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "Critical",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ]
+                                                                   },
+                                                          "shape":  "process",
+                                                          "attrs":  {
+                                                                        "text":  {
+                                                                                     "text":  "service_role path"
+                                                                                 },
+                                                                        "body":  {
+                                                                                     "stroke":  "red",
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  3
+                                                                                 }
+                                                                    },
+                                                          "size":  {
+                                                                       "height":  120,
+                                                                       "width":  120
+                                                                   }
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "data":  {
+                                                                       "hasOpenThreats":  false,
+                                                                       "isTrustBoundary":  true,
+                                                                       "description":  "",
+                                                                       "name":  "AuthN boundary",
+                                                                       "type":  "tm.Boundary"
+                                                                   },
+                                                          "shape":  "trust-boundary-curve",
+                                                          "id":  "250112d7-4061-461e-88c3-ae65193cb068",
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "sourceMarker":  "",
+                                                                                     "targetMarker":  ""
+                                                                                 }
+                                                                    },
+                                                          "source":  {
+                                                                         "y":  40,
+                                                                         "x":  10
+                                                                     },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "y":  320,
+                                                                         "x":  10
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  180,
+                                                                               "x":  140
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  0,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "text":  {
+                                                                                                        "text":  "AuthN boundary"
+                                                                                                    }
+                                                                                       }
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "e7750037-8075-483a-b48c-e4988d8f839f",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "fd954542-fd52-45b4-8cfe-cce7cbac3d1e"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  true,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Bearer JWT",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "HTTPS"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "de7a26d2-a5fd-4e50-b491-f23357dafd7e"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  160
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Bearer JWT"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "105cb0f6-0950-4b0d-80ee-55a3e6ce6f47",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "de7a26d2-a5fd-4e50-b491-f23357dafd7e"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Cache lookup",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "dbe7951f-270a-4efa-8226-931691e17e8f"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  80,
+                                                                               "x":  400
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Cache lookup"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "ab6354ee-9982-40d1-8391-f9837758c74a",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "de7a26d2-a5fd-4e50-b491-f23357dafd7e"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "#333333",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  1.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "SQL as user",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  false,
+                                                                       "threats":  [
+
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "SQL"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "6e174051-50ef-45d6-bcb3-4d730dd09c12"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  220,
+                                                                               "x":  400
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "SQL as user"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      },
+                                                      {
+                                                          "width":  200,
+                                                          "height":  100,
+                                                          "id":  "89df4300-9f81-426a-a229-4c68c150a6e7",
+                                                          "shape":  "flow",
+                                                          "source":  {
+                                                                         "cell":  "de7a26d2-a5fd-4e50-b491-f23357dafd7e"
+                                                                     },
+                                                          "attrs":  {
+                                                                        "line":  {
+                                                                                     "stroke":  "red",
+                                                                                     "targetMarker":  {
+                                                                                                          "name":  "block"
+                                                                                                      },
+                                                                                     "strokeDasharray":  null,
+                                                                                     "strokeWidth":  2.5
+                                                                                 }
+                                                                    },
+                                                          "data":  {
+                                                                       "reasonOutOfScope":  "",
+                                                                       "description":  "",
+                                                                       "type":  "tm.Flow",
+                                                                       "isPublicNetwork":  false,
+                                                                       "outOfScope":  false,
+                                                                       "name":  "Break-glass admin",
+                                                                       "isEncrypted":  true,
+                                                                       "hasOpenThreats":  true,
+                                                                       "threats":  [
+                                                                                       {
+                                                                                           "id":  "5b1b9b4b-7838-48b9-b7d9-92d11572aeee",
+                                                                                           "mitigation":  "Fail closed if secret unset.",
+                                                                                           "title":  "Unsigned internal call",
+                                                                                           "type":  "Spoofing",
+                                                                                           "description":  "Internal route without INTERNAL_API_SECRET.",
+                                                                                           "status":  "Open",
+                                                                                           "severity":  "High",
+                                                                                           "modelType":  "STRIDE"
+                                                                                       }
+                                                                                   ],
+                                                                       "isTrustBoundary":  false,
+                                                                       "protocol":  "internal"
+                                                                   },
+                                                          "connector":  "smooth",
+                                                          "target":  {
+                                                                         "cell":  "78b085a4-8930-49ce-8f6d-0a374a5beb56"
+                                                                     },
+                                                          "vertices":  [
+                                                                           {
+                                                                               "y":  140,
+                                                                               "x":  620
+                                                                           }
+                                                                       ],
+                                                          "zIndex":  10,
+                                                          "labels":  [
+                                                                         {
+                                                                             "attrs":  {
+                                                                                           "label":  {
+                                                                                                         "text":  "Break-glass admin"
+                                                                                                     }
+                                                                                       },
+                                                                             "position":  0.5
+                                                                         }
+                                                                     ]
+                                                      }
+                                                  ]
+                                    }
+                                ],
+                   "diagramTop":  1,
+                   "reviewer":  "DIAL Security Review",
+                   "threatTop":  6
+               }
+}
