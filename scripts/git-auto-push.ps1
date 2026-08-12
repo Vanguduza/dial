@@ -37,13 +37,14 @@ if ($branch -eq 'HEAD') {
   exit 0
 }
 
-# Avoid PowerShell @{ } hashtable parse: build upstream range as string
 $upstreamSym = '@' + '{u}'
 $hasUpstream = $true
+$ErrorActionPreference = 'Continue'
 & git rev-parse --abbrev-ref --symbolic-full-name $upstreamSym 2>$null | Out-Null
 if ($LASTEXITCODE -ne 0) {
   $hasUpstream = $false
 }
+$ErrorActionPreference = 'Stop'
 
 if ($hasUpstream) {
   $range = $upstreamSym + '..HEAD'
