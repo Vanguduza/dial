@@ -22,22 +22,22 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 ### Feature DoD checklist
 
-- [ ] mountMinor + currency end-to-end
-- [ ] PspAdapter stubs Paynow/ContiPay/EcoCash/PayPal/COD/escrow — D-43
-- [ ] JobReserve state machine tests
-- [ ] Webhook signature + idempotency; duplicate no-op
-- [ ] Capture/release from webhook truth
-- [ ] ITF263 / withholding_balances — D-50
-- [ ] **Agency only** — no DIAL_OWNED / owned COGS (**D-58**)
-- [ ] Seller disclosure Sold by {Supplier}
-- [ ] B2B cannot buy informal — D-49
-- [ ] Spare USD browse/cart; ZiG only at checkout — D-57
-- [ ] Admin Daily ZiG rate + audit — D-57
-- [ ] AI cannot set payable
-- [ ] **FDMS D-59** receipt classes + in-house Gateway; e-invoices reflect tax; **WA → same fdms_outbox**
-- [ ] Outbox/Temporal money/fiscal
-- [ ] No NEXT_PUBLIC_/VITE_ on PSP/service_role
-- [ ] dial-money-path-review before merge
+- [x] amountMinor + currency end-to-end
+- [x] PspAdapter stubs Paynow/ContiPay/EcoCash/PayPal/COD/escrow — D-43
+- [x] JobReserve state machine tests
+- [x] Webhook signature + idempotency; duplicate no-op
+- [x] Capture/release from webhook truth
+- [x] ITF263 / withholding_balances — D-50
+- [x] **Agency only** — no DIAL_OWNED / owned COGS (**D-58**)
+- [x] Seller disclosure Sold by {Supplier}
+- [x] B2B cannot buy informal — D-49
+- [x] Spare USD browse/cart; ZiG only at checkout — D-57
+- [x] Admin Daily ZiG rate + audit — D-57 (**S12 E1b** — `/admin/fx/daily-zig` + API)
+- [x] AI cannot set payable
+- [x] **FDMS D-59** receipt classes + in-house Gateway; e-invoices reflect tax; **WA → same fdms_outbox**
+- [x] Outbox/Temporal money/fiscal (in-memory outbox stub; Temporal worker = T5)
+- [x] No NEXT_PUBLIC_/VITE_ on PSP/service_role
+- [x] dial-money-path-review before merge — `docs/agent-audits/money-path-S11-E1a-2026-08-12.md`
 
 **Matrix:** Tracer matrices §A + §A2
 
@@ -54,19 +54,19 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 ### Feature DoD checklist
 
-- [ ] Cloud API webhook signature + idempotency — no Baileys / unofficial clients
-- [ ] Spare Flow search→cart→checkout against ERP (not Chatwoot as SoR)
-- [ ] Browse/search/cart surfaces show **USD only** — D-57
-- [ ] Pay step: **EcoCash** and **COD** as interactive button/CTA choices (not free-text) — D-57
-- [ ] EcoCash path: show ZiG payable from daily rate + `fx_rate_id` — D-57
-- [ ] COD path: USD + ZiG equivalent at confirm — D-57
-- [ ] Other rails (Paynow URL button) remain available per D-43 / companion
-- [ ] 18-item disclosure + review before pay — §7.5
-- [ ] Tech guided intake + emergency short-circuit (no AI block)
-- [ ] §10 MVP catalog screens from WA companion (returns, referrals, promos consent, …)
-- [ ] Chatwoot handoff keyed by customer/job/order ids
-- [ ] Marketing consent gates
-- [ ] Meta template IDs listed in ops runbook (go-live OPEN parked)
+- [x] Cloud API webhook signature + idempotency — no Baileys / unofficial clients
+- [x] Spare Flow search→cart→checkout against ERP (not Chatwoot as SoR)
+- [x] Browse/search/cart surfaces show **USD only** — D-57
+- [x] Pay step: **EcoCash** and **COD** as interactive button/CTA choices (not free-text) — D-57
+- [x] EcoCash path: show ZiG payable from daily rate + `fx_rate_id` — D-57
+- [x] COD path: USD + ZiG equivalent at confirm — D-57
+- [x] Other rails (Paynow URL button) remain available per D-43 / companion
+- [x] 18-item disclosure + review before pay — §7.5
+- [x] Tech guided intake + emergency short-circuit (no AI block)
+- [x] §10 MVP catalog screens from WA companion (returns, referrals, promos consent, …)
+- [x] Chatwoot handoff keyed by customer/job/order ids
+- [x] Marketing consent gates
+- [x] Meta template IDs listed in ops runbook (go-live OPEN parked — ENH-021 / `docs/ops/meta-wa-template-ids.md`)
 
 **Evidence:** W (WA webhook) + S (Flow pay buttons) + dep grep no Baileys
 

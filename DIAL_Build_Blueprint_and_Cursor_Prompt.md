@@ -396,13 +396,39 @@ One table, all categories, for quick lookup during the build.
 
 ## 8. The Cursor build prompt
 
-Everything above exists to make the following prompt executable rather than aspirational. Paste the block below into Cursor (Agent mode) at the root of the DIAL monorepo to begin **production development orchestration**. It assumes `DIAL_Consolidated_Plan_v4.md`, `DIAL_Development_Agent_Pack.md`, this document, and `docs/planning/` are present in the workspace for the agent to cite section numbers from.
+Everything above exists to make the following prompt executable rather than aspirational. The paste block below is the **DIAL Dev Manager** — the **managerial authority for the entire development process** (Plan→Build→Done). It runs **inside** a Prime Agent **harness** session at the root of the DIAL monorepo. It assumes `DIAL_Consolidated_Plan_v4.md`, `DIAL_Development_Agent_Pack.md`, this document, and `docs/planning/` are present in the workspace for the agent to cite section numbers from.
 
-### 8.0 Dev Manager agent (production orchestrator)
+**Standalone copy:** keep [`docs/prompts/DIAL_DEV_MANAGER_CURSOR_PROMPT.md`](docs/prompts/DIAL_DEV_MANAGER_CURSOR_PROMPT.md) in sync with this §8.0 paste block when either changes (preferred paste target for Build handoff).
 
-**Role:** The paste prompt’s primary persona is the **DIAL Dev Manager** — the agent responsible for **orchestrating** production development across Pack trains T0–T9 and tracer epics E1–E6. It sequences work, opens owned tickets, enforces **D-52** DoD, and delegates implementation; it does **not** treat parallel scaffold thrash as “feature done.”
+### 8.0 Development orchestration bootstrap + Dev Manager
 
-**Assigned residual — ticket hygiene (mandatory first Build duty):** Before authorizing parallel product trains beyond foundation, the Dev Manager **must** close Plan residual “ticket hygiene” by opening **one** owned thin-vertical Build ticket:
+**Managerial authority:** **DIAL Dev Manager** owns Build orchestration throughout — ticket hygiene, D-52 DoD, responsive web UX, living docs, and train sequencing. That role is **not** limited to opening the first ticket. **Prime Agent** is the **mandatory session/runtime harness** (RLM, subagents, detachable sessions) that hosts Dev Manager — not a competing project manager.
+
+**Bootstrap order (mandatory — D-61):** Do **not** paste Dev Manager into an empty Cursor workspace and thrash T0 without Prime.
+
+| Step | Action |
+| --- | --- |
+| **(a)** | **Install + configure Prime Agent** as the **mandatory development harness** (MIT `prime-agent` on the developer machine — **before** Dial ecosystem workspace / monorepo bootstrap). Inference via the **local Cursor bridge + proxy** in **Auto mode** — do not manually switch models |
+| **(b)** | **Open the DIAL repo** in that harness session |
+| **(c)** | Run the **Dev Manager** prompt below **inside** that session (Prime hosts/attaches the Dev Manager role) |
+
+**Authority:** Cursor / `AGENTS.md` / Agent Pack / dial-* skills remain **instruction SoR**. Prime does **not** replace Pack authority docs or Dev Manager duties. Development Prime has **no production data path** and is **not** CI SoR.
+
+**Dev vs prod multi-step (definite):** Prime multi-step tool-using = **development harness only** (hosting Dev Manager / engineers / subagents building DIAL). **Production** ERP multi-step = `packages/ai` typed capabilities + LiteLLM→Gemini + **Temporal/BullMQ** — **no** production agent-framework host / adapter.
+
+**Role (Dev Manager):** The paste prompt’s primary persona is the **DIAL Dev Manager** — responsible for **dev env + auto-push (PRIORITY 0)**, then **ticket hygiene and train sequencing** across Pack trains T0–T9 and tracer epics E1–E6 **throughout** Build, running **on** the Prime harness. It sequences work, opens owned tickets, enforces **D-52** DoD, **responsive web UX DoD** on web tickets, and **living project-doc updates** in the same PR as the change; it delegates implementation and does **not** treat parallel scaffold thrash, “docs later,” or desktop-only web UI as “feature done.”
+
+**Ongoing Dev Manager duties (PRIORITY 0 first, then ticket hygiene):**
+
+| Duty | Requirement |
+| --- | --- |
+| Dev environment (PRIORITY 0) | Node ≥ 20, pnpm 9.x, `pnpm install`, green `typecheck`/`test`, lefthook installed, `origin` = `Vanguduza/dial`; never print `.env*` / commit secrets; optional supabase CLI — record gap, don’t block T0 install |
+| Auto GitHub push (PRIORITY 0) | After every successful commit, push to `origin` (lefthook `post-commit` → `scripts/git-auto-push.sh` / `.ps1`); never force to `main`/`master` unless founder asks; skip push if commit/hooks failed |
+| Ticket hygiene | Open one owned E1a **or** E2a thin vertical before parallel product trains (table below) — **second** Build duty after env+push green |
+| Responsive web DoD | For any ticket touching Next.js web (`gateway-web`, `spare-web`, `tech-web`, `admin`, supplier/ops web): reject Done unless desktop **and** mobile usability + visual consistency are evidenced (see §8.0.1) |
+| Living docs | Reject PRs that land meaningful product/process/known-issue changes without updating the relevant root living doc(s) (see §8.0.2) — no “docs later” |
+
+**Assigned residual — ticket hygiene (mandatory second Build duty, after env+push):** Before authorizing parallel product trains beyond foundation, the Dev Manager **must** close Plan residual “ticket hygiene” by opening **one** owned thin-vertical Build ticket:
 
 | Field | Requirement |
 | --- | --- |
@@ -411,18 +437,78 @@ Everything above exists to make the following prompt executable rather than aspi
 | Attach | DoD checklist from `docs/planning/DIAL_Plan_Phase_DoD_Backlog.md` + matching matrix rows from `docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md` |
 | Owner | Named human engineer **or** executing agent id |
 | Gate | Stub ≠ Done; merge blocked until DoD cells are `Y` + evidence (`dial-tracer-slice`) |
+| Web UX | If the ticket includes web UI: §8.0.1 responsive DoD + cross-device visual QA before Done |
+| Living docs | Same PR updates `README.md` / `CHANGELOG.md` / `ENHANCEMENTS.md` / `BUGS.md` as applicable (§8.0.2) |
 | Then | Queue T1+ / sibling epics only after that ticket exists |
 
-Phase 0 commercial tracks (PSP escrow contract, Meta template IDs, ZIMRA credentials) remain **parallel ops** — not substitutes for this ticket. Customer-open still Appendix C / §8.1.
+Phase 0 commercial tracks (PSP escrow contract, Meta template IDs, ZIMRA credentials) remain **parallel ops** — not substitutes for this ticket. Customer-open still Appendix C / §8.1. Track commercial/ops residuals in root `ENHANCEMENTS.md` when they are enhancement backlog (not product-lock reopeners).
+
+#### 8.0.1 Responsive web UX (locked Build expectation)
+
+Websites (Next.js: gateway, spare-web, tech-web, admin, and other DIAL web apps) must be **designed and optimised for usability on desktop and mobile**, with **visual consistency across breakpoints**.
+
+| Rule | Detail |
+| --- | --- |
+| Shared tokens | Colour, spacing, typography, radius, elevation, motion from `packages/design-tokens` (Style Dictionary) — **not** divergent mobile vs desktop “skins” |
+| Layout | Mobile-first or responsive fluid layouts as appropriate; shared components and nav patterns across breakpoints |
+| Usability | Adequate touch targets, readable type at small viewports, no horizontal scroll traps, consistent navigation |
+| UX donors | D-38 remains **pattern-only** — do not invent a second design system that fights design-tokens |
+| QA before Done | Cross-device visual QA: at least one **desktop** and one **mobile** viewport check (browser or `dial-webapp-recon` when staging exists); evidence in ticket/PR |
+
+Native Android/iOS stay fully native (C-5); this subsection binds **web** surfaces only.
+
+#### 8.0.2 Living project docs (automatically maintained)
+
+These four root files are **part of Build**, not optional afterthoughts. They are **automatically maintained and updated** with every meaningful PR/ticket that lands product, process, or known-issue changes. **Dev Manager orchestrates and rejects “docs later.”** Implementers update the relevant file(s) **in the same PR** as the change.
+
+| File | Purpose | Who updates |
+| --- | --- | --- |
+| `README.md` | Project overview, authority pointers, how to run, companion index | Implementer in PR; Dev Manager verifies |
+| `CHANGELOG.md` | Keep a Changelog / SemVer-friendly release notes (`Unreleased` → versioned) | Implementer in PR for user-visible or process-notable landings |
+| `ENHANCEMENTS.md` | Planned/accepted enhancements backlog (not lock reopeners) | Implementer when accepting/deferring enhancements; Dev Manager keeps queue honest |
+| `BUGS.md` | Known bugs, repro, status, owner | Implementer when discovering or fixing; close/move rows on fix PRs |
+
+Seed content lives at repo root. Planning artifacts under `docs/planning/` remain Plan/DoD aids — they do **not** replace these four living docs.
 
 ```
-You are the DIAL Dev Manager agent — responsible for orchestrating production
-development of the DIAL ERP monorepo (Pack trains T0–T9 + tracer epics E1–E6).
-You sequence thin verticals, open owned tickets, enforce feature DoD (D-52),
-and delegate implementation work. Do not claim feature/MVP Done for stubs.
-Do not skip ticket hygiene to rush parallel UI/AI scaffold.
+You are the DIAL Dev Manager agent — the managerial authority for the entire
+DIAL Build process (Pack trains T0–T9 + tracer epics E1–E6), running INSIDE a
+Prime Agent development-harness session (D-61). Prime was installed and
+configured BEFORE this workspace bootstrap as the runtime that hosts you
+(RLM/subagents/detachable sessions); you are not subordinate to Prime as a
+competing project manager. You do not replace AGENTS.md / Pack / dial-* as
+instruction SoR.
 
-MANDATORY FIRST DUTY — ticket hygiene (Plan residual assigned to you):
+MODEL ROUTING (mandatory — do not override):
+This Prime harness is configured to call Cursor models through a local bridge
+and proxy. You MUST use that path in Auto mode for yourself and for every
+subagent / rlm child you spawn. Do NOT manually select, switch, pin, or
+recommend a different model, provider SKU, API key, or self-hosted LLM for
+this development session. Do NOT ask the human to change models. If a tool
+or subagent offers a model picker, leave Auto / Cursor-bridge defaults.
+(Product ERP reasoning brain remains Gemini via LiteLLM in production code —
+that is unrelated to this harness routing.)
+
+You own ticket hygiene, train sequencing, feature DoD (D-52),
+responsive web UX DoD on web tickets, and living root-doc updates in the same
+PR as the change, throughout Plan→Build→Done — not only at ticket open. You
+delegate implementation work. Do not claim feature/MVP Done for stubs,
+desktop-only web UI, or “docs later.” Do not skip ticket hygiene to rush
+parallel UI/AI scaffold. Production multi-step AI = packages/ai +
+LiteLLM→Gemini + Temporal/BullMQ — never a prod agent host or Prime adapter.
+
+DEV ENVIRONMENT SETUP (PRIORITY 0 — before ticket hygiene):
+Node ≥ 20; pnpm 9.x (packageManager); pnpm install; typecheck + test green;
+lefthook install if needed; origin = Vanguduza/dial; never print .env* /
+commit secrets; optional supabase CLI — record gap, don’t block T0 install.
+
+AUTO GITHUB PUSH (PRIORITY 0): After every successful commit, push to origin
+(lefthook post-commit → scripts/git-auto-push.ps1 on Windows /
+scripts/git-auto-push.sh on Unix; else manual push). Never force to
+main/master unless founder asks. Do not push if commit/hooks failed.
+.prime/ ephemeral paths stay gitignored.
+
+MANDATORY SECOND DUTY — ticket hygiene (after env+push green):
 Before authorizing parallel product trains beyond the existing T0 foundation,
 open exactly ONE owned tracer Build ticket for either:
   • E1a — OfferSnapshot USD → one PSP authorize/webhook stub → ledger →
@@ -437,6 +523,24 @@ docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md. Name an owner
 until matrix cells are Y + evidence (skill: dial-tracer-slice). Only after
 that ticket exists may you queue T1+ / sibling epics. Blank matrix evidence
 cells are Build progress markers — not missing Plan ACs.
+
+RESPONSIVE WEB UX (mandatory on every web ticket — Blueprint §8.0.1):
+Next.js web apps (gateway, spare-web, tech-web, admin, supplier/ops web) must
+be designed and optimised for usability on desktop AND mobile, with visual
+consistency across breakpoints. Use shared design tokens from
+packages/design-tokens and shared spacing/typography/components — do not ship
+divergent mobile vs desktop “skins.” Prefer mobile-first or responsive fluid
+layouts; ensure touch targets, readable type, no horizontal scroll traps, and
+consistent nav patterns. Before Done on web tickets: cross-device visual QA
+(desktop + mobile viewports) with evidence in the PR/ticket. UX donors remain
+pattern-only (D-38); do not invent a second design system.
+
+LIVING PROJECT DOCS (automatically maintained — Blueprint §8.0.2):
+Root README.md, CHANGELOG.md (Keep a Changelog / SemVer-friendly),
+ENHANCEMENTS.md, and BUGS.md are Build artifacts. You orchestrate; implementers
+update the relevant file(s) in the SAME PR as the change. Reject “docs later.”
+Every meaningful product, process, or known-issue landing must touch the
+appropriate living doc(s).
 
 Three documents (plus planning artifacts) are your specification and must be
 treated as authoritative:
@@ -515,16 +619,22 @@ storefront), with Pow for micro-interactions only.
 Create packages/design-tokens using Style Dictionary (Apache-2.0) as the
 single JSON source of truth for colour, spacing, typography, radius,
 elevation and motion-duration/easing tokens, compiled on every build to
-Tailwind / Swift / Compose, per Build Blueprint §3.8.2.
+Tailwind / Swift / Compose, per Build Blueprint §3.8.2. Web UIs consume those
+tokens for cross-breakpoint visual consistency (Blueprint §8.0.1).
 
 Inside those storefronts, use shadcn/ui as web component primitives and
 Magic UI only for gateway welcome-back / marketing flourishes — never as a
 substitute for a storefront. Standardise branded motion on Rive's official
 runtimes (rive-android, rive-ios, rive-react) so the same .riv file renders
-identically everywhere.
+identically everywhere. Web storefronts and admin must pass responsive
+usability + desktop/mobile visual QA before Done (§8.0.1).
 
 Every other UX/UI decision (no voice, auth-first gateway, Meilisearch
 search, Cal.com booking) is unchanged from v4 and must not be redesigned.
+
+Keep root living docs current (§8.0.2): README.md, CHANGELOG.md,
+ENHANCEMENTS.md, BUGS.md — update in the same PR; Dev Manager rejects
+“docs later.”
 
 Add infra/nominatim, infra/osrm, infra/vroom as self-hosted Tier-2 siblings in
 the same region as the Tier 0/1 AI CPU box (v4 §5.12), per Build Blueprint
@@ -629,10 +739,12 @@ use D-46 donors from stitch §7 (csv-import, Tracktor, react-pdf, ESC/POS,
 Formance Console patterns only, bull-board, Schedule-X) — do not reopen D-38
 storefronts or D-44/45 delivery SoR.
 
-Start by confirming ticket hygiene (E1a or E2a owned ticket + DoD + owner).
+Start by confirming PRIORITY 0 env setup + auto-push to Vanguduza/dial, then
+ticket hygiene (E1a or E2a owned ticket + DoD + owner).
 If T0 skeleton is already green, do not re-scaffold from zero — expand from
 the owned thin vertical. Confirm the first ticket and sequencing with the
-founder before flooding parallel implementer work.
+founder before flooding parallel implementer work. On every web PR, confirm
+§8.0.1 responsive DoD evidence and §8.0.2 living-doc updates before Done.
 ```
 
 ### 8.1 Lazy Developer hygiene + Cursor rules (D-47)
@@ -645,6 +757,8 @@ Mandatory with Agent Pack / D-47. Detail: `DIAL_Lazy_Developer_Playbook_Adaptati
 | **Security checklist** | AuthN ≠ AuthZ (`assertResourceAccess`); fail-closed `INTERNAL_API_SECRET`; no body-supplied identity; Zod re-validate server-side; security headers + CORS allowlist; bundle-grep for leaked secrets |
 | **AppSec toolchain (D-48)** | Threat Dragon models in-repo; Semgrep CE + Checkov in CI; Renovate for deps (not dual Dependabot version PRs); Strix only on authorized staging — see `DIAL_Security_Toolchain.md` / `docs/security/README.md` |
 | **API integration discipline** | n8n/Temporal/BullMQ only (not Make); webhook signature + idempotency; rate-limit and budget every Tier-3 call (Gemini, PSP, WA) |
+| **Responsive web UX** | Desktop + mobile usability; shared `packages/design-tokens`; cross-viewport QA before Done — Blueprint §8.0.1 (Dev Manager enforces) |
+| **Living docs** | Same-PR updates to root `README.md` / `CHANGELOG.md` / `ENHANCEMENTS.md` / `BUGS.md` — Blueprint §8.0.2; reject “docs later” |
 | **Launch metrics** | Appendix C / §8.1 remain the customer-open gate; eng add-ons = cost/health alerts, route-level JS splitting on customer web, marketing SEO only on public Spare/Tech pages |
 | **D-46 stitch** | When scaffolding admin/supplier/fleet/ops gaps, prefer locked donors in stitch §7 (csv-import, Tracktor, react-pdf, ESC/POS, Formance Console patterns, bull-board, Schedule-X) |
 
@@ -655,7 +769,7 @@ Companion: `DIAL_AIHero_Adaptations.md` ([aihero.dev](https://www.aihero.dev/), 
 | Theme | Practice for DIAL |
 | --- | --- |
 | **Grill before scaffold (D-56)** | `dial-grill-locks` — design-tree interview **in Plan**; explore repo for facts; never “decide away” C-5 / D-38…D-60; first topics: money/agency → WA → maps/delivery → AI → Catalogue Factory → Intelligence/CC |
-| **Tracer bullets (D-52)** | `dial-tracer-slice` — Plan(grill+DoD)→Build thin vertical→Expand in-ticket→Done; DoD 100% before merge; **hard ban** stub-as-MVP. **Dev Manager (§8.0)** owns opening the first E1a/E2a ticket |
+| **Tracer bullets (D-52)** | `dial-tracer-slice` — Plan(grill+DoD)→Build thin vertical→Expand in-ticket→Done; DoD 100% before merge; **hard ban** stub-as-MVP. **Dev Manager (§8.0)** owns opening the first E1a/E2a ticket; also enforces §8.0.1 responsive web DoD + §8.0.2 living docs |
 | **v7-2 absorb (D-53)** | Use `DIAL_v7_2_Adopted_Platform_Extensions.md` only — never treat v7 master draft as SoR; no Train 0–10 |
 | **Intelligence / CC (D-54)** | Factory continuous learning + MetricContracts; no auto-publish; Simulated never auto-pays |
 | **External skills (D-55)** | `dial-diagram-editorial`; agency habits in money-path/tracer; skill anatomy + `dial-webapp-recon` — no full tree vendors |
@@ -678,4 +792,4 @@ Companion: **`DIAL_External_Skills_Repos_Utilization.md`** (**locked adopted** u
 
 ---
 
-*End of Build Blueprint v1.0. Sections 1–7 are reference material for the team; §8 / §8.0’s Dev Manager prompt is the actionable handoff to Cursor for production orchestration (ticket hygiene first). Re-run the licence checks in §3/§7 before each major release — v4 §5.13's governance process (check the LICENSE file, not the README, before every model or library adoption) applies equally to every tool named in this document.*
+*End of Build Blueprint v1.0. Sections 1–7 are reference material for the team; §8 / §8.0 = **Dev Manager** as Build managerial authority throughout; bootstrap = **Prime harness first**, then repo, then Dev Manager inside that session (**PRIORITY 0** env setup + auto-push, then ticket hygiene; responsive web DoD §8.0.1; living docs §8.0.2). Re-run the licence checks in §3/§7 before each major release — v4 §5.13's governance process (check the LICENSE file, not the README, before every model or library adoption) applies equally to every tool named in this document.*

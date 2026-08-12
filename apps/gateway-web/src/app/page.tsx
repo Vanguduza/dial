@@ -1,8 +1,8 @@
 import { dialTokens } from "@dial/design-tokens";
 
 /**
- * T0 auth-first gateway shell (v4 §1.4) — sign-in surface only.
- * Shop | Services appear only after authentication (later trains).
+ * T0/T1 auth-first gateway shell (v4 §1.4) — sign-in surface only.
+ * Shop | Services appear only after authentication.
  */
 export default function SignInPage() {
   return (
@@ -17,7 +17,7 @@ export default function SignInPage() {
         padding: dialTokens.space.lg,
       }}
     >
-      <section style={{ maxWidth: 420, textAlign: "center" }}>
+      <section style={{ maxWidth: 420, width: "100%", textAlign: "center" }}>
         <p
           style={{
             fontFamily: `${dialTokens.font.display}, Georgia, serif`,
@@ -67,18 +67,19 @@ export default function SignInPage() {
               color: "#fff",
               fontWeight: 600,
               cursor: "pointer",
+              minHeight: 44,
             }}
           >
             Sign in
           </button>
         </form>
         <p style={{ marginTop: dialTokens.space.lg, fontSize: 14 }}>
-          <a href="#create-account" style={{ color: dialTokens.color.brand.accent }}>
+          <a href="/sign-up" style={{ color: dialTokens.color.brand.accent }}>
             Create account
           </a>
         </p>
         <p style={{ marginTop: dialTokens.space.md, fontSize: 12, opacity: 0.6 }}>
-          Auth stub — Supabase wiring in T1
+          Auth-first — Shop | Services only after sign-in (Pack T1)
         </p>
       </section>
     </main>
