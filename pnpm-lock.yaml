@@ -102,11 +102,33 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
-  packages/payments:
+  packages/ledger:
     dependencies:
       '@dial/shared':
         specifier: workspace:*
         version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/payments:
+    dependencies:
+      '@dial/ledger':
+        specifier: workspace:*
+        version: link:../ledger
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@dial/tax':
+        specifier: workspace:*
+        version: link:../tax
     devDependencies:
       '@types/node':
         specifier: ^22.15.21
@@ -131,6 +153,22 @@ importers:
         version: 5.9.3
 
   packages/shared:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/tax:
+    dependencies:
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@types/node':
         specifier: ^22.15.21

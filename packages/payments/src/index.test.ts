@@ -1,9 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { __resetLedgerForTests } from "@dial/ledger";
+import { __resetTaxForTests, listFdmsOutbox } from "@dial/tax";
 import {
   __resetPaymentsForTests,
   createCheckoutPayment,
+  freezeOfferSnapshot,
   getActiveFxRate,
+  runE1aMoneySpine,
   setDailyZigRate,
   usdToZig,
 } from "./index.js";
@@ -66,4 +70,71 @@ test("payment intent idempotency key is no-op on replay", async () => {
     idempotencyKey: "same-key",
   });
   assert.equal(a.intent?.id, b.intent?.id);
+});
+
+test("AI cannot freeze OfferSnapshot payable", () => {
+  __resetPaymentsForTests();
+  assert.throws(() =>
+    freezeOfferSnapshot({
+      orderId: "ord_ai",
+      supplierDisplayName: "Acme Spares",
+      formality: "formal",
+      amountUsdMinor: 10_00n,
+      aiSuggestedPayableMinor: 9_00n,
+    }),
+  );
+});
+
+test("E1a spine: OfferSnapshot → authorize → webhook → ledger → FiscalReceiptQueued", async () => {
+  __resetPaymentsForTests();
+  __resetLedgerForTests();
+  __resetTaxForTests();
+
+  const captured = await runE1aMoneySpine({
+    orderId: "ord_e1a",
+    supplierDisplayName: "Harare Filters",
+    formality: "formal",
+    amountUsdMinor: 50_00n,
+    dialFeeUsdMinor: 5_00n,
+    buyerSegment: "b2c",
+    channel: "wa",
+    pspEventId: "psp_evt_1",
+    signatureValid: true,
+  });
+  assert.equal(captured.webhook, "captured");
+  assert.match(captured.snapshot.soldBy, /^Sold by /);
+  assert.equal(captured.intent.status, "captured");
+  assert.ok(captured.journalId);
+  assert.equal(captured.fiscalIds.length, 2);
+  assert.equal(listFdmsOutbox().length, 2);
+  assert.ok(
+    listFdmsOutbox().every((r) => r.gateway === "zimra_virtual_in_house"),
+  );
+
+  const dup = await runE1aMoneySpine({
+    orderId: "ord_e1a",
+    supplierDisplayName: "Harare Filters",
+    formality: "formal",
+    amountUsdMinor: 50_00n,
+    dialFeeUsdMinor: 5_00n,
+    buyerSegment: "b2c",
+    channel: "wa",
+    pspEventId: "psp_evt_1",
+    signatureValid: true,
+  });
+  assert.equal(dup.webhook, "duplicate");
+
+  await assert.rejects(async () =>
+    runE1aMoneySpine({
+      orderId: "ord_b2b",
+      supplierDisplayName: "Informal Guy",
+      formality: "informal",
+      amountUsdMinor: 10_00n,
+      dialFeeUsdMinor: 1_00n,
+      buyerSegment: "b2b",
+      channel: "web",
+      pspEventId: "psp_evt_2",
+      signatureValid: true,
+    }),
+  );
 });

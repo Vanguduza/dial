@@ -1,5 +1,5 @@
 {
-  "name": "@dial/payments",
+  "name": "@dial/tax",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -12,9 +12,7 @@
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
-    "@dial/ledger": "workspace:*",
-    "@dial/shared": "workspace:*",
-    "@dial/tax": "workspace:*"
+    "@dial/shared": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",

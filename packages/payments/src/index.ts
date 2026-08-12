@@ -226,10 +226,167 @@ export function getPaymentIntent(id: string): PaymentIntent | undefined {
   return intents.get(id);
 }
 
+/** Frozen offer at checkout — AI cannot set payable (C-1). */
+export type OfferSnapshot = {
+  offerSnapshotId: string;
+  orderId: string;
+  supplierDisplayName: string;
+  /** Agency disclosure — Sold by {Supplier}. */
+  soldBy: string;
+  formality: "formal" | "informal";
+  amount: Money;
+  frozenAt: string;
+};
+
+const offerSnapshots = new Map<string, OfferSnapshot>();
+const processedPspEvents = new Set<string>();
+
+export function freezeOfferSnapshot(input: {
+  orderId: string;
+  supplierDisplayName: string;
+  formality: "formal" | "informal";
+  amountUsdMinor: bigint;
+  /** Rejected if provided — AI must not write payable. */
+  aiSuggestedPayableMinor?: bigint;
+}): OfferSnapshot {
+  if (input.aiSuggestedPayableMinor !== undefined) {
+    throw new Error("AI cannot set payable amount");
+  }
+  if (typeof input.amountUsdMinor !== "bigint" || input.amountUsdMinor <= 0n) {
+    throw new TypeError("amountUsdMinor must be positive bigint");
+  }
+  const snap: OfferSnapshot = {
+    offerSnapshotId: id("ofs"),
+    orderId: input.orderId,
+    supplierDisplayName: input.supplierDisplayName,
+    soldBy: `Sold by ${input.supplierDisplayName}`,
+    formality: input.formality,
+    amount: money(input.amountUsdMinor, "USD"),
+    frozenAt: new Date().toISOString(),
+  };
+  offerSnapshots.set(snap.offerSnapshotId, snap);
+  return snap;
+}
+
+export function assertB2bMayPurchase(input: {
+  buyerSegment: "b2c" | "b2b";
+  formality: "formal" | "informal";
+}): void {
+  if (input.buyerSegment === "b2b" && input.formality === "informal") {
+    throw new Error("B2B cannot purchase informal stock (D-49)");
+  }
+}
+
+/**
+ * E1a thin path: freeze → authorize stub → verified webhook capture → ledger → FiscalReceiptQueued.
+ */
+export async function runE1aMoneySpine(input: {
+  orderId: string;
+  supplierDisplayName: string;
+  formality: "formal" | "informal";
+  amountUsdMinor: bigint;
+  dialFeeUsdMinor: bigint;
+  buyerSegment: "b2c" | "b2b";
+  channel: "web" | "wa" | "native";
+  pspEventId: string;
+  signatureValid: boolean;
+}): Promise<{
+  snapshot: OfferSnapshot;
+  intent: PaymentIntent;
+  journalId: string;
+  fiscalIds: string[];
+  webhook: "captured" | "rejected_signature" | "duplicate";
+}> {
+  const { postPspCaptureSimple } = await import("@dial/ledger");
+  const { enqueueFiscalReceipt } = await import("@dial/tax");
+
+  assertB2bMayPurchase({
+    buyerSegment: input.buyerSegment,
+    formality: input.formality,
+  });
+
+  const snapshot = freezeOfferSnapshot({
+    orderId: input.orderId,
+    supplierDisplayName: input.supplierDisplayName,
+    formality: input.formality,
+    amountUsdMinor: input.amountUsdMinor,
+  });
+
+  const authorizeKey = `auth_${input.orderId}`;
+  let intentId = intentsByIdem.get(authorizeKey);
+  let intent = intentId ? intents.get(intentId) : undefined;
+  if (!intent) {
+    intent = {
+      id: id("pi"),
+      method: "paynow_hosted",
+      amount: snapshot.amount,
+      status: "authorized",
+      orderId: input.orderId,
+      idempotencyKey: authorizeKey,
+      createdAt: new Date().toISOString(),
+    };
+    intents.set(intent.id, intent);
+    intentsByIdem.set(authorizeKey, intent.id);
+  }
+
+  if (!input.signatureValid) {
+    return {
+      snapshot,
+      intent,
+      journalId: "",
+      fiscalIds: [],
+      webhook: "rejected_signature",
+    };
+  }
+
+  if (processedPspEvents.has(input.pspEventId)) {
+    return {
+      snapshot,
+      intent,
+      journalId: "",
+      fiscalIds: [],
+      webhook: "duplicate",
+    };
+  }
+  processedPspEvents.add(input.pspEventId);
+
+  intent.status = "captured";
+  const journal = postPspCaptureSimple({
+    orderId: input.orderId,
+    amount: snapshot.amount,
+    idempotencyKey: `ledger_${input.pspEventId}`,
+  });
+
+  const goodsClass =
+    input.formality === "formal" ? "GOODS_FORMAL" : "GOODS_INFORMAL";
+  const goods = enqueueFiscalReceipt({
+    orderId: input.orderId,
+    receiptClass: goodsClass,
+    amount: snapshot.amount,
+    channel: input.channel,
+  });
+  const fee = enqueueFiscalReceipt({
+    orderId: input.orderId,
+    receiptClass: "DIAL_FEE",
+    amount: money(input.dialFeeUsdMinor, "USD"),
+    channel: input.channel,
+  });
+
+  return {
+    snapshot,
+    intent,
+    journalId: journal.id,
+    fiscalIds: [goods.id, fee.id],
+    webhook: "captured",
+  };
+}
+
 /** Test helper — wipe in-memory stores. */
 export function __resetPaymentsForTests(): void {
   fxStore.length = 0;
   intents.clear();
   intentsByIdem.clear();
   codOrders.clear();
+  offerSnapshots.clear();
+  processedPspEvents.clear();
 }
