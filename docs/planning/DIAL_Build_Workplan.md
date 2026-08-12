@@ -1,0 +1,130 @@
+# DIAL Build — End-to-End Workplan (auto-advance)
+
+**Authority:** Pack §15 (T0–T9) · DoD backlog E1–E6 · Blueprint §8.0 · D-52 / D-56 / D-61  
+**Companion:** `DIAL_Dev_Manager_Autonomous_Runbook.md` (decision policy)  
+**State pointer:** `DIAL_Build_Workplan_STATE.md` (current stage — update every landing)  
+**Rule:** When a stage goes **green**, Dev Manager **immediately** opens and starts the next stage. **No human confirm. No idle wait.**
+
+---
+
+## 0. Auto-advance contract
+
+```text
+on stage_green(stage):
+  1. Attach evidence (T/W/P/S/A as required)
+  2. Flip DoD/matrix cells to Y on the owning issue
+  3. Comment issue + update STATE.md + CHANGELOG/ENHANCEMENTS as needed
+  4. Commit + auto-push
+  5. OPEN next stage ticket (gh issue) with DoD + matrix attached
+  6. START next stage Build in the same session (or next agent turn without pausing for humans)
+```
+
+| Green means | Not green |
+| --- | --- |
+| Feature DoD checklist 100% **or** Pack train AC table for that stage | Thin-vertical-only (“tracer done”) |
+| Matrix cells for in-scope channels = `Y` + evidence codes | Blank matrix cells |
+| `pnpm typecheck` + `pnpm test` green on landed packages | Hooks failing |
+| Required skills run when in scope (`dial-money-path-review`, `dial-grill-locks` already Plan-done, `dial-ai-capability-review` before `packages/ai` merge) | Skipping gates |
+
+**Parallel (non-blocking):** Phase 0 commercial ENH-020…022 stay `proposed` forever until ops lands — eng continues on stubs.  
+**Hard stop (only):** secrets, force-push main, lock reopen, customer-open declaration, production data.
+
+---
+
+## 1. Stage graph (serial spine)
+
+Stages are ordered. **Do not skip ahead** except where noted (E2a may land WA against payment stubs while E1 expands later).
+
+| # | Stage ID | Name | Owns | Green when | Next (auto) |
+| ---: | --- | --- | --- | --- | --- |
+| 0 | `S00` | PRIORITY 0 — env + auto-push | Dev Manager | Node/pnpm/typecheck/test/lefthook/origin/push script OK | `S01` |
+| 1 | `S01` | Ticket hygiene | Dev Manager | One owned E2a **or** E1a issue with DoD+matrix+owner | `S10` (prefer E2a) |
+| 10 | `S10` | **E2a** Spare WA USD→EcoCash\|COD→intent | #1 | Matrix B (+ A2 checkout cells) 100% + evidence | `S11` |
+| 11 | `S11` | **E1a** Money spine OfferSnapshot→PSP→ledger→FiscalReceiptQueued | new issue | Matrix A money rows for thin path 100% + `dial-money-path-review` | `S12` |
+| 12 | `S12` | **E1b** Daily ZiG admin + EcoCash ZiG/`fx_rate_id` | new issue | Matrix A2 admin+EcoCash cells 100% | `S20` |
+| 20 | `S20` | **T1** Identity | new issue | Pack §15 T1 AC | `S21` |
+| 21 | `S21` | **T2** Catalogue+Search (Meili, B2B hide informal, Factory ingest stubs) | new issue | Pack §15 T2 AC | `S22` |
+| 22 | `S22` | **T3** Spare UI (web/native patterns + responsive DoD; closes remaining Spare channel parity) | new issue | Pack §15 T3 AC + §8.0.1 evidence | `S23` |
+| 23 | `S23` | **T5** Money spine full (ledger, all PspAdapters, JobReserve, WHT, FDMS Gateway stub) | new issue | Pack §15 T5 AC + money-path review | `S24` |
+| 24 | `S24` | **T4** Tech UI | new issue | Pack §15 T4 AC + §8.0.1 | `S25` |
+| 25 | `S25` | **E3a** Delivery job→offer→POD | new issue | Matrix C thin path 100% | `S26` |
+| 26 | `S26` | **T6** Jobs (classification, rate-card quote, JobClass/Trade stubs) | new issue | Pack §15 T6 AC | `S27` |
+| 27 | `S27` | **E4a** / **T7** AI guidedIntake (no price) + Promptfoo smoke | new issue | Matrix / Pack T7 + `dial-ai-capability-review` | `S28` |
+| 28 | `S28` | **E5a** Catalogue Factory CSV→approve→Meili; B2B informal leak=0 | new issue | E5 DoD 100% | `S29` |
+| 29 | `S29` | **E6a** / **T8** Factory shadow+MetricContract + CC Actual/Simulated | new issue | E6 DoD + Pack T8 | `S30` |
+| 30 | `S30` | **T9** Hardening (IDOR, webhooks, Semgrep baseline, Simulated≠pay) | new issue | Pack §15 T9 + Appendix A.1 | `S90` |
+| 90 | `S90` | **Eng Build complete** | Dev Manager | All S10–S30 green; living docs current | `S99` (ops) |
+| 99 | `S99` | **Customer-open** | Founder/ops | Appendix C / Blueprint §8.1 — **not auto** | END |
+
+**Note on order S22→S23→S24:** Pack narrative is T3 then T4 then T5, but money spine T5 is required before deep Tech money and jobs. This workplan runs **T3 Spare UI → T5 Money full → T4 Tech UI** so Tech booking can bind to real quote/money stubs. Do not reopen locks.
+
+**D-53 Commercial Simulation:** scaffold after `S23` green (optional overlay; not a new stage number).
+
+---
+
+## 2. Stage detail — active / near
+
+### S10 — E2a (CURRENT)
+
+| | |
+| --- | --- |
+| Issue | https://github.com/Vanguduza/dial/issues/1 |
+| Branch | `build/e2a-spare-wa-checkout` / PR #2 |
+| Thin path | Done (packages + green-path test) |
+| Expand remaining | Full Matrix B: 18-item disclosure, tech intake + emergency, §10 catalog Flows, Chatwoot handoff ids, marketing consent, Paynow URL button, gateway webhook HTTP routes, dep-grep Baileys=0 evidence |
+| Green → | Auto-open **S11 E1a** and start OfferSnapshot→PSP stub→ledger→FiscalReceiptQueued |
+
+### S11 — E1a (NEXT after S10)
+
+OfferSnapshot USD → one PspAdapter authorize → webhook capture (sig+idempotency) → ledger entries → `FiscalReceiptQueued` (agency D-59).  
+Gates: `dial-money-path-review` before merge.
+
+### S12 — E1b
+
+Admin Daily ZiG rate + audit; EcoCash checkout shows ZiG + persists `fx_rate_id`.
+
+### S20–S30
+
+Pack §15 ACs are the Done definition. Epic DoD from `DIAL_Plan_Phase_DoD_Backlog.md` attaches when the stage is an E* thin vertical.
+
+### S99 — not automatic
+
+Customer-open requires humans (contracts, licences, live Meta/ZIMRA/PSP). Eng must not declare launch.
+
+---
+
+## 3. Session bootstrap (every Dev Manager turn)
+
+1. Read `DIAL_Build_Workplan_STATE.md` → `current_stage`  
+2. If current stage not green → continue expand/build (no ask)  
+3. If current stage green → execute auto-advance contract (§0)  
+4. Never stop between stages for founder preference when prefer/lock exists  
+
+---
+
+## 4. Evidence codes (DoD backlog)
+
+| Code | Meaning |
+| --- | --- |
+| T | tests / typecheck |
+| W | webhook replay / idempotency |
+| P | Promptfoo |
+| S | screenshot / dial-webapp-recon |
+| A | audit skill report (money-path / capability / IDOR) |
+
+---
+
+## 5. Parallel ops track (never blocks S10–S90)
+
+| ID | Track | Blocks |
+| --- | --- | --- |
+| ENH-020 | PSP escrow contract | Customer-open only |
+| ENH-021 | Meta template IDs | Customer-open only |
+| ENH-022 | ZIMRA Gateway credentials | Customer-open only |
+| ENH-023 | POTRAZ / AI transfer | As required for live photo→foreign model |
+
+Eng uses stubs until these land.
+
+---
+
+*End of workplan. Update STATE.md on every stage transition.*

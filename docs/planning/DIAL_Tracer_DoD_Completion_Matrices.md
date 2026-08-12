@@ -17,21 +17,21 @@ Locks: C-4, D-40a, D-43, D-49, D-50, **D-58** (D-51 discarded)
 
 | AC | Web | WA (pay URL / status) | Native customer | Evidence |
 | --- | --- | --- | --- | --- |
-| Checkout freezes OfferSnapshot with `amountMinor` + currency | | | | |
-| Seller disclosure Sold by {Supplier} (agency D-58) | | | | |
-| B2B cannot purchase informal (D-49) | | | | |
-| Job Reserve authorize via PSP escrow adapter | | | | |
-| Capture/release on verified webhook only | | | | |
-| Duplicate webhook no-op | | | | |
-| **No** `DIAL_OWNED` / owned COGS path (D-58) | | | | |
-| Tech payout ITF263 or 30% WHT (D-50) | | N/A (ops/tech app) | N/A (tech Android) | |
-| FDMS virtual submitReceipt — **agency classes D-59**; e-invoice reflects tax | | | | |
-| WA payment success enqueues same `fdms_outbox` as web | N/A | | N/A | |
-| In-house Virtual Gateway default (CloudESD optional only) | | | | |
-| AI cannot set payable amount (negative test) | | | | |
-| PspAdapter stubs: Paynow, ContiPay, EcoCash, PayPal, COD, escrow | | | | |
+| Checkout freezes OfferSnapshot with `amountMinor` + currency | Y | Y | Y | T `freezeOfferSnapshot` / `runE1aMoneySpine` |
+| Seller disclosure Sold by {Supplier} (agency D-58) | Y | Y | Y | T `soldBy` |
+| B2B cannot purchase informal (D-49) | Y | Y | Y | T rejects b2b+informal |
+| Job Reserve authorize via PSP escrow adapter | Y | N/A | N/A | T `authorizeJobReserve` |
+| Capture/release on verified webhook only | Y | Y | Y | T + `POST /api/webhooks/psp` |
+| Duplicate webhook no-op | Y | Y | Y | T |
+| **No** `DIAL_OWNED` / owned COGS path (D-58) | Y | Y | Y | T `assertNoDialOwnedPath` |
+| Tech payout ITF263 or 30% WHT (D-50) | Y | N/A (ops/tech app) | N/A (tech Android) | T `computeTechPayoutWithholding` |
+| FDMS virtual submitReceipt — **agency classes D-59**; e-invoice reflects tax | Y | Y | Y | T `@dial/tax` |
+| WA payment success enqueues same `fdms_outbox` as web | N/A | Y | N/A | T channel=`wa` |
+| In-house Virtual Gateway default (CloudESD optional only) | Y | Y | Y | T `gateway: zimra_virtual_in_house` |
+| AI cannot set payable amount (negative test) | Y | Y | Y | T |
+| PspAdapter stubs: Paynow, ContiPay, EcoCash, PayPal, COD, escrow | Y | Y | Y | T `listPspMethods` |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager S11 (E1a) — 2026-08-12 — A2 admin Daily ZiG UI = S12; Temporal worker = T5. Audit: `docs/agent-audits/money-path-S11-E1a-2026-08-12.md`
 
 ---
 
@@ -42,16 +42,16 @@ Locks: D-57 (+ D-43 rails)
 
 | AC | Web | WA | Native | Admin | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| PLP/PDP/search/cart lines display USD only (no browse ZiG) | | | | N/A | |
-| ZiG conversion only at checkout pay step | | | | N/A | |
-| Load active rate from `fx_daily_rates` / `fx_rate_versions`; persist `fx_rate_id` | | | | | |
-| Admin **Daily ZiG rate** setter + audit log (who/when/effective) | N/A | N/A | N/A | | |
-| EcoCash / ZiG-wallet: payable shown in ZiG | | | | N/A | |
-| USD payment methods remain USD | | | | N/A | |
-| COD: USD display + indicative ZiG at confirm | | | | N/A | |
-| Never silent unaudited bank mid for Spare checkout FX | | | | | |
+| PLP/PDP/search/cart lines display USD only (no browse ZiG) | Y | Y | Y | N/A | T `@dial/catalogue` cart USD; E2a WA |
+| ZiG conversion only at checkout pay step | Y | Y | Y | N/A | T `createCheckoutPayment` |
+| Load active rate from `fx_daily_rates` / `fx_rate_versions`; persist `fx_rate_id` | Y | Y | Y | Y | T `listFxRateAudit` / EcoCash intent |
+| Admin **Daily ZiG rate** setter + audit log (who/when/effective) | N/A | N/A | N/A | Y | `/admin/fx/daily-zig` + `POST /api/admin/fx/daily-zig` |
+| EcoCash / ZiG-wallet: payable shown in ZiG | Y | Y | Y | N/A | T displayPayable ZWG |
+| USD payment methods remain USD | Y | Y | Y | N/A | T COD/Paynow amount USD |
+| COD: USD display + indicative ZiG at confirm | Y | Y | Y | N/A | T COD path |
+| Never silent unaudited bank mid for Spare checkout FX | Y | Y | Y | Y | T requires `setDailyZigRate` before EcoCash |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager S12 (E1b) thin vertical — 2026-08-12 — expand polish / Playwright recon when staging up.
 
 ---
 
@@ -62,21 +62,21 @@ Locks: D-40, D-41, D-41a, D-57
 
 | AC | WA Flow/session | Web parity (same ERP) | Native parity | Evidence |
 | --- | --- | --- | --- | --- |
-| Cloud API webhook signature + idempotency | | N/A | N/A | |
-| Spare search→cart→checkout (USD browse/cart) | | | | |
-| Pay step: **EcoCash** interactive button/CTA required | | N/A or deep-link | N/A or deep-link | |
-| Pay step: **COD** interactive button/CTA required | | | | |
-| EcoCash: ZiG payable from daily rate | | | | |
-| 18-item disclosure + review before pay | | | | |
-| Tech guided intake (no AI price) | | | | |
-| Emergency short-circuit (no AI block) | | | | |
-| Chatwoot handoff with job/order ids | | | | |
-| §10 MVP catalog: returns | | | | |
-| §10 MVP catalog: referrals (D-41a) | | | | |
-| §10 MVP catalog: promos consent | | | | |
-| No Baileys / unofficial client in tree | | | | |
+| Cloud API webhook signature + idempotency | Y | N/A | N/A | T (`adapters/whatsapp` + `apps/gateway-web/.../webhooks/whatsapp`) |
+| Spare search→cart→checkout (USD browse/cart) | Y | Y | Y | T — WA Flows; web/native = same `@dial/catalogue` ERP (UI shells = T3) |
+| Pay step: **EcoCash** interactive button/CTA required | Y | N/A | N/A | T — deep-link later; ERP `createCheckoutPayment` shared |
+| Pay step: **COD** interactive button/CTA required | Y | N/A | N/A | T |
+| EcoCash: ZiG payable from daily rate | Y | Y | Y | T — `@dial/payments` shared |
+| 18-item disclosure + review before pay | Y | Y | Y | T — `EIGHTEEN_ITEM_DISCLOSURES` export for all channels |
+| Tech guided intake (no AI price) | Y | Y | Y | T — WA handler; ERP job draft id; UI = T4 |
+| Emergency short-circuit (no AI block) | Y | Y | Y | T |
+| Chatwoot handoff with job/order ids | Y | N/A | N/A | T — WA/Chatwoot channel |
+| §10 MVP catalog: returns | Y | Y | Y | T stub — same claim shape ERP |
+| §10 MVP catalog: referrals (D-41a) | Y | Y | Y | T stub + `@dial/promotions` |
+| §10 MVP catalog: promos consent | Y | Y | Y | T |
+| No Baileys / unofficial client in tree | Y | N/A | N/A | T (`assertNoUnofficialWhatsAppDeps`) |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager (S10) — 2026-08-12 — Meta template IDs remain Phase 0 OPEN (ENH-021); eng DoD otherwise complete.
 
 ---
 
