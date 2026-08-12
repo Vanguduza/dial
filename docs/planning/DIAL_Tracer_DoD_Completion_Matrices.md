@@ -42,16 +42,16 @@ Locks: D-57 (+ D-43 rails)
 
 | AC | Web | WA | Native | Admin | Evidence |
 | --- | --- | --- | --- | --- | --- |
-| PLP/PDP/search/cart lines display USD only (no browse ZiG) | | | | N/A | |
-| ZiG conversion only at checkout pay step | | | | N/A | |
-| Load active rate from `fx_daily_rates` / `fx_rate_versions`; persist `fx_rate_id` | | | | | |
-| Admin **Daily ZiG rate** setter + audit log (who/when/effective) | N/A | N/A | N/A | | |
-| EcoCash / ZiG-wallet: payable shown in ZiG | | | | N/A | |
-| USD payment methods remain USD | | | | N/A | |
-| COD: USD display + indicative ZiG at confirm | | | | N/A | |
-| Never silent unaudited bank mid for Spare checkout FX | | | | | |
+| PLP/PDP/search/cart lines display USD only (no browse ZiG) | Y | Y | Y | N/A | T `@dial/catalogue` cart USD; E2a WA |
+| ZiG conversion only at checkout pay step | Y | Y | Y | N/A | T `createCheckoutPayment` |
+| Load active rate from `fx_daily_rates` / `fx_rate_versions`; persist `fx_rate_id` | Y | Y | Y | Y | T `listFxRateAudit` / EcoCash intent |
+| Admin **Daily ZiG rate** setter + audit log (who/when/effective) | N/A | N/A | N/A | Y | `/admin/fx/daily-zig` + `POST /api/admin/fx/daily-zig` |
+| EcoCash / ZiG-wallet: payable shown in ZiG | Y | Y | Y | N/A | T displayPayable ZWG |
+| USD payment methods remain USD | Y | Y | Y | N/A | T COD/Paynow amount USD |
+| COD: USD display + indicative ZiG at confirm | Y | Y | Y | N/A | T COD path |
+| Never silent unaudited bank mid for Spare checkout FX | Y | Y | Y | Y | T requires `setDailyZigRate` before EcoCash |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager S12 (E1b) thin vertical — 2026-08-12 — expand polish / Playwright recon when staging up.
 
 ---
 

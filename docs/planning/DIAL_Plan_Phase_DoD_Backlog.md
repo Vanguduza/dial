@@ -32,7 +32,7 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 - [x] Seller disclosure Sold by {Supplier}
 - [x] B2B cannot buy informal — D-49
 - [x] Spare USD browse/cart; ZiG only at checkout — D-57
-- [ ] Admin Daily ZiG rate + audit — D-57 (**S12 E1b**)
+- [x] Admin Daily ZiG rate + audit — D-57 (**S12 E1b** — `/admin/fx/daily-zig` + API)
 - [x] AI cannot set payable
 - [x] **FDMS D-59** receipt classes + in-house Gateway; e-invoices reflect tax; **WA → same fdms_outbox**
 - [x] Outbox/Temporal money/fiscal (in-memory outbox stub; Temporal worker = T5)

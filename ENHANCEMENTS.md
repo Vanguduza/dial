@@ -13,11 +13,11 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ID | Enhancement | Status | Notes |
 | --- | --- | --- | --- |
 | ENH-001 | **Ticket hygiene → first thin vertical** (E2a preferred or E1a) with DoD + owner before parallel trains | `done` | E2a = [#1](https://github.com/Vanguduza/dial/issues/1); S10 green → auto S11 |
-| ENH-006 | **Autonomous Dev Manager loop** — prefer/lock defaults; no founder wait; escalate only true OPENs; **stage auto-advance on green** through S90 | `in_progress` | Runbook + `DIAL_Build_Workplan.md` / STATE (S10→S11 advanced; S99 still human) |
+| ENH-006 | **Autonomous Dev Manager loop** — prefer/lock defaults; no founder wait; escalate only true OPENs; **stage auto-advance on green** through S90 | `in_progress` | Runbook + workplan STATE (S12→S20 advanced; S99 still human) |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
-| ENH-005 | **Development Prime** mandatory Build **harness** (`prime-agent`, MIT) — install before workspace bootstrap; hosts Dev Manager | `accepted` | **D-61** — Dev Manager = managerial authority throughout; no prod data path; not CI/`AGENTS.md` SoR; **reject** prod Prime adapter / alternate frameworks |
+| ENH-005 | **Development Prime** mandatory Build **harness** (`prime-agent`, MIT) — install before workspace bootstrap; hosts Dev Manager | `in_progress` | **D-61** — injected: `.prime/agent/` Auto + `/dev-manager` sync + workplan idle ban; Windows `scripts/start-dial-dev-manager-prime.ps1`; Cursor bridge Auto; **reject** prod Prime adapter / alternate frameworks |
 
 ---
 

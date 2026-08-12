@@ -11,11 +11,13 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 
 ### Added
 
+- Windows Dev Manager starter `scripts/start-dial-dev-manager-prime.ps1` — starts Cursor bridge if down, launches `prime-agent` with Cursor **Auto** + `/dev-manager` (D-61 harness only; no prod data).
 - Root living docs (`README.md`, `CHANGELOG.md`, `ENHANCEMENTS.md`, `BUGS.md`) and Build Blueprint §8.0 requirements for responsive web UX + automatic doc maintenance.
 - **D-61** locked companion `DIAL_AI_Kernel_Prime_Agent_Adopted.md` — Dev Manager = Build managerial authority; Prime = mandatory harness hosting it; prod = capability pipeline + Temporal/BullMQ (no agent adapter); §5.3 affirmed.
 - Standalone Build paste prompt: `docs/prompts/DIAL_DEV_MANAGER_CURSOR_PROMPT.md` (Dev Manager + D-61 bootstrap; locks through D-61; Cursor models via local bridge/proxy in Auto mode).
 - Development Prime harness config under `.prime/agent/` (settings, `APPEND_SYSTEM.md`, `/dev-manager` prompt template) for D-61 bootstrap on Windows (Git Bash `shellPath`).
-- Prime Agent default model provider set to **Cursor** (`composer-2.5`) via local `cursor-api-proxy` bridge (`~/.prime/agent/models.json` + `start-cursor-bridge.ps1`).
+- Prime Agent default model provider set to **Cursor** via local `cursor-api-proxy` bridge (`~/.prime/agent/models.json` + `start-cursor-bridge.ps1`); project + machine **`defaultModel: auto`** (Auto mode for Dev Manager).
+- `.prime/agent/APPEND_SYSTEM.md` + `/dev-manager` strengthened for workplan STATE auto-advance / autonomous runbook idle ban (synced from paste prompt).
 - Dev Manager **autonomous runbook** (`docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md`) — prefer/lock defaults; no founder wait; E2a [#1](https://github.com/Vanguduza/dial/issues/1) active.
 - E2a expand: 18-item CPA disclosure, Tech intake/emergency (no AI price), Chatwoot handoff ids, §10 returns/referral/consent stubs, Paynow URL checkout button, gateway `POST /api/webhooks/whatsapp`, Baileys absence test evidence.
 - **End-to-end Build workplan** (`docs/planning/DIAL_Build_Workplan.md` + `DIAL_Build_Workplan_STATE.md`) — stages S00→S90 with **auto-advance when a stage goes green** (no manual gate between stages; S99 customer-open remains human).

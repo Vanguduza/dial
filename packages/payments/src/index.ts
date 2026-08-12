@@ -71,7 +71,10 @@ function id(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Ops Daily ZiG rate — stub store for E2a (admin UI = E1b). */
+/**
+ * Ops Daily ZiG rate (D-57) — audited store.
+ * Admin UI / API call this; EcoCash checkout reads active row via getActiveFxRate.
+ */
 export function setDailyZigRate(input: {
   zigMinorPerUsd: bigint;
   setBy: string;
@@ -80,11 +83,14 @@ export function setDailyZigRate(input: {
   if (typeof input.zigMinorPerUsd !== "bigint" || input.zigMinorPerUsd <= 0n) {
     throw new TypeError("zigMinorPerUsd must be positive bigint");
   }
+  if (!input.setBy.trim()) {
+    throw new Error("setBy required for Daily ZiG audit");
+  }
   const row: FxDailyRate = {
     fxRateId: id("fx"),
     zigMinorPerUsd: input.zigMinorPerUsd,
     effectiveAt: input.effectiveAt ?? new Date().toISOString(),
-    setBy: input.setBy,
+    setBy: input.setBy.trim(),
   };
   fxStore.unshift(row);
   return row;
@@ -92,6 +98,11 @@ export function setDailyZigRate(input: {
 
 export function getActiveFxRate(): FxDailyRate | undefined {
   return fxStore[0];
+}
+
+/** Audit trail (who / when / effective / rate) — newest first. */
+export function listFxRateAudit(): readonly FxDailyRate[] {
+  return fxStore;
 }
 
 /** Convert USD minor → ZiG minor using active daily rate (integer math only). */

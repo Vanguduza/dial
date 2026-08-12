@@ -12,13 +12,17 @@
 
 Do **not** paste the prompt below into an empty workspace and thrash T0 without the harness.
 
+**Windows one-shot (preferred):** from repo root run  
+`powershell -ExecutionPolicy Bypass -File .\scripts\start-dial-dev-manager-prime.ps1`  
+— starts the Cursor bridge if down, then launches `prime-agent` with Cursor **Auto** and the `/dev-manager` prompt (no production data).
+
 | Step | Action |
 | ---: | --- |
-| **1** | Install + configure **[Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent)** (MIT) on the developer machine — **mandatory development harness** (RLM, subagents, detachable sessions). Route inference through the **local Cursor bridge + proxy** already configured for this machine. **No production data path.** Not CI SoR. |
+| **1** | Install + configure **[Prime Agent](https://github.com/PrimeIntellect-ai/prime-agent)** (MIT) on the developer machine — **mandatory development harness** (RLM, subagents, detachable sessions). Route inference through the **local Cursor bridge + proxy** (`~/.prime/agent/start-cursor-bridge.ps1` → `http://127.0.0.1:8765/v1`). Prereqs: `prime-agent`, `cursor-api-proxy`, Cursor Agent CLI logged in (`agent login` or `CURSOR_API_KEY`). **No production data path.** Not CI SoR. |
 | **2** | Open the **DIAL monorepo** root in that harness session (`cd` to repo; Cursor/Prime attached to this workspace). |
-| **3** | Confirm Prime is on **Cursor models / Auto mode** via that bridge+proxy — **do not** manually pick or switch provider models for Dev Manager or its subagents. |
-| **4** | Paste the **PROMPT** block below as the **DIAL Dev Manager** session. Dev Manager is the **managerial authority for the entire Build** (Plan→Build→Done). Prime **hosts** that role — it is **not** a competing project manager. |
-| **5** | Instruction SoR remains: `AGENTS.md` → v4 → Agent Pack → `.cursor/rules` + `dial-*` skills. |
+| **3** | Confirm Prime is on **Cursor models / Auto mode** via that bridge+proxy (`defaultModel: auto` in `.prime/agent/settings.json`) — **do not** manually pick or switch provider models for Dev Manager or its subagents. |
+| **4** | Expand **`/dev-manager`** (synced from this file under `.prime/agent/prompts/dev-manager.md`) **or** paste the **PROMPT** block below. Dev Manager is the **managerial authority for the entire Build** (Plan→Build→Done). Prime **hosts** that role — it is **not** a competing project manager. |
+| **5** | Instruction SoR remains: `AGENTS.md` → v4 → Agent Pack → `.cursor/rules` + `dial-*` skills. Every session: read `docs/planning/DIAL_Build_Workplan_STATE.md` and auto-advance (idle between stages banned). |
 | **6** | **PRIORITY 0 — Dev environment setup:** Node ≥ 20, pnpm 9.x (`packageManager` in root `package.json`), `pnpm install`, green `pnpm typecheck` + `pnpm test` (or fix blockers), lefthook installed (`pnpm exec lefthook install` if needed), `origin` = `https://github.com/Vanguduza/dial.git` (or SSH equivalent). Never print `.env*`; never commit secrets. Optional: supabase CLI when Pack requires — record gap if missing; do not block T0 package install. |
 | **7** | **PRIORITY 0 — Auto GitHub push:** remote SoR = private `Vanguduza/dial`. After every successful commit, push to `origin` (lefthook `post-commit` → `scripts/git-auto-push.ps1` on Windows / `scripts/git-auto-push.sh` on Unix; if hook missing, Dev Manager runs the matching script or `git push -u origin HEAD`). Never `--force` / `--force-with-lease` to `main`/`master` unless founder explicitly asks in-session. Do not push if commit/hooks failed. `.prime/` ephemeral paths stay gitignored. |
 
@@ -367,6 +371,8 @@ updates before Done.
 | DoD backlog / matrices | `docs/planning/` |
 | End-to-end workplan + STATE | `docs/planning/DIAL_Build_Workplan.md` · `DIAL_Build_Workplan_STATE.md` |
 | Autonomous runbook | `docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md` |
+| Windows Prime starter | `scripts/start-dial-dev-manager-prime.ps1` |
+| Project Prime harness | `.prime/agent/` (`APPEND_SYSTEM.md`, `settings.json`, `/dev-manager`) |
 | Skills | `.cursor/skills/dial-*` |
 
 **Customer-open** still requires Appendix C / Blueprint §8.1 — train completion alone is not launch.

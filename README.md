@@ -17,17 +17,30 @@ Production orchestration: **Dev Manager** is the managerial authority throughout
 
 ## Development Prime harness (D-61)
 
-Install **Prime Agent** on the developer machine **before** thrashing T0 / pasting Dev Manager into a bare IDE session. Windows uses the release tarball + Git Bash (see [Windows setup](https://github.com/PrimeIntellect-ai/prime-agent/blob/main/packages/coding-agent/docs/windows.md)).
+**Build runs inside Prime Agent** (mandatory development harness). Install + configure Prime **before** thrashing T0 / pasting Dev Manager into a bare IDE session. Windows: Git Bash `shellPath` + Cursor bridge (see [Windows setup](https://github.com/PrimeIntellect-ai/prime-agent/blob/main/packages/coding-agent/docs/windows.md)).
 
-```bash
-# already installed on this machine as prime-agent@0.7.2 (npm global)
-cd /path/to/DIAL
-prime-agent
+### Windows one-shot (preferred)
+
+Prereqs once: `npm i -g prime-agent cursor-api-proxy`, Cursor Agent CLI (`agent login` or `CURSOR_API_KEY`).
+
+```powershell
+# From repo root — starts Cursor bridge if down, then Prime with /dev-manager
+powershell -ExecutionPolicy Bypass -File .\scripts\start-dial-dev-manager-prime.ps1
 ```
 
-On first launch for Cursor-backed models: keep `~/.prime/agent/start-cursor-bridge.ps1` running (after `agent login` or `CURSOR_API_KEY`). Defaults are provider `cursor` / model `composer-2.5`. In the DIAL repo session, expand `/dev-manager` (project prompt under `.prime/agent/prompts/`) or paste the Dev Manager fence from `docs/prompts/DIAL_DEV_MANAGER_CURSOR_PROMPT.md`.
+### Manual two-terminal
 
-Project harness config lives in [`.prime/agent/`](./.prime/agent/) (`settings.json`, `APPEND_SYSTEM.md`, prompts). Global machine config: `~/.prime/agent/`. **No production data path**; not CI SoR; Cursor/`AGENTS.md` remain instruction SoR.
+```powershell
+# terminal A — Cursor models bridge (keep open)
+powershell -File $env:USERPROFILE\.prime\agent\start-cursor-bridge.ps1
+
+# terminal B — Prime harness on DIAL
+cd C:\Users\j\Desktop\DIAL
+prime-agent --provider cursor --model auto
+# then expand /dev-manager  (or paste docs/prompts/DIAL_DEV_MANAGER_CURSOR_PROMPT.md)
+```
+
+Defaults: provider `cursor`, model **`auto`** (Auto mode — do not manually switch for Dev Manager/subagents). Project harness: [`.prime/agent/`](./.prime/agent/) (`settings.json`, `APPEND_SYSTEM.md`, `/dev-manager`). Machine: `~/.prime/agent/`. **No production data path**; not CI SoR; no prod Prime adapter (D-61); Cursor/`AGENTS.md` remain instruction SoR.
 
 ## Living docs (auto-maintained)
 

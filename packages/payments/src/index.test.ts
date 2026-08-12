@@ -11,6 +11,7 @@ import {
   createCheckoutPayment,
   freezeOfferSnapshot,
   getActiveFxRate,
+  listFxRateAudit,
   listPspMethods,
   runE1aMoneySpine,
   setDailyZigRate,
@@ -208,6 +209,36 @@ test("Tech WHT 30% without ITF263; zero withhold with clearance (D-50)", () => {
   });
   assert.equal(cleared.withholdMinor, 0n);
   assert.equal(cleared.netPayoutMinor, 100_00n);
+});
+
+test("E1b admin Daily ZiG audit → EcoCash intent carries fx_rate_id", async () => {
+  __resetPaymentsForTests();
+  assert.throws(() => setDailyZigRate({ zigMinorPerUsd: 100n, setBy: "   " }));
+  const first = setDailyZigRate({
+    zigMinorPerUsd: 2400_00n,
+    setBy: "ops_alice",
+    effectiveAt: "2026-08-12T06:00:00.000Z",
+  });
+  const second = setDailyZigRate({
+    zigMinorPerUsd: 2500_00n,
+    setBy: "ops_bob",
+  });
+  const audit = listFxRateAudit();
+  assert.equal(audit.length, 2);
+  assert.equal(audit[0]?.fxRateId, second.fxRateId);
+  assert.equal(audit[0]?.setBy, "ops_bob");
+  assert.equal(audit[1]?.setBy, "ops_alice");
+  assert.equal(getActiveFxRate()?.fxRateId, second.fxRateId);
+
+  const { intent } = await createCheckoutPayment({
+    choice: "ecocash",
+    orderId: "ord_e1b",
+    amountUsdMinor: 12_00n,
+    idempotencyKey: "e1b-eco",
+  });
+  assert.equal(intent?.fxRateId, second.fxRateId);
+  assert.equal(intent?.displayPayable?.currency, "ZWG");
+  assert.notEqual(intent?.fxRateId, first.fxRateId);
 });
 
 test("PSP webhook admit: bad sig / duplicate / capture", async () => {

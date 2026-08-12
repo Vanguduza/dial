@@ -1,7 +1,7 @@
 # DIAL AI Hero — today queue
 
-**Date:** 2026-08-11  
-**Phase:** **3 — Build orchestration** (Dev Manager + first thin vertical). Plan diligence (Phase 1–2) complete.
+**Date:** 2026-08-12  
+**Phase:** **3 — Build orchestration** (Dev Manager + thin verticals). Plan diligence (Phase 1–2) complete.
 
 | Tool / step | Status |
 | --- | --- |
@@ -14,7 +14,7 @@
 | **Ticket hygiene (E1a / E2a owned ticket)** | **Done** — [E2a #1](https://github.com/Vanguduza/dial/issues/1) (prefer applied; autonomous) |
 | **Autonomous runbook** | **Active** — `DIAL_Dev_Manager_Autonomous_Runbook.md` (no founder wait) |
 | **End-to-end workplan** | **Active** — `DIAL_Build_Workplan.md` + STATE (**auto-advance on green**) |
-| First thin vertical Build | **S10 E2a done** → **S11 E1a** [#3](https://github.com/Vanguduza/dial/issues/3) in progress |
+| First thin vertical Build | **S10–S12 done** → **S20 T1** [#5](https://github.com/Vanguduza/dial/issues/5) opening |
 | `dial-webapp-recon` | Blocked (no staging) |
 | Promptfoo CI / runtime money-path / `packages/ai` review | Blocked until those packages/routes exist |
 
@@ -38,10 +38,10 @@ Commands: `pnpm typecheck` · `pnpm test` · `pnpm dev:gateway`
 ## Phase 3 — active (Dev Manager autonomous)
 
 **Owner:** Dev Manager — workplan `DIAL_Build_Workplan.md` · STATE · runbook.  
-**Active stage:** **S11** E1a [#3](https://github.com/Vanguduza/dial/issues/3). S10 E2a closed green (auto-advanced).
+**Active stage:** **S12** E1b [#4](https://github.com/Vanguduza/dial/issues/4). S11 E1a closed green (auto-advanced).
 
-1. Build S11 thin vertical → expand to E1 DoD / Matrix A.  
-2. On green → **auto-advance to S12 E1b**.  
+1. Build S12 thin vertical → expand Matrix A2 (admin Daily ZiG + EcoCash `fx_rate_id`).  
+2. On green → **auto-advance to S20** (per workplan).  
 3. Continue through S90 per workplan; S99 customer-open stays human-gated.  
 4. Phase 0 ops stay in `ENHANCEMENTS.md` ENH-020… — stubs only in eng.
 
