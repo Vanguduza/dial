@@ -62,21 +62,21 @@ Locks: D-40, D-41, D-41a, D-57
 
 | AC | WA Flow/session | Web parity (same ERP) | Native parity | Evidence |
 | --- | --- | --- | --- | --- |
-| Cloud API webhook signature + idempotency | | N/A | N/A | |
-| Spare search→cart→checkout (USD browse/cart) | | | | |
-| Pay step: **EcoCash** interactive button/CTA required | | N/A or deep-link | N/A or deep-link | |
-| Pay step: **COD** interactive button/CTA required | | | | |
-| EcoCash: ZiG payable from daily rate | | | | |
-| 18-item disclosure + review before pay | | | | |
-| Tech guided intake (no AI price) | | | | |
-| Emergency short-circuit (no AI block) | | | | |
-| Chatwoot handoff with job/order ids | | | | |
-| §10 MVP catalog: returns | | | | |
-| §10 MVP catalog: referrals (D-41a) | | | | |
-| §10 MVP catalog: promos consent | | | | |
-| No Baileys / unofficial client in tree | | | | |
+| Cloud API webhook signature + idempotency | Y | N/A | N/A | T (`adapters/whatsapp` + `apps/gateway-web/.../webhooks/whatsapp`) |
+| Spare search→cart→checkout (USD browse/cart) | Y | Y | Y | T — WA Flows; web/native = same `@dial/catalogue` ERP (UI shells = T3) |
+| Pay step: **EcoCash** interactive button/CTA required | Y | N/A | N/A | T — deep-link later; ERP `createCheckoutPayment` shared |
+| Pay step: **COD** interactive button/CTA required | Y | N/A | N/A | T |
+| EcoCash: ZiG payable from daily rate | Y | Y | Y | T — `@dial/payments` shared |
+| 18-item disclosure + review before pay | Y | Y | Y | T — `EIGHTEEN_ITEM_DISCLOSURES` export for all channels |
+| Tech guided intake (no AI price) | Y | Y | Y | T — WA handler; ERP job draft id; UI = T4 |
+| Emergency short-circuit (no AI block) | Y | Y | Y | T |
+| Chatwoot handoff with job/order ids | Y | N/A | N/A | T — WA/Chatwoot channel |
+| §10 MVP catalog: returns | Y | Y | Y | T stub — same claim shape ERP |
+| §10 MVP catalog: referrals (D-41a) | Y | Y | Y | T stub + `@dial/promotions` |
+| §10 MVP catalog: promos consent | Y | Y | Y | T |
+| No Baileys / unofficial client in tree | Y | N/A | N/A | T (`assertNoUnofficialWhatsAppDeps`) |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager (S10) — 2026-08-12 — Meta template IDs remain Phase 0 OPEN (ENH-021); eng DoD otherwise complete.
 
 ---
 

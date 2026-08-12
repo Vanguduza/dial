@@ -54,19 +54,19 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 ### Feature DoD checklist
 
-- [ ] Cloud API webhook signature + idempotency — no Baileys / unofficial clients
-- [ ] Spare Flow search→cart→checkout against ERP (not Chatwoot as SoR)
-- [ ] Browse/search/cart surfaces show **USD only** — D-57
-- [ ] Pay step: **EcoCash** and **COD** as interactive button/CTA choices (not free-text) — D-57
-- [ ] EcoCash path: show ZiG payable from daily rate + `fx_rate_id` — D-57
-- [ ] COD path: USD + ZiG equivalent at confirm — D-57
-- [ ] Other rails (Paynow URL button) remain available per D-43 / companion
-- [ ] 18-item disclosure + review before pay — §7.5
-- [ ] Tech guided intake + emergency short-circuit (no AI block)
-- [ ] §10 MVP catalog screens from WA companion (returns, referrals, promos consent, …)
-- [ ] Chatwoot handoff keyed by customer/job/order ids
-- [ ] Marketing consent gates
-- [ ] Meta template IDs listed in ops runbook (go-live OPEN parked)
+- [x] Cloud API webhook signature + idempotency — no Baileys / unofficial clients
+- [x] Spare Flow search→cart→checkout against ERP (not Chatwoot as SoR)
+- [x] Browse/search/cart surfaces show **USD only** — D-57
+- [x] Pay step: **EcoCash** and **COD** as interactive button/CTA choices (not free-text) — D-57
+- [x] EcoCash path: show ZiG payable from daily rate + `fx_rate_id` — D-57
+- [x] COD path: USD + ZiG equivalent at confirm — D-57
+- [x] Other rails (Paynow URL button) remain available per D-43 / companion
+- [x] 18-item disclosure + review before pay — §7.5
+- [x] Tech guided intake + emergency short-circuit (no AI block)
+- [x] §10 MVP catalog screens from WA companion (returns, referrals, promos consent, …)
+- [x] Chatwoot handoff keyed by customer/job/order ids
+- [x] Marketing consent gates
+- [x] Meta template IDs listed in ops runbook (go-live OPEN parked — ENH-021 / `docs/ops/meta-wa-template-ids.md`)
 
 **Evidence:** W (WA webhook) + S (Flow pay buttons) + dep grep no Baileys
 

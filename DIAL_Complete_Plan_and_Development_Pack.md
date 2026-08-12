@@ -1,5 +1,7 @@
 # DIAL Complete Plan and Development Pack
 
+> **Partial compile** — see v4 **D-61** / `DIAL_AI_Kernel_Prime_Agent_Adopted.md` for AI Kernel/Prime absorb; lock range through **D-61**. This file was last fully generated 2026-08-11 and is not a wholesale recompile; prefer live sources (`AGENTS.md`, v4, companions) for day-to-day authority.
+
 **Generated:** 2026-08-11  
 **Workspace:** `C:\Users\j\Desktop\DIAL`
 
@@ -752,9 +754,10 @@ treated as authoritative:
 1. DIAL_Consolidated_Plan_v4.md — the founder-approved business, compliance, AI
    and technical architecture. Every [FOUNDER]-tagged decision in this document
    is final and must not be redesigned or "improved" without being asked.
-   Locks through D-60 stand (incl. D-58 agency / D-51 discarded; D-59 agency
+   Locks through D-61 stand (incl. D-58 agency / D-51 discarded; D-59 agency
    FDMS + in-house Gateway; D-60 IMTT=opex, COD settle USD, Paynow-first escrow
-   path, B2C informal visible, Flash-Lite P1, Meta ops launch gate).
+   path, B2C informal visible, Flash-Lite P1, Meta ops launch gate; D-61 AI
+   Kernel/Prime absorb via DIAL_AI_Kernel_Prime_Agent_Adopted.md).
 2. DIAL_Development_Agent_Pack.md (D-39) — scaffolding contracts, trains T0–T9,
    Pack §4 stub-now vs Phase-0 production gates. Customer-open = Appendix C /
    §8.1 — never declare launch from train completion alone.
@@ -897,7 +900,7 @@ Also load AGENTS.md and honour D-47 Cursor hygiene:
 .cursor/rules/*.mdc, .cursorignore, docs/agent-audits, dial-* skills
 (catalog: DIAL_Cursor_Rules_and_Skills.md). AppSec toolchain D-48:
 DIAL_Security_Toolchain.md (Semgrep + Checkov + Renovate; Strix staging only).
-Honour locked founder decisions D-38…D-60 without reopening rejects:
+Honour locked founder decisions D-38…D-61 without reopening rejects:
 D-38 UX donors only; D-40/D-41 official WhatsApp Cloud API + Flows MVP;
 D-40a virtual FDMS; D-42 @dial/promotions (Medusa/OfferKit patterns — not runtime SoR);
 D-43 PspAdapter (Paynow/ContiPay/EcoCash/PayPal/COD/escrow); D-44 MapLibre +
@@ -945,7 +948,7 @@ founder before flooding parallel implementer work.
 
 ### 8.1 Lazy Developer hygiene + Cursor rules (D-47)
 
-Mandatory with Agent Pack / D-47. Detail: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, catalog `DIAL_Cursor_Rules_and_Skills.md`. Does **not** reopen C-5, D-38…D-60, Meili, MapLibre, promotions, delivery SoR, or WhatsApp locks.
+Mandatory with Agent Pack / D-47. Detail: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, catalog `DIAL_Cursor_Rules_and_Skills.md`. Does **not** reopen C-5, D-38…D-61, Meili, MapLibre, promotions, delivery SoR, or WhatsApp locks.
 
 | Theme | Practice for DIAL Cursor agents |
 | --- | --- |
@@ -962,7 +965,7 @@ Companion: `DIAL_AIHero_Adaptations.md` ([aihero.dev](https://www.aihero.dev/), 
 
 | Theme | Practice for DIAL |
 | --- | --- |
-| **Grill before scaffold (D-56)** | `dial-grill-locks` — design-tree interview **in Plan**; explore repo for facts; never “decide away” C-5 / D-38…D-60; first topics: money/agency → WA → maps/delivery → AI → Catalogue Factory → Intelligence/CC |
+| **Grill before scaffold (D-56)** | `dial-grill-locks` — design-tree interview **in Plan**; explore repo for facts; never “decide away” C-5 / D-38…D-61; first topics: money/agency → WA → maps/delivery → AI (DialAgentRuntime / packages/ai) → Catalogue Factory → Intelligence/CC |
 | **Tracer bullets (D-52)** | `dial-tracer-slice` — Plan(grill+DoD)→Build thin vertical→Expand in-ticket→Done; DoD 100% before merge; **hard ban** stub-as-MVP. **Dev Manager (§8.0)** owns opening the first E1a/E2a ticket |
 | **v7-2 absorb (D-53)** | Use `DIAL_v7_2_Adopted_Platform_Extensions.md` only — never treat v7 master draft as SoR; no Train 0–10 |
 | **Intelligence / CC (D-54)** | Factory continuous learning + MetricContracts; no auto-publish; Simulated never auto-pays |
@@ -12590,7 +12593,7 @@ Cursor (and other harnesses that read `AGENTS.md`) should load project guidance 
 
 **D-57 Spare FX display:** catalogue/cart **USD only**; ZiG conversion only at checkout from ops **Daily ZiG rate**; WA EcoCash + COD via required checkout buttons — see v4 §0.2 / §4.3 / D-log; Pack Meili + admin screen; `DIAL_WhatsApp_Flows_and_Templates.md` `FLOW_SPARE_CHECKOUT`.
 
-**Do not** reopen locked decisions (C-5, D-38…D-60, official WhatsApp only, MapLibre SoR, AI never writes money, marketplace-wide agency→principal flip, informal→B2B visibility, dropping tech WHT, reintroducing discarded D-51 owned-stock principal (D-58), stub-as-MVP / skip feature DoD, v7 as SoR, Train 0–10 replacing T0–T9, Unleash/OR-Tools as SoR, auto-publish checklist/AI without human+Promptfoo, Command Centre Simulated as live money control, full external skill/agent tree dumps, skip plan-phase grill / AI capability merge gate, dual-display ZiG on Spare browse or unaudited FX / skip WA EcoCash+COD buttons).
+**Do not** reopen locked decisions (C-5, D-38…D-61, official WhatsApp only, MapLibre SoR, AI never writes money, marketplace-wide agency→principal flip, informal→B2B visibility, dropping tech WHT, reintroducing discarded D-51 owned-stock principal (D-58), stub-as-MVP / skip feature DoD, v7 as SoR, Train 0–10 replacing T0–T9, Unleash/OR-Tools as SoR, auto-publish checklist/AI without human+Promptfoo, Command Centre Simulated as live money control, full external skill/agent tree dumps, skip plan-phase grill / AI capability merge gate, dual-display ZiG on Spare browse or unaudited FX / skip WA EcoCash+COD buttons, peer AI kernel / self-host inference via Kernel proposal / Prime as production or parallel Factory SoR (**D-61**)).
 
 Attribution detail: `.cursor/rules/SOURCES.md` and `DIAL_Cursor_Rules_and_Skills.md`.
 ```
@@ -17298,7 +17301,7 @@ alwaysApply: true
 23. **Agency FDMS + in-house Gateway (D-59)** — `DIAL_FEE` / `GOODS_FORMAL` / `GOODS_INFORMAL` receipt rules from tax discussion; build ZIMRA Virtual Gateway; CloudESD optional adapter only; no GMV VAT split-pot.
 24. **IMTT = DIAL opex (D-60)** — never customer checkout line; COD settle USD; B2C informal visible; Flash-Lite P1.
 
-Full checklist: Agent Pack §2. Locks summary: D-38…D-50 + **D-51 discarded (D-58)** + **D-52**…**D-60**.
+Full checklist: Agent Pack §2. Locks summary: D-38…D-50 + **D-51 discarded (D-58)** + **D-52**…**D-61**.
 ```
 
 ---
@@ -17589,7 +17592,7 @@ Thin **DIAL-authored** index. Does **not** vendor the upstream asset gallery or 
 name: dial-grill-locks
 description: >-
   Relentless design-tree interview for a DIAL plan or feature, bounded by locked
-  decisions (C-5, D-38…D-58). Mandatory in Plan (D-56) before scaffolding money,
+  decisions (C-5, D-38…D-61). Mandatory in Plan (D-56) before scaffolding money,
   WA, maps, promotions, delivery, AI, Catalogue Factory, or
   Intelligence — explore the repo for facts; ask humans only for decisions.
   Inspired by AI Hero /grill-me (mattpocock/skills, MIT).
@@ -17614,10 +17617,10 @@ Usable **now** with docs only — no monorepo scaffold required.
 
 ### Grill-first topics (recommended DIAL order)
 
-1. Job Reserve / money / WHT (**D-50**) / agency FDMS (**D-58** / D-40a) — **no** DIAL_OWNED dual capacity
+1. Job Reserve / money / WHT (**D-50**) / agency FDMS (**D-58** / D-40a / **D-59**) — **no** DIAL_OWNED dual capacity; IMTT = opex (**D-60**)
 2. WhatsApp Cloud API + Flows MVP (**D-40 / D-41**)
 3. MapLibre + delivery job SoR (**D-44 / D-45**)
-4. `packages/ai` capabilities — no money writes, D-32 privacy, Zod
+4. `packages/ai` capabilities — no money writes, D-32 privacy, Zod; **DialAgentRuntime** / orchestrator **inside `packages/ai` only** (**D-61**)
 5. Catalogue Factory + B2B hide informal (**D-49 / D-53**)
 6. Intelligence Factory / Command Centre Actual vs Simulated (**D-54**)
 
@@ -17629,7 +17632,7 @@ Inspired by [mattpocock/skills](https://github.com/mattpocock/skills) `/grilling
 2. Map a **design tree**: each decision branches into dependent decisions.
 3. Work in **rounds**. Frontier = questions whose prerequisites are settled. Ask the whole frontier; number each question; give a recommended answer; **wait**.
 4. **Facts** (filesystem, existing Pack/v4 text, code): look them up or dispatch exploration — never ask the user.
-5. **Decisions** that would reopen C-5 / D-38…D-58: refuse; cite the lock; offer compliant alternatives only.
+5. **Decisions** that would reopen C-5 / D-38…D-61: refuse; cite the lock; offer compliant alternatives only.
 6. Stop when the frontier is empty. Do **not** implement until the user confirms shared understanding (feeds **D-52** Plan before Build).
 
 ### Question format
@@ -17651,10 +17654,11 @@ Inspired by [mattpocock/skills](https://github.com/mattpocock/skills) `/grilling
 - Full vendor of agency-agents / anthropics/skills / diagram-design asset trees; Rapid Prototyper culture; docx/pdf/pptx/xlsx skill trees (**D-55**)
 - Skipping plan-phase grill on in-scope domains, or merging `packages/ai` without `dial-ai-capability-review` (**D-56**)
 - Spare browse/cart ZiG dual-display; ZiG conversion without ops-audited daily rate / `fx_rate_id`; free-text EcoCash/COD on WA checkout (**D-57**)
+- Peer `dial-ai-kernel` (or peer control-plane packages); self-host / local-first inference from the Kernel proposal; Prime as production SoR or parallel Factory/eval SoR (**D-61**) — absorb only via `DIAL_AI_Kernel_Prime_Agent_Adopted.md`; §5.3 stays locked
 
 ## Authority
 
-v4 D-log **D-56** / **D-57** / **D-58** (+ **D-52** sequence); Agent Pack §2.2; `DIAL_AIHero_Adaptations.md`; companion Lazy/D-47 pack; **D-55** `DIAL_External_Skills_Repos_Utilization.md`.
+v4 D-log **D-56**…**D-61** (+ **D-52** sequence); Agent Pack §2.2; `DIAL_AIHero_Adaptations.md`; companion Lazy/D-47 pack; **D-55** `DIAL_External_Skills_Repos_Utilization.md`; **D-61** `DIAL_AI_Kernel_Prime_Agent_Adopted.md`.
 ```
 
 ---

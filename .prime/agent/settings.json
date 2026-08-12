@@ -1,0 +1,10 @@
+{
+  "shellPath": "C:\\Program Files\\Git\\bin\\bash.exe",
+  "prompts": ["prompts"],
+  "defaultProvider": "cursor",
+  "defaultModel": "composer-2.5",
+  "defaultThinkingLevel": "high",
+  "telemetry": {
+    "enabled": false
+  }
+}

@@ -11,8 +11,10 @@
 | **T0 monorepo** (pnpm + turbo + typecheck/test + lefthook + CI) | **Done** — see below |
 | T0 gateway shell + design-tokens | **Done** — `apps/gateway-web`, `packages/design-tokens` |
 | `@dial/shared` money types + tests | **Done** |
-| **Ticket hygiene (E1a / E2a owned ticket)** | **Assigned → Dev Manager** (Blueprint §8.0) — **Next** |
-| First thin vertical Build | Blocked on ticket hygiene |
+| **Ticket hygiene (E1a / E2a owned ticket)** | **Done** — [E2a #1](https://github.com/Vanguduza/dial/issues/1) (prefer applied; autonomous) |
+| **Autonomous runbook** | **Active** — `DIAL_Dev_Manager_Autonomous_Runbook.md` (no founder wait) |
+| **End-to-end workplan** | **Active** — `DIAL_Build_Workplan.md` + `DIAL_Build_Workplan_STATE.md` (auto-advance on green) |
+| First thin vertical Build | **In progress** — **S10 E2a** expand (Matrix B remaining); thin path green |
 | `dial-webapp-recon` | Blocked (no staging) |
 | Promptfoo CI / runtime money-path / `packages/ai` review | Blocked until those packages/routes exist |
 
@@ -33,14 +35,15 @@ Commands: `pnpm typecheck` · `pnpm test` · `pnpm dev:gateway`
 
 ---
 
-## Phase 3 — next (Dev Manager)
+## Phase 3 — active (Dev Manager autonomous)
 
-**Owner:** Dev Manager agent — paste `DIAL_Build_Blueprint_and_Cursor_Prompt.md` §8.
+**Owner:** Dev Manager — workplan `DIAL_Build_Workplan.md` · STATE · runbook.  
+**Active stage:** **S10** E2a [#1](https://github.com/Vanguduza/dial/issues/1). Prefer E2a = confirmed (no manual gate).
 
-1. Close **ticket hygiene**: open owned **E2a** (prefer) or **E1a** with DoD + matrix + named owner.  
-2. Then Build that thin vertical:
-   - **E1a** — OfferSnapshot USD → one PSP webhook stub → ledger → `FiscalReceiptQueued` (agency / D-59), **or**
-   - **E2a** — Spare WA Flow USD cart → EcoCash/COD buttons → same `fdms_outbox`
+1. Expand S10 in-ticket to Matrix B DoD 100% + evidence.  
+2. On green → **auto-advance to S11 E1a** (open issue + start Build) — no founder wait.  
+3. Continue S11→S90 per workplan; S99 customer-open stays human-gated.  
+4. Phase 0 ops stay in `ENHANCEMENTS.md` ENH-020… — stubs only in eng.
 
 Do not claim Done until feature DoD + matrix cells have evidence (`dial-tracer-slice`).
 

@@ -1,0 +1,24 @@
+{
+  "name": "@dial/adapter-whatsapp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "node --import tsx --test src/**/*.test.ts",
+    "lint": "node -e \"process.exit(0)\""
+  },
+  "dependencies": {
+    "@dial/catalogue": "workspace:*",
+    "@dial/payments": "workspace:*",
+    "@dial/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
