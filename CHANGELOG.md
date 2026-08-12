@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 
 ### Added
 
+- `docs/planning/DIAL_Resume_From_GitHub.md` — cold-start from GitHub: tip branch (not `main`), auth, pnpm, Prime, portable Cursor restore; links STATE + issue #7.
 - `tooling/cursor-portable/` — sanitized portable Cursor User settings, user/`skills-cursor` skill trees, optional Claude skills, hooks/MCP templates + `RESTORE.md` (machine move; does not replace project `.cursor/` / `dial-*`).
 - Windows Dev Manager starter `scripts/start-dial-dev-manager-prime.ps1` — starts Cursor bridge if down, launches `prime-agent` with Cursor **Auto** + `/dev-manager` (D-61 harness only; no prod data).
 - Root living docs (`README.md`, `CHANGELOG.md`, `ENHANCEMENTS.md`, `BUGS.md`) and Build Blueprint §8.0 requirements for responsive web UX + automatic doc maintenance.

@@ -61,6 +61,8 @@ Next.js web apps (gateway, spare-web, tech-web, admin, …) must be usable on **
 
 Private GitHub: [Vanguduza/dial](https://github.com/Vanguduza/dial).
 
+**Resume on a new machine:** [`docs/planning/DIAL_Resume_From_GitHub.md`](./docs/planning/DIAL_Resume_From_GitHub.md) — checkout the tip feature branch (not `main`), then auth / pnpm / Prime / portable Cursor restore. Live stage: [`docs/planning/DIAL_Build_Workplan_STATE.md`](./docs/planning/DIAL_Build_Workplan_STATE.md).
+
 ## Quick start (T0)
 
 Requires Node ≥ 20 and [pnpm](https://pnpm.io/) 9.x.
