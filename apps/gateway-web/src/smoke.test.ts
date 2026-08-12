@@ -7,6 +7,14 @@ import {
   listFxRateAudit,
   setDailyZigRate,
 } from "@dial/payments";
+import {
+  __resetAuthForTests,
+  assertResourceAccess,
+  createSession,
+  getSessionFromToken,
+  parseSessionCookie,
+  sessionCookieName,
+} from "./lib/auth/session.js";
 
 test("gateway shell package is wired", () => {
   assert.equal(typeof "DIAL", "string");
@@ -29,4 +37,35 @@ test("E1b admin rate path: audit + EcoCash fx_rate_id", async () => {
   });
   assert.equal(intent?.fxRateId, rate.fxRateId);
   assert.equal(intent?.displayPayable?.currency, "ZWG");
+});
+
+test("T1 session AuthN: cookie SoR; body userId refused for AuthZ", () => {
+  __resetAuthForTests();
+  const { token, session } = createSession({ email: "buyer@dial.test" });
+  assert.equal(getSessionFromToken(token)?.userId, session.userId);
+  assert.equal(
+    getSessionFromToken(parseSessionCookie(`${sessionCookieName()}=${token}`))?.email,
+    "buyer@dial.test",
+  );
+  assert.equal(getSessionFromToken("bogus"), null);
+
+  assert.throws(() =>
+    assertResourceAccess({
+      session,
+      resourceOwnerId: session.userId,
+      bodyUserId: "attacker",
+    }),
+  );
+  assert.throws(() =>
+    assertResourceAccess({
+      session,
+      resourceOwnerId: "usr_other",
+    }),
+  );
+  assert.doesNotThrow(() =>
+    assertResourceAccess({
+      session,
+      resourceOwnerId: session.userId,
+    }),
+  );
 });

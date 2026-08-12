@@ -8,7 +8,7 @@
 | --- | --- |
 | `current_stage` | **S20** — T1 Identity |
 | `current_issue` | https://github.com/Vanguduza/dial/issues/5 |
-| `current_branch` | `build/t1-identity` (opening after S12 commit on `build/e1b-daily-zig`) |
+| `current_branch` | `build/t1-identity` |
 | `prior_stage` | **S12** E1b — **green** ([#4](https://github.com/Vanguduza/dial/issues/4)) |
 | `prior_commit_s11` | https://github.com/Vanguduza/dial/commit/761c9fd |
 | `next_stage` | **S21** after S20 green |

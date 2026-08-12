@@ -38,10 +38,10 @@ Commands: `pnpm typecheck` · `pnpm test` · `pnpm dev:gateway`
 ## Phase 3 — active (Dev Manager autonomous)
 
 **Owner:** Dev Manager — workplan `DIAL_Build_Workplan.md` · STATE · runbook.  
-**Active stage:** **S12** E1b [#4](https://github.com/Vanguduza/dial/issues/4). S11 E1a closed green (auto-advanced).
+**Active stage:** **S20** T1 [#5](https://github.com/Vanguduza/dial/issues/5). S12 E1b closed green (auto-advanced).
 
-1. Build S12 thin vertical → expand Matrix A2 (admin Daily ZiG + EcoCash `fx_rate_id`).  
-2. On green → **auto-advance to S20** (per workplan).  
+1. Build S20 T1 thin vertical (session AuthN → Shop\|Services home stub; RLS profile tests stub).  
+2. On green → **auto-advance to S21**.  
 3. Continue through S90 per workplan; S99 customer-open stays human-gated.  
 4. Phase 0 ops stay in `ENHANCEMENTS.md` ENH-020… — stubs only in eng.
 
