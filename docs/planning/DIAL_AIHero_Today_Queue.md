@@ -11,8 +11,9 @@
 | **T0 monorepo** (pnpm + turbo + typecheck/test + lefthook + CI) | **Done** — see below |
 | T0 gateway shell + design-tokens | **Done** — `apps/gateway-web`, `packages/design-tokens` |
 | `@dial/shared` money types + tests | **Done** |
-| **Ticket hygiene (E1a / E2a owned ticket)** | **Assigned → Dev Manager** (Blueprint §8.0) — **Next** |
-| First thin vertical Build | Blocked on ticket hygiene |
+| **Ticket hygiene (E1a / E2a owned ticket)** | **Done** — [E2a #1](https://github.com/Vanguduza/dial/issues/1) (prefer applied; autonomous) |
+| **Autonomous runbook** | **Active** — `docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md` (no founder wait on prefer/locks) |
+| First thin vertical Build | **In progress** — E2a green path (Flow USD cart → EcoCash\|COD → payment_intent) |
 | `dial-webapp-recon` | Blocked (no staging) |
 | Promptfoo CI / runtime money-path / `packages/ai` review | Blocked until those packages/routes exist |
 
@@ -33,14 +34,14 @@ Commands: `pnpm typecheck` · `pnpm test` · `pnpm dev:gateway`
 
 ---
 
-## Phase 3 — next (Dev Manager)
+## Phase 3 — active (Dev Manager autonomous)
 
-**Owner:** Dev Manager agent — paste `DIAL_Build_Blueprint_and_Cursor_Prompt.md` §8.
+**Owner:** Dev Manager — runbook `DIAL_Dev_Manager_Autonomous_Runbook.md`.  
+**Active ticket:** E2a [#1](https://github.com/Vanguduza/dial/issues/1). Prefer E2a = confirmed (no manual gate).
 
-1. Close **ticket hygiene**: open owned **E2a** (prefer) or **E1a** with DoD + matrix + named owner.  
-2. Then Build that thin vertical:
-   - **E1a** — OfferSnapshot USD → one PSP webhook stub → ledger → `FiscalReceiptQueued` (agency / D-59), **or**
-   - **E2a** — Spare WA Flow USD cart → EcoCash/COD buttons → same `fdms_outbox`
+1. Build E2a thin vertical → expand in-ticket to DoD 100% + Matrix B evidence.  
+2. On Done, auto-open **E1a** next (runbook §3) — do not wait for founder.  
+3. Phase 0 ops stay in `ENHANCEMENTS.md` ENH-020… — stubs only in eng.
 
 Do not claim Done until feature DoD + matrix cells have evidence (`dial-tracer-slice`).
 

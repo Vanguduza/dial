@@ -18,6 +18,28 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  adapters/whatsapp:
+    dependencies:
+      '@dial/catalogue':
+        specifier: workspace:*
+        version: link:../../packages/catalogue
+      '@dial/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   apps/gateway-web:
     dependencies:
       '@dial/design-tokens':
@@ -49,7 +71,39 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  packages/catalogue:
+    dependencies:
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   packages/design-tokens:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/payments:
+    dependencies:
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@types/node':
         specifier: ^22.15.21
