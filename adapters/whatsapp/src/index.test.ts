@@ -1,19 +1,32 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { createHmac } from "node:crypto";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import { __resetCatalogueForTests } from "@dial/catalogue";
 import { __resetPaymentsForTests, setDailyZigRate } from "@dial/payments";
 import {
   __resetWhatsappForTests,
   admitWebhookEvent,
+  assertNoUnofficialWhatsAppDeps,
   CHECKOUT_PAY_BUTTONS,
+  EIGHTEEN_ITEM_DISCLOSURES,
+  flowConsentCentre,
+  flowReferralHome,
   flowSpareCartAdd,
   flowSpareCheckoutPay,
   flowSpareCheckoutReview,
+  flowSpareReturns,
   flowSpareSearch,
+  flowTechEmergency,
+  flowTechIntake,
+  openChatwootHandoff,
   startFlow,
   verifyMetaSignature,
 } from "./index.js";
+
+const here = dirname(fileURLToPath(import.meta.url));
 
 test("Meta signature verify + webhook idempotency", () => {
   __resetWhatsappForTests();
@@ -46,7 +59,7 @@ test("E2a green path: search → USD cart → checkout EcoCash|COD buttons → i
   __resetPaymentsForTests();
   setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_e2a" });
 
-  const session = startFlow("FLOW_SPARE_SEARCH");
+  const session = startFlow("FLOW_SPARE_SEARCH", "cust_1");
   const search = flowSpareSearch(session.sessionId, "oil");
   assert.ok(search.offers.length >= 1);
   assert.ok(search.offers.every((o) => o.displayCurrency === "USD"));
@@ -56,12 +69,16 @@ test("E2a green path: search → USD cart → checkout EcoCash|COD buttons → i
   assert.equal(cart.cart.currency, "USD");
 
   const review = flowSpareCheckoutReview(session.sessionId);
+  assert.equal(review.review.disclosures.length, 18);
+  assert.equal(EIGHTEEN_ITEM_DISCLOSURES.length, 18);
+  assert.equal(review.review.canCorrectOrWithdraw, true);
   assert.deepEqual(
     review.payButtons.map((b) => b.id),
     CHECKOUT_PAY_BUTTONS.map((b) => b.id),
   );
   assert.ok(review.payButtons.some((b) => b.id === "ecocash"));
   assert.ok(review.payButtons.some((b) => b.id === "cod"));
+  assert.ok(review.payButtons.some((b) => b.id === "paynow"));
 
   const paid = await flowSpareCheckoutPay(
     session.sessionId,
@@ -79,4 +96,73 @@ test("E2a green path: search → USD cart → checkout EcoCash|COD buttons → i
   const cod = await flowSpareCheckoutPay(s2.sessionId, "cod", "e2a-cod-1");
   assert.equal(cod.codOrder?.amountUsd.currency, "USD");
   assert.equal(cod.intent?.method, "cod_cash");
+
+  const s3 = startFlow("FLOW_SPARE_SEARCH");
+  flowSpareSearch(s3.sessionId, "oil");
+  flowSpareCartAdd(s3.sessionId, offerId, 1);
+  flowSpareCheckoutReview(s3.sessionId);
+  const pn = await flowSpareCheckoutPay(s3.sessionId, "paynow", "e2a-pn-1");
+  assert.ok(pn.paynowUrl?.includes("paynow.stub"));
+  assert.ok(pn.paynowUrl?.includes("orderId="));
+});
+
+test("Tech intake has no payable; emergency short-circuits without AI block", () => {
+  __resetWhatsappForTests();
+  const s = startFlow("FLOW_TECH_INTAKE", "cust_tech");
+  const intake = flowTechIntake(s.sessionId, {
+    tradeHint: "auto",
+    description: "engine rattle at idle",
+  });
+  assert.equal(intake.kind, "intake");
+  if (intake.kind !== "intake") throw new Error("expected intake");
+  assert.equal(intake.assessment.payableAmount, null);
+  assert.equal(intake.assessment.aiPriceForbidden, true);
+
+  const emg = flowTechEmergency(s.sessionId, "smell of gas in cabin");
+  assert.equal(emg.dispatch, "deterministic_human");
+  assert.equal(emg.aiBlocked, false);
+  assert.ok(emg.handoff.jobId);
+  assert.equal(emg.handoff.topic, "tech_emergency");
+});
+
+test("Chatwoot handoff carries order/job/cart ids; §10 returns/referral/consent", () => {
+  __resetWhatsappForTests();
+  __resetCatalogueForTests();
+  const s = startFlow("FLOW_SPARE_SEARCH", "cust_cw");
+  flowSpareSearch(s.sessionId, "filter");
+  flowSpareCartAdd(s.sessionId, "off_filter_oil_kun26", 1);
+  const review = flowSpareCheckoutReview(s.sessionId);
+  const handoff = openChatwootHandoff(s.sessionId, {
+    topic: "stuck_search",
+    orderId: review.review.orderId,
+  });
+  assert.equal(handoff.customerId, "cust_cw");
+  assert.ok(handoff.orderId);
+  assert.ok(handoff.cartId);
+  assert.equal(handoff.searchQuery, "filter");
+
+  const ret = flowSpareReturns(s.sessionId, {
+    orderId: review.review.orderId,
+    reason: "wrong fitment",
+  });
+  assert.equal(ret.claim.statusFrom, "erp");
+
+  const ref = flowReferralHome(s.sessionId, "cust_cw");
+  assert.equal(ref.referral.cashOutForbidden, true);
+
+  const cons = flowConsentCentre(s.sessionId, { marketing: true });
+  assert.equal(cons.consents.marketing, true);
+  assert.equal(cons.consents.vehicleHub, false);
+});
+
+test("No Baileys / whatsapp-web.js in workspace package.json files (D-40)", () => {
+  const roots = [
+    join(here, "../../../package.json"),
+    join(here, "../package.json"),
+    join(here, "../../../packages/payments/package.json"),
+    join(here, "../../../packages/catalogue/package.json"),
+    join(here, "../../../apps/gateway-web/package.json"),
+  ];
+  const texts = roots.map((p) => readFileSync(p, "utf8"));
+  assertNoUnofficialWhatsAppDeps(texts);
 });

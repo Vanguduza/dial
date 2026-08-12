@@ -2,7 +2,8 @@
 
 **Authority:** Blueprint §8 / §8.0 · Dev Manager paste prompt · Pack §0 / §2.2 / §4 / §15 · D-52 / D-56 / D-61  
 **Status:** Active — 2026-08-12  
-**Purpose:** Operate Build **without waiting for human input** wherever docs already encode a default. Escalate only true OPENs.
+**Purpose:** Operate Build **without waiting for human input** wherever docs already encode a default. Escalate only true OPENs.  
+**Stage order SoR:** [`DIAL_Build_Workplan.md`](./DIAL_Build_Workplan.md) · live pointer [`DIAL_Build_Workplan_STATE.md`](./DIAL_Build_Workplan_STATE.md)
 
 ---
 
@@ -24,16 +25,19 @@
 ## 1. Continuous loop (every session)
 
 ```text
-PRIORITY 0  →  env green + auto-push path OK
+READ STATE  →  docs/planning/DIAL_Build_Workplan_STATE.md → current_stage
+PRIORITY 0  →  env green + auto-push path OK (S00)
 TICKET      →  exactly one active thin-vertical (or expand in-ticket)
 BUILD       →  dial-tracer-slice: thin green path → expand DoD
 GATES       →  typecheck/test; money-path / grill / AI review when in scope
-LAND        →  commit + living docs same PR + auto-push
-NEXT        →  if DoD 100%+evidence → open next ticket from queue; else continue expand
+LAND        →  commit + living docs same PR + auto-push + update STATE.md
+AUTO-ADVANCE →  if stage green (DoD 100%+evidence) → open next stage ticket
+                 AND start Build immediately — NO human confirm, NO idle wait
 ```
 
 Never: parallel T1+ product trains before active thin-vertical ticket exists.  
-Never: close ticket as “tracer done” with blank matrix cells.
+Never: close ticket as “tracer done” with blank matrix cells.  
+Never: pause between green stage and next stage for founder preference when prefer/lock exists.
 
 ---
 
@@ -61,20 +65,21 @@ Phase 0 stays stub: live Meta send, live EcoCash keys, approved template IDs (EN
 
 ---
 
-## 3. After E2a Done — automatic next queue
+## 3. End-to-end stage queue (auto-advance)
 
-Do **not** ask. Open the next owned ticket and continue:
+**Full table + green gates:** `DIAL_Build_Workplan.md` (S00→S90 eng; S99 customer-open = human only).
 
-| Order | Ticket | Notes |
-| ---: | --- | --- |
-| 1 | **E1a** money spine | OfferSnapshot → one PSP webhook stub → ledger → `FiscalReceiptQueued` (D-59) |
-| 2 | **E1b** | Daily ZiG rate admin + EcoCash ZiG payable (closes A2) |
-| 3 | **T1 Identity** | Auth home Shop\|Services; RLS profiles (Pack §15) |
-| 4 | **T2/T3** catalogue + payments hardening | Expand beyond E2a stubs toward Pack ACs |
-| 5 | **E3a** delivery | `delivery_job` → offer → accept → POD |
-| 6 | Remaining E4–E6 / T4–T9 | Per Pack trains; grill before in-scope scaffolds (D-56) |
+When **S10 E2a** goes green, Dev Manager **immediately** opens and starts:
 
-Customer-open still **Appendix C / Blueprint §8.1** — eng Done ≠ launch.
+| Stage | Ticket | Notes |
+| --- | --- | --- |
+| S11 | **E1a** money spine | OfferSnapshot → PSP webhook stub → ledger → `FiscalReceiptQueued` (D-59) |
+| S12 | **E1b** | Daily ZiG admin + EcoCash ZiG/`fx_rate_id` |
+| S20…S30 | T1 → T3 → T5 → T4 → E3a → T6 → E4a/T7 → E5a → E6a/T8 → T9 | Pack §15 ACs = Done |
+| S90 | Eng Build complete | Living docs current |
+| S99 | Customer-open | **Not auto** — Appendix C / Blueprint §8.1 |
+
+Do **not** ask between stages. Update `DIAL_Build_Workplan_STATE.md` on every transition.
 
 ---
 
@@ -104,11 +109,12 @@ Everything else: **decide via this runbook and continue.**
 
 ## 6. Session checklist (copy)
 
+- [ ] Read `DIAL_Build_Workplan_STATE.md` — know `current_stage`
 - [ ] PRIORITY 0 still green
 - [ ] Active issue linked; DoD/matrix in issue body
-- [ ] Working only on active ticket expand (or opening next after Done)
+- [ ] Working only on active ticket expand **or** auto-advancing to next stage (no wait)
 - [ ] No Baileys; USD browse; EcoCash\|COD buttons; `amountMinor`
-- [ ] Living docs in landing PR
+- [ ] Living docs + STATE.md in landing PR
 - [ ] Pushed to `Vanguduza/dial`
 
 *End of autonomous runbook.*

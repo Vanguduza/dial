@@ -332,14 +332,23 @@ Money non-negotiables: amountMinor + currency; AI never writes payable amounts;
 ledger / Job Reserve SoR = DIAL packages; outbox for money/fiscal/search/
 notifications/AI cost events; webhook signature + idempotency; AuthN ≠ AuthZ.
 
+END-TO-END WORKPLAN + AUTO-ADVANCE (mandatory — no idle between stages):
+Stage order SoR: docs/planning/DIAL_Build_Workplan.md
+Live pointer: docs/planning/DIAL_Build_Workplan_STATE.md
+Autonomous decisions: docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md
+Every session: read STATE → continue current_stage. When a stage is green
+(DoD 100% + matrix evidence + typecheck/test), immediately open the next
+stage ticket AND start Build — do NOT wait for human confirmation between
+stages. S99 customer-open is the only non-auto gate (Appendix C). Update
+STATE.md in the same landing as each stage transition.
+
 Start by confirming PRIORITY 0: env setup green + auto-push to Vanguduza/dial
 working (lefthook post-commit or manual script). Then apply ticket hygiene
 (E1a or E2a owned ticket + DoD + owner) using **prefer defaults** — Prefer E2a
 unless money-spine was already directed; do **not** wait for founder confirm when
-a prefer/lock exists (autonomous runbook:
-docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md). Escalate only true OPENs
-(force-push, lock reopen, secrets, customer-open). If T0 skeleton is already
-green, do not re-scaffold from zero — expand from the owned thin vertical. On
+a prefer/lock exists. Escalate only true OPENs (force-push, lock reopen,
+secrets, customer-open). If T0 skeleton is already green, do not re-scaffold
+from zero — expand from the owned thin vertical / current workplan stage. On
 every web PR, confirm §8.0.1 responsive DoD evidence and §8.0.2 living-doc
 updates before Done.
 ```
@@ -356,6 +365,8 @@ updates before Done.
 | D-61 | `DIAL_AI_Kernel_Prime_Agent_Adopted.md` |
 | Agent entry | `AGENTS.md` |
 | DoD backlog / matrices | `docs/planning/` |
+| End-to-end workplan + STATE | `docs/planning/DIAL_Build_Workplan.md` · `DIAL_Build_Workplan_STATE.md` |
+| Autonomous runbook | `docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md` |
 | Skills | `.cursor/skills/dial-*` |
 
 **Customer-open** still requires Appendix C / Blueprint §8.1 — train completion alone is not launch.
