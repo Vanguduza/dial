@@ -10,7 +10,7 @@
 | `current_issue` | https://github.com/Vanguduza/dial/issues/7 |
 | `current_branch` | `build/t2-catalogue` |
 | `prior_stage` | **S20** T1 — **green** ([#5](https://github.com/Vanguduza/dial/issues/5)) |
-| `prior_commit_s20` | _(this commit)_ |
+| `prior_commit_s20` | https://github.com/Vanguduza/dial/commit/5bc9d1a |
 | `next_stage` | **S22** after S21 green |
 | `blocked_on_human` | none (S99 customer-open only later) |
 
