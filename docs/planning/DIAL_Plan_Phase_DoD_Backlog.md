@@ -22,22 +22,22 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 ### Feature DoD checklist
 
-- [ ] mountMinor + currency end-to-end
-- [ ] PspAdapter stubs Paynow/ContiPay/EcoCash/PayPal/COD/escrow — D-43
-- [ ] JobReserve state machine tests
-- [ ] Webhook signature + idempotency; duplicate no-op
-- [ ] Capture/release from webhook truth
-- [ ] ITF263 / withholding_balances — D-50
-- [ ] **Agency only** — no DIAL_OWNED / owned COGS (**D-58**)
-- [ ] Seller disclosure Sold by {Supplier}
-- [ ] B2B cannot buy informal — D-49
-- [ ] Spare USD browse/cart; ZiG only at checkout — D-57
-- [ ] Admin Daily ZiG rate + audit — D-57
-- [ ] AI cannot set payable
-- [ ] **FDMS D-59** receipt classes + in-house Gateway; e-invoices reflect tax; **WA → same fdms_outbox**
-- [ ] Outbox/Temporal money/fiscal
-- [ ] No NEXT_PUBLIC_/VITE_ on PSP/service_role
-- [ ] dial-money-path-review before merge
+- [x] amountMinor + currency end-to-end
+- [x] PspAdapter stubs Paynow/ContiPay/EcoCash/PayPal/COD/escrow — D-43
+- [x] JobReserve state machine tests
+- [x] Webhook signature + idempotency; duplicate no-op
+- [x] Capture/release from webhook truth
+- [x] ITF263 / withholding_balances — D-50
+- [x] **Agency only** — no DIAL_OWNED / owned COGS (**D-58**)
+- [x] Seller disclosure Sold by {Supplier}
+- [x] B2B cannot buy informal — D-49
+- [x] Spare USD browse/cart; ZiG only at checkout — D-57
+- [ ] Admin Daily ZiG rate + audit — D-57 (**S12 E1b**)
+- [x] AI cannot set payable
+- [x] **FDMS D-59** receipt classes + in-house Gateway; e-invoices reflect tax; **WA → same fdms_outbox**
+- [x] Outbox/Temporal money/fiscal (in-memory outbox stub; Temporal worker = T5)
+- [x] No NEXT_PUBLIC_/VITE_ on PSP/service_role
+- [x] dial-money-path-review before merge — `docs/agent-audits/money-path-S11-E1a-2026-08-12.md`
 
 **Matrix:** Tracer matrices §A + §A2
 

@@ -48,6 +48,9 @@ importers:
       '@dial/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@dial/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
       next:
         specifier: ^15.3.3
         version: 15.5.23(react-dom@19.2.8(react@19.2.8))(react@19.2.8)

@@ -4,9 +4,14 @@ import { __resetLedgerForTests } from "@dial/ledger";
 import { __resetTaxForTests, listFdmsOutbox } from "@dial/tax";
 import {
   __resetPaymentsForTests,
+  admitPspWebhookEvent,
+  applyJobReserveWebhook,
+  authorizeJobReserve,
+  computeTechPayoutWithholding,
   createCheckoutPayment,
   freezeOfferSnapshot,
   getActiveFxRate,
+  listPspMethods,
   runE1aMoneySpine,
   setDailyZigRate,
   usdToZig,
@@ -136,5 +141,107 @@ test("E1a spine: OfferSnapshot → authorize → webhook → ledger → FiscalRe
       pspEventId: "psp_evt_2",
       signatureValid: true,
     }),
+  );
+});
+
+test("D-43 PspAdapter registry includes all launch rails", () => {
+  const methods = listPspMethods();
+  for (const m of [
+    "paynow_hosted",
+    "contipay",
+    "ecocash_direct",
+    "paypal",
+    "cod_cash",
+    "escrow_hold",
+  ] as const) {
+    assert.ok(methods.includes(m), `missing ${m}`);
+  }
+});
+
+test("Job Reserve authorize → capture/release only via signed webhook", async () => {
+  __resetPaymentsForTests();
+  const reserve = await authorizeJobReserve({
+    jobId: "job_1",
+    amountUsdMinor: 80_00n,
+    idempotencyKey: "jr-1",
+  });
+  assert.equal(reserve.status, "authorized");
+  assert.throws(() =>
+    applyJobReserveWebhook({
+      reserveId: reserve.id,
+      eventId: "evt_bad",
+      action: "capture",
+      signatureValid: false,
+    }),
+  );
+  const captured = applyJobReserveWebhook({
+    reserveId: reserve.id,
+    eventId: "evt_cap",
+    action: "capture",
+    signatureValid: true,
+  });
+  assert.equal(captured.status, "captured");
+  const dup = applyJobReserveWebhook({
+    reserveId: reserve.id,
+    eventId: "evt_cap",
+    action: "capture",
+    signatureValid: true,
+  });
+  assert.equal(dup.status, "captured");
+});
+
+test("Tech WHT 30% without ITF263; zero withhold with clearance (D-50)", () => {
+  __resetPaymentsForTests();
+  const taxed = computeTechPayoutWithholding({
+    technicianId: "tech_1",
+    yearOfAssessment: 2026,
+    payoutUsdMinor: 100_00n,
+    hasItf263: false,
+  });
+  assert.equal(taxed.withholdMinor, 30_00n);
+  assert.equal(taxed.netPayoutMinor, 70_00n);
+  const cleared = computeTechPayoutWithholding({
+    technicianId: "tech_2",
+    yearOfAssessment: 2026,
+    payoutUsdMinor: 100_00n,
+    hasItf263: true,
+  });
+  assert.equal(cleared.withholdMinor, 0n);
+  assert.equal(cleared.netPayoutMinor, 100_00n);
+});
+
+test("PSP webhook admit: bad sig / duplicate / capture", async () => {
+  __resetPaymentsForTests();
+  const reserve = await authorizeJobReserve({
+    jobId: "job_w",
+    amountUsdMinor: 10_00n,
+    idempotencyKey: "w-1",
+  });
+  assert.equal(
+    admitPspWebhookEvent({
+      eventId: "e1",
+      signatureValid: false,
+      intentId: reserve.intentId!,
+      action: "capture",
+    }),
+    "rejected_signature",
+  );
+  assert.equal(
+    admitPspWebhookEvent({
+      eventId: "e2",
+      signatureValid: true,
+      intentId: reserve.intentId!,
+      action: "capture",
+    }),
+    "captured",
+  );
+  assert.equal(
+    admitPspWebhookEvent({
+      eventId: "e2",
+      signatureValid: true,
+      intentId: reserve.intentId!,
+      action: "capture",
+    }),
+    "duplicate",
   );
 });

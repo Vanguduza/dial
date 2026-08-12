@@ -20,6 +20,8 @@
 
 **Human is optional observer, not a step in the loop.**
 
+**Idle ban:** Do **not** end a Dev Manager turn waiting for founder input while `current_stage` is incomplete or while a stage just went green. Always leave the session either (a) mid-build on the active stage, or (b) having opened+started the next stage. The only allowed pause is the §5 hard-stop list.
+
 ---
 
 ## 1. Continuous loop (every session)

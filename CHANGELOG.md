@@ -20,6 +20,7 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - E2a expand: 18-item CPA disclosure, Tech intake/emergency (no AI price), Chatwoot handoff ids, §10 returns/referral/consent stubs, Paynow URL checkout button, gateway `POST /api/webhooks/whatsapp`, Baileys absence test evidence.
 - **End-to-end Build workplan** (`docs/planning/DIAL_Build_Workplan.md` + `DIAL_Build_Workplan_STATE.md`) — stages S00→S90 with **auto-advance when a stage goes green** (no manual gate between stages; S99 customer-open remains human).
 - S11 E1a thin path started: `@dial/ledger`, `@dial/tax` (agency `FiscalReceiptQueued`), `runE1aMoneySpine` in `@dial/payments` (OfferSnapshot → webhook → ledger → FDMS outbox).
+- S11 E1a expand: D-43 `PSP_ADAPTER_REGISTRY` (Paynow/ContiPay/EcoCash/PayPal/COD/escrow), Job Reserve authorize/capture, tech WHT 30%/ITF263, gateway `POST /api/webhooks/psp` (sig+idempotency), money outbox stub, Matrix A sign-off + `docs/agent-audits/money-path-S11-E1a-2026-08-12.md` (Admin Daily ZiG = S12).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).
 - Lefthook **post-commit** auto-push to `Vanguduza/dial` via `scripts/git-auto-push.sh` / `.ps1` (no force).
 

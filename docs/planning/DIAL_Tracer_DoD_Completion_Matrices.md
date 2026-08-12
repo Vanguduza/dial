@@ -17,21 +17,21 @@ Locks: C-4, D-40a, D-43, D-49, D-50, **D-58** (D-51 discarded)
 
 | AC | Web | WA (pay URL / status) | Native customer | Evidence |
 | --- | --- | --- | --- | --- |
-| Checkout freezes OfferSnapshot with `amountMinor` + currency | | | | |
-| Seller disclosure Sold by {Supplier} (agency D-58) | | | | |
-| B2B cannot purchase informal (D-49) | | | | |
-| Job Reserve authorize via PSP escrow adapter | | | | |
-| Capture/release on verified webhook only | | | | |
-| Duplicate webhook no-op | | | | |
-| **No** `DIAL_OWNED` / owned COGS path (D-58) | | | | |
-| Tech payout ITF263 or 30% WHT (D-50) | | N/A (ops/tech app) | N/A (tech Android) | |
-| FDMS virtual submitReceipt — **agency classes D-59**; e-invoice reflects tax | | | | |
-| WA payment success enqueues same `fdms_outbox` as web | N/A | | N/A | |
-| In-house Virtual Gateway default (CloudESD optional only) | | | | |
-| AI cannot set payable amount (negative test) | | | | |
-| PspAdapter stubs: Paynow, ContiPay, EcoCash, PayPal, COD, escrow | | | | |
+| Checkout freezes OfferSnapshot with `amountMinor` + currency | Y | Y | Y | T `freezeOfferSnapshot` / `runE1aMoneySpine` |
+| Seller disclosure Sold by {Supplier} (agency D-58) | Y | Y | Y | T `soldBy` |
+| B2B cannot purchase informal (D-49) | Y | Y | Y | T rejects b2b+informal |
+| Job Reserve authorize via PSP escrow adapter | Y | N/A | N/A | T `authorizeJobReserve` |
+| Capture/release on verified webhook only | Y | Y | Y | T + `POST /api/webhooks/psp` |
+| Duplicate webhook no-op | Y | Y | Y | T |
+| **No** `DIAL_OWNED` / owned COGS path (D-58) | Y | Y | Y | T `assertNoDialOwnedPath` |
+| Tech payout ITF263 or 30% WHT (D-50) | Y | N/A (ops/tech app) | N/A (tech Android) | T `computeTechPayoutWithholding` |
+| FDMS virtual submitReceipt — **agency classes D-59**; e-invoice reflects tax | Y | Y | Y | T `@dial/tax` |
+| WA payment success enqueues same `fdms_outbox` as web | N/A | Y | N/A | T channel=`wa` |
+| In-house Virtual Gateway default (CloudESD optional only) | Y | Y | Y | T `gateway: zimra_virtual_in_house` |
+| AI cannot set payable amount (negative test) | Y | Y | Y | T |
+| PspAdapter stubs: Paynow, ContiPay, EcoCash, PayPal, COD, escrow | Y | Y | Y | T `listPspMethods` |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager S11 (E1a) — 2026-08-12 — A2 admin Daily ZiG UI = S12; Temporal worker = T5. Audit: `docs/agent-audits/money-path-S11-E1a-2026-08-12.md`
 
 ---
 

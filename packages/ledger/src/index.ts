@@ -32,9 +32,31 @@ export type Journal = {
 
 const journals = new Map<string, Journal>();
 const byIdem = new Map<string, string>();
+const moneyOutbox: Array<{
+  id: string;
+  kind: "ledger_posted" | "fiscal_queued";
+  refId: string;
+  createdAt: string;
+}> = [];
 
 function id(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function enqueueMoneyOutbox(input: {
+  kind: "ledger_posted" | "fiscal_queued";
+  refId: string;
+}): void {
+  moneyOutbox.push({
+    id: id("obx"),
+    kind: input.kind,
+    refId: input.refId,
+    createdAt: new Date().toISOString(),
+  });
+}
+
+export function listMoneyOutbox(): readonly (typeof moneyOutbox)[number][] {
+  return moneyOutbox;
 }
 
 /** Post a balanced journal. Duplicate idempotencyKey returns existing. */
@@ -81,6 +103,7 @@ export function postJournal(input: {
   };
   journals.set(journalId, journal);
   byIdem.set(input.idempotencyKey, journalId);
+  enqueueMoneyOutbox({ kind: "ledger_posted", refId: journalId });
   return journal;
 }
 
@@ -170,6 +193,7 @@ export function assertNoDialOwnedPath(): void {
 export function __resetLedgerForTests(): void {
   journals.clear();
   byIdem.clear();
+  moneyOutbox.length = 0;
 }
 
 export { money };

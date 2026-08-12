@@ -13,6 +13,7 @@
   "dependencies": {
     "@dial/adapter-whatsapp": "workspace:*",
     "@dial/design-tokens": "workspace:*",
+    "@dial/payments": "workspace:*",
     "next": "^15.3.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"

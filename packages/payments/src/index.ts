@@ -8,7 +8,10 @@ export type PaymentMethodCode =
   | "ecocash_direct"
   | "cod_cash"
   | "cod_ecocash"
-  | "paynow_hosted";
+  | "paynow_hosted"
+  | "contipay"
+  | "paypal"
+  | "escrow_hold";
 
 export type PaymentIntentStatus =
   | "created"
@@ -136,6 +139,265 @@ export class CodPspStub implements PspAdapter {
       status: "authorized" as const,
     };
   }
+}
+
+export class PaynowPspStub implements PspAdapter {
+  readonly method = "paynow_hosted" as const;
+  async initiate(input: {
+    amount: Money;
+    orderId: string;
+    idempotencyKey: string;
+  }) {
+    return {
+      externalRef: `paynow_stub_${input.idempotencyKey}`,
+      status: "awaiting_customer" as const,
+    };
+  }
+}
+
+export class ContiPayPspStub implements PspAdapter {
+  readonly method = "contipay" as const;
+  async initiate(input: {
+    amount: Money;
+    orderId: string;
+    idempotencyKey: string;
+  }) {
+    return {
+      externalRef: `conti_stub_${input.idempotencyKey}`,
+      status: "awaiting_customer" as const,
+    };
+  }
+}
+
+export class PayPalPspStub implements PspAdapter {
+  readonly method = "paypal" as const;
+  async initiate(input: {
+    amount: Money;
+    orderId: string;
+    idempotencyKey: string;
+  }) {
+    return {
+      externalRef: `pp_stub_${input.idempotencyKey}`,
+      status: "awaiting_customer" as const,
+    };
+  }
+}
+
+/** Job Reserve escrow hold — capture/release only from verified webhook. */
+export class EscrowPspStub implements PspAdapter {
+  readonly method = "escrow_hold" as const;
+  async initiate(input: {
+    amount: Money;
+    orderId: string;
+    idempotencyKey: string;
+  }) {
+    if (input.amount.currency !== "USD") {
+      throw new Error("Job Reserve escrow currency-of-record USD");
+    }
+    return {
+      externalRef: `escrow_stub_${input.idempotencyKey}`,
+      status: "authorized" as const,
+    };
+  }
+}
+
+/** D-43 registry — every launch rail must be present. */
+export const PSP_ADAPTER_REGISTRY: Readonly<
+  Record<PaymentMethodCode, new () => PspAdapter>
+> = {
+  ecocash_direct: EcoCashPspStub,
+  cod_cash: CodPspStub,
+  cod_ecocash: CodPspStub,
+  paynow_hosted: PaynowPspStub,
+  contipay: ContiPayPspStub,
+  paypal: PayPalPspStub,
+  escrow_hold: EscrowPspStub,
+};
+
+export function getPspAdapter(method: PaymentMethodCode): PspAdapter {
+  const Ctor = PSP_ADAPTER_REGISTRY[method];
+  if (!Ctor) throw new Error(`Unknown PSP method ${method}`);
+  return new Ctor();
+}
+
+export function listPspMethods(): PaymentMethodCode[] {
+  return Object.keys(PSP_ADAPTER_REGISTRY) as PaymentMethodCode[];
+}
+
+export type JobReserveStatus =
+  | "quoted"
+  | "authorized"
+  | "captured"
+  | "released"
+  | "cancelled";
+
+export type JobReserve = {
+  id: string;
+  jobId: string;
+  amount: Money;
+  status: JobReserveStatus;
+  intentId?: string;
+  idempotencyKey: string;
+  createdAt: string;
+};
+
+const jobReserves = new Map<string, JobReserve>();
+const jobReservesByIdem = new Map<string, string>();
+
+/** Job Reserve authorize via escrow adapter — capture only on webhook. */
+export async function authorizeJobReserve(input: {
+  jobId: string;
+  amountUsdMinor: bigint;
+  idempotencyKey: string;
+}): Promise<JobReserve> {
+  const existingId = jobReservesByIdem.get(input.idempotencyKey);
+  if (existingId) {
+    const existing = jobReserves.get(existingId);
+    if (existing) return existing;
+  }
+  const amount = money(input.amountUsdMinor, "USD");
+  const psp = getPspAdapter("escrow_hold");
+  const initiated = await psp.initiate({
+    amount,
+    orderId: input.jobId,
+    idempotencyKey: input.idempotencyKey,
+  });
+  const intent: PaymentIntent = {
+    id: id("pi"),
+    method: "escrow_hold",
+    amount,
+    status: initiated.status,
+    orderId: input.jobId,
+    idempotencyKey: input.idempotencyKey,
+    createdAt: new Date().toISOString(),
+  };
+  intents.set(intent.id, intent);
+  intentsByIdem.set(input.idempotencyKey, intent.id);
+
+  const reserve: JobReserve = {
+    id: id("jr"),
+    jobId: input.jobId,
+    amount,
+    status: "authorized",
+    intentId: intent.id,
+    idempotencyKey: input.idempotencyKey,
+    createdAt: new Date().toISOString(),
+  };
+  jobReserves.set(reserve.id, reserve);
+  jobReservesByIdem.set(input.idempotencyKey, reserve.id);
+  return reserve;
+}
+
+export function applyJobReserveWebhook(input: {
+  reserveId: string;
+  eventId: string;
+  action: "capture" | "release";
+  signatureValid: boolean;
+}): JobReserve {
+  if (!input.signatureValid) {
+    throw new Error("Job Reserve webhook signature invalid");
+  }
+  const reserve = jobReserves.get(input.reserveId);
+  if (!reserve) throw new Error("Unknown JobReserve");
+  if (processedPspEvents.has(input.eventId)) {
+    return reserve;
+  }
+  processedPspEvents.add(input.eventId);
+  if (input.action === "capture") {
+    reserve.status = "captured";
+    if (reserve.intentId) {
+      const intent = intents.get(reserve.intentId);
+      if (intent) intent.status = "captured";
+    }
+  } else {
+    reserve.status = "released";
+    if (reserve.intentId) {
+      const intent = intents.get(reserve.intentId);
+      if (intent) intent.status = "cancelled";
+    }
+  }
+  return reserve;
+}
+
+export function getJobReserve(id: string): JobReserve | undefined {
+  return jobReserves.get(id);
+}
+
+/** Tech WHT — ITF263 clearance or 30% withhold (D-50). Never assume WHT disappears. */
+export type WithholdingBalance = {
+  technicianId: string;
+  yearOfAssessment: number;
+  grossPaidMinor: bigint;
+  withheldMinor: bigint;
+  hasItf263: boolean;
+};
+
+const withholding = new Map<string, WithholdingBalance>();
+
+function whKey(technicianId: string, year: number): string {
+  return `${technicianId}:${year}`;
+}
+
+export function computeTechPayoutWithholding(input: {
+  technicianId: string;
+  yearOfAssessment: number;
+  payoutUsdMinor: bigint;
+  hasItf263: boolean;
+}): { netPayoutMinor: bigint; withholdMinor: bigint; rateBps: number } {
+  if (typeof input.payoutUsdMinor !== "bigint" || input.payoutUsdMinor < 0n) {
+    throw new TypeError("payoutUsdMinor must be non-negative bigint");
+  }
+  const key = whKey(input.technicianId, input.yearOfAssessment);
+  let row = withholding.get(key);
+  if (!row) {
+    row = {
+      technicianId: input.technicianId,
+      yearOfAssessment: input.yearOfAssessment,
+      grossPaidMinor: 0n,
+      withheldMinor: 0n,
+      hasItf263: input.hasItf263,
+    };
+    withholding.set(key, row);
+  }
+  row.hasItf263 = input.hasItf263;
+  row.grossPaidMinor += input.payoutUsdMinor;
+  if (input.hasItf263) {
+    return { netPayoutMinor: input.payoutUsdMinor, withholdMinor: 0n, rateBps: 0 };
+  }
+  const withholdMinor = (input.payoutUsdMinor * 30n) / 100n;
+  row.withheldMinor += withholdMinor;
+  return {
+    netPayoutMinor: input.payoutUsdMinor - withholdMinor,
+    withholdMinor,
+    rateBps: 3000,
+  };
+}
+
+export function getWithholdingBalance(
+  technicianId: string,
+  yearOfAssessment: number,
+): WithholdingBalance | undefined {
+  return withholding.get(whKey(technicianId, yearOfAssessment));
+}
+
+/**
+ * Verified PSP webhook admission for gateway routes — signature + event idempotency.
+ * Capture mutates intent only after both pass (webhook-as-truth).
+ */
+export function admitPspWebhookEvent(input: {
+  eventId: string;
+  signatureValid: boolean;
+  intentId: string;
+  action: "capture" | "ignore";
+}): "captured" | "rejected_signature" | "duplicate" | "ignored" {
+  if (!input.signatureValid) return "rejected_signature";
+  if (processedPspEvents.has(input.eventId)) return "duplicate";
+  processedPspEvents.add(input.eventId);
+  if (input.action === "ignore") return "ignored";
+  const intent = intents.get(input.intentId);
+  if (!intent) throw new Error("Unknown intent");
+  intent.status = "captured";
+  return "captured";
 }
 
 export type CheckoutPayChoice = "ecocash" | "cod";
@@ -357,6 +619,7 @@ export async function runE1aMoneySpine(input: {
     idempotencyKey: `ledger_${input.pspEventId}`,
   });
 
+  const { enqueueMoneyOutbox } = await import("@dial/ledger");
   const goodsClass =
     input.formality === "formal" ? "GOODS_FORMAL" : "GOODS_INFORMAL";
   const goods = enqueueFiscalReceipt({
@@ -371,6 +634,8 @@ export async function runE1aMoneySpine(input: {
     amount: money(input.dialFeeUsdMinor, "USD"),
     channel: input.channel,
   });
+  enqueueMoneyOutbox({ kind: "fiscal_queued", refId: goods.id });
+  enqueueMoneyOutbox({ kind: "fiscal_queued", refId: fee.id });
 
   return {
     snapshot,
@@ -389,4 +654,7 @@ export function __resetPaymentsForTests(): void {
   codOrders.clear();
   offerSnapshots.clear();
   processedPspEvents.clear();
+  jobReserves.clear();
+  jobReservesByIdem.clear();
+  withholding.clear();
 }
