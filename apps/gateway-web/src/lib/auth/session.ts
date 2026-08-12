@@ -14,13 +14,16 @@ const sessions = new Map<string, DialSession>();
 
 export function createSession(input: {
   email: string;
+  userId?: string;
   role?: DialSession["role"];
 }): { token: string; session: DialSession } {
   const email = input.email.trim().toLowerCase();
   if (!email) throw new Error("email required");
   const token = `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
   const session: DialSession = {
-    userId: `usr_${Buffer.from(email).toString("base64url").slice(0, 16)}`,
+    userId:
+      input.userId ??
+      `usr_${Buffer.from(email).toString("base64url").slice(0, 16)}`,
     email,
     role: input.role ?? "customer",
   };

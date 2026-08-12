@@ -1,44 +1,51 @@
 import { NextResponse } from "next/server";
-import { signInByEmail, signUp } from "@dial/identity";
+import { signUp } from "@dial/identity";
 import { createSession, sessionCookieName } from "../../../../lib/auth/session";
 
-/** T1 sign-in stub — session from profile SoR; rejects body userId (D-47). */
+/** T1 sign-up stub — creates profile (RLS SoR) + session cookie. */
 export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") ?? "";
   let email = "";
+  let displayName = "";
+
   if (contentType.includes("application/json")) {
-    const body = (await req.json()) as { email?: string; identifier?: string; userId?: string };
-    if (body.userId) {
+    const body = (await req.json()) as {
+      email?: string;
+      identifier?: string;
+      displayName?: string;
+      name?: string;
+      userId?: string;
+      role?: string;
+    };
+    if (body.userId !== undefined || body.role !== undefined) {
       return NextResponse.json(
-        { error: "userId from body rejected — session SoR only (D-47)" },
+        { error: "userId/role from body rejected — session SoR only (D-47)" },
         { status: 400 },
       );
     }
     email = (body.email ?? body.identifier ?? "").trim();
+    displayName = (body.displayName ?? body.name ?? "").trim();
   } else {
     const form = await req.formData();
-    if (form.has("userId")) {
+    if (form.has("userId") || form.has("role")) {
       return NextResponse.json(
-        { error: "userId from body rejected — session SoR only (D-47)" },
+        { error: "userId/role from body rejected — session SoR only (D-47)" },
         { status: 400 },
       );
     }
     email = String(form.get("identifier") ?? form.get("email") ?? "").trim();
+    displayName = String(form.get("displayName") ?? form.get("name") ?? "").trim();
   }
 
   if (!email) {
     return NextResponse.json({ error: "identifier required" }, { status: 400 });
   }
+  if (!displayName) {
+    return NextResponse.json({ error: "displayName required" }, { status: 400 });
+  }
 
   try {
-    let profile = signInByEmail(email);
-    // Stub convenience: first sign-in may mint a customer profile (Phase 0 → real Auth).
-    if (!profile) {
-      profile = signUp({
-        email,
-        displayName: email.split("@")[0] || "DIAL user",
-      });
-    }
+    const profile = signUp({ email, displayName });
     const { token, session } = createSession({
       email: profile.email,
       userId: profile.userId,
@@ -58,7 +65,7 @@ export async function POST(req: Request) {
     return res;
   } catch (e) {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "sign-in failed" },
+      { error: e instanceof Error ? e.message : "sign-up failed" },
       { status: 400 },
     );
   }

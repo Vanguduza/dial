@@ -78,10 +78,12 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 
 | Path | Notes |
 | --- | --- |
-| `apps/gateway-web` | Auth-first Next.js gateway shell |
+| `apps/gateway-web` | Auth-first Next.js gateway (sign-in/up → Shop\|Services home) |
+| `packages/identity` | Profiles + RLS policy stub/tests (Pack T1 / §12) |
 | `packages/shared` | Shared types (e.g. `amountMinor` + `currency`) |
 | `packages/design-tokens` | Brand tokens + validate script |
 | `packages/promotions` | `@dial/promotions` package (D-42) |
+| `packages/catalogue` | USD cart/search stubs (E2a / expanding T2) |
 
 Further apps/packages land on Pack trains T1–T9 and tracer epics E1–E6.
 

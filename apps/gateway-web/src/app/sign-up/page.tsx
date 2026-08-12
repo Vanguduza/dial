@@ -1,10 +1,9 @@
 import { dialTokens } from "@dial/design-tokens";
 
 /**
- * T0/T1 auth-first gateway shell (v4 §1.4) — sign-in surface only.
- * Shop | Services appear only after authentication.
+ * Pre-auth sign-up (Pack T1 / §10 screens) — no Shop|Services until AuthN.
  */
-export default function SignInPage() {
+export default function SignUpPage() {
   return (
     <main
       style={{
@@ -30,7 +29,7 @@ export default function SignInPage() {
           DIAL
         </p>
         <p style={{ marginTop: dialTokens.space.sm, opacity: 0.85 }}>
-          Find it. Buy it. Get it done.
+          Create your account
         </p>
         <form
           style={{
@@ -39,9 +38,24 @@ export default function SignInPage() {
             gap: dialTokens.space.md,
             textAlign: "left",
           }}
-          action="/api/auth/sign-in"
+          action="/api/auth/sign-up"
           method="post"
         >
+          <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
+            Display name
+            <input
+              name="displayName"
+              type="text"
+              autoComplete="name"
+              required
+              style={{
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: `1px solid ${dialTokens.color.brand.primary}33`,
+                fontSize: 16,
+              }}
+            />
+          </label>
           <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
             Email or phone
             <input
@@ -70,16 +84,13 @@ export default function SignInPage() {
               minHeight: 44,
             }}
           >
-            Sign in
+            Create account
           </button>
         </form>
         <p style={{ marginTop: dialTokens.space.lg, fontSize: 14 }}>
-          <a href="/sign-up" style={{ color: dialTokens.color.brand.accent }}>
-            Create account
+          <a href="/" style={{ color: dialTokens.color.brand.accent }}>
+            Already have an account? Sign in
           </a>
-        </p>
-        <p style={{ marginTop: dialTokens.space.md, fontSize: 12, opacity: 0.6 }}>
-          Auth-first — Shop | Services only after sign-in (Pack T1)
         </p>
       </section>
     </main>

@@ -14,7 +14,7 @@
 | **Ticket hygiene (E1a / E2a owned ticket)** | **Done** — [E2a #1](https://github.com/Vanguduza/dial/issues/1) (prefer applied; autonomous) |
 | **Autonomous runbook** | **Active** — `DIAL_Dev_Manager_Autonomous_Runbook.md` (no founder wait) |
 | **End-to-end workplan** | **Active** — `DIAL_Build_Workplan.md` + STATE (**auto-advance on green**) |
-| First thin vertical Build | **S10–S12 done** → **S20 T1** [#5](https://github.com/Vanguduza/dial/issues/5) opening |
+| First thin vertical Build | **S10–S20 done** → **S21 T2** [#7](https://github.com/Vanguduza/dial/issues/7) |
 | `dial-webapp-recon` | Blocked (no staging) |
 | Promptfoo CI / runtime money-path / `packages/ai` review | Blocked until those packages/routes exist |
 
@@ -38,10 +38,10 @@ Commands: `pnpm typecheck` · `pnpm test` · `pnpm dev:gateway`
 ## Phase 3 — active (Dev Manager autonomous)
 
 **Owner:** Dev Manager — workplan `DIAL_Build_Workplan.md` · STATE · runbook.  
-**Active stage:** **S20** T1 [#5](https://github.com/Vanguduza/dial/issues/5). S12 E1b closed green (auto-advanced).
+**Active stage:** **S21** T2 [#7](https://github.com/Vanguduza/dial/issues/7) (auto-advanced from S20 T1 [#5](https://github.com/Vanguduza/dial/issues/5) green).
 
-1. Build S20 T1 thin vertical (session AuthN → Shop\|Services home stub; RLS profile tests stub).  
-2. On green → **auto-advance to S21**.  
+1. Build S21 T2 thin vertical (Meili settings + B2B hide informal + Factory ingest/`search_no_result_events` stubs).  
+2. On green → **auto-advance to S22**.  
 3. Continue through S90 per workplan; S99 customer-open stays human-gated.  
 4. Phase 0 ops stay in `ENHANCEMENTS.md` ENH-020… — stubs only in eng.
 

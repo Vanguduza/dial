@@ -8,6 +8,12 @@ import {
   setDailyZigRate,
 } from "@dial/payments";
 import {
+  __resetIdentityForTests,
+  rlsContextFromProfile,
+  selectProfileAs,
+  signUp,
+} from "@dial/identity";
+import {
   __resetAuthForTests,
   assertResourceAccess,
   createSession,
@@ -68,4 +74,24 @@ test("T1 session AuthN: cookie SoR; body userId refused for AuthZ", () => {
       resourceOwnerId: session.userId,
     }),
   );
+});
+
+test("T1 Pack §15: sign-up profile + session aligns; anonymous has no Shop home session", () => {
+  __resetAuthForTests();
+  __resetIdentityForTests();
+  const profile = signUp({
+    email: "home@dial.test",
+    displayName: "Home User",
+  });
+  const { token, session } = createSession({
+    email: profile.email,
+    userId: profile.userId,
+  });
+  assert.equal(session.userId, profile.userId);
+  assert.equal(
+    selectProfileAs(rlsContextFromProfile(profile), profile.userId)?.displayName,
+    "Home User",
+  );
+  assert.equal(getSessionFromToken(undefined), null);
+  assert.ok(getSessionFromToken(token));
 });
