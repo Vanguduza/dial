@@ -18,6 +18,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
 | ENH-005 | **Development Prime** mandatory Build **harness** (`prime-agent`, MIT) — install before workspace bootstrap; hosts Dev Manager | `in_progress` | **D-61** — injected: `.prime/agent/` Auto + `/dev-manager` sync + workplan idle ban; Windows `scripts/start-dial-dev-manager-prime.ps1`; Cursor bridge Auto; **reject** prod Prime adapter / alternate frameworks |
+| ENH-014 | **Cursor portable UX pack** — sanitized settings/skills restore for new machines without touching DIAL `.cursor` SoR | `done` | `tooling/cursor-portable/` + `RESTORE.md`; secrets redacted; project `dial-*` stays SoR |
 
 ---
 

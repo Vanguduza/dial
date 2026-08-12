@@ -100,6 +100,10 @@ Further apps/packages land on Pack trains T1–T9 and tracer epics E1–E6.
 | `DIAL_Cursor_Rules_and_Skills.md` | Local rules/skills catalog |
 | `docs/planning/` | Plan-phase grill, DoD backlog, tracer matrices |
 
+## Cursor portable UX (machine move)
+
+User-level Cursor settings/skills (not DIAL project SoR) live under [`tooling/cursor-portable/`](./tooling/cursor-portable/) with restore steps in [`RESTORE.md`](./tooling/cursor-portable/RESTORE.md). Project locks stay in [`.cursor/`](./.cursor/) + [`AGENTS.md`](./AGENTS.md) — do not overwrite `dial-*` rules/skills from the portable pack.
+
 ## Licence / secrets
 
 Private proprietary project unless a root licence file says otherwise. Never commit `.env*`; never put service-role / PSP / WA secrets behind `NEXT_PUBLIC_` or `VITE_`.
