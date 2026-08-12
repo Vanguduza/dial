@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeSubmitPrompt": [
+      {
+        "command": "& \"PLACEHOLDER_BUN_EXE\" \"PLACEHOLDER_CLAUDE_MEM_WORKER\" hook cursor session-init"
+      },
+      {
+        "command": "& \"PLACEHOLDER_BUN_EXE\" \"PLACEHOLDER_CLAUDE_MEM_WORKER\" hook cursor context"
+      }
+    ],
+    "afterMCPExecution": [
+      {
+        "command": "& \"PLACEHOLDER_BUN_EXE\" \"PLACEHOLDER_CLAUDE_MEM_WORKER\" hook cursor observation"
+      }
+    ],
+    "afterShellExecution": [
+      {
+        "command": "& \"PLACEHOLDER_BUN_EXE\" \"PLACEHOLDER_CLAUDE_MEM_WORKER\" hook cursor observation"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "& \"PLACEHOLDER_BUN_EXE\" \"PLACEHOLDER_CLAUDE_MEM_WORKER\" hook cursor file-edit"
+      }
+    ],
+    "stop": [
+      {
+        "command": "& \"PLACEHOLDER_BUN_EXE\" \"PLACEHOLDER_CLAUDE_MEM_WORKER\" hook cursor summarize"
+      }
+    ]
+  }
+}

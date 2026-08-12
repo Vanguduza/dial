@@ -11,4 +11,8 @@ Plan diligence outputs. Not a second product SoR — v4 / Pack / D-log win on co
 | [DIAL_AI_Capability_Plan_Phase_Review.md](./DIAL_AI_Capability_Plan_Phase_Review.md) | packages/ai plan-surface audit |
 | [DIAL_Promptfoo_Golden_Assertion_Outline.md](./DIAL_Promptfoo_Golden_Assertion_Outline.md) | Eval assertions / goldens (no CI yet) |
 | [DIAL_Tracer_DoD_Completion_Matrices.md](./DIAL_Tracer_DoD_Completion_Matrices.md) | AC × channel matrices (Plan filled; Build marks Y) |
+| [DIAL_Dev_Manager_Autonomous_Runbook.md](./DIAL_Dev_Manager_Autonomous_Runbook.md) | Build ops loop — prefer/lock defaults; no manual gates |
+| [DIAL_Build_Workplan.md](./DIAL_Build_Workplan.md) | End-to-end stages S00→S90 (+ S99); **auto-advance on green** |
+| [DIAL_Build_Workplan_STATE.md](./DIAL_Build_Workplan_STATE.md) | Live pointer — current stage / issue / next |
+| [DIAL_Resume_From_GitHub.md](./DIAL_Resume_From_GitHub.md) | Cold-start / machine-move: clone tip branch (not `main`), auth, pnpm, Prime, portable Cursor restore → STATE + [#7](https://github.com/Vanguduza/dial/issues/7) |
 | [diagrams/](./diagrams/) | Mermaid editorial briefs (money, delivery, Factory/CC) |

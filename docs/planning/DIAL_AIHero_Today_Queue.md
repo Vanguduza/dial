@@ -1,7 +1,7 @@
 # DIAL AI Hero — today queue
 
-**Date:** 2026-08-11  
-**Phase:** **3 — Build orchestration** (Dev Manager + first thin vertical). Plan diligence (Phase 1–2) complete.
+**Date:** 2026-08-12  
+**Phase:** **3 — Build orchestration** (Dev Manager + thin verticals). Plan diligence (Phase 1–2) complete.
 
 | Tool / step | Status |
 | --- | --- |
@@ -11,8 +11,10 @@
 | **T0 monorepo** (pnpm + turbo + typecheck/test + lefthook + CI) | **Done** — see below |
 | T0 gateway shell + design-tokens | **Done** — `apps/gateway-web`, `packages/design-tokens` |
 | `@dial/shared` money types + tests | **Done** |
-| **Ticket hygiene (E1a / E2a owned ticket)** | **Assigned → Dev Manager** (Blueprint §8.0) — **Next** |
-| First thin vertical Build | Blocked on ticket hygiene |
+| **Ticket hygiene (E1a / E2a owned ticket)** | **Done** — [E2a #1](https://github.com/Vanguduza/dial/issues/1) (prefer applied; autonomous) |
+| **Autonomous runbook** | **Active** — `DIAL_Dev_Manager_Autonomous_Runbook.md` (no founder wait) |
+| **End-to-end workplan** | **Active** — `DIAL_Build_Workplan.md` + STATE (**auto-advance on green**) |
+| First thin vertical Build | **S10–S20 done** → **S21 T2** [#7](https://github.com/Vanguduza/dial/issues/7) |
 | `dial-webapp-recon` | Blocked (no staging) |
 | Promptfoo CI / runtime money-path / `packages/ai` review | Blocked until those packages/routes exist |
 
@@ -33,14 +35,15 @@ Commands: `pnpm typecheck` · `pnpm test` · `pnpm dev:gateway`
 
 ---
 
-## Phase 3 — next (Dev Manager)
+## Phase 3 — active (Dev Manager autonomous)
 
-**Owner:** Dev Manager agent — paste `DIAL_Build_Blueprint_and_Cursor_Prompt.md` §8.
+**Owner:** Dev Manager — workplan `DIAL_Build_Workplan.md` · STATE · runbook.  
+**Active stage:** **S21** T2 [#7](https://github.com/Vanguduza/dial/issues/7) (auto-advanced from S20 T1 [#5](https://github.com/Vanguduza/dial/issues/5) green).
 
-1. Close **ticket hygiene**: open owned **E2a** (prefer) or **E1a** with DoD + matrix + named owner.  
-2. Then Build that thin vertical:
-   - **E1a** — OfferSnapshot USD → one PSP webhook stub → ledger → `FiscalReceiptQueued` (agency / D-59), **or**
-   - **E2a** — Spare WA Flow USD cart → EcoCash/COD buttons → same `fdms_outbox`
+1. Build S21 T2 thin vertical (Meili settings + B2B hide informal + Factory ingest/`search_no_result_events` stubs).  
+2. On green → **auto-advance to S22**.  
+3. Continue through S90 per workplan; S99 customer-open stays human-gated.  
+4. Phase 0 ops stay in `ENHANCEMENTS.md` ENH-020… — stubs only in eng.
 
 Do not claim Done until feature DoD + matrix cells have evidence (`dial-tracer-slice`).
 

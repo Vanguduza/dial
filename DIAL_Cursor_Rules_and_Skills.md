@@ -1,6 +1,6 @@
 # DIAL Cursor Rules & Skills Catalog (D-47 / D-55 / D-56)
 
-**Locked by D-47** (Cursor pack) **+ D-48** (AppSec toolchain pointers) **+ D-55** (external skills utilization) **+ D-56** (plan-phase grill + AI capability merge gate). Indexes the applied Cursor pack. Architecture authority: `DIAL_Consolidated_Plan_v4.md` → `DIAL_Development_Agent_Pack.md` → companions. Rationale: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`, `DIAL_External_Skills_Repos_Utilization.md`. Security tools: `DIAL_Security_Toolchain.md`.
+**Locked by D-47** (Cursor pack) **+ D-48** (AppSec toolchain pointers) **+ D-55** (external skills utilization) **+ D-56** (plan-phase grill + AI capability merge gate). Indexes the applied Cursor pack. Architecture authority: `DIAL_Consolidated_Plan_v4.md` → `DIAL_Development_Agent_Pack.md` → companions. Rationale: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`, `DIAL_External_Skills_Repos_Utilization.md`. Security tools: `DIAL_Security_Toolchain.md`. AI Kernel/Prime absorb (**D-61**): `DIAL_AI_Kernel_Prime_Agent_Adopted.md` (not proposal archive as SoR).
 
 ## How agents should use this
 
@@ -40,7 +40,7 @@ Ignores `.env*`, keys/certs, `node_modules`, build artifacts, large binaries, of
 | File | Apply | Purpose |
 | --- | --- | --- |
 | `dial-agent-authority.mdc` | always | Doc authority + reading order |
-| `dial-non-negotiables.mdc` | always | Money/AI/WA/maps/SoR locks (D-38…D-56) |
+| `dial-non-negotiables.mdc` | always | Money/AI/WA/maps/SoR locks (D-38…D-61) |
 | `dial-security-idor.mdc` | always | IDOR, no body identity, webhooks, secrets |
 | `dial-security-toolchain.mdc` | always | D-48 Threat Dragon / Semgrep / Checkov / Renovate / Strix pointers |
 | `dial-api-webhooks.mdc` | globs API / webhooks | Fail-closed internals, signature + idempotency, Zod at boundary |
@@ -73,7 +73,7 @@ Does **not** replace dial-* skills or Appendix A.1. Detail: `DIAL_Security_Toolc
 | `dial-money-path-review` | Payments, Job Reserve, pricing, fiscal — audit before fix; webhook-as-truth / idempotency (**D-55**) |
 | `dial-rls-idor-audit` | Routes with object ids; RLS/IDOR reviews |
 | `dial-psp-adapter-completeness` | PspAdapter / D-43 webhook completeness |
-| `dial-grill-locks` | **D-56** — design-tree interview in Plan before scaffold; hard-stops on C-5 / D-38…D-56 |
+| `dial-grill-locks` | **D-56** — design-tree interview in Plan before scaffold; hard-stops on C-5 / D-38…D-61 |
 | `dial-tracer-slice` | **D-52** — Plan→Build→Expand→DoD 100% + Reality Checker evidence (**D-55**); ban stub-as-MVP |
 | `dial-ai-capability-review` | **D-56** — `packages/ai` merge gate: Zod, D-32, no money writes, Promptfoo/Langfuse |
 | `dial-diagram-editorial` | **D-55** — DIAL diagram type→domain map (layer stack, delivery swimlane, JR state machine, Factory loop, dual capacity, CC Actual vs Simulated) |
