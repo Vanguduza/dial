@@ -2,8 +2,8 @@
 
 **Date:** 2026-08-11  
 **Skill:** `.cursor/skills/dial-grill-locks`  
-**Authority:** `DIAL_Consolidated_Plan_v4.md` D-38…D-60 + §0.2; `DIAL_Development_Agent_Pack.md` §2 / §2.2; `AGENTS.md`; `.cursor/rules/dial-non-negotiables.mdc`  
-**Mode:** Plan diligence **complete** (D-56). Product locks through **D-60**. Build orchestration = **Dev Manager** (Blueprint §8.0) — ticket hygiene first.
+**Authority:** `DIAL_Consolidated_Plan_v4.md` D-38…D-61 + §0.2; `DIAL_Development_Agent_Pack.md` §2 / §2.2; `AGENTS.md`; `.cursor/rules/dial-non-negotiables.mdc`  
+**Mode:** Plan diligence **complete** (D-56). Product locks through **D-61**. Build orchestration = **Dev Manager** (Blueprint §8.0) — ticket hygiene first.
 
 **Legend**
 

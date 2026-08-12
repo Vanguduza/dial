@@ -17,3 +17,11 @@ pnpm-debug.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Prime Agent local runtime (keep settings/prompts; ignore ephemeral state)
+.prime/agent/sessions/
+.prime/agent/npm/
+.prime/agent/git/
+.prime/agent/logs/
+.prime/agent/kernel-venv/
+.prime/agent/*.log

@@ -2,7 +2,7 @@
 
 **Mandatory companion to `DIAL_Consolidated_Plan_v4.md`.** Locked by founder decision **D-39** / Part 9. Cursor agents (and human engineers) must read this pack **before scaffolding** so base research is not repeated in the development phase.
 
-**Authority order when documents conflict:** `DIAL_Consolidated_Plan_v4.md` wins on product, compliance, and architecture decisions. This pack wins on **scaffolding contracts** (env names, index schemas, screen inventories, adapter stubs, acceptance checks) unless a later D-log row supersedes it. Companion UX/checklist detail: `DIAL_Build_Blueprint_and_Cursor_Prompt.md`, `DIAL_Diagnostic_Checklist_Library.md`. Deep OSS/payment/delivery stitch: `DIAL_Deep_Engineering_and_OSS_Stitch.md` (D-43 / D-44 / **D-45** / **D-46** / **D-53** §8). Cursor engineering hygiene (**D-47**): `AGENTS.md` + `.cursor/rules/` + `.cursor/skills/` + `DIAL_Cursor_Rules_and_Skills.md`; rationale companions `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`. Security toolchain (**D-48**): `DIAL_Security_Toolchain.md` + `docs/security/README.md`. Agency + B2B hide informal (**D-49**), tech-hire 30% WHT (**D-50**), DIAL-owned stock dual capacity (**D-51 discarded by D-58**), tracer sequencing + feature DoD (**D-52**), v7-2 platform extensions (**D-53**), Intelligence Factory + Command Centre metrics (**D-54**), external skills utilization (**D-55**), plan-phase grill + AI capability merge gate (**D-56**), Spare USD browse + ZiG-at-checkout + WA EcoCash/COD buttons (**D-57**): v4 §0.2 / D-log / `DIAL_v7_2_Adopted_Platform_Extensions.md` / `DIAL_External_Skills_Repos_Utilization.md`.
+**Authority order when documents conflict:** `DIAL_Consolidated_Plan_v4.md` wins on product, compliance, and architecture decisions. This pack wins on **scaffolding contracts** (env names, index schemas, screen inventories, adapter stubs, acceptance checks) unless a later D-log row supersedes it. Companion UX/checklist detail: `DIAL_Build_Blueprint_and_Cursor_Prompt.md`, `DIAL_Diagnostic_Checklist_Library.md`. Deep OSS/payment/delivery stitch: `DIAL_Deep_Engineering_and_OSS_Stitch.md` (D-43 / D-44 / **D-45** / **D-46** / **D-53** §8). Cursor engineering hygiene (**D-47**): `AGENTS.md` + `.cursor/rules/` + `.cursor/skills/` + `DIAL_Cursor_Rules_and_Skills.md`; rationale companions `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`. Security toolchain (**D-48**): `DIAL_Security_Toolchain.md` + `docs/security/README.md`. Agency + B2B hide informal (**D-49**), tech-hire 30% WHT (**D-50**), DIAL-owned stock dual capacity (**D-51 discarded by D-58**), tracer sequencing + feature DoD (**D-52**), v7-2 platform extensions (**D-53**), Intelligence Factory + Command Centre metrics (**D-54**), external skills utilization (**D-55**), plan-phase grill + AI capability merge gate (**D-56**), Spare USD browse + ZiG-at-checkout + WA EcoCash/COD buttons (**D-57**), AI Kernel/Prime absorb (**D-61**): v4 §0.2 / D-log / `DIAL_v7_2_Adopted_Platform_Extensions.md` / `DIAL_External_Skills_Repos_Utilization.md` / `DIAL_AI_Kernel_Prime_Agent_Adopted.md`.
 
 ---
 
@@ -19,7 +19,8 @@
 
 **Go for scaffolding / internal build trains:** YES, with stubs for PSP/FDMS/WhatsApp until Phase 0 contracts land.  
 **Go for customer-open launch:** NO until Appendix C bold items + Gates in §8.1 are green.  
-**Dev Manager:** Paste Blueprint §8 / §8.0 — owns **ticket hygiene** (open one E1a or E2a owned thin-vertical ticket with DoD + owner) before parallel product trains.
+**Before you start (D-61 bootstrap):** Install + configure **Prime Agent** as the project **development orchestrator** **before** Dial ecosystem workspace / monorepo bootstrap; then open the repo; then paste Blueprint §8 / §8.0 **Dev Manager** **inside** that Prime session (Prime may host/attach Dev Manager; Cursor/`AGENTS.md` remain instruction SoR).  
+**Dev Manager:** Owns **ticket hygiene** (open one E1a or E2a owned thin-vertical ticket with DoD + owner) before parallel product trains; enforces **responsive web UX** (§8.0.1) and **living root docs** (`README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS`, §8.0.2) in the same PR — reject “docs later.”
 
 ---
 
@@ -52,8 +53,9 @@
 23. **D-58** — **D-2 agency confirmed**; **discard D-51** owned-stock principal track; FDMS on agency receipt model; no `DIAL_OWNED` offers/inventory
 24. **D-59** — Agency FDMS receipt types (`DIAL_FEE` / `GOODS_FORMAL` / `GOODS_INFORMAL`); **in-house** ZIMRA Virtual Gateway default; CloudESD optional `FdmsSigner` only; e-invoices + WA share outbox
 25. **D-60** — IMTT = DIAL opex (not customer price); COD settle USD; B2C informal visible; Flash-Lite P1; C-4 Paynow-first; WA templates §12
+26. **D-61** — `DIAL_AI_Kernel_Prime_Agent_Adopted.md`: **Dev Manager** = Build managerial authority throughout (Blueprint §8.0); **Development Prime** = mandatory **harness** hosting that role (before workspace); production multi-step = `packages/ai` + LiteLLM→Gemini + Temporal/BullMQ (**no** prod agent host/adapter); learning **outcomes** on Factory/Langfuse/Promptfoo (**no** agent host as production driver); §5.3 affirmed. Eval archive: `DIAL_AI_Kernel_Prime_Agent_Feasibility_Evaluation.md`
 
-**Do not** re-open: Expo/RN customer apps, Lottie, Inngest, Typesense, imgproxy, agentic Spare shop, AI customer prices before §5.9 gates, SandPIM as runtime SoR, Mercur/Medusa as money ledger, **OfferKit/Medusa as live promotion SoR** (pattern into `@dial/promotions` only — D-42), cash-out of promo credit, deferring §10 WA Flows past open launch, **Google Maps / Mapbox as sole distance or courier-map SoR** (MapLibre + OSRM/VROOM — D-44), Fleetbase/Navigator as delivery runtime SoR (AGPL pattern-only — **D-45** job SoR is `packages/delivery`), skipping D-47 Cursor hygiene for multi-agent scaffolds, replacing D-47 IDOR/RLS CI with Semgrep/Strix alone, dual Dependabot+Renovate *version* bots (**D-48** = Renovate primary), **marketplace-wide principal/reseller** or informal→B2B **visibility/sales** (**D-49**), designing tech payouts as if **30% WHT disappears** (**D-50**), reintroducing discarded D-51 `DIAL_OWNED` principal SKUs without new D-log (**D-58**), treating tracer/stub as MVP-complete or merging without feature DoD / channel matrix (**D-52**), **v7-2 as plan SoR**, Train 0–10 replacing **T0–T9**, Unleash/OR-Tools as SoR, CERTIFIED–DORMANT as public multi-phase MVP, or AI/`pricing-intelligence` writing payable amounts (**D-53**), auto-publish checklist/AI without human+Promptfoo, Command Centre Simulated as live money control, or ad-hoc KPIs without MetricContract (**D-54**), full agency-agents / anthropics/skills / diagram-design asset tree dumps or Anthropic ToS document-skill vendoring (**D-55**), skipping plan-phase grill or merging `packages/ai` without capability review (**D-56**), dual-displaying ZiG on Spare browse/cart or converting without ops-audited daily rate / skipping WA EcoCash+COD checkout buttons (**D-57**).
+**Do not** re-open: Expo/RN customer apps, Lottie, Inngest, Typesense, imgproxy, agentic Spare shop, AI customer prices before §5.9 gates, SandPIM as runtime SoR, Mercur/Medusa as money ledger, **OfferKit/Medusa as live promotion SoR** (pattern into `@dial/promotions` only — D-42), cash-out of promo credit, deferring §10 WA Flows past open launch, **Google Maps / Mapbox as sole distance or courier-map SoR** (MapLibre + OSRM/VROOM — D-44), Fleetbase/Navigator as delivery runtime SoR (AGPL pattern-only — **D-45** job SoR is `packages/delivery`), skipping D-47 Cursor hygiene for multi-agent scaffolds, replacing D-47 IDOR/RLS CI with Semgrep/Strix alone, dual Dependabot+Renovate *version* bots (**D-48** = Renovate primary), **marketplace-wide principal/reseller** or informal→B2B **visibility/sales** (**D-49**), designing tech payouts as if **30% WHT disappears** (**D-50**), reintroducing discarded D-51 `DIAL_OWNED` principal SKUs without new D-log (**D-58**), treating tracer/stub as MVP-complete or merging without feature DoD / channel matrix (**D-52**), **v7-2 as plan SoR**, Train 0–10 replacing **T0–T9**, Unleash/OR-Tools as SoR, CERTIFIED–DORMANT as public multi-phase MVP, or AI/`pricing-intelligence` writing payable amounts (**D-53**), auto-publish checklist/AI without human+Promptfoo, Command Centre Simulated as live money control, or ad-hoc KPIs without MetricContract (**D-54**), full agency-agents / anthropics/skills / diagram-design asset tree dumps or Anthropic ToS document-skill vendoring (**D-55**), skipping plan-phase grill or merging `packages/ai` without capability review (**D-56**), dual-displaying ZiG on Spare browse/cart or converting without ops-audited daily rate / skipping WA EcoCash+COD checkout buttons (**D-57**), peer AI kernel / Kernel self-host or S24 local-first inference / Prime as production or parallel Factory SoR / prod agent adapter or alternate prod agent framework (**D-61**).
 
 ---
 
@@ -89,6 +91,7 @@ Copy into PR checklist / Cursor rules:
 26. **D-2 agency + discard owned stock (D-58):** DIAL is **agent**; no DIAL-owned principal SKUs; agency FDMS/e-invoice tax model; WA payments share ERP `fdms_outbox`.
 27. **Agency FDMS + in-house Gateway (D-59):** registered goods VAT-inclusive (supplier remits); DIAL VAT on fees only; informal no goods VAT fiscal; B2B buyer TIN; build Gateway adapter; CloudESD optional only.
 28. **IMTT + open locks (D-60):** never put IMTT on customer prices; GL expense; COD settle USD; B2C informal visible; Flash-Lite P1; Paynow-first escrow ask.
+29. **AI Kernel + Prime Agent (D-61):** **Dev Manager** = Build manager throughout; **Development Prime** = mandatory harness hosting it (before workspace); production AI = capability pipeline + Temporal/BullMQ (**no** prod adapter / alternate agent framework); learning/ERP Improvement **outcomes** without agent host as production driver; §5.3 locked; Factory = eval SoR — companion `DIAL_AI_Kernel_Prime_Agent_Adopted.md`.
 
 ### 2.1 Lazy Developer hygiene (D-47 — mandatory)
 
@@ -163,7 +166,8 @@ Do **not** install full agency-agents roster as monorepo SoR; do **not** vendor 
 | --- | --- |
 | `DIAL_Consolidated_Plan_v4.md` | Product truth, compliance, architecture, D-log |
 | `DIAL_Development_Agent_Pack.md` (this file) | Scaffold contracts, env, schemas, screens, AC |
-| `DIAL_Build_Blueprint_and_Cursor_Prompt.md` | Improvements I-*, alternate tools research, Cursor paste prompt |
+| `DIAL_Build_Blueprint_and_Cursor_Prompt.md` | Improvements I-*, alternate tools research, Cursor paste prompt; **§8.0.1** responsive web UX; **§8.0.2** living docs |
+| `README.md` / `CHANGELOG.md` / `ENHANCEMENTS.md` / `BUGS.md` | Living root docs — same-PR updates (Blueprint §8.0.2) |
 | `DIAL_Diagnostic_Checklist_Library.md` | 42 launch checklists → seed `packages/checklists` |
 | `DIAL_Deep_Engineering_and_OSS_Stitch.md` | Feature→OSS matrix; PspAdapter methods (D-43); delivery-android (D-44); dispatch SoR (D-45); ERP gaps + D-46 (§7) |
 | `DIAL_WhatsApp_Flows_and_Templates.md` | WA Flows + templates |
@@ -174,6 +178,8 @@ Do **not** install full agency-agents roster as monorepo SoR; do **not** vendor 
 | `DIAL_v7_2_Adopted_Platform_Extensions.md` | **D-53** platform extension designs + OSS picks; **D-54** Intelligence Factory + Command Centre metric contracts |
 | `DIAL_v7-2_Adjustment_Expansion_Evaluation.md` | Adopt/modify/reject classifier — not SoR |
 | `DIAL_External_Skills_Repos_Utilization.md` | **D-55** locked adopted — diagram-editorial, agency habits, anthropics anatomy / webapp-recon |
+| `DIAL_AI_Kernel_Prime_Agent_Adopted.md` | **D-61** — Dev Manager = Build manager; Prime = mandatory harness; prod = capability + Temporal/BullMQ (no adapter); §5.3 affirmed |
+| `DIAL_AI_Kernel_Prime_Agent_Feasibility_Evaluation.md` | D-61 classifier archive — not SoR |
 | `docs/planning/` | **D-56 / D-52** plan-phase grill session, DoD backlog, AI Hero today queue, diagrams, Promptfoo outline, tracer matrices — not a second product SoR |
 
 ---
@@ -774,11 +780,11 @@ Agents close a train only when AC pass.
 
 | Train | Done when |
 | --- | --- |
-| T0 Foundation | Monorepo boots; apps render shell; tokens compile; CI lint/typecheck; **Semgrep dial hard-fail + Checkov HIGH+ workflows present (D-48)**; Renovate config or Mend App noted |
+| T0 Foundation | Monorepo boots; apps render shell; tokens compile; CI lint/typecheck; **Semgrep dial hard-fail + Checkov HIGH+ workflows present (D-48)**; Renovate config or Mend App noted; **root living docs present** (`README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS`) |
 | T1 Identity | Sign-in/up; auth home Shop\|Services; RLS tests green on profiles |
 | T2 Catalogue+Search | Migrations for catalogue/offers (**no owned inventory — D-58**); Meili settings incl. `offerSource` / `supplierFormality`; stub docs searchable; B2B Meili filter excludes informal; SandPIM notes linked in ADR; **Catalogue Factory ingest/review stubs + `search_no_result_events` (D-53)** |
-| T3 Spare UI | Mercur-patterned browse/PDP/cart against stub API; no supplierId in client payloads; checkout seller disclosure agency supplier (D-58); **USD-only browse/cart display (D-57)**; ZiG only on pay-step mock; WA FLOW_SPARE_CHECKOUT EcoCash+COD **required buttons** (D-57) |
-| T4 Tech UI | FixItNow-patterned intake/book; emergency path bypasses AI; checklist runner loads 1 automotive + 1 emergency checklist |
+| T3 Spare UI | Mercur-patterned browse/PDP/cart against stub API; no supplierId in client payloads; checkout seller disclosure agency supplier (D-58); **USD-only browse/cart display (D-57)**; ZiG only on pay-step mock; WA FLOW_SPARE_CHECKOUT EcoCash+COD **required buttons** (D-57); **responsive desktop+mobile web QA + shared design-tokens (Blueprint §8.0.1)** |
+| T4 Tech UI | FixItNow-patterned intake/book; emergency path bypasses AI; checklist runner loads 1 automotive + 1 emergency checklist; **responsive desktop+mobile web QA + shared design-tokens (Blueprint §8.0.1)** |
 | T5 Money spine | Ledger tables; Paynow + ContiPay/EcoCash/PayPal/COD adapter stubs; JobReserve state machine unit tests; Threat Dragon models under `ThreatDragonModels/` (Job Reserve + related); **`itf263_records` + `withholding_balances` stubs and tech-payout WHT decision path (D-50)**; **tech economics / Take-Home UI stub (D-53)**; **`fx_daily_rates` + admin Daily ZiG rate stub + checkout conversion persists `fx_rate_id` (D-57)**; **FDMS agency receipt types + Gateway adapter stub (D-59)** |
 | T6 Jobs | Classification + assignment eligibility tests; quote from rate card only; **`job_class_definitions` + `trade_definitions` lifecycle stubs; Value Score snapshot read path (D-53)** |
 | T7 AI | guidedIntake + opsDraftQuote behind Zod; Promptfoo smoke; no price in customer assessment; **Intelligence Factory shadow/promote metadata stubs; capability rename = commercial-forecast / pricing-draft-assist only — never money writer (D-53)**; **checklist outcome loop + outcome-weighted dataset versioning ACs (D-54 §13)** |
@@ -840,6 +846,7 @@ Customer-open requires Appendix C + §8.1 gates — not T-train alone.
 | External skills utilization | Thin dial-diagram-editorial; agency payments/evidence habits; anthropics anatomy + dial-webapp-recon; no full tree vendors | D-55 |
 | Plan-phase grill + AI capability gate | `dial-grill-locks` in Plan; `dial-ai-capability-review` before `packages/ai` merge; slim AGENTS + evals + T0 affirmed; Flash-Lite P1 | D-56 |
 | Spare USD browse / ZiG checkout | Display USD on PLP/PDP/search/cart; ZiG only at pay step from ops daily rate; admin Daily ZiG rate + audit; WA EcoCash+COD buttons | D-57 |
+| AI Kernel / Prime Agent absorb | Dev Manager = Build managerial authority throughout; Prime = mandatory harness (before workspace); prod multi-step = capabilities + Temporal/BullMQ; no prod adapter / alternate agent framework; Factory remains eval SoR; §5.3 locked | D-61 |
 
 ### 16.1 Optional donors (D-46) — high-value only
 
@@ -887,6 +894,8 @@ dial-ai-capability-review before packages/ai merge; Flash-Lite stays P1.
 Spare USD browse + ZiG-at-checkout (**D-57**): displayCurrency=USD on catalogue/cart;
 ZiG only at pay step from ops daily fx_daily_rates; admin Daily ZiG rate + audit;
 WA EcoCash + COD via required checkout buttons/CTAs (not free-text only).
+Web UX: responsive desktop+mobile + shared design-tokens (Blueprint §8.0.1).
+Living docs: update README/CHANGELOG/ENHANCEMENTS/BUGS in the same PR (§8.0.2).
 ```
 
 ---

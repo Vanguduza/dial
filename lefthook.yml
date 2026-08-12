@@ -5,3 +5,15 @@ pre-commit:
       run: pnpm typecheck
     test:
       run: pnpm test
+
+# After a successful commit, push the current branch to origin (Vanguduza/dial).
+# Never force-pushes. Script exits 0 if nothing to push.
+# Windows (this machine): PowerShell. Unix / Git Bash: use scripts/git-auto-push.sh
+# (lefthook on Windows often resolves `bash` to a broken WSL stub).
+# If the hook is missing, Dev Manager must run:
+#   powershell -NoProfile -ExecutionPolicy Bypass -File scripts/git-auto-push.ps1
+#   # or: bash scripts/git-auto-push.sh
+post-commit:
+  commands:
+    auto-push:
+      run: powershell -NoProfile -ExecutionPolicy Bypass -File "./scripts/git-auto-push.ps1"

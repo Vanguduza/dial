@@ -18,11 +18,39 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  adapters/whatsapp:
+    dependencies:
+      '@dial/catalogue':
+        specifier: workspace:*
+        version: link:../../packages/catalogue
+      '@dial/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   apps/gateway-web:
     dependencies:
+      '@dial/adapter-whatsapp':
+        specifier: workspace:*
+        version: link:../../adapters/whatsapp
       '@dial/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
+      '@dial/payments':
+        specifier: workspace:*
+        version: link:../../packages/payments
       next:
         specifier: ^15.3.3
         version: 15.5.23(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -49,7 +77,61 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  packages/catalogue:
+    dependencies:
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   packages/design-tokens:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/ledger:
+    dependencies:
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/payments:
+    dependencies:
+      '@dial/ledger':
+        specifier: workspace:*
+        version: link:../ledger
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@dial/tax':
+        specifier: workspace:*
+        version: link:../tax
     devDependencies:
       '@types/node':
         specifier: ^22.15.21
@@ -74,6 +156,22 @@ importers:
         version: 5.9.3
 
   packages/shared:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/tax:
+    dependencies:
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@types/node':
         specifier: ^22.15.21
