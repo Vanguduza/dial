@@ -48,6 +48,46 @@ export function createTemporalWorkerOptions(
   };
 }
 
+/**
+ * Temporal worker health (S126) — fixture returns options + namespace; sandbox fail-closed without address.
+ * Never opens a live Temporal connection in health (avoid hanging CI).
+ */
+export function pingTemporalHealth(
+  env: NodeJS.ProcessEnv = process.env,
+): {
+  ok: boolean;
+  mode: string;
+  addressConfigured: boolean;
+  namespace: string;
+  taskQueue: string;
+  workflows: string[];
+  error?: string;
+} {
+  const mode = (env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  const addressConfigured = Boolean(env.TEMPORAL_ADDRESS?.trim());
+  try {
+    const opts = createTemporalWorkerOptions(env);
+    return {
+      ok: true,
+      mode,
+      addressConfigured,
+      namespace: opts.namespace,
+      taskQueue: opts.taskQueue,
+      workflows: opts.workflows,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      mode,
+      addressConfigured,
+      namespace: env.TEMPORAL_NAMESPACE?.trim() || "dial",
+      taskQueue: TEMPORAL_TASK_QUEUE,
+      workflows: [WORKFLOW_DELIVERY_DISPATCH],
+      error: e instanceof Error ? e.message : "temporal config error",
+    };
+  }
+}
+
 export async function runDeliveryDispatchInProcess(input: {
   orderId: string;
   from: string;

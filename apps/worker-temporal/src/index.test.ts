@@ -65,3 +65,24 @@ test("S101 Temporal SDK worker fixture registers without NativeConnection", asyn
   await sdk.run();
   await sdk.stop();
 });
+
+test("S126 pingTemporalHealth fixture ok + sandbox fail-closed without address", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.TEMPORAL_ADDRESS;
+  process.env.TEMPORAL_NAMESPACE = "dial_s126";
+  const { pingTemporalHealth } = await import("./index.js");
+  const fx = pingTemporalHealth();
+  assert.equal(fx.ok, true);
+  assert.equal(fx.mode, "fixture");
+  assert.equal(fx.namespace, "dial_s126");
+  assert.equal(fx.taskQueue, TEMPORAL_TASK_QUEUE);
+  assert.ok(fx.workflows.includes(WORKFLOW_DELIVERY_DISPATCH));
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.TEMPORAL_ADDRESS;
+  const closed = pingTemporalHealth();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.TEMPORAL_NAMESPACE;
+});

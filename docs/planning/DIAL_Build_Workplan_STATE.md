@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S125** — Redis/queues health ping — **green** |
+| `current_stage` | **S126** — Temporal health expand — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S124** Meili search health ping — **green** |
-| `next_stage` | **S126** Temporal worker options health expand (namespace ping fixture) |
+| `prior_stage` | **S125** Redis/queues health ping — **green** |
+| `next_stage` | **S127** LiteLLM health expand (model list fixture) on integrations |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S124 | 2026-08-13/14 | through Meili health |
-| S125 | 2026-08-14 | `pingQueuesHealth` under `queues.health` |
+| S91–S125 | 2026-08-13/14 | through queues health |
+| S126 | 2026-08-14 | `pingTemporalHealth` namespace/taskQueue fixture |
 
 ## Note
 

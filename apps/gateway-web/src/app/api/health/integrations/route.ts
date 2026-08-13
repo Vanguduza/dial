@@ -16,7 +16,7 @@ import {
   pingQueuesHealth,
 } from "@dial/queues";
 import { getFiscalDayState } from "@dial/tax";
-import { createTemporalWorkerOptions } from "@dial/worker-temporal";
+import { pingTemporalHealth } from "@dial/worker-temporal";
 
 export const runtime = "nodejs";
 
@@ -37,15 +37,7 @@ function group(label: string, keys: string[]) {
 
 export async function GET(): Promise<NextResponse> {
   const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
-  let temporal: { ok: boolean; error?: string } = { ok: true };
-  try {
-    createTemporalWorkerOptions();
-  } catch (e) {
-    temporal = {
-      ok: false,
-      error: e instanceof Error ? e.message : "temporal config error",
-    };
-  }
+  const temporal = pingTemporalHealth();
   const litellm = await pingLiteLlm();
   const maps = await pingMapsHealth();
   const fdms = await pingFdmsHealth();

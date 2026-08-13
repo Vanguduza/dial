@@ -48,6 +48,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-061 | **FDMS Gateway health ping** | `done` | S123 — pingFdmsHealth fixture day + sandbox fail-closed |
 | ENH-062 | **Meili search health ping expand** | `done` | S124 — pingMeiliHealth on search.meili |
 | ENH-063 | **Redis/queues health ping** | `done` | S125 — pingQueuesHealth on queues.health |
+| ENH-064 | **Temporal health expand** | `done` | S126 — pingTemporalHealth namespace/taskQueue |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
