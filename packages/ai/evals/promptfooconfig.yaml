@@ -1,0 +1,25 @@
+# Promptfoo outline (D-54 / D-56) — fill providers when LITELLM_* set.
+# Run: npx promptfoo eval -c packages/ai/evals/promptfooconfig.yaml
+# CI stays fixture-guidedIntake until Promptfoo is wired in T7 expand.
+
+description: DIAL packages/ai guidedIntake golden assertions (outline)
+
+prompts:
+  - "Customer text: {{customerText}}\nReturn JobAssessment JSON only. Never include price or amountMinor."
+
+providers:
+  - id: echo
+    config:
+      # Replace with litellm:gemini/... when LITELLM_BASE_URL is set
+      type: echo
+
+tests:
+  - vars:
+      customerText: "Car won't start, maybe battery"
+    assert:
+      - type: not-contains
+        value: amountMinor
+      - type: not-contains
+        value: '"price"'
+      - type: contains
+        value: needsHumanQuote

@@ -669,3 +669,9 @@ export function __resetPaymentsForTests(): void {
   jobReservesByIdem.clear();
   withholding.clear();
 }
+
+export {
+  createVendorPaymentSession,
+  toCanonicalPspCode,
+  type DomainPaymentMethodCode,
+} from "./adapterBridge.js";

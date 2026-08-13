@@ -66,6 +66,33 @@ function id(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/**
+ * Route estimate — uses @dial/adapter-maps when not fixture and OSRM_URL set;
+ * otherwise deterministic stub (never Google/Mapbox — D-44).
+ */
+export async function estimateRoute(input: {
+  from: string;
+  to: string;
+}): Promise<{
+  distanceMeters: number;
+  etaMinutes: number;
+  provider: "osrm_vroom_stub" | "osrm" | "fixture" | "vroom";
+}> {
+  const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  if (mode !== "fixture" && process.env.OSRM_URL?.trim()) {
+    const maps = await import("@dial/adapter-maps");
+    const from = await maps.geocodeNominatim(input.from);
+    const to = await maps.geocodeNominatim(input.to);
+    const route = await maps.estimateRouteOsrm(from, to);
+    return {
+      distanceMeters: route.distanceMeters,
+      etaMinutes: Math.max(1, Math.round(route.durationSeconds / 60)),
+      provider: route.provider,
+    };
+  }
+  return estimateRouteStub(input);
+}
+
 /** OSRM/VROOM stub — not Google/Mapbox (D-44). */
 export function estimateRouteStub(input: {
   from: string;

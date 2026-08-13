@@ -12,6 +12,7 @@
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
+    "@dial/adapter-psp": "workspace:*",
     "@dial/ledger": "workspace:*",
     "@dial/shared": "workspace:*",
     "@dial/tax": "workspace:*"

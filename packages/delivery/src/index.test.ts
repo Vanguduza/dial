@@ -81,3 +81,11 @@ test("E3a reject/timeout → reassign; zero couriers → FIFO", () => {
   timeoutOffer(oid);
   assert.equal(getDeliveryJob(j2.id)?.status, "queued_fifo");
 });
+
+test("S92 estimateRoute uses stub in fixture mode", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { estimateRoute } = await import("./index.js");
+  const r = await estimateRoute({ from: "A", to: "B" });
+  assert.equal(r.provider, "osrm_vroom_stub");
+  assert.ok(r.distanceMeters > 0);
+});

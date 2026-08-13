@@ -6,22 +6,22 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S91** — Integration readiness (API adapters key-drop-in) |
-| `current_issue` | _(opening)_ |
+| `current_stage` | **S92** — Local compose + Temporal worker + bridges — **green** |
+| `current_issue` | _(hygiene)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S90** Eng Build complete — **green** |
-| `next_stage` | Expand sandbox smoke / compose; **S99** still human |
-| `blocked_on_human` | **S99 only** + Phase 0 commercial ENH-020…022 |
+| `prior_stage` | **S91** Integration readiness — **green** |
+| `next_stage` | S93 Supabase Auth client / search-indexer; **S99** human |
+| `blocked_on_human` | **S99 only** + Phase 0 ENH-020…022 |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S90 | 2026-08-13 | Eng S10–S30 green |
-| S91 | 2026-08-13 | `adapters/psp|fdms|maps` + WA Cloud + Meili/LiteLLM clients + per-vendor webhooks; fixture CI |
+| S91 | 2026-08-13 | API adapters key-drop-in |
+| S92 | 2026-08-13 | docker-compose, worker-temporal, PSP/maps bridges, health, SQL stub |
 
 ## Note
 
-Founder directed: develop to API docs so keys plug in. Not a customer-open declaration.
+Auto-resume: sandbox infra without declaring customer-open.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

@@ -309,3 +309,19 @@ test("T9 Simulated Command Centre never auto-pays", () => {
     attemptCommandCentrePayout({ mode: "simulated", amountMinor: 50_00n }),
   );
 });
+
+test("S92 integration health groups are enumerable (no secret leak)", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { GET } = await import("./app/api/health/integrations/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const body = (await res.json()) as {
+    mode: string;
+    groups: Array<{ label: string; missing: string[] }>;
+  };
+  assert.equal(body.mode, "fixture");
+  assert.ok(body.groups.some((g) => g.label === "paynow"));
+  const blob = JSON.stringify(body);
+  assert.equal(blob.includes("sk_live"), false);
+  assert.equal(/Bearer\s+\w+/.test(blob), false);
+});

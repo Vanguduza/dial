@@ -102,6 +102,9 @@ importers:
       '@dial/payments':
         specifier: workspace:*
         version: link:../../packages/payments
+      '@dial/worker-temporal':
+        specifier: workspace:*
+        version: link:../worker-temporal
       next:
         specifier: ^15.3.3
         version: 15.5.23(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -121,6 +124,25 @@ importers:
       '@types/react-dom':
         specifier: ^19.1.5
         version: 19.2.4(@types/react@19.2.18)
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  apps/worker-temporal:
+    dependencies:
+      '@dial/delivery':
+        specifier: workspace:*
+        version: link:../../packages/delivery
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
       tsx:
         specifier: ^4.19.4
         version: 4.23.12
@@ -162,6 +184,9 @@ importers:
 
   packages/delivery:
     dependencies:
+      '@dial/adapter-maps':
+        specifier: workspace:*
+        version: link:../../adapters/maps
       '@dial/shared':
         specifier: workspace:*
         version: link:../shared
@@ -234,6 +259,9 @@ importers:
 
   packages/payments:
     dependencies:
+      '@dial/adapter-psp':
+        specifier: workspace:*
+        version: link:../../adapters/psp
       '@dial/ledger':
         specifier: workspace:*
         version: link:../ledger

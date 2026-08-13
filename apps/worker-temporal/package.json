@@ -1,5 +1,5 @@
 {
-  "name": "@dial/delivery",
+  "name": "@dial/worker-temporal",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -9,10 +9,11 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --import tsx --test src/**/*.test.ts",
+    "start": "node --import tsx src/run.ts",
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
-    "@dial/adapter-maps": "workspace:*",
+    "@dial/delivery": "workspace:*",
     "@dial/shared": "workspace:*"
   },
   "devDependencies": {

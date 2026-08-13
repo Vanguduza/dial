@@ -40,12 +40,13 @@
 - ZIMRA device credentials field-map refine (ENH-022)
 - **S99 customer-open** declaration
 
-## How to flip when keys arrive
+## Local compose (S92)
 
-1. Copy `.env.example` → `.env` (never commit).
-2. Set `DIAL_INTEGRATION_MODE=sandbox` (then `live` after smoke).
-3. Fill vendor secrets for the rails you enable.
-4. Point webhook URLs at gateway (`PAYNOW_RESULT_URL`, ContiPay/EcoCash/PayPal/Meta dashboards).
-5. Run `pnpm test` still with fixture in CI; smoke sandbox manually.
+```bash
+docker compose up -d redis meilisearch
+docker compose --profile temporal up -d   # optional Temporal + UI
+pnpm --filter @dial/worker-temporal start  # in-process DeliveryDispatchWorkflow
+curl -s http://localhost:3000/api/health/integrations | jq .
+```
 
-Authority: Pack §6 / §11, Stitch §2, D-40…D-45, D-59, D-61.
+See root `docker-compose.yml` and `supabase/migrations/0001_core_tables.sql`.

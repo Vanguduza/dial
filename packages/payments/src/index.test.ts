@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { money } from "@dial/shared";
 import { __resetLedgerForTests } from "@dial/ledger";
 import { __resetTaxForTests, listFdmsOutbox } from "@dial/tax";
 import {
@@ -9,12 +10,14 @@ import {
   authorizeJobReserve,
   computeTechPayoutWithholding,
   createCheckoutPayment,
+  createVendorPaymentSession,
   freezeOfferSnapshot,
   getActiveFxRate,
   listFxRateAudit,
   listPspMethods,
   runE1aMoneySpine,
   setDailyZigRate,
+  toCanonicalPspCode,
   usdToZig,
 } from "./index.js";
 
@@ -275,4 +278,17 @@ test("PSP webhook admit: bad sig / duplicate / capture", async () => {
     }),
     "duplicate",
   );
+});
+
+test("S92 bridge: domain method → canonical PSP createPayment (fixture)", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  assert.equal(toCanonicalPspCode("paynow_hosted"), "paynow");
+  assert.equal(toCanonicalPspCode("escrow_hold"), "psp_escrow");
+  const session = await createVendorPaymentSession({
+    method: "paynow_hosted",
+    reference: "ord_bridge_1",
+    amount: money(10_00n, "USD"),
+  });
+  assert.ok(session.providerRef.includes("paynow"));
+  assert.ok(session.redirectUrl || session.status);
 });

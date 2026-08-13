@@ -10,7 +10,9 @@
     "test": "turbo run test",
     "build": "turbo run build",
     "lint": "turbo run lint --continue",
-    "dev:gateway": "pnpm --filter @dial/gateway-web dev"
+    "dev:gateway": "pnpm --filter @dial/gateway-web dev",
+    "dev:worker": "pnpm --filter @dial/worker-temporal start",
+    "compose:up": "docker compose up -d redis meilisearch"
   },
   "devDependencies": {
     "lefthook": "^1.11.13",
