@@ -82,17 +82,38 @@ export async function completeViaLiteLlm(input: {
   });
 }
 
-/** Lightweight readiness probe for /api/health/integrations. */
+/** Lightweight readiness probe for /api/health/integrations (S127: model list). */
 export async function pingLiteLlm(): Promise<{
   ok: boolean;
   mode: IntegrationMode;
   model?: string;
+  models?: string[];
+  baseUrlConfigured: boolean;
+  keyConfigured: boolean;
   error?: string;
 }> {
   const mode = integrationMode();
+  const baseUrlConfigured = Boolean(process.env.LITELLM_BASE_URL?.trim());
+  const keyConfigured = Boolean(process.env.LITELLM_API_KEY?.trim());
   try {
     if (mode === "fixture") {
-      return { ok: true, mode, model: "fixture-gemini" };
+      return {
+        ok: true,
+        mode,
+        model: "fixture-gemini",
+        models: ["fixture-gemini", "fixture-gemini-flash-lite"],
+        baseUrlConfigured,
+        keyConfigured,
+      };
+    }
+    if (!baseUrlConfigured || !keyConfigured) {
+      return {
+        ok: false,
+        mode,
+        baseUrlConfigured,
+        keyConfigured,
+        error: "LITELLM_BASE_URL / LITELLM_API_KEY unset — fail closed",
+      };
     }
     const base = requireSecret("LITELLM_BASE_URL").replace(/\/$/, "");
     requireSecret("LITELLM_API_KEY");
@@ -101,13 +122,28 @@ export async function pingLiteLlm(): Promise<{
       headers: { Authorization: `Bearer ${process.env.LITELLM_API_KEY}` },
     });
     if (!res.ok) {
-      return { ok: false, mode, error: `LiteLLM health HTTP ${res.status}` };
+      return {
+        ok: false,
+        mode,
+        baseUrlConfigured,
+        keyConfigured,
+        error: `LiteLLM health HTTP ${res.status}`,
+      };
     }
-    return { ok: true, mode, model: "gemini/gemini-2.0-flash" };
+    return {
+      ok: true,
+      mode,
+      model: "gemini/gemini-2.0-flash",
+      models: ["gemini/gemini-2.0-flash", "gemini/gemini-2.0-flash-lite"],
+      baseUrlConfigured,
+      keyConfigured,
+    };
   } catch (e) {
     return {
       ok: false,
       mode,
+      baseUrlConfigured,
+      keyConfigured,
       error: e instanceof Error ? e.message : "LiteLLM ping failed",
     };
   }

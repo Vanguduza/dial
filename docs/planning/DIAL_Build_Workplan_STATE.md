@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S126** — Temporal health expand — **green** |
+| `current_stage` | **S127** — LiteLLM health expand (model list) — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S125** Redis/queues health ping — **green** |
-| `next_stage` | **S127** LiteLLM health expand (model list fixture) on integrations |
+| `prior_stage` | **S126** Temporal health expand — **green** |
+| `next_stage` | **S128** Integration readiness checklist doc + health aggregate `ready` flag |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S125 | 2026-08-13/14 | through queues health |
-| S126 | 2026-08-14 | `pingTemporalHealth` namespace/taskQueue fixture |
+| S91–S126 | 2026-08-13/14 | through Temporal health |
+| S127 | 2026-08-14 | `pingLiteLlm` models list + sandbox fail-closed |
 
 ## Note
 

@@ -95,4 +95,14 @@ test("LiteLLM fixture completion never requires keys", async () => {
   const ping = await pingLiteLlm();
   assert.equal(ping.ok, true);
   assert.equal(ping.mode, "fixture");
+  assert.ok(ping.models?.includes("fixture-gemini"));
+  assert.ok(ping.models?.includes("fixture-gemini-flash-lite"));
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.LITELLM_BASE_URL;
+  delete process.env.LITELLM_API_KEY;
+  const closed = await pingLiteLlm();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
