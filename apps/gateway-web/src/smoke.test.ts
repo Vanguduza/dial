@@ -373,6 +373,27 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
   assert.equal(/Bearer\s+\w+/.test(blob), false);
 });
 
+test("S143 fixture health group labels come only from INTEGRATION_ENV_GROUPS", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { INTEGRATION_ENV_GROUPS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const { GET } = await import("./app/api/health/integrations/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const body = (await res.json()) as {
+    mode: string;
+    groups: Array<{ label: string }>;
+  };
+  assert.equal(body.mode, "fixture");
+  const expected = INTEGRATION_ENV_GROUPS.map((g) => g.label);
+  assert.deepEqual(
+    body.groups.map((g) => g.label),
+    expected,
+    "health groups[] labels must match INTEGRATION_ENV_GROUPS order exactly",
+  );
+});
+
 test("S132 .env.example lists every integrations health group key", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const { readFileSync } = await import("node:fs");
@@ -386,26 +407,12 @@ test("S132 .env.example lists every integrations health group key", async () => 
   const body = (await res.json()) as {
     groups: Array<{ label: string }>;
   };
-  assert.equal(
-    body.groups.map((g) => g.label).sort().join(","),
-    [
-      "contipay",
-      "ecocash",
-      "escrow",
-      "fdms",
-      "internal",
-      "litellm",
-      "maps",
-      "meili",
-      "paynow",
-      "paypal",
-      "redis",
-      "temporal",
-      "whatsapp",
-    ].join(","),
-  );
   const { INTEGRATION_ENV_GROUPS } = await import(
     "./lib/integrationsReadiness.js"
+  );
+  assert.deepEqual(
+    body.groups.map((g) => g.label),
+    INTEGRATION_ENV_GROUPS.map((g) => g.label),
   );
   assert.equal(body.groups.length, INTEGRATION_ENV_GROUPS.length);
   const requiredKeys = INTEGRATION_ENV_GROUPS.flatMap((g) => [...g.keys]);
