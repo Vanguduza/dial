@@ -757,3 +757,59 @@ test("S120 WhatsApp webhook durable claim + Meta HMAC fail-closed", async () => 
   if (prevVerify === undefined) delete process.env.WHATSAPP_VERIFY_TOKEN;
   else process.env.WHATSAPP_VERIFY_TOKEN = prevVerify;
 });
+
+test("S121 Escrow PSP webhook durable smoke + sandbox fail-closed", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevSecret = process.env.PSP_WEBHOOK_SECRET;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { __resetIdempotencyForTests } = await import("@dial/shared");
+  __resetIdempotencyForTests();
+  const { POST } = await import("./app/api/webhooks/escrow/route.js");
+
+  const body = JSON.stringify({
+    eventId: "escrow_s121",
+    type: "escrow.capture",
+    holdId: "hold_s121",
+    status: "captured",
+  });
+  const first = await POST(
+    new Request("http://localhost/api/webhooks/escrow", {
+      method: "POST",
+      body,
+    }),
+  );
+  assert.equal(first.status, 200);
+  assert.equal(((await first.json()) as { ok: boolean }).ok, true);
+
+  const dup = await POST(
+    new Request("http://localhost/api/webhooks/escrow", {
+      method: "POST",
+      body,
+    }),
+  );
+  assert.equal(((await dup.json()) as { duplicate?: boolean }).duplicate, true);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.PSP_WEBHOOK_SECRET = "escrow_sandbox_secret";
+  const bad = await POST(
+    new Request("http://localhost/api/webhooks/escrow", {
+      method: "POST",
+      headers: { "x-psp-signature": "sha256=deadbeef" },
+      body: JSON.stringify({ eventId: "escrow_bad", holdId: "x" }),
+    }),
+  );
+  assert.equal(bad.status, 401);
+
+  delete process.env.PSP_WEBHOOK_SECRET;
+  const closed = await POST(
+    new Request("http://localhost/api/webhooks/escrow", {
+      method: "POST",
+      body: JSON.stringify({ eventId: "escrow_closed" }),
+    }),
+  );
+  assert.equal(closed.status, 401);
+
+  process.env.DIAL_INTEGRATION_MODE = prevMode;
+  if (prevSecret === undefined) delete process.env.PSP_WEBHOOK_SECRET;
+  else process.env.PSP_WEBHOOK_SECRET = prevSecret;
+});

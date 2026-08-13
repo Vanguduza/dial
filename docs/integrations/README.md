@@ -35,6 +35,7 @@
 | `POST /api/webhooks/contipay` | ContiPay HMAC |
 | `POST /api/webhooks/ecocash` | EcoCash HMAC |
 | `POST /api/webhooks/paypal` | PayPal verify |
+| `POST /api/webhooks/escrow` | Escrow hold/capture HMAC |
 | `POST /api/webhooks/fdms` | FDMS acknowledge / submit |
 | `GET\|POST /api/webhooks/whatsapp` | Meta challenge + HMAC |
 | `POST /api/webhooks/psp` | Generic escrow shim (legacy) |
