@@ -1,6 +1,20 @@
 /**
- * S133 — parse integrations health JSON for admin readiness UI (no secrets).
+ * S133/S137 — parse integrations health JSON for admin readiness UI (no secrets).
  */
+export const INTEGRATION_PROBE_KEYS = [
+  "temporal",
+  "litellm",
+  "maps",
+  "fdms",
+  "meili",
+  "queues",
+  "whatsapp",
+  "psp",
+  "internal",
+] as const;
+
+export type IntegrationProbeKey = (typeof INTEGRATION_PROBE_KEYS)[number];
+
 export type IntegrationsHealthSnapshot = {
   ready: boolean;
   mode: string;

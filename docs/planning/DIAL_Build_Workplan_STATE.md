@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S136** — README + integrations package table accuracy — **green** |
+| `current_stage` | **S137** — OpenAPI IntegrationsProbes schema — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S135** OpenAPI + readiness discovery links — **green** |
-| `next_stage` | **S137** Expand OpenAPI schemas for IntegrationsHealth probes enum |
+| `prior_stage` | **S136** README + package table — **green** |
+| `next_stage` | **S138** Export INTEGRATION_PROBE_KEYS from health route builder (single SoR) |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S135 | 2026-08-13/14 | through discovery links |
-| S136 | 2026-08-14 | README layout + integrations package table smoke |
+| S91–S136 | 2026-08-13/14 | through README package table |
+| S137 | 2026-08-14 | OpenAPI IntegrationsProbes + INTEGRATION_PROBE_KEYS sync |
 
 ## Note
 

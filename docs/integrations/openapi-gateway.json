@@ -333,15 +333,38 @@
             "enum": ["fixture", "sandbox", "live"]
           },
           "probes": {
-            "type": "object",
-            "additionalProperties": { "type": "boolean" }
+            "$ref": "#/components/schemas/IntegrationsProbes"
           },
           "groups": {
             "type": "array",
             "items": {
               "type": "object",
+              "required": [
+                "label",
+                "configured",
+                "missing",
+                "presentCount",
+                "requiredCount"
+              ],
               "properties": {
-                "label": { "type": "string" },
+                "label": {
+                  "type": "string",
+                  "enum": [
+                    "whatsapp",
+                    "paynow",
+                    "contipay",
+                    "ecocash",
+                    "paypal",
+                    "escrow",
+                    "fdms",
+                    "meili",
+                    "litellm",
+                    "maps",
+                    "temporal",
+                    "redis",
+                    "internal"
+                  ]
+                },
                 "configured": { "type": "boolean" },
                 "missing": {
                   "type": "array",
@@ -353,6 +376,33 @@
             }
           },
           "note": { "type": "string" }
+        }
+      },
+      "IntegrationsProbes": {
+        "type": "object",
+        "description": "S137 — boolean readiness probes aggregated into ready",
+        "required": [
+          "temporal",
+          "litellm",
+          "maps",
+          "fdms",
+          "meili",
+          "queues",
+          "whatsapp",
+          "psp",
+          "internal"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "temporal": { "type": "boolean" },
+          "litellm": { "type": "boolean" },
+          "maps": { "type": "boolean" },
+          "fdms": { "type": "boolean" },
+          "meili": { "type": "boolean" },
+          "queues": { "type": "boolean" },
+          "whatsapp": { "type": "boolean" },
+          "psp": { "type": "boolean" },
+          "internal": { "type": "boolean" }
         }
       },
       "WebhookOpaqueBody": {

@@ -110,3 +110,5 @@ Machine-readable outline of health + inbound webhooks + fail-closed admin routes
 - Live: `GET /api/openapi`
 
 Schemas stay opaque for webhook bodies (signature + idempotency SoR in adapters). Expand fields when vendor contracts lock (ENH-020…022).
+
+**Probes (S137):** OpenAPI `IntegrationsProbes` requires `temporal`, `litellm`, `maps`, `fdms`, `meili`, `queues`, `whatsapp`, `psp`, `internal` — kept in sync with `INTEGRATION_PROBE_KEYS` in gateway-web.

@@ -343,7 +343,12 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
   assert.equal(body.probes?.psp, true);
   assert.equal(body.probes?.internal, true);
   assert.ok(body.groups.some((g) => g.label === "paynow"));
-  assert.equal(body.maps?.ok, true);
+  const { INTEGRATION_PROBE_KEYS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  for (const k of INTEGRATION_PROBE_KEYS) {
+    assert.equal(body.probes?.[k], true, `probe ${k}`);
+  }  assert.equal(body.maps?.ok, true);
   assert.equal(body.maps?.nominatim, true);
   assert.equal(body.maps?.osrm, true);
   assert.equal(body.fdms?.ok, true);
