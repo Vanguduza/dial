@@ -484,6 +484,20 @@ test("S150 .env.example points at INTEGRATION_ENV_GROUP_LABELS SoR", async () =>
   assert.ok(envExample.includes("integrationsReadiness.ts"));
 });
 
+test("S151 health note cites INTEGRATION_ENV_GROUP_LABELS", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { INTEGRATION_ENV_GROUP_LABELS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const { GET } = await import("./app/api/health/integrations/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const body = (await res.json()) as { note?: string };
+  assert.ok(typeof body.note === "string");
+  assert.ok(body.note.includes("groups labels="));
+  assert.ok(body.note.includes(INTEGRATION_ENV_GROUP_LABELS.join(",")));
+});
+
 test("S134 OpenAPI skeleton covers health + webhook paths", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

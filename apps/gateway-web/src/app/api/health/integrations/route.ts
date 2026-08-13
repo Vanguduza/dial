@@ -21,6 +21,7 @@ import { getFiscalDayState } from "@dial/tax";
 import { pingTemporalHealth } from "@dial/worker-temporal";
 import {
   buildIntegrationsProbes,
+  INTEGRATION_ENV_GROUP_LABELS,
   integrationsReady,
   listIntegrationEnvGroupSnapshots,
 } from "../../../../lib/integrationsReadiness.js";
@@ -80,8 +81,8 @@ export async function GET(): Promise<NextResponse> {
     },
     note:
       mode === "fixture"
-        ? "Fixture mode — missing keys OK for CI; ready=all probes ok"
-        : "Sandbox/live — missing groups will fail closed on use; ready=all probes ok",
+        ? `Fixture mode — missing keys OK for CI; ready=all probes ok; groups labels=${INTEGRATION_ENV_GROUP_LABELS.join(",")}`
+        : `Sandbox/live — missing groups will fail closed on use; ready=all probes ok; groups labels=${INTEGRATION_ENV_GROUP_LABELS.join(",")}`,
   };
 
   return NextResponse.json(body);
