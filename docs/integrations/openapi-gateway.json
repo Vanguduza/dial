@@ -1,0 +1,365 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "DIAL Gateway — integration surface (skeleton)",
+    "version": "0.1.0",
+    "description": "S134 skeleton for API-key drop-in readiness. Documents health + inbound webhook shapes. Never includes secret values. Authoritative eng behaviour remains Pack/adapters; this is a contract outline for vendors/ops."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Local gateway-web"
+    }
+  ],
+  "tags": [
+    { "name": "health" },
+    { "name": "webhooks" },
+    { "name": "admin" }
+  ],
+  "paths": {
+    "/api/health/integrations": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Integration readiness (mode, ready, probes, groups)",
+        "operationId": "getIntegrationsHealth",
+        "responses": {
+          "200": {
+            "description": "Readiness snapshot — never echoes secrets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntegrationsHealth"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/webhooks/paynow": {
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "Paynow SHA512 result notification",
+        "operationId": "webhookPaynow",
+        "parameters": [
+          {
+            "name": "Hash",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string" },
+            "description": "Paynow hash (also validated from body fields)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate idempotent" },
+          "401": { "description": "Bad signature" },
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
+        }
+      }
+    },
+    "/api/webhooks/contipay": {
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "ContiPay HMAC webhook",
+        "operationId": "webhookContipay",
+        "parameters": [
+          {
+            "name": "x-contipay-signature",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate" },
+          "401": { "description": "Bad signature" },
+          "503": { "description": "Fail-closed" }
+        }
+      }
+    },
+    "/api/webhooks/ecocash": {
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "EcoCash HMAC webhook",
+        "operationId": "webhookEcocash",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate" },
+          "401": { "description": "Bad signature" },
+          "503": { "description": "Fail-closed" }
+        }
+      }
+    },
+    "/api/webhooks/paypal": {
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "PayPal webhook verify",
+        "operationId": "webhookPaypal",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate" },
+          "401": { "description": "Bad signature / verify failed" },
+          "503": { "description": "Fail-closed" }
+        }
+      }
+    },
+    "/api/webhooks/escrow": {
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "Escrow hold/capture HMAC",
+        "operationId": "webhookEscrow",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate" },
+          "401": { "description": "Bad signature" },
+          "503": { "description": "Fail-closed" }
+        }
+      }
+    },
+    "/api/webhooks/fdms": {
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "FDMS Gateway acknowledge / submit callback",
+        "operationId": "webhookFdms",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate" },
+          "401": { "description": "Bad signature" },
+          "503": { "description": "Fail-closed" }
+        }
+      }
+    },
+    "/api/webhooks/whatsapp": {
+      "get": {
+        "tags": ["webhooks"],
+        "summary": "Meta hub challenge",
+        "operationId": "webhookWhatsappChallenge",
+        "parameters": [
+          {
+            "name": "hub.mode",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "hub.verify_token",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "hub.challenge",
+            "in": "query",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Challenge echo" },
+          "403": { "description": "Verify token mismatch" }
+        }
+      },
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "Meta Cloud API inbound (HMAC)",
+        "operationId": "webhookWhatsapp",
+        "parameters": [
+          {
+            "name": "x-hub-signature-256",
+            "in": "header",
+            "required": false,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate" },
+          "401": { "description": "Bad HMAC" },
+          "503": { "description": "Fail-closed" }
+        }
+      }
+    },
+    "/api/webhooks/psp": {
+      "post": {
+        "tags": ["webhooks"],
+        "summary": "Legacy generic PSP/escrow shim",
+        "operationId": "webhookPspLegacy",
+        "deprecated": true,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/WebhookOpaqueBody" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Accepted or duplicate" },
+          "401": { "description": "Bad signature" }
+        }
+      }
+    },
+    "/api/admin/fdms/day": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Fiscal day state (fail-closed INTERNAL_API_SECRET)",
+        "operationId": "adminFdmsDayGet",
+        "security": [{ "InternalApiSecret": [] }],
+        "responses": {
+          "200": { "description": "Fiscal day snapshot" },
+          "401": { "description": "Missing/invalid internal secret" }
+        }
+      },
+      "post": {
+        "tags": ["admin"],
+        "summary": "Open/close fiscal day",
+        "operationId": "adminFdmsDayPost",
+        "security": [{ "InternalApiSecret": [] }],
+        "responses": {
+          "200": { "description": "Day action result" },
+          "401": { "description": "Missing/invalid internal secret" }
+        }
+      }
+    },
+    "/api/admin/money/outbox": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Money outbox depth",
+        "operationId": "adminMoneyOutboxGet",
+        "security": [{ "InternalApiSecret": [] }],
+        "responses": {
+          "200": { "description": "Outbox depth" },
+          "401": { "description": "Missing/invalid internal secret" }
+        }
+      },
+      "post": {
+        "tags": ["admin"],
+        "summary": "Drain money outbox",
+        "operationId": "adminMoneyOutboxDrain",
+        "security": [{ "InternalApiSecret": [] }],
+        "responses": {
+          "200": { "description": "Drain result" },
+          "401": { "description": "Missing/invalid internal secret" }
+        }
+      }
+    },
+    "/api/openapi": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Serve this OpenAPI skeleton document",
+        "operationId": "getOpenApiSkeleton",
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.0 JSON",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "InternalApiSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-internal-secret",
+        "description": "INTERNAL_API_SECRET — never expose in browser bundles"
+      }
+    },
+    "schemas": {
+      "IntegrationsHealth": {
+        "type": "object",
+        "required": ["ok", "ready", "mode", "probes", "groups"],
+        "properties": {
+          "ok": { "type": "boolean" },
+          "ready": { "type": "boolean" },
+          "mode": {
+            "type": "string",
+            "enum": ["fixture", "sandbox", "live"]
+          },
+          "probes": {
+            "type": "object",
+            "additionalProperties": { "type": "boolean" }
+          },
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": { "type": "string" },
+                "configured": { "type": "boolean" },
+                "missing": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "presentCount": { "type": "integer" },
+                "requiredCount": { "type": "integer" }
+              }
+            }
+          },
+          "note": { "type": "string" }
+        }
+      },
+      "WebhookOpaqueBody": {
+        "type": "object",
+        "description": "Vendor payload — verified by adapter signature before mutate; idempotent via processed_events",
+        "additionalProperties": true
+      }
+    }
+  }
+}

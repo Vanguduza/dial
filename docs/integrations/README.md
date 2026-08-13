@@ -93,6 +93,17 @@ pnpm --filter @dial/worker-queues start    # BullMQ workers (fixture exits OK)
 pnpm eval:smoke                            # Promptfoo CI golden no-money
 curl -s http://localhost:3000/api/health/integrations | jq .
 # Admin UI (S133): http://localhost:3000/admin/integrations
+# OpenAPI skeleton (S134): http://localhost:3000/api/openapi
+# Spec file: docs/integrations/openapi-gateway.json
 ```
 
 See root `docker-compose.yml` and `supabase/migrations/0001_core_tables.sql`.
+
+## OpenAPI skeleton (S134)
+
+Machine-readable outline of health + inbound webhooks + fail-closed admin routes:
+
+- File: [`openapi-gateway.json`](./openapi-gateway.json)
+- Live: `GET /api/openapi`
+
+Schemas stay opaque for webhook bodies (signature + idempotency SoR in adapters). Expand fields when vendor contracts lock (ENH-020…022).

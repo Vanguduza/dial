@@ -439,6 +439,49 @@ test("S132 .env.example lists every integrations health group key", async () => 
   assert.ok(envExample.includes("docs/integrations/README.md"));
 });
 
+test("S134 OpenAPI skeleton covers health + webhook paths", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    openapi: string;
+    paths: Record<string, unknown>;
+  };
+  assert.equal(spec.openapi.startsWith("3."), true);
+  const required = [
+    "/api/health/integrations",
+    "/api/webhooks/paynow",
+    "/api/webhooks/contipay",
+    "/api/webhooks/ecocash",
+    "/api/webhooks/paypal",
+    "/api/webhooks/escrow",
+    "/api/webhooks/fdms",
+    "/api/webhooks/whatsapp",
+    "/api/webhooks/psp",
+    "/api/admin/fdms/day",
+    "/api/admin/money/outbox",
+    "/api/openapi",
+  ];
+  for (const p of required) {
+    assert.ok(spec.paths[p], `missing path ${p}`);
+  }
+  assert.equal(raw.includes("sk_live"), false);
+  assert.equal(raw.includes("service_role"), false);
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    openapi?: string;
+    paths?: Record<string, unknown>;
+  };
+  assert.ok(served.openapi?.startsWith("3."));
+  assert.ok(served.paths?.["/api/health/integrations"]);
+});
+
 test("S95 Supabase password → DialSession bridge", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   __resetAuthForTests();
