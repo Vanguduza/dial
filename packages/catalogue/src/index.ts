@@ -254,7 +254,7 @@ export function listSearchNoResultEvents(): SearchNoResultEvent[] {
 export function enqueueCatalogueIngest(rowCount: number): CatalogueIngestBatch {
   if (rowCount < 1) throw new Error("rowCount must be >= 1");
   const batch: CatalogueIngestBatch = {
-    batchId: `cib_${Date.now().toString(36)}`,
+    batchId: `cib_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
     status: "pending_review",
     rowCount,
     createdAt: new Date().toISOString(),
@@ -393,3 +393,8 @@ export function __resetCatalogueForTests(): void {
   OFFERS.length = 0;
   OFFERS.push(...OFFER_SEED);
 }
+
+export {
+  ensureSpareOffersIndex,
+  upsertSpareOfferDocuments,
+} from "./meiliClient.js";

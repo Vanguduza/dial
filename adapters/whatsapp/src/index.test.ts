@@ -166,3 +166,25 @@ test("No Baileys / whatsapp-web.js in workspace package.json files (D-40)", () =
   const texts = roots.map((p) => readFileSync(p, "utf8"));
   assertNoUnofficialWhatsAppDeps(texts);
 });
+
+test("Cloud API fixture send + webhook challenge (key-ready)", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  process.env.WHATSAPP_VERIFY_TOKEN = "verify_fx";
+  const { MetaCloudApiAdapter, verifyWebhookChallenge } = await import("./cloudApi.js");
+  const api = new MetaCloudApiAdapter();
+  const tpl = await api.sendUtilityTemplate({
+    toE164: "+263771234567",
+    templateName: "order_update",
+    language: "en",
+  });
+  assert.ok(tpl.messageId.startsWith("wamid."));
+  const txt = await api.sendSessionText({ toE164: "+263771234567", text: "hi" });
+  assert.ok(txt.messageId.startsWith("wamid."));
+  const ok = verifyWebhookChallenge({
+    mode: "subscribe",
+    token: "verify_fx",
+    challenge: "12345",
+  });
+  assert.equal(ok.ok, true);
+  if (ok.ok) assert.equal(ok.challenge, "12345");
+});

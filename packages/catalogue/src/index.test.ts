@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { describe, test } from "node:test";
 import {
   __resetCatalogueForTests,
   addToCart,
@@ -17,6 +17,7 @@ import {
   searchOffers,
 } from "./index.js";
 
+describe("catalogue", { concurrency: false }, () => {
 test("search returns stub offers", () => {
   const hits = searchOffers("oil");
   assert.ok(hits.length >= 1);
@@ -146,4 +147,15 @@ test("E5a CSV→approve→Meili stub; B2B informal leak=0", () => {
       .length,
     0,
   );
+});
+
+test("Meili HTTP client fixture ensure+upsert without keys", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { ensureSpareOffersIndex, upsertSpareOfferDocuments } = await import("./meiliClient.js");
+  const idx = await ensureSpareOffersIndex();
+  assert.equal(idx.applied, true);
+  assert.ok(idx.indexUid);
+  const task = await upsertSpareOfferDocuments([]);
+  assert.equal(task.taskUid, "fixture");
+});
 });

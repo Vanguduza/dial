@@ -11,6 +11,8 @@
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
+    "@dial/adapter-fdms": "workspace:*",
+    "@dial/adapter-psp": "workspace:*",
     "@dial/adapter-whatsapp": "workspace:*",
     "@dial/ai": "workspace:*",
     "@dial/catalogue": "workspace:*",

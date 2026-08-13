@@ -18,6 +18,42 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  adapters/fdms:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  adapters/maps:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  adapters/psp:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
   adapters/whatsapp:
     dependencies:
       '@dial/catalogue':
@@ -42,6 +78,12 @@ importers:
 
   apps/gateway-web:
     dependencies:
+      '@dial/adapter-fdms':
+        specifier: workspace:*
+        version: link:../../adapters/fdms
+      '@dial/adapter-psp':
+        specifier: workspace:*
+        version: link:../../adapters/psp
       '@dial/adapter-whatsapp':
         specifier: workspace:*
         version: link:../../adapters/whatsapp

@@ -1,20 +1,39 @@
 /**
  * Meta WhatsApp Cloud API webhook — signature + idempotency before mutate (D-40 / D-47).
- * Phase 0: verifies + admits; Flow handlers live in @dial/adapter-whatsapp.
+ * GET: hub challenge with WHATSAPP_VERIFY_TOKEN.
+ * POST: HMAC with WHATSAPP_APP_SECRET (alias META_WA_APP_SECRET).
  */
 import { NextResponse } from "next/server";
 import {
   admitWebhookEvent,
+  resolveWhatsAppAppSecret,
   verifyMetaSignature,
+  verifyWebhookChallenge,
 } from "@dial/adapter-whatsapp";
 
 export const runtime = "nodejs";
 
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const result = verifyWebhookChallenge({
+    mode: url.searchParams.get("hub.mode"),
+    token: url.searchParams.get("hub.verify_token"),
+    challenge: url.searchParams.get("hub.challenge"),
+  });
+  if (!result.ok) {
+    return NextResponse.json({ error: "verify failed" }, { status: 403 });
+  }
+  return new NextResponse(result.challenge, {
+    status: 200,
+    headers: { "Content-Type": "text/plain" },
+  });
+}
+
 export async function POST(req: Request) {
-  const appSecret = process.env.META_WA_APP_SECRET;
+  const appSecret = resolveWhatsAppAppSecret();
   if (!appSecret) {
     return NextResponse.json(
-      { error: "META_WA_APP_SECRET unset — fail closed" },
+      { error: "WHATSAPP_APP_SECRET unset — fail closed" },
       { status: 503 },
     );
   }
@@ -41,7 +60,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, duplicate: true });
   }
 
-  // Stub: parse + route to Flow handlers in Expand (E2a). No Baileys.
   return NextResponse.json({ ok: true, admitted: true });
 }
 

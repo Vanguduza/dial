@@ -435,3 +435,11 @@ export function __resetWhatsappForTests(): void {
   handoffs.clear();
   referrals.clear();
 }
+
+export {
+  MetaCloudApiAdapter,
+  verifyWebhookChallenge,
+  resolveWhatsAppAppSecret,
+  verifyMetaSignature as verifyMetaSignatureCloud,
+  type WhatsAppCloudAdapter,
+} from "./cloudApi.js";

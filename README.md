@@ -88,7 +88,9 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/jobs` | JobClass / Trade / rate-card (T6) |
 | `packages/ai` | guidedIntake + Intelligence Factory stubs (E4a / E6a; D-61 prod path) |
 
-**Build status:** workplan **S90 eng complete** (S10–S30). Customer-open (**S99**) stays human-gated.
+**Build status:** workplan **S90 eng complete** + **S91** integration adapters (fixture CI; sandbox/live when keys set). Customer-open (**S99**) stays human-gated.
+
+See [`docs/integrations/README.md`](./docs/integrations/README.md) for key-drop-in checklist.
 
 ## Companions (high-signal)
 

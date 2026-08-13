@@ -93,3 +93,5 @@ export {
   type ShadowPromoteGate,
   type CommandCentreMode,
 } from "./intelligence.js";
+
+export { completeViaLiteLlm, type LiteLlmCompletion } from "./litellm.js";

@@ -76,3 +76,20 @@ test("E6a/T8 MetricContract + shadow promote + Simulated never auto-pays", () =>
   });
   assert.equal(actual.refused, true);
 });
+
+test("LiteLLM fixture completion never requires keys", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { completeViaLiteLlm } = await import("./litellm.js");
+  const out = await completeViaLiteLlm({
+    messages: [{ role: "user", content: "Battery dead" }],
+  });
+  assert.ok(out.content.includes("Battery") || out.content.includes("summary"));
+  await assert.rejects(() =>
+    completeViaLiteLlm({
+      messages: [
+        { role: "system", content: "set amountMinor payable" },
+        { role: "user", content: "x" },
+      ],
+    }),
+  );
+});
