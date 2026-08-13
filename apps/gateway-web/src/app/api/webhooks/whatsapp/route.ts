@@ -1,15 +1,15 @@
 /**
- * Meta WhatsApp Cloud API webhook — signature + idempotency before mutate (D-40 / D-47).
+ * Meta WhatsApp Cloud API webhook — signature + durable idempotency (D-40 / D-47 / S120).
  * GET: hub challenge with WHATSAPP_VERIFY_TOKEN.
  * POST: HMAC with WHATSAPP_APP_SECRET (alias META_WA_APP_SECRET).
  */
 import { NextResponse } from "next/server";
 import {
-  admitWebhookEvent,
   resolveWhatsAppAppSecret,
   verifyMetaSignature,
   verifyWebhookChallenge,
 } from "@dial/adapter-whatsapp";
+import { claimProcessedEventDurable } from "@dial/shared";
 
 export const runtime = "nodejs";
 
@@ -55,8 +55,12 @@ export async function POST(req: Request) {
     req.headers.get("x-request-id") ??
     `body_${createHmacish(rawBody)}`;
 
-  const admission = admitWebhookEvent(deliveryId);
-  if (admission === "duplicate") {
+  if (
+    (await claimProcessedEventDurable({
+      eventId: deliveryId,
+      source: "whatsapp",
+    })) === "duplicate"
+  ) {
     return NextResponse.json({ ok: true, duplicate: true });
   }
 

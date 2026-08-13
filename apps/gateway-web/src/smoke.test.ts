@@ -675,3 +675,85 @@ test("S119 Paynow webhook durable claim + fixture payments SoR bridge", async ()
   if (prevKey === undefined) delete process.env.PAYNOW_INTEGRATION_KEY;
   else process.env.PAYNOW_INTEGRATION_KEY = prevKey;
 });
+
+test("S120 WhatsApp webhook durable claim + Meta HMAC fail-closed", async () => {
+  const { createHmac } = await import("node:crypto");
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevSecret = process.env.WHATSAPP_APP_SECRET;
+  const prevMeta = process.env.META_WA_APP_SECRET;
+  const prevVerify = process.env.WHATSAPP_VERIFY_TOKEN;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.WHATSAPP_APP_SECRET;
+  delete process.env.META_WA_APP_SECRET;
+  process.env.WHATSAPP_VERIFY_TOKEN = "verify_s120";
+
+  const { __resetIdempotencyForTests } = await import("@dial/shared");
+  __resetIdempotencyForTests();
+  const { GET, POST } = await import("./app/api/webhooks/whatsapp/route.js");
+
+  const challenge = await GET(
+    new Request(
+      "http://localhost/api/webhooks/whatsapp?hub.mode=subscribe&hub.verify_token=verify_s120&hub.challenge=chal_s120",
+    ),
+  );
+  assert.equal(challenge.status, 200);
+  assert.equal(await challenge.text(), "chal_s120");
+
+  const closed = await POST(
+    new Request("http://localhost/api/webhooks/whatsapp", {
+      method: "POST",
+      body: "{}",
+    }),
+  );
+  assert.equal(closed.status, 503);
+
+  process.env.WHATSAPP_APP_SECRET = "wa_secret_s120";
+  const raw = '{"object":"whatsapp_business_account","entry":[]}';
+  const goodSig =
+    "sha256=" +
+    createHmac("sha256", "wa_secret_s120").update(raw).digest("hex");
+  const ok = await POST(
+    new Request("http://localhost/api/webhooks/whatsapp", {
+      method: "POST",
+      headers: {
+        "x-hub-signature-256": goodSig,
+        "x-hub-delivery-id": "del_s120",
+      },
+      body: raw,
+    }),
+  );
+  assert.equal(ok.status, 200);
+  assert.equal(((await ok.json()) as { admitted?: boolean }).admitted, true);
+
+  const dup = await POST(
+    new Request("http://localhost/api/webhooks/whatsapp", {
+      method: "POST",
+      headers: {
+        "x-hub-signature-256": goodSig,
+        "x-hub-delivery-id": "del_s120",
+      },
+      body: raw,
+    }),
+  );
+  assert.equal(((await dup.json()) as { duplicate?: boolean }).duplicate, true);
+
+  const bad = await POST(
+    new Request("http://localhost/api/webhooks/whatsapp", {
+      method: "POST",
+      headers: {
+        "x-hub-signature-256": "sha256=deadbeef",
+        "x-hub-delivery-id": "del_s120_bad",
+      },
+      body: raw,
+    }),
+  );
+  assert.equal(bad.status, 401);
+
+  process.env.DIAL_INTEGRATION_MODE = prevMode;
+  if (prevSecret === undefined) delete process.env.WHATSAPP_APP_SECRET;
+  else process.env.WHATSAPP_APP_SECRET = prevSecret;
+  if (prevMeta === undefined) delete process.env.META_WA_APP_SECRET;
+  else process.env.META_WA_APP_SECRET = prevMeta;
+  if (prevVerify === undefined) delete process.env.WHATSAPP_VERIFY_TOKEN;
+  else process.env.WHATSAPP_VERIFY_TOKEN = prevVerify;
+});

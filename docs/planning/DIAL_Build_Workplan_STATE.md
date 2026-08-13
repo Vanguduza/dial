@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S119** — Paynow durable claim + fixture payments SoR bridge — **green** |
+| `current_stage` | **S120** — WhatsApp durable claim + Meta HMAC smoke — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S118** PayPal/FDMS webhook smoke — **green** |
-| `next_stage` | **S120** WhatsApp webhook durable claim + Meta HMAC fail-closed smoke |
+| `prior_stage` | **S119** Paynow durable + SoR bridge — **green** |
+| `next_stage` | **S121** Escrow PSP webhook route durable smoke + fail-closed |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S118 | 2026-08-13/14 | through PayPal/FDMS webhooks |
-| S119 | 2026-08-14 | Paynow durable + fixture `admitPspWebhookEvent` bridge |
+| S91–S119 | 2026-08-13/14 | through Paynow webhook bridge |
+| S120 | 2026-08-14 | WA GET challenge + durable POST + HMAC 401/503 |
 
 ## Note
 
