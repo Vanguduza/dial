@@ -72,3 +72,20 @@ test("S97 processFdmsDayJob open then close", async () => {
   await processFdmsDayJob({ action: "close" });
   assert.ok(getFiscalDayState().closedAt);
 });
+
+test("S107 drain FDMS day queue then process", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetTaxForTests();
+  const { enqueueFdmsDayJob, drainFixtureFdmsDayJobs, __resetQueuesForTests } =
+    await import("@dial/queues");
+  __resetQueuesForTests();
+  await enqueueFdmsDayJob({ action: "open" });
+  await enqueueFdmsDayJob({ action: "close" });
+  const jobs = drainFixtureFdmsDayJobs();
+  assert.equal(jobs.length, 2);
+  const { processFdmsDayJob, getFiscalDayState } = await import("./index.js");
+  for (const job of jobs) {
+    await processFdmsDayJob(job);
+  }
+  assert.ok(getFiscalDayState().closedAt);
+});
