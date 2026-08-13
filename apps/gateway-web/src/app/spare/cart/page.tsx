@@ -65,9 +65,23 @@ export default async function SpareCartPage({
               Total USD {(Number(cart.total.amountMinor) / 100).toFixed(2)}
             </p>
             <p style={{ fontSize: 13, opacity: 0.7 }}>
-              Checkout pay step (EcoCash ZiG / COD) is on WA FLOW_SPARE_CHECKOUT and money spine —
-              web pay CTA lands in expand. No ZiG on this cart (D-57).
+              No ZiG on this cart (D-57). Pay step converts with ops Daily ZiG rate.
             </p>
+            <Link
+              href={`/spare/checkout?cartId=${encodeURIComponent(cart.id)}`}
+              style={{
+                display: "inline-block",
+                marginTop: dialTokens.space.md,
+                padding: `${dialTokens.space.sm} ${dialTokens.space.lg}`,
+                borderRadius: 8,
+                background: dialTokens.color.brand.primary,
+                color: "#fff",
+                textDecoration: "none",
+                fontWeight: 600,
+              }}
+            >
+              Checkout
+            </Link>
           </>
         )}
       </div>

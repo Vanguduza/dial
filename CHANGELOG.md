@@ -28,6 +28,9 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - S21 T2 thin vertical started: Meili `spare_offers_v1` settings (`offerSource` / `supplierFormality`), B2B hide informal, Catalogue Factory ingest/review + `search_no_result_events`, SandPIM ADR ([#7](https://github.com/Vanguduza/dial/issues/7)).
 - Windows Prime handshake patch `scripts/patch-prime-agent-windows-handshake.mjs` (WMIC start-id + TTL; applied by Dev Manager starter) — unblocks daemon worker hello/`worker_auth` on Windows (#748/#1077).
 - S22 T3 Spare UI thin vertical started: `/spare` browse + PDP + USD cart (design-tokens, agency disclosure, B2B session filter) ([#11](https://github.com/Vanguduza/dial/issues/11)).
+- S22 T3 Spare UI **green**: checkout pay-step EcoCash|COD (ZiG only at pay); viewport DoD; WA button parity ([#11](https://github.com/Vanguduza/dial/issues/11)).
+- S23 T5 Money spine **green**: Take-Home UI/API; ledger + withholding SQL stubs; PSP/JobReserve/WHT evidence ([#12](https://github.com/Vanguduza/dial/issues/12)).
+- S24 T4 Tech UI thin vertical started: `/tech` home, book, emergency (AI bypass), automotive + emergency checklists ([#13](https://github.com/Vanguduza/dial/issues/13)).
 - S20 T1 Identity **green** (Pack §15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).

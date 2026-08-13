@@ -66,7 +66,7 @@ export default async function AuthHomePage() {
           Shop
         </a>
         <a
-          href="#services"
+          href="/tech"
           style={{
             display: "block",
             padding: dialTokens.space.lg,

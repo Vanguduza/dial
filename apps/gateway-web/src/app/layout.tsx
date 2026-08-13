@@ -1,10 +1,16 @@
 import type { CSSProperties, ReactNode } from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { dialTokens } from "@dial/design-tokens";
 
 export const metadata: Metadata = {
   title: "DIAL",
   description: "Find it. Buy it. Get it done.",
+};
+
+/** Blueprint §8.0.1 — mobile-usable viewport. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 const vars = {
