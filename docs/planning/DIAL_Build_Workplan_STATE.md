@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S128** — Integration readiness checklist + health `ready` — **green** |
+| `current_stage` | **S129** — WhatsApp Cloud health ping — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S127** LiteLLM health expand — **green** |
-| `next_stage` | **S129** Continue integration/plug-in hardening (see workplan / ENH backlog) |
+| `prior_stage` | **S128** Integration readiness + `ready` — **green** |
+| `next_stage` | **S130** PSP adapter health ping aggregate on integrations |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S127 | 2026-08-13/14 | through LiteLLM health |
-| S128 | 2026-08-14 | readiness checklist + `ready`/`probes` on integrations health |
+| S91–S128 | 2026-08-13/14 | through readiness checklist / `ready` |
+| S129 | 2026-08-14 | `pingWhatsAppHealth` + health `whatsapp` / probes |
 
 ## Note
 

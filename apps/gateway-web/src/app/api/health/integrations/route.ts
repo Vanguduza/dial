@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { pingFdmsHealth } from "@dial/adapter-fdms";
 import { pingMapsHealth } from "@dial/adapter-maps";
 import { listCanonicalPspMethods } from "@dial/adapter-psp";
+import { pingWhatsAppHealth } from "@dial/adapter-whatsapp";
 import { pingLiteLlm } from "@dial/ai";
 import { searchHealthSnapshot, pingMeiliHealth } from "@dial/catalogue";
 import { listMoneyOutbox } from "@dial/ledger";
@@ -43,6 +44,7 @@ export async function GET(): Promise<NextResponse> {
   const fdms = await pingFdmsHealth();
   const meili = await pingMeiliHealth();
   const queuesHealth = await pingQueuesHealth();
+  const whatsapp = await pingWhatsAppHealth();
 
   const probes = {
     temporal: temporal.ok,
@@ -51,6 +53,7 @@ export async function GET(): Promise<NextResponse> {
     fdms: fdms.ok,
     meili: meili.ok,
     queues: queuesHealth.ok,
+    whatsapp: whatsapp.ok,
   };
   const ready = Object.values(probes).every(Boolean);
 
@@ -88,6 +91,7 @@ export async function GET(): Promise<NextResponse> {
     litellm,
     maps,
     fdms,
+    whatsapp,
     queues: {
       searchIndexer: QUEUE_SEARCH_INDEXER,
       outboxSideEffects: QUEUE_OUTBOX_SIDE_EFFECTS,

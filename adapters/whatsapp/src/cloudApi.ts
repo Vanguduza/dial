@@ -169,3 +169,44 @@ export function verifyMetaSignature(input: {
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
 }
+
+/** S129 — Cloud API env readiness; never echoes secrets (D-47). */
+export async function pingWhatsAppHealth(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{
+  ok: boolean;
+  mode: IntegrationMode;
+  token: boolean;
+  phoneNumberId: boolean;
+  appSecret: boolean;
+  verifyToken: boolean;
+  error?: string;
+}> {
+  const mode = integrationMode(env);
+  const token = Boolean(env.WHATSAPP_TOKEN?.trim());
+  const phoneNumberId = Boolean(env.WHATSAPP_PHONE_NUMBER_ID?.trim());
+  const appSecret = Boolean(resolveWhatsAppAppSecret(env));
+  const verifyToken = Boolean(env.WHATSAPP_VERIFY_TOKEN?.trim());
+  if (mode === "fixture") {
+    return {
+      ok: true,
+      mode,
+      token: true,
+      phoneNumberId: true,
+      appSecret: true,
+      verifyToken: true,
+    };
+  }
+  if (!token || !phoneNumberId || !appSecret || !verifyToken) {
+    return {
+      ok: false,
+      mode,
+      token,
+      phoneNumberId,
+      appSecret,
+      verifyToken,
+      error: "WHATSAPP_* unset — fail closed",
+    };
+  }
+  return { ok: true, mode, token, phoneNumberId, appSecret, verifyToken };
+}

@@ -595,6 +595,7 @@ export {
   verifyWebhookChallenge,
   resolveWhatsAppAppSecret,
   verifyMetaSignature as verifyMetaSignatureCloud,
+  pingWhatsAppHealth,
   type WhatsAppCloudAdapter,
 } from "./cloudApi.js";
 

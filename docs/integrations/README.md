@@ -55,7 +55,7 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 5. Smoke each webhook you enabled (Paynow / ContiPay / EcoCash / PayPal / Escrow / FDMS / WhatsApp) with sig+idempotency.
 6. Confirm ops-only items remain tracked: Meta template IDs (ENH-021), escrow contract (ENH-020), ZIMRA field-map (ENH-022).
 
-**`ready` meaning:** aggregate of Temporal, LiteLLM, Maps, FDMS, Meili, and Queues health probes — not a substitute for ops credential approval.
+**`ready` meaning:** aggregate of Temporal, LiteLLM, Maps, FDMS, Meili, Queues, and WhatsApp health probes — not a substitute for ops credential approval.
 
 ## Still ops / credentials (eng continues either way)
 

@@ -261,6 +261,26 @@ test("Cloud API fixture send + webhook challenge (key-ready)", async () => {
   if (ok.ok) assert.equal(ok.challenge, "12345");
 });
 
+test("S129 pingWhatsAppHealth fixture ok + sandbox fail-closed without keys", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { pingWhatsAppHealth } = await import("./cloudApi.js");
+  const fx = await pingWhatsAppHealth();
+  assert.equal(fx.ok, true);
+  assert.equal(fx.mode, "fixture");
+  assert.equal(fx.token, true);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.WHATSAPP_TOKEN;
+  delete process.env.WHATSAPP_PHONE_NUMBER_ID;
+  delete process.env.WHATSAPP_APP_SECRET;
+  delete process.env.META_WA_APP_SECRET;
+  delete process.env.WHATSAPP_VERIFY_TOKEN;
+  const closed = await pingWhatsAppHealth();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
 test("S106 template registry + sendRegisteredTemplate fixture", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   delete process.env.WA_TEMPLATE_SPARE_ORDER_CONFIRMED;
