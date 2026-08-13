@@ -1,24 +1,24 @@
 # DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
-**Updated:** 2026-08-13  
+**Updated:** 2026-08-14  
 **Auto-advance:** ON — stage green ⇒ commit+push same turn; no idle.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S116** — worker-queues money outbox drain hook — **green** |
+| `current_stage` | **S117** — ContiPay/EcoCash webhook route smoke — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S115** Gateway admin money outbox API — **green** |
-| `next_stage` | **S117** ContiPay/EcoCash dedicated webhook route smoke (sig+idempotency) |
+| `prior_stage` | **S116** worker money outbox drain — **green** |
+| `next_stage` | **S118** PayPal + FDMS webhook route durable idempotency smoke |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S115 | 2026-08-13 | through admin money outbox |
-| S116 | 2026-08-13 | `runMoneyOutboxDrain` + `startOutboxSideEffectsWorker` |
+| S91–S116 | 2026-08-13 | through worker money outbox |
+| S117 | 2026-08-14 | ContiPay/EcoCash routes: durable claim + accept/dup/bad-sig |
 
 ## Note
 

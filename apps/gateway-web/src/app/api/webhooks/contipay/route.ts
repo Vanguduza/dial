@@ -1,9 +1,9 @@
 /**
- * ContiPay webhook — HMAC + idempotency (D-43).
+ * ContiPay webhook — HMAC + durable idempotency (D-43 / S117).
  */
 import { NextResponse } from "next/server";
 import { ContiPayAdapter } from "@dial/adapter-psp";
-import { claimProcessedEvent } from "@dial/shared";
+import { claimProcessedEventDurable } from "@dial/shared";
 
 export const runtime = "nodejs";
 
@@ -13,10 +13,10 @@ export async function POST(req: Request) {
   try {
     const admission = await new ContiPayAdapter().verifyWebhook(headers, rawBody);
     if (
-      claimProcessedEvent({
+      (await claimProcessedEventDurable({
         eventId: admission.eventId,
         source: "contipay",
-      }) === "duplicate"
+      })) === "duplicate"
     ) {
       return NextResponse.json({ ok: true, duplicate: true });
     }

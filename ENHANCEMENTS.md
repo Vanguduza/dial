@@ -39,6 +39,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-052 | **Money outbox drain → fiscal side-effects** | `done` | S114 — drainMoneyOutbox links FiscalReceiptQueued |
 | ENH-053 | **Admin money outbox API + health depth** | `done` | S115 — `/api/admin/money/outbox` + health moneyOutbox |
 | ENH-054 | **Worker money outbox drain + side-effects worker** | `done` | S116 — runMoneyOutboxDrain + startOutboxSideEffectsWorker |
+| ENH-055 | **ContiPay/EcoCash webhook durable smoke** | `done` | S117 — claimProcessedEventDurable + bad-sig 401 |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

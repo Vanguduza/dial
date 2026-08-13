@@ -1,9 +1,9 @@
 /**
- * EcoCash webhook — HMAC + idempotency (D-43).
+ * EcoCash webhook — HMAC + durable idempotency (D-43 / S117).
  */
 import { NextResponse } from "next/server";
 import { EcoCashDirectAdapter } from "@dial/adapter-psp";
-import { claimProcessedEvent } from "@dial/shared";
+import { claimProcessedEventDurable } from "@dial/shared";
 
 export const runtime = "nodejs";
 
@@ -16,10 +16,10 @@ export async function POST(req: Request) {
       rawBody,
     );
     if (
-      claimProcessedEvent({
+      (await claimProcessedEventDurable({
         eventId: admission.eventId,
         source: "ecocash",
-      }) === "duplicate"
+      })) === "duplicate"
     ) {
       return NextResponse.json({ ok: true, duplicate: true });
     }

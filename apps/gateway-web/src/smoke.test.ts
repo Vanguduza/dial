@@ -428,3 +428,91 @@ test("S115 admin money outbox drain fail-closed + fixture drain", async () => {
   if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
   else process.env.INTERNAL_API_SECRET = prev;
 });
+
+test("S117 ContiPay/EcoCash webhook routes: accept + duplicate + sandbox bad-sig", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevConti = process.env.CONTIPAY_API_SECRET;
+  const prevEco = process.env.ECOCASH_WEBHOOK_SECRET;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { __resetIdempotencyForTests } = await import("@dial/shared");
+  __resetIdempotencyForTests();
+
+  const { POST: contiPost } = await import("./app/api/webhooks/contipay/route.js");
+  const { POST: ecoPost } = await import("./app/api/webhooks/ecocash/route.js");
+
+  const contiBody = JSON.stringify({
+    eventId: "conti_s117",
+    paymentId: "pay_s117",
+    status: "paid",
+  });
+  const conti1 = await contiPost(
+    new Request("http://localhost/api/webhooks/contipay", {
+      method: "POST",
+      body: contiBody,
+    }),
+  );
+  assert.equal(conti1.status, 200);
+  const conti1Body = (await conti1.json()) as { ok: boolean; duplicate?: boolean };
+  assert.equal(conti1Body.ok, true);
+  assert.equal(conti1Body.duplicate, undefined);
+
+  const conti2 = await contiPost(
+    new Request("http://localhost/api/webhooks/contipay", {
+      method: "POST",
+      body: contiBody,
+    }),
+  );
+  assert.equal(conti2.status, 200);
+  const conti2Body = (await conti2.json()) as { duplicate?: boolean };
+  assert.equal(conti2Body.duplicate, true);
+
+  const ecoBody = JSON.stringify({
+    eventId: "eco_s117",
+    transactionId: "tx_s117",
+    status: "SUCCESS",
+  });
+  const eco1 = await ecoPost(
+    new Request("http://localhost/api/webhooks/ecocash", {
+      method: "POST",
+      body: ecoBody,
+    }),
+  );
+  assert.equal(eco1.status, 200);
+  const eco2 = await ecoPost(
+    new Request("http://localhost/api/webhooks/ecocash", {
+      method: "POST",
+      body: ecoBody,
+    }),
+  );
+  assert.equal(((await eco2.json()) as { duplicate?: boolean }).duplicate, true);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.CONTIPAY_API_SECRET = "conti_sandbox_secret";
+  process.env.ECOCASH_WEBHOOK_SECRET = "eco_sandbox_secret";
+  const badConti = await contiPost(
+    new Request("http://localhost/api/webhooks/contipay", {
+      method: "POST",
+      headers: { "x-contipay-signature": "deadbeef" },
+      body: JSON.stringify({ eventId: "conti_bad", paymentId: "x", status: "paid" }),
+    }),
+  );
+  assert.equal(badConti.status, 401);
+  const badEco = await ecoPost(
+    new Request("http://localhost/api/webhooks/ecocash", {
+      method: "POST",
+      headers: { "x-ecocash-signature": "deadbeef" },
+      body: JSON.stringify({
+        eventId: "eco_bad",
+        transactionId: "y",
+        status: "SUCCESS",
+      }),
+    }),
+  );
+  assert.equal(badEco.status, 401);
+
+  process.env.DIAL_INTEGRATION_MODE = prevMode;
+  if (prevConti === undefined) delete process.env.CONTIPAY_API_SECRET;
+  else process.env.CONTIPAY_API_SECRET = prevConti;
+  if (prevEco === undefined) delete process.env.ECOCASH_WEBHOOK_SECRET;
+  else process.env.ECOCASH_WEBHOOK_SECRET = prevEco;
+});
