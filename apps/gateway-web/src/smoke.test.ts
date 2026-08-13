@@ -317,6 +317,8 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
   assert.equal(res.status, 200);
   const body = (await res.json()) as {
     mode: string;
+    ready?: boolean;
+    probes?: Record<string, boolean>;
     groups: Array<{ label: string; missing: string[] }>;
     maps?: { ok: boolean; nominatim: boolean; osrm: boolean };
     fdms?: { ok: boolean; fixtureDayId?: string };
@@ -331,6 +333,9 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
     litellm?: { ok: boolean; models?: string[] };
   };
   assert.equal(body.mode, "fixture");
+  assert.equal(body.ready, true);
+  assert.equal(body.probes?.maps, true);
+  assert.equal(body.probes?.queues, true);
   assert.ok(body.groups.some((g) => g.label === "paynow"));
   assert.equal(body.maps?.ok, true);
   assert.equal(body.maps?.nominatim, true);

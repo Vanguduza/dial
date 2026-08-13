@@ -1,6 +1,6 @@
 /**
  * Integration readiness health — reports which env groups are configured.
- * Never echoes secret values (D-47).
+ * Never echoes secret values (D-47). S128: aggregate `ready` flag.
  */
 import { NextResponse } from "next/server";
 import { pingFdmsHealth } from "@dial/adapter-fdms";
@@ -44,9 +44,21 @@ export async function GET(): Promise<NextResponse> {
   const meili = await pingMeiliHealth();
   const queuesHealth = await pingQueuesHealth();
 
+  const probes = {
+    temporal: temporal.ok,
+    litellm: litellm.ok,
+    maps: maps.ok,
+    fdms: fdms.ok,
+    meili: meili.ok,
+    queues: queuesHealth.ok,
+  };
+  const ready = Object.values(probes).every(Boolean);
+
   const body = {
     ok: true,
+    ready,
     mode,
+    probes,
     pspMethods: listCanonicalPspMethods(),
     groups: [
       group("whatsapp", [
@@ -90,8 +102,8 @@ export async function GET(): Promise<NextResponse> {
     },
     note:
       mode === "fixture"
-        ? "Fixture mode — missing keys OK for CI"
-        : "Sandbox/live — missing groups will fail closed on use",
+        ? "Fixture mode — missing keys OK for CI; ready=all probes ok"
+        : "Sandbox/live — missing groups will fail closed on use; ready=all probes ok",
   };
 
   return NextResponse.json(body);

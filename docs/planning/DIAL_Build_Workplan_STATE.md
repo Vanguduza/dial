@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S127** — LiteLLM health expand (model list) — **green** |
+| `current_stage` | **S128** — Integration readiness checklist + health `ready` — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S126** Temporal health expand — **green** |
-| `next_stage` | **S128** Integration readiness checklist doc + health aggregate `ready` flag |
+| `prior_stage` | **S127** LiteLLM health expand — **green** |
+| `next_stage` | **S129** Continue integration/plug-in hardening (see workplan / ENH backlog) |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S126 | 2026-08-13/14 | through Temporal health |
-| S127 | 2026-08-14 | `pingLiteLlm` models list + sandbox fail-closed |
+| S91–S127 | 2026-08-13/14 | through LiteLLM health |
+| S128 | 2026-08-14 | readiness checklist + `ready`/`probes` on integrations health |
 
 ## Note
 
