@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S140** — Document INTEGRATION_ENV_GROUPS SoR — **green** |
+| `current_stage` | **S141** — Admin SoR hint + OpenAPI CTA — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S139** Shared INTEGRATION_ENV_GROUPS — **green** |
-| `next_stage` | **S141** Admin integrations UI shows env-group SoR hint + OpenAPI link prominence |
+| `prior_stage` | **S140** Document INTEGRATION_ENV_GROUPS SoR — **green** |
+| `next_stage` | **S142** Cost-health stub mirrors OpenAPI primary CTA + SoR hint |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S139 | 2026-08-13/14 | through INTEGRATION_ENV_GROUPS |
-| S140 | 2026-08-14 | README SoR + OpenAPI `x-dial-sor` |
+| S91–S140 | 2026-08-13/14 | through INTEGRATION_ENV_GROUPS docs |
+| S141 | 2026-08-14 | `/admin/integrations` SoR hint + OpenAPI CTA |
 
 ## Note
 

@@ -76,6 +76,14 @@ export default function IntegrationsReadinessPage() {
           <code>/api/health/integrations</code> — plug-in key status without secret
           values. See <code>docs/integrations/README.md</code>.
         </p>
+        <p
+          style={{ opacity: 0.75, fontSize: 13, marginTop: dialTokens.space.sm }}
+          data-testid="env-groups-sor-hint"
+        >
+          Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> in{" "}
+          <code>integrationsReadiness.ts</code> (OpenAPI{" "}
+          <code>info.x-dial-sor</code>).
+        </p>
 
         <div
           style={{
@@ -102,6 +110,21 @@ export default function IntegrationsReadinessPage() {
           >
             Refresh
           </button>
+          <a
+            href="/api/openapi"
+            data-testid="openapi-primary-link"
+            style={{
+              padding: "12px 16px",
+              borderRadius: 8,
+              border: `1px solid ${dialTokens.color.brand.primary}55`,
+              background: "transparent",
+              color: dialTokens.color.brand.ink,
+              fontWeight: 600,
+              textDecoration: "none",
+            }}
+          >
+            OpenAPI skeleton
+          </a>
           {snap ? (
             <p
               style={{ margin: 0, fontSize: 14, fontWeight: 600 }}
