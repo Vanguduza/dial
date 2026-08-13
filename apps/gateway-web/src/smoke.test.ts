@@ -366,3 +366,65 @@ test("S103 shared idempotency store dedupes across webhook sources", async () =>
   assert.equal(admitWebhookEvent("wa_s103"), "accepted");
   assert.equal(admitWebhookEvent("wa_s103"), "duplicate");
 });
+
+test("S115 admin money outbox drain fail-closed + fixture drain", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const prev = process.env.INTERNAL_API_SECRET;
+  delete process.env.INTERNAL_API_SECRET;
+  const { GET, POST, __testMoneyOutbox } = await import(
+    "./app/api/admin/money/outbox/route.js"
+  );
+  const closed = await GET(new Request("http://localhost/api/admin/money/outbox"));
+  assert.equal(closed.status, 503);
+
+  process.env.INTERNAL_API_SECRET = "s115_secret";
+  const { __resetTaxForTests, enqueueFiscalReceipt } = await import("@dial/tax");
+  const { money } = await import("@dial/shared");
+  __testMoneyOutbox.reset();
+  __resetTaxForTests();
+
+  const fee = enqueueFiscalReceipt({
+    orderId: "ord_s115",
+    receiptClass: "DIAL_FEE",
+    amount: money(50n, "USD"),
+    channel: "web",
+  });
+  __testMoneyOutbox.enqueue({ kind: "ledger_posted", refId: "jr_s115" });
+  __testMoneyOutbox.enqueue({ kind: "fiscal_queued", refId: fee.id });
+  assert.ok(__testMoneyOutbox.list().length >= 2);
+
+  const headers = { "x-internal-secret": "s115_secret" };
+  const listed = await GET(
+    new Request("http://localhost/api/admin/money/outbox", { headers }),
+  );
+  assert.equal(listed.status, 200);
+  const depthBody = (await listed.json()) as { depth: number };
+  assert.equal(depthBody.depth, __testMoneyOutbox.list().length);
+
+  const drained = await POST(
+    new Request("http://localhost/api/admin/money/outbox", {
+      method: "POST",
+      headers: { ...headers, "content-type": "application/json" },
+      body: JSON.stringify({ enqueueSideEffects: true }),
+    }),
+  );
+  assert.equal(drained.status, 200);
+  const drainBody = (await drained.json()) as {
+    remaining: number;
+    drained: Array<{ status: string }>;
+  };
+  assert.equal(drainBody.remaining, 0);
+  assert.ok(drainBody.drained.length >= 1);
+  assert.equal(__testMoneyOutbox.list().length, 0);
+
+  const health = await (
+    await import("./app/api/health/integrations/route.js")
+  ).GET();
+  const healthBody = (await health.json()) as {
+    moneyOutbox: { depth: number };
+  };
+  assert.equal(typeof healthBody.moneyOutbox.depth, "number");
+
+  if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
+  else process.env.INTERNAL_API_SECRET = prev;
+});

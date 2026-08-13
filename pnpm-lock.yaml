@@ -102,6 +102,9 @@ importers:
       '@dial/identity':
         specifier: workspace:*
         version: link:../../packages/identity
+      '@dial/ledger':
+        specifier: workspace:*
+        version: link:../../packages/ledger
       '@dial/payments':
         specifier: workspace:*
         version: link:../../packages/payments

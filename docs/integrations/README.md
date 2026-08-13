@@ -39,6 +39,7 @@
 | `GET\|POST /api/webhooks/whatsapp` | Meta challenge + HMAC |
 | `POST /api/webhooks/psp` | Generic escrow shim (legacy) |
 | `GET\|POST /api/admin/fdms/day` | Fiscal-day open/close (fail-closed `INTERNAL_API_SECRET`) |
+| `GET\|POST /api/admin/money/outbox` | Money outbox depth + drain (fail-closed `INTERNAL_API_SECRET`) |
 
 ## Still ops / credentials (eng continues either way)
 

@@ -18,6 +18,7 @@
     "@dial/catalogue": "workspace:*",
     "@dial/design-tokens": "workspace:*",
     "@dial/identity": "workspace:*",
+    "@dial/ledger": "workspace:*",
     "@dial/payments": "workspace:*",
     "@dial/queues": "workspace:*",
     "@dial/shared": "workspace:*",
