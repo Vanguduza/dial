@@ -31,6 +31,12 @@ export class EscrowPspAdapter implements PspAdapter {
       return {
         providerRef: `escrow_fx_${input.reference}`,
         status: "pending",
+        customerAction: "wait_for_hold",
+        metadata: {
+          hold: "authorized_stub",
+          supportsRelease: "true",
+          currency: input.money.currency,
+        },
       };
     }
     const base = requireSecret("PSP_ESCROW_BASE_URL");

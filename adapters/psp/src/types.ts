@@ -40,7 +40,10 @@ export type PaymentSession = {
     | "approve_on_handset"
     | "open_redirect"
     | "pay_courier"
-    | "pay_at_supplier";
+    | "pay_at_supplier"
+    | "wait_for_hold";
+  /** Opaque adapter hints (never payable amounts). */
+  metadata?: Record<string, string>;
 };
 
 export type WebhookAdmission = {

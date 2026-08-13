@@ -109,3 +109,32 @@ test("S104 ContiPay/EcoCash live-shape fixtures + COD settle USD", async () => {
     /COD settle USD/,
   );
 });
+
+test("S105 Paynow redirect fixture + escrow hold/release stub", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const registry = createPspRegistry();
+  const paynow = await registry.paynow.createPayment(baseInput("paynow"));
+  assert.equal(paynow.status, "redirect_required");
+  assert.ok(paynow.redirectUrl?.includes("ConfirmPayment"));
+  assert.ok(paynow.pollUrl?.includes("pollfixture"));
+  assert.equal(paynow.customerAction, "open_redirect");
+  const h = paynowHash(
+    ["1", "ord_test_1", "10.00", "https://a", "https://b", "Message"],
+    "key",
+  );
+  assert.equal(h.length, 128);
+
+  const escrow = await registry.psp_escrow.createPayment(
+    baseInput("psp_escrow"),
+  );
+  assert.ok(escrow.providerRef.startsWith("escrow_fx_"));
+  assert.equal(escrow.customerAction, "wait_for_hold");
+  assert.equal(escrow.metadata?.hold, "authorized_stub");
+  assert.equal(registry.psp_escrow.capabilities().supportsHold, true);
+  assert.ok(registry.psp_escrow.instructRelease);
+  const rel = await registry.psp_escrow.instructRelease!({
+    holdRef: escrow.providerRef,
+    allocations: [{ partyId: "supplier_1", amountMinor: 10_00n }],
+  });
+  assert.ok(rel.instructionId.startsWith("escrow_rel_"));
+});

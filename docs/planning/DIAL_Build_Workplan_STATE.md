@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S104** — ContiPay/EcoCash fixtures + COD USD settle — **green** |
+| `current_stage` | **S105** — Paynow redirect + escrow hold/release — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S103** maps bridge + shared webhook smoke — **green** |
-| `next_stage` | **S105** Paynow hash+redirect fixture evidence + escrow hold stub expand |
+| `prior_stage` | **S104** ContiPay/EcoCash + COD USD — **green** |
+| `next_stage` | **S106** Meta WA Cloud send fixture + template id registry stub |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S103 | 2026-08-13 | through maps bridge / shared webhook smoke |
-| S104 | 2026-08-13 | ContiPay redirect + EcoCash ZWG-only + COD USD settle tests |
+| S91–S104 | 2026-08-13 | through ContiPay/EcoCash/COD fixtures |
+| S105 | 2026-08-13 | Paynow redirect/poll + escrow hold/release stub |
 
 ## Note
 
