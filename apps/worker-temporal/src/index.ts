@@ -1,9 +1,8 @@
 /**
  * Temporal worker host (D-45 / D-61) — DeliveryDispatchWorkflow + money/fiscal hooks.
- * Default: in-process runner (no SDK required for CI).
- * When TEMPORAL_ADDRESS is set and @temporalio packages are installed later,
- * use createTemporalWorkerOptions() to wire the real worker.
+ * Fixture: in-process. Sandbox/live: Temporal client against TEMPORAL_ADDRESS.
  */
+import { Connection, Client } from "@temporalio/client";
 import {
   acceptOffer,
   capturePod,
@@ -25,7 +24,14 @@ export type TemporalWorkerOptions = {
   workflows: string[];
 };
 
-/** Config for a future @temporalio/worker bootstrap — fail closed if address missing in live. */
+export type DeliveryDispatchInput = {
+  orderId: string;
+  from: string;
+  to: string;
+  courierId: string;
+  codUsdMinor?: bigint;
+};
+
 export function createTemporalWorkerOptions(
   env: NodeJS.ProcessEnv = process.env,
 ): TemporalWorkerOptions {
@@ -42,10 +48,6 @@ export function createTemporalWorkerOptions(
   };
 }
 
-/**
- * In-process DeliveryDispatchWorkflow (fixture / local without Temporal server).
- * SoR remains @dial/delivery — this only hosts the orchestration loop.
- */
 export async function runDeliveryDispatchInProcess(input: {
   orderId: string;
   from: string;
@@ -73,6 +75,59 @@ export async function runDeliveryDispatchInProcess(input: {
   return { workflowId: wf.workflowId, job };
 }
 
+/**
+ * Start DeliveryDispatchWorkflow — remote Temporal when not fixture.
+ */
+export async function startDeliveryDispatch(
+  input: DeliveryDispatchInput,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ workflowId: string; path: "in_process" | "temporal" }> {
+  const mode = (env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  if (mode === "fixture") {
+    const result = await runDeliveryDispatchInProcess(input);
+    return { workflowId: result.workflowId, path: "in_process" };
+  }
+
+  const opts = createTemporalWorkerOptions(env);
+  const connection = await Connection.connect({ address: opts.address });
+  try {
+    const client = new Client({
+      connection,
+      namespace: opts.namespace,
+    });
+    const handle = await client.workflow.start("DeliveryDispatchWorkflow", {
+      taskQueue: opts.taskQueue,
+      workflowId: `ddw_${input.orderId}_${Date.now().toString(36)}`,
+      args: [
+        {
+          orderId: input.orderId,
+          from: input.from,
+          to: input.to,
+          courierId: input.courierId,
+          codUsdMinor:
+            input.codUsdMinor !== undefined
+              ? input.codUsdMinor.toString()
+              : undefined,
+        },
+      ],
+    });
+    return { workflowId: handle.workflowId, path: "temporal" };
+  } finally {
+    await connection.close();
+  }
+}
+
+export function temporalWorkerBootstrap(
+  env: NodeJS.ProcessEnv = process.env,
+): TemporalWorkerOptions & { workflowsPathHint: string } {
+  const opts = createTemporalWorkerOptions(env);
+  return {
+    ...opts,
+    workflowsPathHint:
+      "@dial/worker-temporal workflows.ts — register DeliveryDispatchWorkflow",
+  };
+}
+
 export function assertInternalSecretForSideEffects(
   env: NodeJS.ProcessEnv = process.env,
 ): void {
@@ -82,3 +137,5 @@ export function assertInternalSecretForSideEffects(
     throw new Error("INTERNAL_API_SECRET unset — fail closed for worker side-effects");
   }
 }
+
+export { DeliveryDispatchWorkflow } from "./workflows.js";

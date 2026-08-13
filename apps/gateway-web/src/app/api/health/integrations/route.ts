@@ -60,6 +60,7 @@ export async function GET() {
       group("litellm", ["LITELLM_BASE_URL", "LITELLM_API_KEY"]),
       group("maps", ["NOMINATIM_URL", "OSRM_URL"]),
       group("temporal", ["TEMPORAL_ADDRESS", "TEMPORAL_NAMESPACE"]),
+      group("redis", ["REDIS_URL"]),
       group("internal", ["INTERNAL_API_SECRET"]),
     ],
     temporal,

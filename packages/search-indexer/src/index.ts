@@ -1,7 +1,6 @@
 /**
- * Search indexer — BullMQ/outbox consumer shape (Pack §8 / D-26).
- * Fixture: applies Meili settings + upsert via catalogue client without Redis.
- * Sandbox/live: requires REDIS_URL + MEILI_* (fail closed).
+ * Search indexer — BullMQ/outbox consumer (Pack §8 / D-26 / D-29).
+ * Fixture: in-memory queue + Meili client. Sandbox/live: Redis required.
  */
 import {
   ensureSpareOffersIndex,
@@ -9,22 +8,14 @@ import {
   upsertSpareOfferDocuments,
   type SpareOfferDocument,
 } from "@dial/catalogue";
+import {
+  drainFixtureSearchJobs,
+  enqueueSearchIndexerJob,
+  integrationMode,
+  type SearchIndexerJobPayload,
+} from "@dial/queues";
 
-export type IntegrationMode = "fixture" | "sandbox" | "live";
-
-export function integrationMode(
-  env: NodeJS.ProcessEnv = process.env,
-): IntegrationMode {
-  const m = (env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
-  if (m === "sandbox" || m === "live") return m;
-  return "fixture";
-}
-
-export type IndexerJob =
-  | { type: "OfferInvalidated"; offerId: string }
-  | { type: "MasterProductPublished"; masterProductId: string }
-  | { type: "StockHeartbeatReceived"; supplierId: string }
-  | { type: "ReindexAll" };
+export type IndexerJob = SearchIndexerJobPayload;
 
 export type IndexerResult = {
   job: IndexerJob;
@@ -43,7 +34,7 @@ function assertSandboxDeps(env: NodeJS.ProcessEnv = process.env): void {
   }
 }
 
-/** Process one outbox-shaped job (in-process; BullMQ worker wires later). */
+/** Process one outbox-shaped job (in-process; BullMQ worker wires via @dial/queues). */
 export async function processIndexerJob(
   job: IndexerJob,
 ): Promise<IndexerResult> {
@@ -66,6 +57,22 @@ export async function processIndexerJob(
   };
 }
 
+/** Enqueue via BullMQ (fixture buffer) then process drained jobs. */
+export async function enqueueAndProcessIndexerJob(
+  job: IndexerJob,
+): Promise<IndexerResult[]> {
+  await enqueueSearchIndexerJob(job);
+  if (integrationMode() === "fixture") {
+    const pending = drainFixtureSearchJobs();
+    const out: IndexerResult[] = [];
+    for (const j of pending) {
+      out.push(await processIndexerJob(j));
+    }
+    return out;
+  }
+  return [];
+}
+
 /** Drain a batch of outbox jobs (fixture / worker activity). */
 export async function drainIndexerOutbox(
   jobs: IndexerJob[],
@@ -76,3 +83,5 @@ export async function drainIndexerOutbox(
   }
   return out;
 }
+
+export { integrationMode } from "@dial/queues";

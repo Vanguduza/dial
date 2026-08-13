@@ -19,7 +19,9 @@
 | `@dial/adapter-maps` | Nominatim / OSRM / VROOM | `NOMINATIM_URL`, `OSRM_URL`, `VROOM_URL` |
 | `@dial/adapter-whatsapp` Cloud API | Graph send template/text + GET verify | `WHATSAPP_*` |
 | `@dial/catalogue` Meili client | Index settings + upsert | `MEILI_*` |
-| `@dial/ai` LiteLLM | Chat completions → Gemini | `LITELLM_*` |
+| `@dial/queues` | BullMQ search + outbox side-effect queues | `REDIS_URL`, `INTERNAL_API_SECRET` |
+| `@dial/worker-temporal` | DeliveryDispatch in-process + Temporal client | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
+| `@dial/search-indexer` | Meili reindex jobs via queues | `MEILI_*`, `REDIS_URL` |
 
 ## Gateway webhook routes
 
@@ -33,12 +35,11 @@
 | `GET\|POST /api/webhooks/whatsapp` | Meta challenge + HMAC |
 | `POST /api/webhooks/psp` | Generic escrow shim (legacy) |
 
-## Still Phase 0 / founder (not eng)
+## Still ops / credentials (eng continues either way)
 
-- Live Meta template IDs (`docs/ops/meta-wa-template-ids.md`, ENH-021)
+- Meta template IDs (`docs/ops/meta-wa-template-ids.md`, ENH-021)
 - Escrow partner contract (ENH-020)
 - ZIMRA device credentials field-map refine (ENH-022)
-- **S99 customer-open** declaration
 
 ## Local compose (S92)
 

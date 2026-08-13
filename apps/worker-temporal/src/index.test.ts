@@ -1,16 +1,20 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { __resetDeliveryForTests } from "@dial/delivery";
 import {
   TEMPORAL_TASK_QUEUE,
   WORKFLOW_DELIVERY_DISPATCH,
   assertInternalSecretForSideEffects,
   createTemporalWorkerOptions,
   runDeliveryDispatchInProcess,
+  startDeliveryDispatch,
+  temporalWorkerBootstrap,
 } from "./index.js";
 
 test("Temporal worker options + in-process DeliveryDispatchWorkflow", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   delete process.env.TEMPORAL_ADDRESS;
+  __resetDeliveryForTests();
   const opts = createTemporalWorkerOptions();
   assert.equal(opts.taskQueue, TEMPORAL_TASK_QUEUE);
   assert.ok(opts.workflows.includes(WORKFLOW_DELIVERY_DISPATCH));
@@ -33,4 +37,20 @@ test("sandbox/live fail closed without TEMPORAL_ADDRESS / INTERNAL_API_SECRET", 
   delete process.env.INTERNAL_API_SECRET;
   assert.throws(() => assertInternalSecretForSideEffects());
   process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
+test("S94 startDeliveryDispatch uses in-process path in fixture", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetDeliveryForTests();
+  const started = await startDeliveryDispatch({
+    orderId: "ord_s94",
+    from: "A",
+    to: "B",
+    courierId: "c_s94",
+  });
+  assert.equal(started.path, "in_process");
+  assert.ok(started.workflowId);
+  const boot = temporalWorkerBootstrap();
+  assert.equal(boot.taskQueue, TEMPORAL_TASK_QUEUE);
+  assert.ok(boot.workflows.includes(WORKFLOW_DELIVERY_DISPATCH));
 });

@@ -20,3 +20,11 @@ test("S93 search-indexer fixture reindex without Redis", async () => {
   await assert.rejects(() => processIndexerJob({ type: "ReindexAll" }));
   process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
+
+test("S94 enqueueAndProcessIndexerJob via BullMQ fixture queue", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { enqueueAndProcessIndexerJob } = await import("./index.js");
+  const results = await enqueueAndProcessIndexerJob({ type: "ReindexAll" });
+  assert.equal(results.length, 1);
+  assert.equal(results[0]?.job.type, "ReindexAll");
+});
