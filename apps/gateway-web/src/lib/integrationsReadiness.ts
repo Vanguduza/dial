@@ -123,6 +123,11 @@ export const INTEGRATION_ENV_GROUPS = [
 export type IntegrationEnvGroupLabel =
   (typeof INTEGRATION_ENV_GROUPS)[number]["label"];
 
+/** S146 — ordered label tuple derived from INTEGRATION_ENV_GROUPS (no parallel list). */
+export const INTEGRATION_ENV_GROUP_LABELS = INTEGRATION_ENV_GROUPS.map(
+  (g) => g.label,
+) as readonly IntegrationEnvGroupLabel[];
+
 export function listIntegrationEnvGroupSnapshots(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): Array<{

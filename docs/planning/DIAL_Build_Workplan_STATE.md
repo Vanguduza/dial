@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S145** — Live health labels = INTEGRATION_ENV_GROUPS — **green** |
+| `current_stage` | **S146** — INTEGRATION_ENV_GROUP_LABELS helper — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S144** Sandbox health labels = INTEGRATION_ENV_GROUPS — **green** |
-| `next_stage` | **S146** Export INTEGRATION_ENV_GROUP_LABELS helper + unit lock |
+| `prior_stage` | **S145** Live health labels = INTEGRATION_ENV_GROUPS — **green** |
+| `next_stage` | **S147** Document INTEGRATION_ENV_GROUP_LABELS in integrations README + OpenAPI x-dial-sor |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S144 | 2026-08-13/14 | through sandbox label SoR lock |
-| S145 | 2026-08-14 | live health labels = INTEGRATION_ENV_GROUPS |
+| S91–S145 | 2026-08-13/14 | through live label SoR lock |
+| S146 | 2026-08-14 | INTEGRATION_ENV_GROUP_LABELS helper + unit lock |
 
 ## Note
 

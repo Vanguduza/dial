@@ -375,7 +375,7 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
 
 test("S143 fixture health group labels come only from INTEGRATION_ENV_GROUPS", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
-  const { INTEGRATION_ENV_GROUPS } = await import(
+  const { INTEGRATION_ENV_GROUP_LABELS } = await import(
     "./lib/integrationsReadiness.js"
   );
   const { GET } = await import("./app/api/health/integrations/route.js");
@@ -386,11 +386,10 @@ test("S143 fixture health group labels come only from INTEGRATION_ENV_GROUPS", a
     groups: Array<{ label: string }>;
   };
   assert.equal(body.mode, "fixture");
-  const expected = INTEGRATION_ENV_GROUPS.map((g) => g.label);
   assert.deepEqual(
     body.groups.map((g) => g.label),
-    expected,
-    "health groups[] labels must match INTEGRATION_ENV_GROUPS order exactly",
+    [...INTEGRATION_ENV_GROUP_LABELS],
+    "health groups[] labels must match INTEGRATION_ENV_GROUP_LABELS order exactly",
   );
 });
 
@@ -398,7 +397,7 @@ test("S144 sandbox health group labels match INTEGRATION_ENV_GROUPS", async () =
   const prevMode = process.env.DIAL_INTEGRATION_MODE;
   process.env.DIAL_INTEGRATION_MODE = "sandbox";
   try {
-    const { INTEGRATION_ENV_GROUPS } = await import(
+    const { INTEGRATION_ENV_GROUP_LABELS } = await import(
       "./lib/integrationsReadiness.js"
     );
     const { GET } = await import("./app/api/health/integrations/route.js");
@@ -411,8 +410,8 @@ test("S144 sandbox health group labels match INTEGRATION_ENV_GROUPS", async () =
     assert.equal(body.mode, "sandbox");
     assert.deepEqual(
       body.groups.map((g) => g.label),
-      INTEGRATION_ENV_GROUPS.map((g) => g.label),
-      "sandbox groups[] labels must match INTEGRATION_ENV_GROUPS order exactly",
+      [...INTEGRATION_ENV_GROUP_LABELS],
+      "sandbox groups[] labels must match INTEGRATION_ENV_GROUP_LABELS order exactly",
     );
   } finally {
     process.env.DIAL_INTEGRATION_MODE = prevMode;
@@ -423,7 +422,7 @@ test("S145 live health group labels match INTEGRATION_ENV_GROUPS", async () => {
   const prevMode = process.env.DIAL_INTEGRATION_MODE;
   process.env.DIAL_INTEGRATION_MODE = "live";
   try {
-    const { INTEGRATION_ENV_GROUPS } = await import(
+    const { INTEGRATION_ENV_GROUP_LABELS } = await import(
       "./lib/integrationsReadiness.js"
     );
     const { GET } = await import("./app/api/health/integrations/route.js");
@@ -436,8 +435,8 @@ test("S145 live health group labels match INTEGRATION_ENV_GROUPS", async () => {
     assert.equal(body.mode, "live");
     assert.deepEqual(
       body.groups.map((g) => g.label),
-      INTEGRATION_ENV_GROUPS.map((g) => g.label),
-      "live groups[] labels must match INTEGRATION_ENV_GROUPS order exactly",
+      [...INTEGRATION_ENV_GROUP_LABELS],
+      "live groups[] labels must match INTEGRATION_ENV_GROUP_LABELS order exactly",
     );
   } finally {
     process.env.DIAL_INTEGRATION_MODE = prevMode;

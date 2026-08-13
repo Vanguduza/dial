@@ -77,6 +77,21 @@ test("S138 buildIntegrationsProbes + integrationsReady SoR", async () => {
   assert.equal(integrationsReady(allTrue), true);
 });
 
+test("S146 INTEGRATION_ENV_GROUP_LABELS tracks INTEGRATION_ENV_GROUPS order", async () => {
+  const {
+    INTEGRATION_ENV_GROUPS,
+    INTEGRATION_ENV_GROUP_LABELS,
+  } = await import("./integrationsReadiness.js");
+  assert.deepEqual(
+    [...INTEGRATION_ENV_GROUP_LABELS],
+    INTEGRATION_ENV_GROUPS.map((g) => g.label),
+  );
+  assert.equal(
+    INTEGRATION_ENV_GROUP_LABELS.length,
+    INTEGRATION_ENV_GROUPS.length,
+  );
+});
+
 test("S139 INTEGRATION_ENV_GROUPS match OpenAPI label enum + .env.example keys", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
