@@ -87,6 +87,7 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - S136 Refresh root README layout/build-status + integrations package table (ledger/payments/gateway + health pings).
 - S137 Expand OpenAPI `IntegrationsProbes` required enum + sync with `INTEGRATION_PROBE_KEYS`.
 - S138 Health route builds `probes`/`ready` via `buildIntegrationsProbes` + `integrationsReady` (single SoR).
+- S139 Deduplicate health env groups into `INTEGRATION_ENV_GROUPS` + `listIntegrationEnvGroupSnapshots`.
 - S20 T1 Identity **green** (Pack §15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).

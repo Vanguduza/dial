@@ -76,3 +76,54 @@ test("S138 buildIntegrationsProbes + integrationsReady SoR", async () => {
   );
   assert.equal(integrationsReady(allTrue), true);
 });
+
+test("S139 INTEGRATION_ENV_GROUPS match OpenAPI label enum + .env.example keys", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const {
+    INTEGRATION_ENV_GROUPS,
+    listIntegrationEnvGroupSnapshots,
+  } = await import("./integrationsReadiness.js");
+  const spec = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components: {
+      schemas: {
+        IntegrationsHealth: {
+          properties: {
+            groups: {
+              items: { properties: { label: { enum: string[] } } };
+            };
+          };
+        };
+      };
+    };
+  };
+  const openapiLabels = [
+    ...spec.components.schemas.IntegrationsHealth.properties.groups.items
+      .properties.label.enum,
+  ].sort();
+  const labels = INTEGRATION_ENV_GROUPS.map((g) => g.label).sort();
+  assert.deepEqual(labels, openapiLabels);
+
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  for (const g of INTEGRATION_ENV_GROUPS) {
+    for (const key of g.keys) {
+      assert.ok(envExample.includes(`${key}=`), `.env.example missing ${key}`);
+    }
+  }
+
+  const snaps = listIntegrationEnvGroupSnapshots({
+    MEILI_HOST: "http://127.0.0.1:7700",
+  });
+  const meili = snaps.find((s) => s.label === "meili");
+  assert.ok(meili);
+  assert.equal(meili.presentCount, 1);
+  assert.equal(meili.configured, false);
+});

@@ -404,39 +404,11 @@ test("S132 .env.example lists every integrations health group key", async () => 
       "whatsapp",
     ].join(","),
   );
-  const requiredKeys = [
-    "WHATSAPP_TOKEN",
-    "WHATSAPP_PHONE_NUMBER_ID",
-    "WHATSAPP_APP_SECRET",
-    "WHATSAPP_VERIFY_TOKEN",
-    "PAYNOW_INTEGRATION_ID",
-    "PAYNOW_INTEGRATION_KEY",
-    "CONTIPAY_API_KEY",
-    "CONTIPAY_API_SECRET",
-    "CONTIPAY_MERCHANT_ID",
-    "ECOCASH_API_KEY",
-    "ECOCASH_MERCHANT_CODE",
-    "ECOCASH_WEBHOOK_SECRET",
-    "PAYPAL_CLIENT_ID",
-    "PAYPAL_CLIENT_SECRET",
-    "PAYPAL_WEBHOOK_ID",
-    "PSP_ESCROW_BASE_URL",
-    "PSP_ESCROW_API_KEY",
-    "PSP_WEBHOOK_SECRET",
-    "FDMS_BASE_URL",
-    "FDMS_DEVICE_ID",
-    "FDMS_ACTIVATION_KEY",
-    "MEILI_HOST",
-    "MEILI_MASTER_KEY",
-    "LITELLM_BASE_URL",
-    "LITELLM_API_KEY",
-    "NOMINATIM_URL",
-    "OSRM_URL",
-    "TEMPORAL_ADDRESS",
-    "TEMPORAL_NAMESPACE",
-    "REDIS_URL",
-    "INTERNAL_API_SECRET",
-  ];
+  const { INTEGRATION_ENV_GROUPS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  assert.equal(body.groups.length, INTEGRATION_ENV_GROUPS.length);
+  const requiredKeys = INTEGRATION_ENV_GROUPS.flatMap((g) => [...g.keys]);
   for (const key of requiredKeys) {
     assert.ok(envExample.includes(`${key}=`), `.env.example missing ${key}`);
   }

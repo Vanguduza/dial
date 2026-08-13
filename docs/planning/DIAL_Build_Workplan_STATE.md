@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S138** — Health probes from INTEGRATION_PROBE_KEYS — **green** |
+| `current_stage` | **S139** — Shared INTEGRATION_ENV_GROUPS — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S137** OpenAPI IntegrationsProbes — **green** |
-| `next_stage` | **S139** Deduplicate health env group key list into shared constant |
+| `prior_stage` | **S138** Health probes from INTEGRATION_PROBE_KEYS — **green** |
+| `next_stage` | **S140** Document INTEGRATION_ENV_GROUPS in integrations README + OpenAPI x-dial note |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S137 | 2026-08-13/14 | through OpenAPI probes schema |
-| S138 | 2026-08-14 | `buildIntegrationsProbes` / `integrationsReady` in health route |
+| S91–S138 | 2026-08-13/14 | through probe SoR builder |
+| S139 | 2026-08-14 | `INTEGRATION_ENV_GROUPS` + listIntegrationEnvGroupSnapshots |
 
 ## Note
 
