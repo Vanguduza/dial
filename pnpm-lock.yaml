@@ -286,9 +286,15 @@ importers:
 
   packages/ledger:
     dependencies:
+      '@dial/queues':
+        specifier: workspace:*
+        version: link:../queues
       '@dial/shared':
         specifier: workspace:*
         version: link:../shared
+      '@dial/tax':
+        specifier: workspace:*
+        version: link:../tax
     devDependencies:
       '@types/node':
         specifier: ^22.15.21

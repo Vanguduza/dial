@@ -59,6 +59,78 @@ export function listMoneyOutbox(): readonly (typeof moneyOutbox)[number][] {
   return moneyOutbox;
 }
 
+export type MoneyOutboxRow = (typeof moneyOutbox)[number];
+
+/**
+ * Drain money outbox (S114).
+ * - ledger_posted → optional @dial/queues side-effect
+ * - fiscal_queued → single FDMS drain via @dial/tax (FiscalReceiptQueued link)
+ */
+export async function drainMoneyOutbox(input?: {
+  enqueueSideEffects?: boolean;
+}): Promise<
+  Array<{
+    id: string;
+    kind: MoneyOutboxRow["kind"];
+    refId: string;
+    status: "drained" | "fiscal_submitted" | "fiscal_failed" | "skipped";
+  }>
+> {
+  const results: Array<{
+    id: string;
+    kind: MoneyOutboxRow["kind"];
+    refId: string;
+    status: "drained" | "fiscal_submitted" | "fiscal_failed" | "skipped";
+  }> = [];
+  const pending = [...moneyOutbox];
+  moneyOutbox.length = 0;
+
+  const ledgerRows = pending.filter((r) => r.kind === "ledger_posted");
+  const fiscalRows = pending.filter((r) => r.kind === "fiscal_queued");
+
+  for (const row of ledgerRows) {
+    if (input?.enqueueSideEffects) {
+      const { enqueueOutboxSideEffect } = await import("@dial/queues");
+      await enqueueOutboxSideEffect({
+        topic: "money.ledger_posted",
+        payload: { journalId: row.refId, outboxId: row.id },
+      });
+    }
+    results.push({
+      id: row.id,
+      kind: row.kind,
+      refId: row.refId,
+      status: "drained",
+    });
+  }
+
+  if (fiscalRows.length > 0) {
+    const { drainFdmsOutbox } = await import("@dial/tax");
+    const drained = await drainFdmsOutbox(
+      input?.enqueueSideEffects
+        ? { enqueueSideEffects: true }
+        : undefined,
+    );
+    const byId = new Map(drained.map((d) => [d.id, d]));
+    for (const row of fiscalRows) {
+      const match = byId.get(row.refId);
+      results.push({
+        id: row.id,
+        kind: row.kind,
+        refId: row.refId,
+        status:
+          match?.status === "submitted"
+            ? "fiscal_submitted"
+            : match
+              ? "fiscal_failed"
+              : "skipped",
+      });
+    }
+  }
+
+  return results;
+}
+
 /** Post a balanced journal. Duplicate idempotencyKey returns existing. */
 export function postJournal(input: {
   orderId: string;

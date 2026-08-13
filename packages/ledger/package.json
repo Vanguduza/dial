@@ -12,7 +12,9 @@
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
-    "@dial/shared": "workspace:*"
+    "@dial/queues": "workspace:*",
+    "@dial/shared": "workspace:*",
+    "@dial/tax": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",

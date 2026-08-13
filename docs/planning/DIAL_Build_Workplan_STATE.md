@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S113** — returns claim ERP stub — **green** |
+| `current_stage` | **S114** — Money outbox drain + FiscalReceiptQueued side-effect link — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S112** consent + referral promo_credit — **green** |
-| `next_stage` | **S114** Money outbox drain fixture + FiscalReceiptQueued side-effect link |
+| `prior_stage` | **S113** returns claim ERP stub — **green** |
+| `next_stage` | **S115** Gateway admin money outbox drain API + health depth |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S112 | 2026-08-13 | through consent/referral |
-| S113 | 2026-08-13 | `ReturnClaim` + `resolveReturnClaim` (no AI amounts) |
+| S91–S113 | 2026-08-13 | through returns claim |
+| S114 | 2026-08-13 | `drainMoneyOutbox` → queues + `drainFdmsOutbox` |
 
 ## Note
 
