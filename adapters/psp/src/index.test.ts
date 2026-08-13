@@ -172,3 +172,36 @@ test("S108 PayPal Orders fixture + escrow capture webhook", async () => {
   assert.equal(escrowCap.status, "paid");
   assert.equal(escrowCap.type, "escrow.capture");
 });
+
+test("S130 pingPspHealth fixture ok + sandbox fail-closed without paid rails", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { pingPspHealth } = await import("./index.js");
+  const fx = await pingPspHealth();
+  assert.equal(fx.ok, true);
+  assert.equal(fx.rails.paynow, true);
+  assert.equal(fx.rails.cod_collection, true);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  for (const k of [
+    "PAYNOW_INTEGRATION_ID",
+    "PAYNOW_INTEGRATION_KEY",
+    "CONTIPAY_API_KEY",
+    "CONTIPAY_API_SECRET",
+    "CONTIPAY_MERCHANT_ID",
+    "ECOCASH_API_KEY",
+    "ECOCASH_MERCHANT_CODE",
+    "ECOCASH_WEBHOOK_SECRET",
+    "PAYPAL_CLIENT_ID",
+    "PAYPAL_CLIENT_SECRET",
+    "PAYPAL_WEBHOOK_ID",
+    "PSP_ESCROW_BASE_URL",
+    "PSP_ESCROW_API_KEY",
+    "PSP_WEBHOOK_SECRET",
+  ]) {
+    delete process.env[k];
+  }
+  const closed = await pingPspHealth();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});

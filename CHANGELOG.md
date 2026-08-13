@@ -78,6 +78,7 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - S127 LiteLLM health expand (`pingLiteLlm`) — fixture model list incl. Flash-Lite; sandbox fail-closed without base URL/key.
 - S128 Integration readiness checklist (`docs/integrations/README.md`) + health aggregate `ready`/`probes` on `/api/health/integrations`.
 - S129 WhatsApp Cloud health ping (`pingWhatsAppHealth`) on integrations — fixture ok; sandbox fail-closed without `WHATSAPP_*`.
+- S130 PSP health ping aggregate (`pingPspHealth`) — per-rail configured flags; sandbox fail-closed with no paid rail.
 - S20 T1 Identity **green** (Pack §15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).

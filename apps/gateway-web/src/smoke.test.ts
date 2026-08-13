@@ -332,12 +332,14 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
     temporal?: { ok: boolean; namespace?: string; taskQueue?: string };
     litellm?: { ok: boolean; models?: string[] };
     whatsapp?: { ok: boolean; token?: boolean; phoneNumberId?: boolean };
+    psp?: { ok: boolean; rails?: Record<string, boolean> };
   };
   assert.equal(body.mode, "fixture");
   assert.equal(body.ready, true);
   assert.equal(body.probes?.maps, true);
   assert.equal(body.probes?.queues, true);
   assert.equal(body.probes?.whatsapp, true);
+  assert.equal(body.probes?.psp, true);
   assert.ok(body.groups.some((g) => g.label === "paynow"));
   assert.equal(body.maps?.ok, true);
   assert.equal(body.maps?.nominatim, true);
@@ -355,6 +357,8 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
   assert.ok(body.litellm?.models?.includes("fixture-gemini"));
   assert.equal(body.whatsapp?.ok, true);
   assert.equal(body.whatsapp?.token, true);
+  assert.equal(body.psp?.ok, true);
+  assert.equal(body.psp?.rails?.paynow, true);
   const blob = JSON.stringify(body);
   assert.equal(blob.includes("sk_live"), false);
   assert.equal(/Bearer\s+\w+/.test(blob), false);
