@@ -34,6 +34,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-047 | **VROOM plan + maps ETA on delivery jobs** | `done` | S109 — planDeliveryWithVroom + createDeliveryJobWithMaps |
 | ENH-048 | **B2B informal leak=0 + search health** | `done` | S110 — countInformalB2bLeaks + integrations.search |
 | ENH-049 | **Chatwoot handoff id contract + support ticket** | `done` | S111 — erpTicketId/inbox/contact + FLOW_SUPPORT_TICKET |
+| ENH-050 | **Consent audit + referral promo_credit only** | `done` | S112 — listConsentAudit + assertReferralRewardNonCash |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

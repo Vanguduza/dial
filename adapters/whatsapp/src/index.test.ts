@@ -177,6 +177,27 @@ test("S111 support ticket flow + Chatwoot id contract", async () => {
   assert.equal(getSupportTicket(out.ticket.ticketId)?.conversationKey, out.handoff.conversationKey);
 });
 
+test("S112 consent audit + referral promo_credit only", async () => {
+  __resetWhatsappForTests();
+  const {
+    flowConsentCentre,
+    flowReferralHome,
+    listConsentAudit,
+  } = await import("./index.js");
+  const s = startFlow("FLOW_CONSENT_CENTRE", "cust_s112");
+  const c = flowConsentCentre(s.sessionId, {
+    marketing: true,
+    referralInvites: true,
+  });
+  assert.equal(c.consents.marketing, true);
+  assert.equal(c.auditLen, 1);
+  assert.equal(listConsentAudit().length, 1);
+  const ref = flowReferralHome(s.sessionId, "cust_s112");
+  assert.equal(ref.referral.cashOutForbidden, true);
+  assert.equal(ref.referral.rewardKind, "promo_credit");
+  assert.match(ref.referral.code, /^REF-/);
+});
+
 test("No Baileys / whatsapp-web.js in workspace package.json files (D-40)", () => {
   const roots = [
     join(here, "../../../package.json"),

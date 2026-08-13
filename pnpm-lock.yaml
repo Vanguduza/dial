@@ -62,6 +62,9 @@ importers:
       '@dial/payments':
         specifier: workspace:*
         version: link:../../packages/payments
+      '@dial/promotions':
+        specifier: workspace:*
+        version: link:../../packages/promotions
       '@dial/shared':
         specifier: workspace:*
         version: link:../../packages/shared

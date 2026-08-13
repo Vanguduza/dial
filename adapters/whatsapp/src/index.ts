@@ -12,6 +12,10 @@ import {
   usdToZig,
 } from "@dial/payments";
 import {
+  assertReferralRewardNonCash,
+  formatReferralCode,
+} from "@dial/promotions";
+import {
   __resetIdempotencyForTests,
   claimProcessedEvent,
 } from "@dial/shared";
@@ -124,6 +128,12 @@ const sessions = new Map<string, FlowSession>();
 const handoffs = new Map<string, ChatwootHandoff>();
 const supportTickets = new Map<string, SupportTicket>();
 const referrals = new Map<string, { code: string; balancePromoCreditMinor: bigint }>();
+const consentAudit: Array<{
+  sessionId: string;
+  customerId?: string;
+  consents: ConsentState;
+  at: string;
+}> = [];
 
 export function verifyMetaSignature(input: {
   appSecret: string;
@@ -455,22 +465,29 @@ export function flowReferralHome(sessionId: string, customerId: string) {
   let row = referrals.get(customerId);
   if (!row) {
     row = {
-      code: `REF${customerId.slice(-4).toUpperCase()}`,
+      code: formatReferralCode("REF", customerId),
       balancePromoCreditMinor: 0n,
     };
     referrals.set(customerId, row);
   }
+  // Guard: referral rewards may only be promo_credit / percent_service_fee (D-42).
+  assertReferralRewardNonCash({
+    kind: "promo_credit",
+    amountMinor: row.balancePromoCreditMinor,
+    currency: "USD",
+  });
   return {
     session,
     referral: {
       code: row.code,
       balancePromoCreditMinor: row.balancePromoCreditMinor.toString(),
       cashOutForbidden: true,
+      rewardKind: "promo_credit" as const,
     },
   };
 }
 
-/** §10 — marketing / purpose consents (revocable). */
+/** §10 — marketing / purpose consents (revocable) with audit trail. */
 export function flowConsentCentre(
   sessionId: string,
   patch: Partial<ConsentState>,
@@ -486,7 +503,28 @@ export function flowConsentCentre(
     ...session.consents,
     ...patch,
   };
-  return { session, consents: session.consents };
+  const entry: {
+    sessionId: string;
+    customerId?: string;
+    consents: ConsentState;
+    at: string;
+  } = {
+    sessionId,
+    consents: { ...session.consents },
+    at: new Date().toISOString(),
+  };
+  if (session.customerId !== undefined) entry.customerId = session.customerId;
+  consentAudit.push(entry);
+  return { session, consents: session.consents, auditLen: consentAudit.length };
+}
+
+export function listConsentAudit(): ReadonlyArray<{
+  sessionId: string;
+  customerId?: string;
+  consents: ConsentState;
+  at: string;
+}> {
+  return consentAudit.map((e) => ({ ...e, consents: { ...e.consents } }));
 }
 
 export function getChatwootHandoff(key: string): ChatwootHandoff | undefined {
@@ -508,6 +546,7 @@ export function __resetWhatsappForTests(): void {
   handoffs.clear();
   supportTickets.clear();
   referrals.clear();
+  consentAudit.length = 0;
 }
 
 export {
