@@ -93,6 +93,41 @@ export async function estimateRoute(input: {
   }
 }
 
+/**
+ * VROOM assignment plan (D-44) — geocode courier starts + dropoff, then planVroomJob.
+ */
+export async function planDeliveryWithVroom(input: {
+  courierStarts: Array<{ courierId: string; address: string }>;
+  dropoff: string;
+}): Promise<{
+  provider: "vroom" | "fixture";
+  summary: string;
+  etaMinutes: number;
+  distanceMeters: number;
+}> {
+  const maps = await import("@dial/adapter-maps");
+  const drop = await maps.geocodeNominatim(input.dropoff);
+  const vehicles = [];
+  for (let i = 0; i < input.courierStarts.length; i++) {
+    const start = await maps.geocodeNominatim(input.courierStarts[i]!.address);
+    vehicles.push({ id: i + 1, start });
+  }
+  const plan = await maps.planVroomJob({
+    vehicles,
+    jobs: [{ id: 1, location: drop }],
+  });
+  const route = await estimateRoute({
+    from: input.courierStarts[0]?.address ?? input.dropoff,
+    to: input.dropoff,
+  });
+  return {
+    provider: plan.provider,
+    summary: plan.summary,
+    etaMinutes: route.etaMinutes,
+    distanceMeters: route.distanceMeters,
+  };
+}
+
 /** OSRM/VROOM stub — not Google/Mapbox (D-44). */
 export function estimateRouteStub(input: {
   from: string;
@@ -123,6 +158,31 @@ export function createDeliveryJob(input: {
   codUsdMinor?: bigint;
 }): DeliveryJob {
   const route = estimateRouteStub({ from: input.from, to: input.to });
+  const job: DeliveryJob = {
+    id: id("dj"),
+    orderId: input.orderId,
+    status: "created",
+    distanceMeters: route.distanceMeters,
+    etaMinutes: route.etaMinutes,
+    createdAt: new Date().toISOString(),
+  };
+  if (input.codUsdMinor !== undefined) {
+    job.codAmountUsd = money(input.codUsdMinor, "USD");
+  }
+  jobs.set(job.id, job);
+  return { ...job };
+}
+
+/**
+ * Create job with maps ETA (OSRM duration → etaMinutes) — preferred when adapters available.
+ */
+export async function createDeliveryJobWithMaps(input: {
+  orderId: string;
+  from: string;
+  to: string;
+  codUsdMinor?: bigint;
+}): Promise<DeliveryJob> {
+  const route = await estimateRoute({ from: input.from, to: input.to });
   const job: DeliveryJob = {
     id: id("dj"),
     orderId: input.orderId,

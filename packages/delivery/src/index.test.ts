@@ -90,3 +90,25 @@ test("S103 estimateRoute bridges @dial/adapter-maps in fixture", async () => {
   assert.ok(r.distanceMeters > 0);
   assert.ok(r.etaMinutes >= 1);
 });
+
+test("S109 VROOM plan + maps ETA on createDeliveryJobWithMaps", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetDeliveryForTests();
+  const { planDeliveryWithVroom, createDeliveryJobWithMaps } = await import(
+    "./index.js"
+  );
+  const plan = await planDeliveryWithVroom({
+    courierStarts: [{ courierId: "c1", address: "Harare CBD" }],
+    dropoff: "Avondale",
+  });
+  assert.equal(plan.provider, "fixture");
+  assert.match(plan.summary, /vehicles=1/);
+  assert.ok(plan.etaMinutes >= 1);
+  const job = await createDeliveryJobWithMaps({
+    orderId: "ord_s109",
+    from: "Harare CBD",
+    to: "Avondale",
+  });
+  assert.equal(job.etaMinutes, plan.etaMinutes);
+  assert.ok((job.distanceMeters ?? 0) > 0);
+});
