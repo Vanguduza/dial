@@ -21,7 +21,7 @@
 | `@dial/catalogue` Meili client | Index settings + upsert | `MEILI_*` |
 | `@dial/queues` | BullMQ search + outbox + FDMS day queues | `REDIS_URL`, `INTERNAL_API_SECRET` |
 | `@dial/worker-temporal` | DeliveryDispatch in-process + Temporal client/SDK worker | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
-| `@dial/worker-queues` | BullMQ FDMS day + search-indexer workers | `REDIS_URL` (non-fixture) |
+| `@dial/worker-queues` | BullMQ FDMS day + search-indexer + money outbox workers | `REDIS_URL` (non-fixture) |
 | `@dial/search-indexer` | Meili reindex jobs via queues | `MEILI_*`, `REDIS_URL` |
 | `@dial/tax` | FDMS outbox drain + fiscal-day open/close | `FDMS_*` |
 | `@dial/shared` idempotency | `claimProcessedEvent` (→ SQL `processed_events`) | — |

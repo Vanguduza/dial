@@ -224,3 +224,36 @@ export async function startFdmsDayWorker(input: {
     },
   };
 }
+
+/**
+ * Start BullMQ worker for outbox side-effects (incl. money.ledger_posted).
+ * Fixture: no-op (use drainFixtureOutboxJobs / ledger drainMoneyOutbox).
+ */
+export async function startOutboxSideEffectsWorker(input: {
+  processor: (data: OutboxSideEffectPayload) => Promise<void>;
+  env?: NodeJS.ProcessEnv;
+}): Promise<{ stop: () => Promise<void>; mode: IntegrationMode }> {
+  const env = input.env ?? process.env;
+  const mode = integrationMode(env);
+  if (mode === "fixture") {
+    return {
+      mode,
+      stop: async () => undefined,
+    };
+  }
+  const connection = redisConnection(env);
+  const worker = new Worker(
+    QUEUE_OUTBOX_SIDE_EFFECTS,
+    async (job: Job<OutboxSideEffectPayload>) => {
+      await input.processor(job.data);
+    },
+    { connection },
+  );
+  return {
+    mode,
+    stop: async () => {
+      await worker.close();
+      connection.disconnect();
+    },
+  };
+}

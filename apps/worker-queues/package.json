@@ -10,6 +10,7 @@
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
+    "@dial/ledger": "workspace:*",
     "@dial/queues": "workspace:*",
     "@dial/search-indexer": "workspace:*",
     "@dial/tax": "workspace:*"

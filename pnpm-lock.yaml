@@ -148,6 +148,9 @@ importers:
 
   apps/worker-queues:
     dependencies:
+      '@dial/ledger':
+        specifier: workspace:*
+        version: link:../../packages/ledger
       '@dial/queues':
         specifier: workspace:*
         version: link:../../packages/queues

@@ -29,3 +29,20 @@ test("S98 worker-queues fixture start exits 0", async () => {
   });
   assert.equal(code, 0);
 });
+
+test("S116 money outbox drain hook empties ledger outbox", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const {
+    __resetLedgerForTests,
+    enqueueMoneyOutbox,
+    listMoneyOutbox,
+  } = await import("@dial/ledger");
+  __resetLedgerForTests();
+  enqueueMoneyOutbox({ kind: "ledger_posted", refId: "jr_s116" });
+  assert.equal(listMoneyOutbox().length, 1);
+  const { runMoneyOutboxDrain } = await import("./moneyOutbox.js");
+  const result = await runMoneyOutboxDrain({ enqueueSideEffects: true });
+  assert.ok(result.drained.some((d) => d.kind === "ledger_posted"));
+  assert.equal(result.remaining, 0);
+  assert.equal(listMoneyOutbox().length, 0);
+});

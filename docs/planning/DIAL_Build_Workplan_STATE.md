@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S115** — Gateway admin money outbox drain API + health depth — **green** |
+| `current_stage` | **S116** — worker-queues money outbox drain hook — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S114** Money outbox drain + FiscalReceiptQueued — **green** |
-| `next_stage` | **S116** worker-queues money outbox drain hook (fixture) |
+| `prior_stage` | **S115** Gateway admin money outbox API — **green** |
+| `next_stage` | **S117** ContiPay/EcoCash dedicated webhook route smoke (sig+idempotency) |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S114 | 2026-08-13 | through money outbox drain |
-| S115 | 2026-08-13 | `/api/admin/money/outbox` + health `moneyOutbox.depth` |
+| S91–S115 | 2026-08-13 | through admin money outbox |
+| S116 | 2026-08-13 | `runMoneyOutboxDrain` + `startOutboxSideEffectsWorker` |
 
 ## Note
 
