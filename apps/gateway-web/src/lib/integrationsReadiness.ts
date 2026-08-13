@@ -60,3 +60,22 @@ export function probeEntries(
     .map(([name, ok]) => ({ name, ok: Boolean(ok) }))
     .sort((a, b) => a.name.localeCompare(b.name));
 }
+
+/**
+ * S138 — build probes object from INTEGRATION_PROBE_KEYS SoR (missing → false).
+ */
+export function buildIntegrationsProbes(
+  values: Partial<Record<IntegrationProbeKey, boolean>>,
+): Record<IntegrationProbeKey, boolean> {
+  const out = {} as Record<IntegrationProbeKey, boolean>;
+  for (const key of INTEGRATION_PROBE_KEYS) {
+    out[key] = Boolean(values[key]);
+  }
+  return out;
+}
+
+export function integrationsReady(
+  probes: Record<string, boolean>,
+): boolean {
+  return INTEGRATION_PROBE_KEYS.every((k) => probes[k] === true);
+}

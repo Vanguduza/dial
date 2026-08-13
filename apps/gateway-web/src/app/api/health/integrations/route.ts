@@ -1,6 +1,6 @@
 /**
  * Integration readiness health — reports which env groups are configured.
- * Never echoes secret values (D-47). S128: aggregate `ready` flag.
+ * Never echoes secret values (D-47). S128 ready; S138 probes from INTEGRATION_PROBE_KEYS.
  */
 import { NextResponse } from "next/server";
 import { pingFdmsHealth } from "@dial/adapter-fdms";
@@ -19,6 +19,10 @@ import {
 import { pingInternalApiHealth } from "@dial/shared";
 import { getFiscalDayState } from "@dial/tax";
 import { pingTemporalHealth } from "@dial/worker-temporal";
+import {
+  buildIntegrationsProbes,
+  integrationsReady,
+} from "../../../../lib/integrationsReadiness.js";
 
 export const runtime = "nodejs";
 
@@ -49,7 +53,7 @@ export async function GET(): Promise<NextResponse> {
   const psp = await pingPspHealth();
   const internal = await pingInternalApiHealth();
 
-  const probes = {
+  const probes = buildIntegrationsProbes({
     temporal: temporal.ok,
     litellm: litellm.ok,
     maps: maps.ok,
@@ -59,8 +63,8 @@ export async function GET(): Promise<NextResponse> {
     whatsapp: whatsapp.ok,
     psp: psp.ok,
     internal: internal.ok,
-  };
-  const ready = Object.values(probes).every(Boolean);
+  });
+  const ready = integrationsReady(probes);
 
   const body = {
     ok: true,

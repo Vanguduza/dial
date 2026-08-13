@@ -59,3 +59,20 @@ test("S137 INTEGRATION_PROBE_KEYS match OpenAPI IntegrationsProbes required", as
     assert.ok(spec.components.schemas.IntegrationsProbes.properties[k]);
   }
 });
+
+test("S138 buildIntegrationsProbes + integrationsReady SoR", async () => {
+  const {
+    buildIntegrationsProbes,
+    integrationsReady,
+    INTEGRATION_PROBE_KEYS,
+  } = await import("./integrationsReadiness.js");
+  const partial = buildIntegrationsProbes({ maps: true, psp: true });
+  assert.equal(Object.keys(partial).sort().join(","), [...INTEGRATION_PROBE_KEYS].sort().join(","));
+  assert.equal(partial.maps, true);
+  assert.equal(partial.temporal, false);
+  assert.equal(integrationsReady(partial), false);
+  const allTrue = buildIntegrationsProbes(
+    Object.fromEntries(INTEGRATION_PROBE_KEYS.map((k) => [k, true])),
+  );
+  assert.equal(integrationsReady(allTrue), true);
+});

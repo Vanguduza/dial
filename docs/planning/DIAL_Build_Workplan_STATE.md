@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S137** — OpenAPI IntegrationsProbes schema — **green** |
+| `current_stage` | **S138** — Health probes from INTEGRATION_PROBE_KEYS — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S136** README + package table — **green** |
-| `next_stage` | **S138** Export INTEGRATION_PROBE_KEYS from health route builder (single SoR) |
+| `prior_stage` | **S137** OpenAPI IntegrationsProbes — **green** |
+| `next_stage` | **S139** Deduplicate health env group key list into shared constant |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S136 | 2026-08-13/14 | through README package table |
-| S137 | 2026-08-14 | OpenAPI IntegrationsProbes + INTEGRATION_PROBE_KEYS sync |
+| S91–S137 | 2026-08-13/14 | through OpenAPI probes schema |
+| S138 | 2026-08-14 | `buildIntegrationsProbes` / `integrationsReady` in health route |
 
 ## Note
 
