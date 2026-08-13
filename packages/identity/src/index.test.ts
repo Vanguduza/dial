@@ -57,3 +57,29 @@ test("T1 RLS profiles: own CRUD; cross-tenant deny; admin all", () => {
   assert.equal(all.length, 3);
   assert.equal(selectProfileAs(adminCtx, bob.userId)?.email, "bob@dial.test");
 });
+
+test("S93 Supabase Auth fixture sign-in + fail-closed server config", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const {
+    getSupabasePublicConfig,
+    getSupabaseServerConfig,
+    signInWithPassword,
+  } = await import("./supabaseAuth.js");
+  const pub = getSupabasePublicConfig();
+  assert.ok(pub.url);
+  assert.ok(pub.anonKey);
+  const server = getSupabaseServerConfig();
+  assert.ok(server.serviceRoleKey);
+  const session = await signInWithPassword({
+    email: "buyer@dial.test",
+    password: "x",
+  });
+  assert.ok(session.accessToken.startsWith("sb_fx_"));
+  assert.equal(session.email, "buyer@dial.test");
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+  delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  assert.throws(() => getSupabasePublicConfig());
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});

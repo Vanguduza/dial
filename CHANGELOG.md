@@ -42,6 +42,7 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - S90 Eng Build **complete** (S10–S30 green); S99 customer-open remains human-gated.
 - S91 Integration readiness: `@dial/adapter-psp|fdms|maps`, WA Cloud Graph client, Meili/LiteLLM HTTP clients, per-vendor webhook routes, Pack-complete `.env.example`, `DIAL_INTEGRATION_MODE=fixture|sandbox|live` (`docs/integrations/README.md`).
 - S92 Local sandbox infra: `docker-compose.yml` (Redis/Meili/Temporal profile), `@dial/worker-temporal` in-process DeliveryDispatchWorkflow, payments→PSP + delivery→maps bridges, `GET /api/health/integrations`, Supabase `0001_core_tables.sql`, Promptfoo outline.
+- S93 Supabase Auth client scaffold (`signInWithPassword` fixture/live) + `@dial/search-indexer` outbox job drain (Meili ensure/upsert; Redis required outside fixture).
 - S20 T1 Identity **green** (Pack §15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).

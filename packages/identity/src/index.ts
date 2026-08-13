@@ -129,3 +129,12 @@ export function listProfilesAs(
 export function rlsContextFromProfile(profile: Profile): RlsContext {
   return { userId: profile.userId, role: profile.role };
 }
+
+export {
+  getSupabasePublicConfig,
+  getSupabaseServerConfig,
+  signInWithPassword,
+  integrationMode as supabaseIntegrationMode,
+  type SupabasePublicConfig,
+  type SupabaseServerConfig,
+} from "./supabaseAuth.js";

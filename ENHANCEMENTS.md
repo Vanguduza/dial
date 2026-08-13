@@ -16,6 +16,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-006 | **Autonomous Dev Manager loop** — prefer/lock defaults; no founder wait; escalate only true OPENs; **stage auto-advance on green** through S90 | `done` | Runbook + workplan STATE — S90 eng complete 2026-08-13; S99 still human |
 | ENH-030 | **API key-drop-in adapters** — Pack/Stitch HTTP shapes + fixture/sandbox/live mode; per-vendor webhooks | `done` | S91 — `docs/integrations/README.md` |
 | ENH-031 | **Local compose + Temporal worker host** — Redis/Meili/Temporal; in-process DeliveryDispatchWorkflow | `done` | S92 — `docker-compose.yml` + `@dial/worker-temporal` |
+| ENH-032 | **Supabase Auth + search-indexer** — GoTrue client scaffold; Meili outbox consumer | `done` | S93 — fixture CI; sandbox needs Redis/Meili/Supabase env |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
