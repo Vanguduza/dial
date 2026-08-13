@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { listCanonicalPspMethods } from "@dial/adapter-psp";
 import { pingLiteLlm } from "@dial/ai";
+import { searchHealthSnapshot } from "@dial/catalogue";
 import { QUEUE_FDMS_DAY, QUEUE_OUTBOX_SIDE_EFFECTS, QUEUE_SEARCH_INDEXER } from "@dial/queues";
 import { getFiscalDayState } from "@dial/tax";
 import { createTemporalWorkerOptions } from "@dial/worker-temporal";
@@ -75,6 +76,7 @@ export async function GET(): Promise<NextResponse> {
       fdmsDay: QUEUE_FDMS_DAY,
     },
     fiscalDay: getFiscalDayState(),
+    search: searchHealthSnapshot(),
     note:
       mode === "fixture"
         ? "Fixture mode — missing keys OK for CI"

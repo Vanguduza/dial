@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S109** — VROOM plan + maps ETA — **green** |
+| `current_stage` | **S110** — B2B informal leak=0 + search health — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S108** PayPal + escrow capture — **green** |
-| `next_stage` | **S110** Meili filter B2B informal leak regression + search health |
+| `prior_stage` | **S109** VROOM plan + maps ETA — **green** |
+| `next_stage` | **S111** Chatwoot handoff id contract + support ticket stub expand |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S108 | 2026-08-13 | through PayPal/escrow fixtures |
-| S109 | 2026-08-13 | `planDeliveryWithVroom` + `createDeliveryJobWithMaps` ETA |
+| S91–S109 | 2026-08-13 | through VROOM/maps ETA |
+| S110 | 2026-08-13 | `countInformalB2bLeaks` + health `search` snapshot |
 
 ## Note
 

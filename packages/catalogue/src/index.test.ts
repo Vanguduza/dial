@@ -65,6 +65,20 @@ test("T2 B2B Meili filter excludes informal (D-49)", () => {
   assert.ok(formalB2b.every((o) => o.supplierFormality === "formal"));
 });
 
+test("S110 informal B2B leak=0 + search health snapshot", async () => {
+  __resetCatalogueForTests();
+  const { countInformalB2bLeaks, searchHealthSnapshot } = await import(
+    "./index.js"
+  );
+  assert.equal(countInformalB2bLeaks(""), 0);
+  assert.equal(countInformalB2bLeaks("wiper"), 0);
+  assert.equal(countInformalB2bLeaks("oil"), 0);
+  const health = searchHealthSnapshot();
+  assert.equal(health.informalB2bLeaks, 0);
+  assert.match(health.meiliFilterB2b, /supplierFormality = "formal"/);
+  assert.ok(health.marketplaceDocCount > 0);
+});
+
 test("T2 Catalogue Factory ingest/review + search_no_result_events (D-53)", () => {
   __resetCatalogueForTests();
   const batch = enqueueCatalogueIngest(3);

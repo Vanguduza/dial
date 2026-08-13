@@ -232,6 +232,26 @@ export function searchOffers(
   return hits;
 }
 
+/** D-49 regression — B2B search must never return informal (leak count = 0). */
+export function countInformalB2bLeaks(query = ""): number {
+  return searchOffers(query, { sessionRole: "b2b" }).filter(
+    (o) => o.supplierFormality === "informal",
+  ).length;
+}
+
+/** Search readiness for /api/health — never echoes secrets. */
+export function searchHealthSnapshot(): {
+  meiliFilterB2b: string;
+  informalB2bLeaks: number;
+  marketplaceDocCount: number;
+} {
+  return {
+    meiliFilterB2b: meiliFilterForSession("b2b"),
+    informalB2bLeaks: countInformalB2bLeaks(),
+    marketplaceDocCount: listMeiliStubDocuments().length,
+  };
+}
+
 export function recordSearchNoResult(
   query: string,
   sessionRole: SearchSessionRole,
