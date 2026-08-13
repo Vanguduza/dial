@@ -69,3 +69,43 @@ test("Paynow SHA512 hash is uppercase hex", () => {
   assert.match(h, /^[0-9A-F]+$/);
   assert.equal(h.length, 128);
 });
+
+test("S104 ContiPay/EcoCash live-shape fixtures + COD settle USD", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const registry = createPspRegistry();
+
+  const conti = await registry.contipay.createPayment(baseInput("contipay"));
+  assert.ok(conti.redirectUrl?.includes("/pay/fixture/"));
+  assert.equal(conti.customerAction, "open_redirect");
+  assert.deepEqual(registry.contipay.capabilities().currencies.sort(), [
+    "USD",
+    "ZWG",
+  ]);
+
+  const eco = await registry.ecocash_direct.createPayment(
+    baseInput("ecocash_direct"),
+  );
+  assert.ok(eco.providerRef.startsWith("eco_fx_"));
+  assert.equal(eco.customerAction, "approve_on_handset");
+  await assert.rejects(
+    () =>
+      registry.ecocash_direct.createPayment({
+        ...baseInput("ecocash_direct"),
+        money: { amountMinor: 10_00n, currency: "USD" },
+      }),
+    /ZWG/,
+  );
+
+  const cod = await registry.cod_delivery.createPayment(
+    baseInput("cod_delivery"),
+  );
+  assert.equal(cod.customerAction, "pay_courier");
+  await assert.rejects(
+    () =>
+      registry.cod_delivery.createPayment({
+        ...baseInput("cod_delivery"),
+        money: { amountMinor: 10_00n, currency: "ZWG" },
+      }),
+    /COD settle USD/,
+  );
+});

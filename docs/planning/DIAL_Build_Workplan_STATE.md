@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S103** — shared webhook smoke + maps distance bridge — **green** |
+| `current_stage` | **S104** — ContiPay/EcoCash fixtures + COD USD settle — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S102** WA/PSP durable idempotency — **green** |
-| `next_stage` | **S104** ContiPay/EcoCash createPayment live-shape fixtures + COD settle USD evidence |
+| `prior_stage` | **S103** maps bridge + shared webhook smoke — **green** |
+| `next_stage` | **S105** Paynow hash+redirect fixture evidence + escrow hold stub expand |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S102 | 2026-08-13 | integration readiness through durable idempotency |
-| S103 | 2026-08-13 | gateway shared-store smoke; delivery→maps fixture bridge |
+| S91–S103 | 2026-08-13 | through maps bridge / shared webhook smoke |
+| S104 | 2026-08-13 | ContiPay redirect + EcoCash ZWG-only + COD USD settle tests |
 
 ## Note
 
