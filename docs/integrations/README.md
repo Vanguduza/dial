@@ -92,6 +92,7 @@ pnpm --filter @dial/worker-temporal start  # in-process DeliveryDispatchWorkflow
 pnpm --filter @dial/worker-queues start    # BullMQ workers (fixture exits OK)
 pnpm eval:smoke                            # Promptfoo CI golden no-money
 curl -s http://localhost:3000/api/health/integrations | jq .
+# Admin UI (S133): http://localhost:3000/admin/integrations
 ```
 
 See root `docker-compose.yml` and `supabase/migrations/0001_core_tables.sql`.

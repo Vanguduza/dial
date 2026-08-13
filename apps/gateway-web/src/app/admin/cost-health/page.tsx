@@ -20,6 +20,10 @@ export default function CostHealthStubPage() {
       <ul style={{ margin: 0, paddingLeft: "1.25rem", lineHeight: 1.6 }}>
         <li>LLM cost events → outbox (AI cost) — not implemented live</li>
         <li>
+          Integrations readiness:{" "}
+          <a href="/admin/integrations">/admin/integrations</a>
+        </li>
+        <li>
           Command Centre: <a href="/admin/command-centre">/admin/command-centre</a>
         </li>
         <li>Restore drill: docs/security/restore-drill.md</li>
