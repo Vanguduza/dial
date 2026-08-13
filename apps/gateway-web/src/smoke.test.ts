@@ -514,10 +514,21 @@ test("S134 OpenAPI skeleton covers health + webhook paths", async () => {
   assert.ok(served.openapi?.startsWith("3."));
   assert.ok(served.paths?.["/api/health/integrations"]);
   const withSor = served as {
-    info?: { "x-dial-sor"?: { probes?: string; envGroups?: string } };
+    info?: {
+      "x-dial-sor"?: {
+        probes?: string;
+        envGroups?: string;
+        envGroupLabels?: string;
+      };
+    };
   };
   assert.ok(withSor.info?.["x-dial-sor"]?.probes?.includes("INTEGRATION_PROBE_KEYS"));
   assert.ok(withSor.info?.["x-dial-sor"]?.envGroups?.includes("INTEGRATION_ENV_GROUPS"));
+  assert.ok(
+    withSor.info?.["x-dial-sor"]?.envGroupLabels?.includes(
+      "INTEGRATION_ENV_GROUP_LABELS",
+    ),
+  );
 });
 
 test("S140 integrations README documents INTEGRATION_ENV_GROUPS SoR", async () => {
@@ -530,6 +541,29 @@ test("S140 integrations README documents INTEGRATION_ENV_GROUPS SoR", async () =
   assert.ok(integ.includes("INTEGRATION_ENV_GROUPS"));
   assert.ok(integ.includes("listIntegrationEnvGroupSnapshots"));
   assert.ok(integ.includes("x-dial-sor"));
+});
+
+test("S147 README + OpenAPI document INTEGRATION_ENV_GROUP_LABELS", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: { "x-dial-sor"?: { envGroupLabels?: string } };
+  };
+  assert.ok(integ.includes("INTEGRATION_ENV_GROUP_LABELS"));
+  assert.ok(integ.includes("envGroupLabels"));
+  assert.ok(
+    spec.info?.["x-dial-sor"]?.envGroupLabels?.includes(
+      "INTEGRATION_ENV_GROUP_LABELS",
+    ),
+  );
 });
 
 test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {

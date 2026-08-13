@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S146** — INTEGRATION_ENV_GROUP_LABELS helper — **green** |
+| `current_stage` | **S147** — Document INTEGRATION_ENV_GROUP_LABELS — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S145** Live health labels = INTEGRATION_ENV_GROUPS — **green** |
-| `next_stage` | **S147** Document INTEGRATION_ENV_GROUP_LABELS in integrations README + OpenAPI x-dial-sor |
+| `prior_stage` | **S146** INTEGRATION_ENV_GROUP_LABELS helper — **green** |
+| `next_stage` | **S148** Admin SoR hint mentions INTEGRATION_ENV_GROUP_LABELS |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S145 | 2026-08-13/14 | through live label SoR lock |
-| S146 | 2026-08-14 | INTEGRATION_ENV_GROUP_LABELS helper + unit lock |
+| S91–S146 | 2026-08-13/14 | through INTEGRATION_ENV_GROUP_LABELS helper |
+| S147 | 2026-08-14 | README + OpenAPI x-dial-sor.envGroupLabels |
 
 ## Note
 

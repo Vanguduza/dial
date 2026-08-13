@@ -62,7 +62,7 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 
 ### Health groups ↔ `.env.example` (S132 / S139 / S140)
 
-**SoR:** `INTEGRATION_ENV_GROUPS` in `apps/gateway-web/src/lib/integrationsReadiness.ts` (via `listIntegrationEnvGroupSnapshots`). Do not edit the table below without updating that constant — smoke tests assert labels + keys against OpenAPI and `.env.example`.
+**SoR:** `INTEGRATION_ENV_GROUPS` in `apps/gateway-web/src/lib/integrationsReadiness.ts` (via `listIntegrationEnvGroupSnapshots`). Ordered label tuple: `INTEGRATION_ENV_GROUP_LABELS` (derived — do not maintain a parallel list). Do not edit the table below without updating that constant — smoke tests assert labels + keys against OpenAPI and `.env.example`.
 
 | Health `groups[].label` | Keys (must appear in root `.env.example`) |
 | --- | --- |
@@ -115,4 +115,4 @@ Schemas stay opaque for webhook bodies (signature + idempotency SoR in adapters)
 
 **Probes (S137):** OpenAPI `IntegrationsProbes` requires `temporal`, `litellm`, `maps`, `fdms`, `meili`, `queues`, `whatsapp`, `psp`, `internal` — kept in sync with `INTEGRATION_PROBE_KEYS` in gateway-web.
 
-**Env groups (S139/S140):** OpenAPI `groups[].label` enum + `info.x-dial-sor` point at `INTEGRATION_ENV_GROUPS` (same module).
+**Env groups (S139/S140/S147):** OpenAPI `groups[].label` enum + `info.x-dial-sor.envGroups` point at `INTEGRATION_ENV_GROUPS`; `info.x-dial-sor.envGroupLabels` points at `INTEGRATION_ENV_GROUP_LABELS` (same module).
