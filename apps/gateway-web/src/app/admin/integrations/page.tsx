@@ -80,7 +80,8 @@ export default function IntegrationsReadinessPage() {
           style={{ opacity: 0.75, fontSize: 13, marginTop: dialTokens.space.sm }}
           data-testid="env-groups-sor-hint"
         >
-          Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> in{" "}
+          Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> +{" "}
+          <code>INTEGRATION_ENV_GROUP_LABELS</code> in{" "}
           <code>integrationsReadiness.ts</code> (OpenAPI{" "}
           <code>info.x-dial-sor</code>).
         </p>

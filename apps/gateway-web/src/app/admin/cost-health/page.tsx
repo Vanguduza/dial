@@ -22,7 +22,8 @@ export default function CostHealthStubPage() {
         style={{ margin: "0 0 1rem", maxWidth: "36rem", color: "#94a3b8", fontSize: 13 }}
         data-testid="env-groups-sor-hint"
       >
-        Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> (OpenAPI{" "}
+        Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> +{" "}
+        <code>INTEGRATION_ENV_GROUP_LABELS</code> (OpenAPI{" "}
         <code>info.x-dial-sor</code>) — see readiness UI for live probes.
       </p>
       <p style={{ margin: "0 0 1.25rem" }}>
