@@ -472,6 +472,18 @@ test("S132 .env.example lists every integrations health group key", async () => 
   assert.ok(envExample.includes("docs/integrations/README.md"));
 });
 
+test("S150 .env.example points at INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("INTEGRATION_ENV_GROUPS"));
+  assert.ok(envExample.includes("INTEGRATION_ENV_GROUP_LABELS"));
+  assert.ok(envExample.includes("integrationsReadiness.ts"));
+});
+
 test("S134 OpenAPI skeleton covers health + webhook paths", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
