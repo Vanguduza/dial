@@ -11,6 +11,10 @@ import {
   getActiveFxRate,
   usdToZig,
 } from "@dial/payments";
+import {
+  __resetIdempotencyForTests,
+  claimProcessedEvent,
+} from "@dial/shared";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export type FlowId =
@@ -100,7 +104,6 @@ export type ChatwootHandoff = {
 };
 
 const sessions = new Map<string, FlowSession>();
-const processedWebhookIds = new Set<string>();
 const handoffs = new Map<string, ChatwootHandoff>();
 const referrals = new Map<string, { code: string; balancePromoCreditMinor: bigint }>();
 
@@ -118,11 +121,9 @@ export function verifyMetaSignature(input: {
   return timingSafeEqual(a, b);
 }
 
-/** Idempotent webhook admission — duplicate delivery-id is a no-op. */
+/** Idempotent webhook admission via shared store (D-47 / S102). */
 export function admitWebhookEvent(deliveryId: string): "accepted" | "duplicate" {
-  if (processedWebhookIds.has(deliveryId)) return "duplicate";
-  processedWebhookIds.add(deliveryId);
-  return "accepted";
+  return claimProcessedEvent({ eventId: deliveryId, source: "whatsapp" });
 }
 
 export function startFlow(flowId: FlowId, customerId?: string): FlowSession {
@@ -431,7 +432,7 @@ export function assertNoUnofficialWhatsAppDeps(pkgJsonTexts: string[]): void {
 
 export function __resetWhatsappForTests(): void {
   sessions.clear();
-  processedWebhookIds.clear();
+  __resetIdempotencyForTests();
   handoffs.clear();
   referrals.clear();
 }

@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./money": "./src/money.ts",
-    "./idempotency": "./src/idempotency.ts"
+    "./idempotency": "./src/idempotency.ts",
+    "./processed-events": "./src/processedEvents.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",

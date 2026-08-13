@@ -6,3 +6,7 @@ export {
   __resetIdempotencyForTests,
   type IdempotencyClaim,
 } from "./idempotency.js";
+export {
+  claimProcessedEventDurable,
+  integrationMode as processedEventsIntegrationMode,
+} from "./processedEvents.js";

@@ -6,11 +6,11 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S101** — Temporal SDK worker + webhook idempotency store — **green** |
+| `current_stage` | **S102** — WA/PSP admit→shared + durable processed_events — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S100** LiteLLM ping + Meili bootstrap — **green** |
-| `next_stage` | **S102** Supabase processed_events client + WA admit→shared store |
+| `prior_stage` | **S101** Temporal SDK worker + webhook idempotency — **green** |
+| `next_stage` | **S103** gateway webhook smoke using shared store + maps distance fixture bridge |
 | `blocked_on_human` | none |
 
 ## Completed
@@ -18,13 +18,12 @@
 | Stage | When | Evidence |
 | --- | --- | --- |
 | S91–S95 | 2026-08-13 | adapters → compose → auth → queues → FDMS drain |
-| S96 | 2026-08-13 | `eval:smoke` + CI step (local); FDMS open/close |
-| S97–S98 | 2026-08-13 | FDMS day queue/admin + `@dial/worker-queues` |
-| S100 | 2026-08-13 | `pingLiteLlm` + `bootstrapLocalSearchIndex` |
-| S101 | 2026-08-13 | `createTemporalSdkWorker` + `claimProcessedEvent` on PSP/FDMS webhooks |
+| S96–S98 | 2026-08-13 | Promptfoo / FDMS day / worker-queues |
+| S100–S101 | 2026-08-13 | LiteLLM/Meili + Temporal SDK + claimProcessedEvent |
+| S102 | 2026-08-13 | WA+PSP → shared store; `claimProcessedEventDurable` |
 
 ## Note
 
-Founder directive: auto-proceed; **auto commit+push on every stage green**. Do not modify `.github/workflows/*` in auto-push commits until the GitHub token has `workflow` scope. S99 = ops-only.
+Founder directive: auto-proceed; **auto commit+push on every stage green**. Skip `.github/workflows/*` in pushes until token has `workflow` scope. S99 = ops-only.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

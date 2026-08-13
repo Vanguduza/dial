@@ -2,7 +2,12 @@
  * E2a payments spine (D-43 / D-57 / D-60) — integer money only; AI never writes payables.
  * Phase 0: in-memory SoR + PspAdapter stubs (no live EcoCash/Paynow keys).
  */
-import { type Money, money } from "@dial/shared";
+import {
+  type Money,
+  money,
+  claimProcessedEvent,
+  __resetIdempotencyForTests,
+} from "@dial/shared";
 
 export type PaymentMethodCode =
   | "ecocash_direct"
@@ -402,7 +407,12 @@ export function admitPspWebhookEvent(input: {
   action: "capture" | "ignore";
 }): "captured" | "rejected_signature" | "duplicate" | "ignored" {
   if (!input.signatureValid) return "rejected_signature";
-  if (processedPspEvents.has(input.eventId)) return "duplicate";
+  if (
+    claimProcessedEvent({ eventId: input.eventId, source: "psp" }) ===
+    "duplicate"
+  ) {
+    return "duplicate";
+  }
   processedPspEvents.add(input.eventId);
   if (input.action === "ignore") return "ignored";
   const intent = intents.get(input.intentId);
@@ -665,6 +675,7 @@ export function __resetPaymentsForTests(): void {
   codOrders.clear();
   offerSnapshots.clear();
   processedPspEvents.clear();
+  __resetIdempotencyForTests();
   jobReserves.clear();
   jobReservesByIdem.clear();
   withholding.clear();
