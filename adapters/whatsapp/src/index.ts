@@ -124,9 +124,24 @@ export type SupportTicket = {
   jobId?: string;
 };
 
+export type ReturnClaimPath = "refund_or_replace" | "refund" | "replace";
+
+export type ReturnClaim = {
+  claimId: string;
+  orderId: string;
+  reason: string;
+  path: ReturnClaimPath;
+  status: "open" | "resolved_refund" | "resolved_replace";
+  statusFrom: "erp";
+  customerId?: string;
+  /** Payable amounts never set by AI — human/ERP only when resolving. */
+  resolutionAmountMinor: null;
+};
+
 const sessions = new Map<string, FlowSession>();
 const handoffs = new Map<string, ChatwootHandoff>();
 const supportTickets = new Map<string, SupportTicket>();
+const returnClaims = new Map<string, ReturnClaim>();
 const referrals = new Map<string, { code: string; balancePromoCreditMinor: bigint }>();
 const consentAudit: Array<{
   sessionId: string;
@@ -435,25 +450,50 @@ export function getSupportTicket(ticketId: string): SupportTicket | undefined {
   return t ? { ...t } : undefined;
 }
 
-/** §10 MVP — returns stub (ERP creates claim; Chatwoot not SoR). */
+/** §10 MVP — ERP creates claim; Chatwoot not SoR; AI never writes refund amounts. */
 export function flowSpareReturns(
   sessionId: string,
   input: { orderId: string; reason: string },
-) {
+): { session: FlowSession; claim: ReturnClaim } {
   const session = requireSession(sessionId);
   session.flowId = "FLOW_SPARE_RETURNS";
   session.lastScreen = "returns";
   session.orderId = input.orderId;
-  return {
-    session,
-    claim: {
-      claimId: `ret_${session.sessionId}`,
-      orderId: input.orderId,
-      reason: input.reason,
-      path: "refund_or_replace" as const,
-      statusFrom: "erp" as const,
-    },
+  const claim: ReturnClaim = {
+    claimId: `ret_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    orderId: input.orderId,
+    reason: input.reason,
+    path: "refund_or_replace",
+    status: "open",
+    statusFrom: "erp",
+    resolutionAmountMinor: null,
   };
+  if (session.customerId !== undefined) claim.customerId = session.customerId;
+  returnClaims.set(claim.claimId, claim);
+  return { session, claim: { ...claim } };
+}
+
+export function getReturnClaim(claimId: string): ReturnClaim | undefined {
+  const c = returnClaims.get(claimId);
+  return c ? { ...c } : undefined;
+}
+
+/**
+ * ERP human resolution — refund or replace only.
+ * Never accepts amountMinor from caller (AI-never-writes-money).
+ */
+export function resolveReturnClaim(input: {
+  claimId: string;
+  path: "refund" | "replace";
+}): ReturnClaim {
+  const claim = returnClaims.get(input.claimId);
+  if (!claim) throw new Error("Unknown return claim");
+  if (claim.status !== "open") throw new Error("Claim already resolved");
+  claim.path = input.path;
+  claim.status =
+    input.path === "refund" ? "resolved_refund" : "resolved_replace";
+  claim.resolutionAmountMinor = null;
+  return { ...claim };
 }
 
 /** §10 — referral home (promo credit; no cash-out D-41a / D-42). */
@@ -545,6 +585,7 @@ export function __resetWhatsappForTests(): void {
   __resetIdempotencyForTests();
   handoffs.clear();
   supportTickets.clear();
+  returnClaims.clear();
   referrals.clear();
   consentAudit.length = 0;
 }

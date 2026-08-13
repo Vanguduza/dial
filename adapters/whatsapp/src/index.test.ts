@@ -198,6 +198,35 @@ test("S112 consent audit + referral promo_credit only", async () => {
   assert.match(ref.referral.code, /^REF-/);
 });
 
+test("S113 returns claim ERP stub refund_or_replace path", async () => {
+  __resetWhatsappForTests();
+  const {
+    flowSpareReturns,
+    getReturnClaim,
+    resolveReturnClaim,
+  } = await import("./index.js");
+  const s = startFlow("FLOW_SPARE_RETURNS", "cust_s113");
+  const opened = flowSpareReturns(s.sessionId, {
+    orderId: "ord_s113",
+    reason: "wrong fitment",
+  });
+  assert.equal(opened.claim.path, "refund_or_replace");
+  assert.equal(opened.claim.statusFrom, "erp");
+  assert.equal(opened.claim.status, "open");
+  assert.equal(opened.claim.resolutionAmountMinor, null);
+  assert.equal(getReturnClaim(opened.claim.claimId)?.orderId, "ord_s113");
+  const refunded = resolveReturnClaim({
+    claimId: opened.claim.claimId,
+    path: "refund",
+  });
+  assert.equal(refunded.status, "resolved_refund");
+  assert.equal(refunded.path, "refund");
+  assert.equal(refunded.resolutionAmountMinor, null);
+  assert.throws(() =>
+    resolveReturnClaim({ claimId: opened.claim.claimId, path: "replace" }),
+  );
+});
+
 test("No Baileys / whatsapp-web.js in workspace package.json files (D-40)", () => {
   const roots = [
     join(here, "../../../package.json"),

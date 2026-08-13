@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S112** — consent audit + referral promo_credit — **green** |
+| `current_stage` | **S113** — returns claim ERP stub — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S111** Chatwoot handoff + support ticket — **green** |
-| `next_stage` | **S113** Returns claim ERP stub + refund_or_replace path evidence |
+| `prior_stage` | **S112** consent + referral promo_credit — **green** |
+| `next_stage` | **S114** Money outbox drain fixture + FiscalReceiptQueued side-effect link |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S111 | 2026-08-13 | through Chatwoot support ticket |
-| S112 | 2026-08-13 | consent audit + `@dial/promotions` promo_credit guard |
+| S91–S112 | 2026-08-13 | through consent/referral |
+| S113 | 2026-08-13 | `ReturnClaim` + `resolveReturnClaim` (no AI amounts) |
 
 ## Note
 
