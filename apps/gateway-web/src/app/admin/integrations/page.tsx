@@ -167,7 +167,9 @@ export default function IntegrationsReadinessPage() {
           Related:{" "}
           <a href="/admin/cost-health">Cost / health</a> ·{" "}
           <a href="/admin/fx/daily-zig">Daily ZiG</a> ·{" "}
-          <a href="/admin/command-centre">Command Centre</a>
+          <a href="/admin/command-centre">Command Centre</a> ·{" "}
+          <a href="/api/openapi">OpenAPI</a> ·{" "}
+          <a href="/api/health/integrations">Health JSON</a>
         </p>
       </section>
     </main>

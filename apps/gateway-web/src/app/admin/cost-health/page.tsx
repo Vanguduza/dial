@@ -24,6 +24,12 @@ export default function CostHealthStubPage() {
           <a href="/admin/integrations">/admin/integrations</a>
         </li>
         <li>
+          Health JSON: <a href="/api/health/integrations">/api/health/integrations</a>
+        </li>
+        <li>
+          OpenAPI skeleton: <a href="/api/openapi">/api/openapi</a>
+        </li>
+        <li>
           Command Centre: <a href="/admin/command-centre">/admin/command-centre</a>
         </li>
         <li>Restore drill: docs/security/restore-drill.md</li>

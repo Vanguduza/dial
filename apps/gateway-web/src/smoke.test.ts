@@ -482,6 +482,28 @@ test("S134 OpenAPI skeleton covers health + webhook paths", async () => {
   assert.ok(served.paths?.["/api/health/integrations"]);
 });
 
+test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(cost.includes("/admin/integrations"));
+  assert.ok(cost.includes("/api/openapi"));
+  assert.ok(cost.includes("/api/health/integrations"));
+  assert.ok(integ.includes("/api/openapi"));
+  assert.ok(integ.includes("/api/health/integrations"));
+  assert.ok(readme.includes("/api/openapi"));
+  assert.ok(readme.includes("/admin/integrations"));
+  assert.ok(readme.includes("openapi-gateway.json"));
+});
+
 test("S95 Supabase password → DialSession bridge", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   __resetAuthForTests();

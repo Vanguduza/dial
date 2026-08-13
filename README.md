@@ -88,7 +88,17 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/jobs` | JobClass / Trade / rate-card (T6) |
 | `packages/ai` | guidedIntake + Intelligence Factory stubs (E4a / E6a; D-61 prod path) |
 
-**Build status:** workplan **S90 eng complete** + **S91** integration adapters (fixture CI; sandbox/live when keys set). Customer-open (**S99**) stays human-gated.
+**Build status:** workplan auto-advance on `build/t4-tech-ui` (integration readiness through OpenAPI). Customer-open (**S99**) stays human-gated.
+
+### Gateway integration surface (plug-in)
+
+| URL / doc | Purpose |
+| --- | --- |
+| `/api/health/integrations` | `ready` / `probes` / env groups (no secrets) |
+| `/admin/integrations` | Ops UI for the same snapshot |
+| `/api/openapi` | OpenAPI 3 skeleton (health + webhooks + admin) |
+| [`docs/integrations/README.md`](./docs/integrations/README.md) | Key-drop-in checklist + health group map |
+| [`docs/integrations/openapi-gateway.json`](./docs/integrations/openapi-gateway.json) | Spec file SoR for the skeleton |
 
 See [`docs/integrations/README.md`](./docs/integrations/README.md) for key-drop-in checklist.
 

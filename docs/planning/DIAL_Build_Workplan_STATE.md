@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S134** — Gateway OpenAPI skeleton — **green** |
+| `current_stage` | **S135** — OpenAPI + readiness discovery links — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S133** Admin integrations readiness UI — **green** |
-| `next_stage` | **S135** Link OpenAPI + readiness UI in admin cost-health / README gateway section |
+| `prior_stage` | **S134** Gateway OpenAPI skeleton — **green** |
+| `next_stage` | **S136** Root README build-status refresh + integrations package table accuracy pass |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S133 | 2026-08-13/14 | through admin readiness UI |
-| S134 | 2026-08-14 | `openapi-gateway.json` + `GET /api/openapi` |
+| S91–S134 | 2026-08-13/14 | through OpenAPI skeleton |
+| S135 | 2026-08-14 | admin + README links to OpenAPI / readiness |
 
 ## Note
 
