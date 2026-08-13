@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { dialTokens } from "@dial/design-tokens";
 import { getChecklist, type ChecklistId } from "../../../../lib/tech/stubs";
+import { ChecklistRunner } from "./ChecklistRunner";
 
 export default async function TechChecklistPage({
   params,
@@ -21,22 +21,7 @@ export default async function TechChecklistPage({
         padding: dialTokens.space.md,
       }}
     >
-      <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        <Link href="/tech">Back</Link>
-        <h1
-          style={{
-            fontFamily: `${dialTokens.font.display}, Georgia, serif`,
-            color: dialTokens.color.brand.primary,
-          }}
-        >
-          {list.title}
-        </h1>
-        <ol style={{ lineHeight: 1.7 }}>
-          {list.steps.map((s) => (
-            <li key={s}>{s}</li>
-          ))}
-        </ol>
-      </div>
+      <ChecklistRunner checklist={list} />
     </main>
   );
 }

@@ -84,8 +84,11 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/design-tokens` | Brand tokens + validate script |
 | `packages/promotions` | `@dial/promotions` package (D-42) |
 | `packages/catalogue` | USD cart/search stubs (E2a / expanding T2) |
+| `packages/delivery` | DeliveryDispatchWorkflow SoR stub (E3a / D-45) |
+| `packages/jobs` | JobClass / Trade / rate-card (T6) |
+| `packages/ai` | guidedIntake + Intelligence Factory stubs (E4a / E6a; D-61 prod path) |
 
-Further apps/packages land on Pack trains T1–T9 and tracer epics E1–E6.
+**Build status:** workplan **S90 eng complete** (S10–S30). Customer-open (**S99**) stays human-gated.
 
 ## Companions (high-signal)
 

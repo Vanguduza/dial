@@ -61,9 +61,11 @@ export type Cart = {
 
 export type CatalogueIngestBatch = {
   batchId: string;
-  status: "pending_review" | "approved" | "rejected";
+  status: "pending_review" | "approved" | "rejected" | "published";
   rowCount: number;
   createdAt: string;
+  /** Set after human approve + explicit publish to Meili stub index. */
+  publishedOfferId?: string;
 };
 
 export type CatalogueReviewItem = {
@@ -127,7 +129,7 @@ export const MEILI_SPARE_OFFERS_V1_SETTINGS = {
   ],
 } as const;
 
-const OFFERS: StubOffer[] = [
+const OFFER_SEED: StubOffer[] = [
   {
     offerId: "off_filter_oil_kun26",
     title: "Oil filter (KUN26)",
@@ -159,6 +161,8 @@ const OFFERS: StubOffer[] = [
     brand: "Local",
   },
 ];
+
+const OFFERS: StubOffer[] = [...OFFER_SEED];
 
 const carts = new Map<string, Cart>();
 const ingestBatches = new Map<string, CatalogueIngestBatch>();
@@ -279,7 +283,7 @@ export function getCatalogueIngestBatch(
 
 /**
  * Human approve only (D-53 / D-54) — never auto-publish from AI.
- * Marks review + batch approved; live Meili index remains Phase 0 / E5a.
+ * Marks review + batch approved; publish to Meili stub is a separate step.
  */
 export function approveCatalogueReview(reviewId: string): CatalogueReviewItem {
   const item = reviewQueue.find((r) => r.reviewId === reviewId);
@@ -303,6 +307,30 @@ export function rejectCatalogueReview(reviewId: string): CatalogueReviewItem {
   const batch = ingestBatches.get(item.batchId);
   if (batch) batch.status = "rejected";
   return { ...item };
+}
+
+/**
+ * E5a: after human approve, publish one SKU into Meili stub docs (B2C visible).
+ * Never publishes informal to B2B search (D-49).
+ */
+export function publishApprovedBatchToMeiliStub(input: {
+  batchId: string;
+  offer: StubOffer;
+}): SpareOfferDocument {
+  const batch = ingestBatches.get(input.batchId);
+  if (!batch) throw new Error(`Unknown batch ${input.batchId}`);
+  if (batch.status !== "approved") {
+    throw new Error("Batch must be human-approved before Meili publish");
+  }
+  if (input.offer.offerSource !== "MARKETPLACE") {
+    throw new Error("DIAL_OWNED forbidden (D-58)");
+  }
+  OFFERS.push(input.offer);
+  batch.status = "published";
+  batch.publishedOfferId = input.offer.offerId;
+  const review = reviewQueue.find((r) => r.batchId === input.batchId);
+  if (review) review.offerId = input.offer.offerId;
+  return toMeiliDoc(input.offer);
 }
 
 export function createCart(): Cart {
@@ -362,4 +390,6 @@ export function __resetCatalogueForTests(): void {
   ingestBatches.clear();
   reviewQueue.length = 0;
   searchNoResultEvents.length = 0;
+  OFFERS.length = 0;
+  OFFERS.push(...OFFER_SEED);
 }

@@ -46,10 +46,21 @@ export function parseSessionCookie(cookieHeader: string | null): string | undefi
   return part?.slice(COOKIE.length + 1);
 }
 
+/** Priority resources for T9 / Appendix A.1 IDOR smoke (≥5). */
+export type ProtectedResourceKind =
+  | "job"
+  | "order"
+  | "vehicle"
+  | "promo_credit"
+  | "delivery_job"
+  | "delivery_offer"
+  | "courier_location";
+
 /** Object-level AuthZ stub — resource owner must match session, never body. */
 export function assertResourceAccess(input: {
   session: DialSession;
   resourceOwnerId: string;
+  resourceKind?: ProtectedResourceKind;
   /** Forbidden: callers must not pass body userId as authority. */
   bodyUserId?: string;
 }): void {
@@ -57,8 +68,15 @@ export function assertResourceAccess(input: {
     throw new Error("Refuse body userId for AuthZ (D-47)");
   }
   if (input.session.userId !== input.resourceOwnerId) {
-    throw new Error("IDOR: session user cannot access this resource");
+    const kind = input.resourceKind ? ` (${input.resourceKind})` : "";
+    throw new Error(`IDOR: session user cannot access this resource${kind}`);
   }
+}
+
+/** Authorize before cache read — keys must include userId (D-47). */
+export function userScopedCacheKey(userId: string, suffix: string): string {
+  if (!userId) throw new Error("userId required for cache key");
+  return `u:${userId}:${suffix}`;
 }
 
 export function sessionCookieName(): string {

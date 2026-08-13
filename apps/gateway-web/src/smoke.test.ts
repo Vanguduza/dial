@@ -12,6 +12,7 @@ import {
 } from "@dial/catalogue";
 import {
   __resetPaymentsForTests,
+  admitPspWebhookEvent,
   applyJobReserveWebhook,
   authorizeJobReserve,
   computeTechPayoutWithholding,
@@ -29,12 +30,18 @@ import {
 } from "@dial/identity";
 import { CHECKOUT_PAY_BUTTONS as WA_PAY_BUTTONS } from "@dial/adapter-whatsapp";
 import {
+  attemptCommandCentrePayout,
+  commandCentreBanner,
+} from "@dial/ai";
+import {
   __resetAuthForTests,
   assertResourceAccess,
   createSession,
   getSessionFromToken,
   parseSessionCookie,
   sessionCookieName,
+  userScopedCacheKey,
+  type ProtectedResourceKind,
 } from "./lib/auth/session.js";
 
 test("gateway shell package is wired", () => {
@@ -218,4 +225,87 @@ test("T4 Tech stubs: automotive + emergency checklists; emergency bypass flag", 
   assert.equal(normal.source, "rate_card_stub");
   const emergency = draftTechQuote({ jobClass: "roadside", emergency: true });
   assert.equal(emergency.emergency, true);
+});
+
+/** S30 T9 / Appendix A.1 — ≥5 resource kinds IDOR denied; cache keys user-scoped. */
+test("T9 IDOR: cross-tenant denied on ≥5 priority resources", () => {
+  __resetAuthForTests();
+  const owner = createSession({ email: "owner@dial.test" });
+  const attacker = createSession({ email: "attacker@dial.test" });
+  const kinds: ProtectedResourceKind[] = [
+    "job",
+    "order",
+    "vehicle",
+    "promo_credit",
+    "delivery_job",
+    "delivery_offer",
+    "courier_location",
+  ];
+  assert.ok(kinds.length >= 5);
+  for (const resourceKind of kinds) {
+    assert.throws(() =>
+      assertResourceAccess({
+        session: attacker.session,
+        resourceOwnerId: owner.session.userId,
+        resourceKind,
+      }),
+    );
+    assert.doesNotThrow(() =>
+      assertResourceAccess({
+        session: owner.session,
+        resourceOwnerId: owner.session.userId,
+        resourceKind,
+      }),
+    );
+  }
+  assert.equal(
+    userScopedCacheKey(owner.session.userId, "orders"),
+    `u:${owner.session.userId}:orders`,
+  );
+  assert.throws(() => userScopedCacheKey("", "x"));
+});
+
+/** S30 T9 — webhook signature + idempotency before mutate. */
+test("T9 webhook AC: reject bad signature; duplicate no-op", async () => {
+  __resetPaymentsForTests();
+  assert.equal(
+    admitPspWebhookEvent({
+      eventId: "evt_t9_bad",
+      intentId: "pi_missing",
+      signatureValid: false,
+      action: "capture",
+    }),
+    "rejected_signature",
+  );
+  const reserve = await authorizeJobReserve({
+    jobId: "job_t9",
+    amountUsdMinor: 10_00n,
+    idempotencyKey: "t9-jr",
+  });
+  assert.equal(
+    admitPspWebhookEvent({
+      eventId: "evt_t9_1",
+      intentId: reserve.intentId!,
+      signatureValid: true,
+      action: "capture",
+    }),
+    "captured",
+  );
+  assert.equal(
+    admitPspWebhookEvent({
+      eventId: "evt_t9_1",
+      intentId: reserve.intentId!,
+      signatureValid: true,
+      action: "capture",
+    }),
+    "duplicate",
+  );
+});
+
+/** S30 T9 / D-54 — Simulated → payout path forbidden. */
+test("T9 Simulated Command Centre never auto-pays", () => {
+  assert.equal(commandCentreBanner("simulated").autoPayAllowed, false);
+  assert.throws(() =>
+    attemptCommandCentrePayout({ mode: "simulated", amountMinor: 50_00n }),
+  );
 });

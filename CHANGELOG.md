@@ -31,6 +31,15 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - S22 T3 Spare UI **green**: checkout pay-step EcoCash|COD (ZiG only at pay); viewport DoD; WA button parity ([#11](https://github.com/Vanguduza/dial/issues/11)).
 - S23 T5 Money spine **green**: Take-Home UI/API; ledger + withholding SQL stubs; PSP/JobReserve/WHT evidence ([#12](https://github.com/Vanguduza/dial/issues/12)).
 - S24 T4 Tech UI thin vertical started: `/tech` home, book, emergency (AI bypass), automotive + emergency checklists ([#13](https://github.com/Vanguduza/dial/issues/13)).
+- S24 T4 **green**: interactive checklist runner + Services link ([#13](https://github.com/Vanguduza/dial/issues/13)).
+- S25 E3a **green**: `@dial/delivery` DeliveryDispatchWorkflow thin (offer/accept/reject/timeout/FIFO/POD/COD) + Matrix C + MapLibre admin stub.
+- S26 T6 **green**: `@dial/jobs` JobClass/Trade, rate-card quote, Value Score eligibility.
+- S27 E4a thin started: `@dial/ai` guidedIntake Zod JobAssessment (no price) + capability audit.
+- S28 E5a **green**: human approve → Meili stub publish; B2B informal leak=0.
+- S29 E6a/T8 **green**: MetricContract registry + Command Centre Simulated never auto-pays.
+- S30 T9 Hardening thin started (IDOR/webhook/Semgrep baseline already in tree — expand evidence).
+- S30 T9 **green**: cross-tenant IDOR ≥5 resources; PSP webhook sig+idempotency; Simulated≠pay; restore-drill stub; security headers middleware; cost/health stub.
+- S90 Eng Build **complete** (S10–S30 green); S99 customer-open remains human-gated.
 - S20 T1 Identity **green** (Pack §15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).

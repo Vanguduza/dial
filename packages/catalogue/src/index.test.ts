@@ -12,6 +12,7 @@ import {
   listSearchNoResultEvents,
   MEILI_SPARE_OFFERS_V1_SETTINGS,
   meiliFilterForSession,
+  publishApprovedBatchToMeiliStub,
   rejectCatalogueReview,
   searchOffers,
 } from "./index.js";
@@ -88,4 +89,61 @@ test("T2 human approve/reject — no auto-publish (D-53/D-54)", () => {
   const rejected = rejectCatalogueReview(queued2.reviewId);
   assert.equal(rejected.status, "rejected");
   assert.equal(getCatalogueIngestBatch(batch2.batchId)?.status, "rejected");
+});
+
+test("E5a CSV→approve→Meili stub; B2B informal leak=0", () => {
+  __resetCatalogueForTests();
+  assert.throws(() =>
+    publishApprovedBatchToMeiliStub({
+      batchId: "missing",
+      offer: {
+        offerId: "x",
+        title: "x",
+        unitPriceUsdMinor: 1n,
+        qualityTier: "OES",
+        offerSource: "MARKETPLACE",
+        supplierFormality: "formal",
+        oem: "X",
+        brand: "X",
+      },
+    }),
+  );
+  const batch = enqueueCatalogueIngest(1);
+  assert.throws(() =>
+    publishApprovedBatchToMeiliStub({
+      batchId: batch.batchId,
+      offer: {
+        offerId: "off_e5a_formal",
+        title: "E5a formal SKU",
+        unitPriceUsdMinor: 15_00n,
+        qualityTier: "OES",
+        offerSource: "MARKETPLACE",
+        supplierFormality: "formal",
+        oem: "E5A-1",
+        brand: "Test",
+      },
+    }),
+  );
+  approveCatalogueReview(listCatalogueReviewQueue()[0]!.reviewId);
+  publishApprovedBatchToMeiliStub({
+    batchId: batch.batchId,
+    offer: {
+      offerId: "off_e5a_formal",
+      title: "E5a formal SKU",
+      unitPriceUsdMinor: 15_00n,
+      qualityTier: "OES",
+      offerSource: "MARKETPLACE",
+      supplierFormality: "formal",
+      oem: "E5A-1",
+      brand: "Test",
+    },
+  });
+  assert.equal(getCatalogueIngestBatch(batch.batchId)?.status, "published");
+  assert.ok(searchOffers("E5a", { sessionRole: "b2c" }).some((o) => o.offerId === "off_e5a_formal"));
+  assert.ok(searchOffers("E5a", { sessionRole: "b2b" }).some((o) => o.offerId === "off_e5a_formal"));
+  assert.equal(
+    searchOffers("wiper", { sessionRole: "b2b" }).filter((o) => o.supplierFormality === "informal")
+      .length,
+    0,
+  );
 });

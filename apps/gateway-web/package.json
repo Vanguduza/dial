@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@dial/adapter-whatsapp": "workspace:*",
+    "@dial/ai": "workspace:*",
     "@dial/catalogue": "workspace:*",
     "@dial/design-tokens": "workspace:*",
     "@dial/identity": "workspace:*",

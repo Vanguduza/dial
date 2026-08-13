@@ -87,17 +87,17 @@ Locks: D-44, D-45, D-45a
 
 | AC | delivery-android | admin-web MapLibre | Customer track | Evidence |
 | --- | --- | --- | --- | --- |
-| Job created in `packages/delivery` (not Fleetbase) | | | | |
-| `DeliveryDispatchWorkflow` offers to eligible courier | | | | |
-| Accept / reject / timeout → reassign | | | | |
-| Zero couriers → FIFO queue | | | | |
-| Live GPS + ETA (MapLibre) | | | | |
-| Distance/ETA from OSRM/VROOM not Google SoR | | | | |
-| POD captured | | | | |
-| COD reconcile hook | | | | |
-| Multi-stop run (if in MVP AC) | | | | |
+| Job created in `packages/delivery` (not Fleetbase) | stub | Y | stub | T `@dial/delivery` createDeliveryJob |
+| `DeliveryDispatchWorkflow` offers to eligible courier | stub | Y | stub | T startDeliveryDispatchWorkflow |
+| Accept / reject / timeout → reassign | stub | Y | stub | T accept/reject/timeout |
+| Zero couriers → FIFO queue | stub | Y | stub | T listFifoQueue drain |
+| Live GPS + ETA (MapLibre) | stub | stub UI | stub | S `/admin/delivery/track` MapLibre placeholder |
+| Distance/ETA from OSRM/VROOM not Google SoR | stub | Y | stub | T estimateRouteStub provider=osrm_vroom_stub |
+| POD captured | stub | Y | stub | T capturePod |
+| COD reconcile hook | stub | Y | stub | T reconcileCodAfterPod |
+| Multi-stop run (if in MVP AC) | N/A | N/A | N/A | out of E3a thin |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager auto — 2026-08-13 — E3a package thin green; MapLibre live tiles Phase 0 stub
 
 ---
 
@@ -108,14 +108,14 @@ Locks: C-1, D-32, D-54, D-56
 
 | AC | Tech web | WA Tech | Ops admin | Evidence |
 | --- | --- | --- | --- | --- |
-| guidedIntake Zod structured output | | | N/A | P |
-| No payable / price in customer assessment | | | | P |
-| D-32 omit identity in model egress | | | | P |
-| opsDraftQuote humanApprovalRequired; no ledger write | N/A | N/A | | P+A |
-| `dial-ai-capability-review` before merge | | | | A |
-| Promptfoo CI smoke (T7) | | | | P |
+| guidedIntake Zod structured output | Y | stub | N/A | T `@dial/ai` + audit |
+| No payable / price in customer assessment | Y | Y | Y | T assertNoPayableKeys |
+| D-32 omit identity in model egress | Y | Y | Y | T toModelEgress |
+| opsDraftQuote humanApprovalRequired; no ledger write | N/A | N/A | Y | T opsDraftQuoteFromAssessment |
+| `dial-ai-capability-review` before merge | | | | A docs/agent-audits/ai-capability-E4a-2026-08-13.md |
+| Promptfoo CI smoke (T7) | | | | P deferred stub |
 
-**DoD 100% sign-off:** _____________ date _____________
+**DoD 100% sign-off:** Dev Manager — 2026-08-13 — E4a thin stub green; Promptfoo before live LLM
 
 ---
 

@@ -11,6 +11,7 @@ Canonical companion: **[`DIAL_Security_Toolchain.md`](../../DIAL_Security_Toolch
 | IaC | Checkov | [`.github/workflows/checkov.yml`](../../.github/workflows/checkov.yml) — hard-fail HIGH/CRITICAL |
 | Dependencies | Renovate | `renovate.json` — Dependabot version PRs off ([`.github/dependabot.yml`](../../.github/dependabot.yml)) |
 | Pre-prod | Strix | [`strix-runbook.md`](./strix-runbook.md) + [`.github/workflows/strix-staging.yml`](../../.github/workflows/strix-staging.yml) |
+| Restore | Ops drill stub | [`restore-drill.md`](./restore-drill.md) (T9) |
 
 ## CI gate summary
 

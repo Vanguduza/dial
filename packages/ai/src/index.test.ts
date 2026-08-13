@@ -1,0 +1,78 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import {
+  guidedIntake,
+  opsDraftQuoteFromAssessment,
+  toModelEgress,
+  attemptCommandCentrePayout,
+  commandCentreBanner,
+  evaluateShadowPromote,
+  listMetricContracts,
+  recordOutcomeWeightedDataset,
+  registerMetricContract,
+  __resetIntelligenceForTests,
+} from "./index.js";
+
+test("E4a guidedIntake: Zod assessment, no price, identity omitted from egress", () => {
+  const egress = toModelEgress({
+    customerText: "Car won't start, maybe battery",
+    customerUserId: "usr_secret",
+    customerPhone: "+26377",
+  });
+  assert.equal(egress.text.includes("usr_secret"), false);
+  assert.equal("customerUserId" in egress, false);
+
+  const assessment = guidedIntake({
+    customerText: "Car won't start, maybe battery",
+    customerUserId: "usr_secret",
+  });
+  assert.equal(assessment.needsHumanQuote, true);
+  assert.equal(assessment.urgency, "emergency");
+  assert.equal(assessment.likelyJobClass, "jc_roadside");
+  assert.equal("price" in assessment, false);
+  assert.equal("amountMinor" in assessment, false);
+
+  const draft = opsDraftQuoteFromAssessment(assessment);
+  assert.equal(draft.humanApprovalRequired, true);
+  assert.equal(draft.ledgerWrite, false);
+});
+
+test("E6a/T8 MetricContract + shadow promote + Simulated never auto-pays", () => {
+  __resetIntelligenceForTests();
+  registerMetricContract({
+    id: "metric.on_time_pod",
+    source: "delivery.pod",
+    calculation: "count(pod_on_time)/count(pod)",
+    thresholds: { warn: 0.9, critical: 0.8 },
+    ownerRole: "ops_admin",
+  });
+  assert.equal(listMetricContracts().length, 1);
+  assert.equal(recordOutcomeWeightedDataset().outcomeWeighted, true);
+  assert.equal(
+    evaluateShadowPromote({
+      shadowId: "sh_1",
+      promptfooPassed: true,
+      humanApproved: false,
+    }).canPromote,
+    false,
+  );
+  assert.equal(
+    evaluateShadowPromote({
+      shadowId: "sh_1",
+      promptfooPassed: true,
+      humanApproved: true,
+    }).canPromote,
+    true,
+  );
+  const sim = commandCentreBanner("simulated");
+  assert.equal(sim.autoPayAllowed, false);
+  assert.ok(sim.watermark.includes("SIMULATED"));
+  assert.throws(() =>
+    attemptCommandCentrePayout({ mode: "simulated", amountMinor: 1_00n }),
+  );
+  const actual = attemptCommandCentrePayout({
+    mode: "actual",
+    amountMinor: 1_00n,
+  });
+  assert.equal(actual.refused, true);
+});
