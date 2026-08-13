@@ -491,6 +491,9 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(cost.includes("/admin/integrations"));
   assert.ok(cost.includes("/api/openapi"));
   assert.ok(cost.includes("/api/health/integrations"));
+  assert.ok(cost.includes("INTEGRATION_ENV_GROUPS"));
+  assert.ok(cost.includes("openapi-primary-link"));
+  assert.ok(cost.includes("env-groups-sor-hint"));
   assert.ok(integ.includes("/api/openapi"));
   assert.ok(integ.includes("/api/health/integrations"));
   assert.ok(integ.includes("INTEGRATION_ENV_GROUPS"));

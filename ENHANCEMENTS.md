@@ -64,6 +64,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-077 | **Shared INTEGRATION_ENV_GROUPS** | `done` | S139 — env group SoR for health + .env.example |
 | ENH-078 | **Document INTEGRATION_ENV_GROUPS SoR** | `done` | S140 — README + OpenAPI x-dial-sor |
 | ENH-079 | **Admin readiness SoR hint + OpenAPI CTA** | `done` | S141 — `/admin/integrations` UI |
+| ENH-080 | **Cost-health OpenAPI CTA + SoR hint** | `done` | S142 — parity with readiness UI |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

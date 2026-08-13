@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S141** — Admin SoR hint + OpenAPI CTA — **green** |
+| `current_stage` | **S142** — Cost-health OpenAPI CTA + SoR hint — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S140** Document INTEGRATION_ENV_GROUPS SoR — **green** |
-| `next_stage` | **S142** Cost-health stub mirrors OpenAPI primary CTA + SoR hint |
+| `prior_stage` | **S141** Admin SoR hint + OpenAPI CTA — **green** |
+| `next_stage` | **S143** Fixture-mode health smoke asserts group labels from INTEGRATION_ENV_GROUPS only |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S140 | 2026-08-13/14 | through INTEGRATION_ENV_GROUPS docs |
-| S141 | 2026-08-14 | `/admin/integrations` SoR hint + OpenAPI CTA |
+| S91–S141 | 2026-08-13/14 | through admin readiness SoR/OpenAPI CTA |
+| S142 | 2026-08-14 | cost-health OpenAPI CTA + SoR hint |
 
 ## Note
 

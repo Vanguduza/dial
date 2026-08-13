@@ -1,5 +1,6 @@
 /**
  * T9 cost/health dashboard stub — no live secrets; links to MetricContract / CC.
+ * S142: OpenAPI primary CTA + INTEGRATION_ENV_GROUPS SoR hint (parity with /admin/integrations).
  */
 export default function CostHealthStubPage() {
   return (
@@ -13,9 +14,34 @@ export default function CostHealthStubPage() {
       }}
     >
       <h1 style={{ fontSize: "1.5rem", margin: "0 0 0.5rem" }}>Cost / health (stub)</h1>
-      <p style={{ margin: "0 0 1rem", maxWidth: "36rem", color: "#94a3b8" }}>
+      <p style={{ margin: "0 0 0.75rem", maxWidth: "36rem", color: "#94a3b8" }}>
         T9 placeholder for LiteLLM/Gemini spend + worker health. Money SoR remains ledger
         packages — this page never authorizes payouts.
+      </p>
+      <p
+        style={{ margin: "0 0 1rem", maxWidth: "36rem", color: "#94a3b8", fontSize: 13 }}
+        data-testid="env-groups-sor-hint"
+      >
+        Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> (OpenAPI{" "}
+        <code>info.x-dial-sor</code>) — see readiness UI for live probes.
+      </p>
+      <p style={{ margin: "0 0 1.25rem" }}>
+        <a
+          href="/api/openapi"
+          data-testid="openapi-primary-link"
+          style={{
+            display: "inline-block",
+            padding: "10px 14px",
+            borderRadius: 8,
+            border: "1px solid #64748b",
+            color: "#e2e8f0",
+            textDecoration: "none",
+            fontWeight: 600,
+            fontSize: 14,
+          }}
+        >
+          OpenAPI skeleton
+        </a>
       </p>
       <ul style={{ margin: 0, paddingLeft: "1.25rem", lineHeight: 1.6 }}>
         <li>LLM cost events → outbox (AI cost) — not implemented live</li>
