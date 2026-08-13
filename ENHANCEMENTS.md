@@ -54,6 +54,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-067 | **WhatsApp Cloud health ping** | `done` | S129 — pingWhatsAppHealth + ready probe |
 | ENH-068 | **PSP health ping aggregate** | `done` | S130 — pingPspHealth rails + ready probe |
 | ENH-069 | **Internal API secret health probe** | `done` | S131 — pingInternalApiHealth + ready probe |
+| ENH-070 | **`.env.example` ↔ health groups sync** | `done` | S132 — keys + WA_TEMPLATE_* + checklist table |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

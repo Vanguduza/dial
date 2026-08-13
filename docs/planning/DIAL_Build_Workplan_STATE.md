@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S131** — Internal API secret health probe — **green** |
+| `current_stage` | **S132** — `.env.example` ↔ health groups sync — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S130** PSP health ping aggregate — **green** |
-| `next_stage` | **S132** `.env.example` sync with health groups + readiness checklist cross-links |
+| `prior_stage` | **S131** Internal API secret health — **green** |
+| `next_stage` | **S133** Admin integrations readiness UI (ready/probes snapshot) |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S130 | 2026-08-13/14 | through PSP health ping |
-| S131 | 2026-08-14 | `pingInternalApiHealth` + health `internal` / probes |
+| S91–S131 | 2026-08-13/14 | through internal API health |
+| S132 | 2026-08-14 | `.env.example` + checklist table + smoke sync |
 
 ## Note
 

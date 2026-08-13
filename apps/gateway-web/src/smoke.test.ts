@@ -368,6 +368,77 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
   assert.equal(/Bearer\s+\w+/.test(blob), false);
 });
 
+test("S132 .env.example lists every integrations health group key", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  const { GET } = await import("./app/api/health/integrations/route.js");
+  const res = await GET();
+  const body = (await res.json()) as {
+    groups: Array<{ label: string }>;
+  };
+  assert.equal(
+    body.groups.map((g) => g.label).sort().join(","),
+    [
+      "contipay",
+      "ecocash",
+      "escrow",
+      "fdms",
+      "internal",
+      "litellm",
+      "maps",
+      "meili",
+      "paynow",
+      "paypal",
+      "redis",
+      "temporal",
+      "whatsapp",
+    ].join(","),
+  );
+  const requiredKeys = [
+    "WHATSAPP_TOKEN",
+    "WHATSAPP_PHONE_NUMBER_ID",
+    "WHATSAPP_APP_SECRET",
+    "WHATSAPP_VERIFY_TOKEN",
+    "PAYNOW_INTEGRATION_ID",
+    "PAYNOW_INTEGRATION_KEY",
+    "CONTIPAY_API_KEY",
+    "CONTIPAY_API_SECRET",
+    "CONTIPAY_MERCHANT_ID",
+    "ECOCASH_API_KEY",
+    "ECOCASH_MERCHANT_CODE",
+    "ECOCASH_WEBHOOK_SECRET",
+    "PAYPAL_CLIENT_ID",
+    "PAYPAL_CLIENT_SECRET",
+    "PAYPAL_WEBHOOK_ID",
+    "PSP_ESCROW_BASE_URL",
+    "PSP_ESCROW_API_KEY",
+    "PSP_WEBHOOK_SECRET",
+    "FDMS_BASE_URL",
+    "FDMS_DEVICE_ID",
+    "FDMS_ACTIVATION_KEY",
+    "MEILI_HOST",
+    "MEILI_MASTER_KEY",
+    "LITELLM_BASE_URL",
+    "LITELLM_API_KEY",
+    "NOMINATIM_URL",
+    "OSRM_URL",
+    "TEMPORAL_ADDRESS",
+    "TEMPORAL_NAMESPACE",
+    "REDIS_URL",
+    "INTERNAL_API_SECRET",
+  ];
+  for (const key of requiredKeys) {
+    assert.ok(envExample.includes(`${key}=`), `.env.example missing ${key}`);
+  }
+  assert.ok(envExample.includes("WA_TEMPLATE_SPARE_ORDER_CONFIRMED="));
+  assert.ok(envExample.includes("docs/integrations/README.md"));
+});
+
 test("S95 Supabase password → DialSession bridge", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   __resetAuthForTests();

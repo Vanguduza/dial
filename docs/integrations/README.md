@@ -57,6 +57,26 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 
 **`ready` meaning:** aggregate of Temporal, LiteLLM, Maps, FDMS, Meili, Queues, WhatsApp, PSP, and Internal API secret health probes — not a substitute for ops credential approval.
 
+### Health groups ↔ `.env.example` (S132)
+
+| Health `groups[].label` | Keys (must appear in root `.env.example`) |
+| --- | --- |
+| `whatsapp` | `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_APP_SECRET`, `WHATSAPP_VERIFY_TOKEN` |
+| `paynow` | `PAYNOW_INTEGRATION_ID`, `PAYNOW_INTEGRATION_KEY` |
+| `contipay` | `CONTIPAY_API_KEY`, `CONTIPAY_API_SECRET`, `CONTIPAY_MERCHANT_ID` |
+| `ecocash` | `ECOCASH_API_KEY`, `ECOCASH_MERCHANT_CODE`, `ECOCASH_WEBHOOK_SECRET` |
+| `paypal` | `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_WEBHOOK_ID` |
+| `escrow` | `PSP_ESCROW_BASE_URL`, `PSP_ESCROW_API_KEY`, `PSP_WEBHOOK_SECRET` |
+| `fdms` | `FDMS_BASE_URL`, `FDMS_DEVICE_ID`, `FDMS_ACTIVATION_KEY` |
+| `meili` | `MEILI_HOST`, `MEILI_MASTER_KEY` |
+| `litellm` | `LITELLM_BASE_URL`, `LITELLM_API_KEY` |
+| `maps` | `NOMINATIM_URL`, `OSRM_URL` (+ optional `VROOM_URL`) |
+| `temporal` | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
+| `redis` | `REDIS_URL` |
+| `internal` | `INTERNAL_API_SECRET` |
+
+Template overrides (not in health groups): `WA_TEMPLATE_*` — see ENH-021 / `docs/ops/meta-wa-template-ids.md`.
+
 ## Still ops / credentials (eng continues either way)
 
 - Meta template IDs (`docs/ops/meta-wa-template-ids.md`, ENH-021)
