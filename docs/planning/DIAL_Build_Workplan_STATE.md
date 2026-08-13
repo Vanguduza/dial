@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S135** — OpenAPI + readiness discovery links — **green** |
+| `current_stage` | **S136** — README + integrations package table accuracy — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S134** Gateway OpenAPI skeleton — **green** |
-| `next_stage` | **S136** Root README build-status refresh + integrations package table accuracy pass |
+| `prior_stage` | **S135** OpenAPI + readiness discovery links — **green** |
+| `next_stage` | **S137** Expand OpenAPI schemas for IntegrationsHealth probes enum |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S134 | 2026-08-13/14 | through OpenAPI skeleton |
-| S135 | 2026-08-14 | admin + README links to OpenAPI / readiness |
+| S91–S135 | 2026-08-13/14 | through discovery links |
+| S136 | 2026-08-14 | README layout + integrations package table smoke |
 
 ## Note
 

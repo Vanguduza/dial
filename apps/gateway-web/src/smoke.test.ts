@@ -504,6 +504,53 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(readme.includes("openapi-gateway.json"));
 });
 
+test("S136 integrations README package table matches workspace package names", async () => {
+  const { readFileSync, readdirSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const root = join(process.cwd(), "../..");
+  const integ = readFileSync(join(root, "docs/integrations/README.md"), "utf8");
+  const readme = readFileSync(join(root, "README.md"), "utf8");
+  const names = new Set<string>();
+  for (const dir of ["packages", "adapters", "apps"] as const) {
+    for (const entry of readdirSync(join(root, dir), { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      try {
+        const pkg = JSON.parse(
+          readFileSync(join(root, dir, entry.name, "package.json"), "utf8"),
+        ) as { name?: string };
+        if (pkg.name) names.add(pkg.name);
+      } catch {
+        /* skip */
+      }
+    }
+  }
+  const mentioned = [
+    "@dial/adapter-psp",
+    "@dial/adapter-fdms",
+    "@dial/adapter-maps",
+    "@dial/adapter-whatsapp",
+    "@dial/catalogue",
+    "@dial/payments",
+    "@dial/ledger",
+    "@dial/queues",
+    "@dial/worker-temporal",
+    "@dial/worker-queues",
+    "@dial/search-indexer",
+    "@dial/tax",
+    "@dial/shared",
+    "@dial/ai",
+    "@dial/gateway-web",
+  ];
+  for (const n of mentioned) {
+    assert.ok(names.has(n), `workspace missing ${n}`);
+    assert.ok(integ.includes(n), `integrations README missing ${n}`);
+  }
+  assert.ok(readme.includes("adapters/psp"));
+  assert.ok(readme.includes("apps/worker-queues"));
+  assert.ok(readme.includes("packages/ledger"));
+  assert.ok(readme.includes("S136") || readme.includes("S135"));
+});
+
 test("S95 Supabase password → DialSession bridge", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   __resetAuthForTests();

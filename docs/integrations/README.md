@@ -14,18 +14,21 @@
 
 | Package | Covers | Env (see `.env.example`) |
 | --- | --- | --- |
-| `@dial/adapter-psp` | Paynow / ContiPay / EcoCash / PayPal / COD / escrow | `PAYNOW_*`, `CONTIPAY_*`, `ECOCASH_*`, `PAYPAL_*`, `PSP_ESCROW_*` |
-| `@dial/adapter-fdms` | ZIMRA Virtual Gateway open/submit/close | `FDMS_*` |
-| `@dial/adapter-maps` | Nominatim / OSRM / VROOM | `NOMINATIM_URL`, `OSRM_URL`, `VROOM_URL` |
-| `@dial/adapter-whatsapp` Cloud API | Graph send template/text + GET verify | `WHATSAPP_*` |
-| `@dial/catalogue` Meili client | Index settings + upsert | `MEILI_*` |
-| `@dial/queues` | BullMQ search + outbox + FDMS day queues | `REDIS_URL`, `INTERNAL_API_SECRET` |
-| `@dial/worker-temporal` | DeliveryDispatch in-process + Temporal client/SDK worker | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
+| `@dial/adapter-psp` | Paynow / ContiPay / EcoCash / PayPal / COD / escrow + `pingPspHealth` | `PAYNOW_*`, `CONTIPAY_*`, `ECOCASH_*`, `PAYPAL_*`, `PSP_ESCROW_*` |
+| `@dial/adapter-fdms` | ZIMRA Virtual Gateway open/submit/close + `pingFdmsHealth` | `FDMS_*` |
+| `@dial/adapter-maps` | Nominatim / OSRM / VROOM + `pingMapsHealth` | `NOMINATIM_URL`, `OSRM_URL`, `VROOM_URL` |
+| `@dial/adapter-whatsapp` | Cloud API send/verify + templates + `pingWhatsAppHealth` | `WHATSAPP_*`, optional `WA_TEMPLATE_*` |
+| `@dial/catalogue` | Meili client + informal B2B leak=0 + `pingMeiliHealth` | `MEILI_*` |
+| `@dial/payments` | Checkout / Job Reserve / FX / PSP admit SoR | (via PSP adapters) |
+| `@dial/ledger` | Journal + `drainMoneyOutbox` → fiscal side-effects | — |
+| `@dial/queues` | BullMQ search + outbox + FDMS day + `pingQueuesHealth` | `REDIS_URL`, `INTERNAL_API_SECRET` |
+| `@dial/worker-temporal` | DeliveryDispatch in-process + Temporal client/SDK + `pingTemporalHealth` | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
 | `@dial/worker-queues` | BullMQ FDMS day + search-indexer + money outbox workers | `REDIS_URL` (non-fixture) |
 | `@dial/search-indexer` | Meili reindex jobs via queues | `MEILI_*`, `REDIS_URL` |
 | `@dial/tax` | FDMS outbox drain + fiscal-day open/close | `FDMS_*` |
-| `@dial/shared` idempotency | `claimProcessedEvent` (→ SQL `processed_events`) | — |
-| `@dial/ai` Promptfoo smoke | `pnpm eval:smoke` / CI guidedIntake no-money | optional `LITELLM_*` |
+| `@dial/shared` | Idempotency + `pingInternalApiHealth` | `INTERNAL_API_SECRET` (sandbox/live) |
+| `@dial/ai` | Promptfoo smoke + `pingLiteLlm` | optional `LITELLM_*` |
+| `@dial/gateway-web` | Health / OpenAPI / webhooks / admin readiness UI | all groups above |
 
 ## Gateway webhook routes
 

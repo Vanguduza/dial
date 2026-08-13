@@ -74,21 +74,32 @@ pnpm dev:gateway
 
 Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + test; **post-commit auto-pushes** the current branch to [`Vanguduza/dial`](https://github.com/Vanguduza/dial) via `scripts/git-auto-push.ps1` / `.sh` (never force). CI under `.github/workflows/`.
 
-### Current T0 layout (expanding)
+### Current layout (T0 + integration spine)
 
 | Path | Notes |
 | --- | --- |
-| `apps/gateway-web` | Auth-first Next.js gateway (sign-in/up → Shop\|Services home) |
+| `apps/gateway-web` | Auth-first Next.js gateway + health/OpenAPI/webhooks/admin |
+| `apps/worker-temporal` | DeliveryDispatch Temporal client/SDK worker |
+| `apps/worker-queues` | BullMQ FDMS day + search-indexer + money outbox workers |
+| `adapters/psp` | Paynow / ContiPay / EcoCash / PayPal / COD / escrow |
+| `adapters/fdms` | ZIMRA Virtual Gateway (agency receipt classes) |
+| `adapters/maps` | Nominatim / OSRM / VROOM (D-44) |
+| `adapters/whatsapp` | Official Cloud API only (D-40) |
 | `packages/identity` | Profiles + RLS policy stub/tests (Pack T1 / §12) |
-| `packages/shared` | Shared types (e.g. `amountMinor` + `currency`) |
+| `packages/shared` | Money types + idempotency + internal API health |
 | `packages/design-tokens` | Brand tokens + validate script |
-| `packages/promotions` | `@dial/promotions` package (D-42) |
-| `packages/catalogue` | USD cart/search stubs (E2a / expanding T2) |
-| `packages/delivery` | DeliveryDispatchWorkflow SoR stub (E3a / D-45) |
+| `packages/promotions` | `@dial/promotions` (D-42) |
+| `packages/catalogue` | USD cart/search + Meili client (D-57 / D-49) |
+| `packages/delivery` | Delivery job SoR + maps bridge (D-45) |
 | `packages/jobs` | JobClass / Trade / rate-card (T6) |
-| `packages/ai` | guidedIntake + Intelligence Factory stubs (E4a / E6a; D-61 prod path) |
+| `packages/payments` | Checkout / Job Reserve / FX / PSP admit |
+| `packages/ledger` | Journal + money outbox drain |
+| `packages/tax` | FDMS outbox + fiscal-day open/close |
+| `packages/queues` | BullMQ queue hosts + health pings |
+| `packages/search-indexer` | Meili reindex jobs |
+| `packages/ai` | guidedIntake + LiteLLM + Intelligence stubs (D-61) |
 
-**Build status:** workplan auto-advance on `build/t4-tech-ui` (integration readiness through OpenAPI). Customer-open (**S99**) stays human-gated.
+**Build status:** auto-advance on `build/t4-tech-ui` — integration readiness through **S136** (README + package table accuracy). Customer-open (**S99**) stays human-gated.
 
 ### Gateway integration surface (plug-in)
 
