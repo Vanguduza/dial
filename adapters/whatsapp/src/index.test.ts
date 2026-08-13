@@ -188,3 +188,28 @@ test("Cloud API fixture send + webhook challenge (key-ready)", async () => {
   assert.equal(ok.ok, true);
   if (ok.ok) assert.equal(ok.challenge, "12345");
 });
+
+test("S106 template registry + sendRegisteredTemplate fixture", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.WA_TEMPLATE_SPARE_ORDER_CONFIRMED;
+  const {
+    listWaTemplateRegistry,
+    resolveWaTemplate,
+  } = await import("./templateRegistry.js");
+  const list = listWaTemplateRegistry();
+  assert.ok(list.length >= 4);
+  assert.equal(resolveWaTemplate("SPARE_ORDER_CONFIRMED").status, "stub");
+  process.env.WA_TEMPLATE_SPARE_ORDER_CONFIRMED = "spare_order_confirmed_v2";
+  assert.equal(resolveWaTemplate("SPARE_ORDER_CONFIRMED").status, "approved");
+  assert.equal(
+    resolveWaTemplate("SPARE_ORDER_CONFIRMED").templateName,
+    "spare_order_confirmed_v2",
+  );
+  const { MetaCloudApiAdapter } = await import("./cloudApi.js");
+  const sent = await new MetaCloudApiAdapter().sendRegisteredTemplate({
+    toE164: "+263771234567",
+    key: "SPARE_ORDER_CONFIRMED",
+  });
+  assert.ok(sent.messageId.includes("spare_order_confirmed_v2"));
+  delete process.env.WA_TEMPLATE_SPARE_ORDER_CONFIRMED;
+});

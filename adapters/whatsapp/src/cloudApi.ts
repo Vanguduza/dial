@@ -49,28 +49,50 @@ export class MetaCloudApiAdapter implements WhatsAppCloudAdapter {
     }
     const token = requireSecret("WHATSAPP_TOKEN");
     const phoneId = requireSecret("WHATSAPP_PHONE_NUMBER_ID");
+    const body: Record<string, unknown> = {
+      messaging_product: "whatsapp",
+      to: input.toE164.replace(/^\+/, ""),
+      type: "template",
+      template: {
+        name: input.templateName,
+        language: { code: input.language },
+        ...(input.components !== undefined
+          ? { components: input.components }
+          : {}),
+      },
+    };
     const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to: input.toE164.replace(/^\+/, ""),
-        type: "template",
-        template: {
-          name: input.templateName,
-          language: { code: input.language },
-          components: input.components,
-        },
-      }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error(`WA template HTTP ${res.status}`);
     const data = (await res.json()) as {
       messages?: Array<{ id?: string }>;
     };
     return { messageId: data.messages?.[0]?.id ?? "unknown" };
+  }
+
+  /** Send using registry key — resolves env-approved name when present. */
+  async sendRegisteredTemplate(input: {
+    toE164: string;
+    key: import("./templateRegistry.js").WaTemplateKey;
+    components?: unknown;
+  }): Promise<{ messageId: string; binding: import("./templateRegistry.js").WaTemplateBinding }> {
+    const { resolveWaTemplate } = await import("./templateRegistry.js");
+    const binding = resolveWaTemplate(input.key);
+    const sent = await this.sendUtilityTemplate({
+      toE164: input.toE164,
+      templateName: binding.templateName,
+      language: binding.language,
+      ...(input.components !== undefined
+        ? { components: input.components }
+        : {}),
+    });
+    return { messageId: sent.messageId, binding };
   }
 
   async sendSessionText(input: {

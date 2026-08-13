@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S105** — Paynow redirect + escrow hold/release — **green** |
+| `current_stage` | **S106** — Meta WA template registry + Cloud send — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S104** ContiPay/EcoCash + COD USD — **green** |
-| `next_stage` | **S106** Meta WA Cloud send fixture + template id registry stub |
+| `prior_stage` | **S105** Paynow + escrow stubs — **green** |
+| `next_stage` | **S107** FDMS submitReceipt live-shape fixture + day worker queue drain |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S104 | 2026-08-13 | through ContiPay/EcoCash/COD fixtures |
-| S105 | 2026-08-13 | Paynow redirect/poll + escrow hold/release stub |
+| S91–S105 | 2026-08-13 | through Paynow/escrow fixtures |
+| S106 | 2026-08-13 | `resolveWaTemplate` + `sendRegisteredTemplate` |
 
 ## Note
 

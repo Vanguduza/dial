@@ -444,3 +444,10 @@ export {
   verifyMetaSignature as verifyMetaSignatureCloud,
   type WhatsAppCloudAdapter,
 } from "./cloudApi.js";
+
+export {
+  listWaTemplateRegistry,
+  resolveWaTemplate,
+  type WaTemplateBinding,
+  type WaTemplateKey,
+} from "./templateRegistry.js";
