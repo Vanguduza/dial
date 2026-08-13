@@ -15,9 +15,11 @@ export type FiscalReceiptQueued = {
   receiptClass: AgencyReceiptClass;
   amount: Money;
   channel: "web" | "wa" | "native";
-  status: "queued";
+  status: "queued" | "submitted" | "failed";
   gateway: "zimra_virtual_in_house";
+  fiscalCode?: string;
   createdAt: string;
+  submittedAt?: string;
 };
 
 const outbox: FiscalReceiptQueued[] = [];
@@ -50,7 +52,69 @@ export function enqueueFiscalReceipt(input: {
 }
 
 export function listFdmsOutbox(): readonly FiscalReceiptQueued[] {
-  return outbox;
+  return outbox.map((r) => ({ ...r }));
+}
+
+export function listQueuedFdmsReceipts(): FiscalReceiptQueued[] {
+  return outbox.filter((r) => r.status === "queued").map((r) => ({ ...r }));
+}
+
+/**
+ * Drain FDMS outbox through ZIMRA Virtual Gateway adapter (D-40a / D-59).
+ * Enqueues side-effect jobs on @dial/queues when requested.
+ */
+export async function drainFdmsOutbox(input?: {
+  enqueueSideEffects?: boolean;
+}): Promise<
+  Array<{ id: string; status: "submitted" | "failed"; fiscalCode?: string }>
+> {
+  const { ZimraVirtualGatewayAdapter } = await import("@dial/adapter-fdms");
+  const gw = new ZimraVirtualGatewayAdapter();
+  const results: Array<{
+    id: string;
+    status: "submitted" | "failed";
+    fiscalCode?: string;
+  }> = [];
+
+  for (const row of outbox) {
+    if (row.status !== "queued") continue;
+    try {
+      const submitted = await gw.submitReceipt({
+        outboxId: row.id,
+        orderId: row.orderId,
+        receiptClass: row.receiptClass,
+        amountMinor: row.amount.amountMinor.toString(),
+        currency: row.amount.currency,
+        channel: row.channel,
+        gateway: row.gateway,
+      });
+      row.status = "submitted";
+      row.fiscalCode = submitted.fiscalCode;
+      row.submittedAt = new Date().toISOString();
+      const result: {
+        id: string;
+        status: "submitted" | "failed";
+        fiscalCode?: string;
+      } = { id: row.id, status: "submitted", fiscalCode: submitted.fiscalCode };
+      results.push(result);
+      if (input?.enqueueSideEffects) {
+        const { enqueueOutboxSideEffect } = await import("@dial/queues");
+        await enqueueOutboxSideEffect({
+          topic: "fdms.submitted",
+          payload: {
+            outboxId: row.id,
+            fiscalCode: submitted.fiscalCode,
+            orderId: row.orderId,
+          },
+        });
+      }
+    } catch (e) {
+      row.status = "failed";
+      results.push({ id: row.id, status: "failed" });
+      void e;
+    }
+  }
+  return results;
 }
 
 export function __resetTaxForTests(): void {

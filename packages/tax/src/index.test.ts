@@ -25,3 +25,21 @@ test("enqueue FiscalReceiptQueued agency classes on in-house Gateway", () => {
   });
   assert.equal(listFdmsOutbox().length, 2);
 });
+
+test("S95 drainFdmsOutbox submits via Gateway adapter (fixture)", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetTaxForTests();
+  enqueueFiscalReceipt({
+    orderId: "ord_drain",
+    receiptClass: "DIAL_FEE",
+    amount: money(50n, "USD"),
+    channel: "web",
+  });
+  const { drainFdmsOutbox, listQueuedFdmsReceipts } = await import("./index.js");
+  assert.equal(listQueuedFdmsReceipts().length, 1);
+  const results = await drainFdmsOutbox({ enqueueSideEffects: true });
+  assert.equal(results.length, 1);
+  assert.equal(results[0]?.status, "submitted");
+  assert.ok(results[0]?.fiscalCode);
+  assert.equal(listQueuedFdmsReceipts().length, 0);
+});

@@ -349,6 +349,12 @@ importers:
 
   packages/tax:
     dependencies:
+      '@dial/adapter-fdms':
+        specifier: workspace:*
+        version: link:../../adapters/fdms
+      '@dial/queues':
+        specifier: workspace:*
+        version: link:../queues
       '@dial/shared':
         specifier: workspace:*
         version: link:../shared

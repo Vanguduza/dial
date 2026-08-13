@@ -86,3 +86,27 @@ export function sessionCookieName(): string {
 export function __resetAuthForTests(): void {
   sessions.clear();
 }
+
+/**
+ * Bridge Supabase GoTrue password sign-in → DialSession cookie SoR (S95).
+ * Fixture uses identity package token shape; never trusts body userId/role.
+ */
+export async function createSessionFromSupabasePassword(input: {
+  email: string;
+  password: string;
+  buyerSegment?: DialSession["buyerSegment"];
+}): Promise<{ token: string; session: DialSession; accessToken: string }> {
+  const { signInWithPassword } = await import("@dial/identity");
+  const auth = await signInWithPassword({
+    email: input.email,
+    password: input.password,
+  });
+  const created = createSession({
+    email: auth.email,
+    userId: auth.userId,
+    ...(input.buyerSegment !== undefined
+      ? { buyerSegment: input.buyerSegment }
+      : {}),
+  });
+  return { ...created, accessToken: auth.accessToken };
+}

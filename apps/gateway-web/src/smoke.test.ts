@@ -325,3 +325,18 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
   assert.equal(blob.includes("sk_live"), false);
   assert.equal(/Bearer\s+\w+/.test(blob), false);
 });
+
+test("S95 Supabase password → DialSession bridge", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetAuthForTests();
+  const { createSessionFromSupabasePassword } = await import(
+    "./lib/auth/session.js"
+  );
+  const { token, session, accessToken } = await createSessionFromSupabasePassword({
+    email: "buyer@dial.test",
+    password: "secret",
+  });
+  assert.ok(accessToken.startsWith("sb_fx_"));
+  assert.equal(session.email, "buyer@dial.test");
+  assert.equal(getSessionFromToken(token)?.userId, session.userId);
+});

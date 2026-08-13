@@ -1,13 +1,26 @@
 import { NextResponse } from "next/server";
 import { signInByEmail, signUp } from "@dial/identity";
-import { createSession, sessionCookieName } from "../../../../lib/auth/session";
+import {
+  createSession,
+  createSessionFromSupabasePassword,
+  sessionCookieName,
+} from "../../../../lib/auth/session";
 
-/** T1 sign-in stub — session from profile SoR; rejects body userId (D-47). */
+/**
+ * T1 / S95 sign-in — session SoR only; rejects body userId (D-47).
+ * When `password` is present, uses Supabase Auth client bridge (fixture/live).
+ */
 export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") ?? "";
   let email = "";
+  let password: string | undefined;
   if (contentType.includes("application/json")) {
-    const body = (await req.json()) as { email?: string; identifier?: string; userId?: string };
+    const body = (await req.json()) as {
+      email?: string;
+      identifier?: string;
+      password?: string;
+      userId?: string;
+    };
     if (body.userId) {
       return NextResponse.json(
         { error: "userId from body rejected — session SoR only (D-47)" },
@@ -15,6 +28,7 @@ export async function POST(req: Request) {
       );
     }
     email = (body.email ?? body.identifier ?? "").trim();
+    password = body.password;
   } else {
     const form = await req.formData();
     if (form.has("userId")) {
@@ -24,6 +38,8 @@ export async function POST(req: Request) {
       );
     }
     email = String(form.get("identifier") ?? form.get("email") ?? "").trim();
+    const pw = form.get("password");
+    password = pw == null ? undefined : String(pw);
   }
 
   if (!email) {
@@ -31,8 +47,27 @@ export async function POST(req: Request) {
   }
 
   try {
+    if (password) {
+      const { token, session } = await createSessionFromSupabasePassword({
+        email,
+        password,
+      });
+      const res = NextResponse.json({
+        ok: true,
+        userId: session.userId,
+        email: session.email,
+        auth: "supabase",
+        next: "/home",
+      });
+      res.cookies.set(sessionCookieName(), token, {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+      });
+      return res;
+    }
+
     let profile = signInByEmail(email);
-    // Stub convenience: first sign-in may mint a customer profile (Phase 0 → real Auth).
     if (!profile) {
       profile = signUp({
         email,
@@ -48,6 +83,7 @@ export async function POST(req: Request) {
       ok: true,
       userId: session.userId,
       email: session.email,
+      auth: "profile_stub",
       next: "/home",
     });
     res.cookies.set(sessionCookieName(), token, {
