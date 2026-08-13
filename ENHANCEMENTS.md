@@ -71,6 +71,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-084 | **INTEGRATION_ENV_GROUP_LABELS helper** | `done` | S146 — derived label tuple + unit lock |
 | ENH-085 | **Document envGroupLabels SoR** | `done` | S147 — README + OpenAPI x-dial-sor |
 | ENH-086 | **Admin hint: ENV_GROUP_LABELS** | `done` | S148 — integrations + cost-health UI |
+| ENH-087 | **Root README envGroupLabels SoR** | `done` | S149 — INTEGRATION_ENV_GROUP_LABELS |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

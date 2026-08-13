@@ -99,7 +99,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/search-indexer` | Meili reindex jobs |
 | `packages/ai` | guidedIntake + LiteLLM + Intelligence stubs (D-61) |
 
-**Build status:** auto-advance on `build/t4-tech-ui` — integration readiness through **S136** (README + package table accuracy). Customer-open (**S99**) stays human-gated.
+**Build status:** auto-advance on `build/t4-tech-ui` — integration readiness through **S149** (root README env-group label SoR). Customer-open (**S99**) stays human-gated.
 
 ### Gateway integration surface (plug-in)
 
@@ -111,7 +111,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | [`docs/integrations/README.md`](./docs/integrations/README.md) | Key-drop-in checklist + health group map |
 | [`docs/integrations/openapi-gateway.json`](./docs/integrations/openapi-gateway.json) | Spec file SoR for the skeleton |
 
-See [`docs/integrations/README.md`](./docs/integrations/README.md) for key-drop-in checklist.
+Env-group SoR: `INTEGRATION_ENV_GROUPS` + ordered `INTEGRATION_ENV_GROUP_LABELS` in `apps/gateway-web/src/lib/integrationsReadiness.ts` (OpenAPI `info.x-dial-sor`). See [`docs/integrations/README.md`](./docs/integrations/README.md) for key-drop-in checklist.
 
 ## Companions (high-signal)
 

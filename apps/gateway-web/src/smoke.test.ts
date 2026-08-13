@@ -594,6 +594,18 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(readme.includes("/api/openapi"));
   assert.ok(readme.includes("/admin/integrations"));
   assert.ok(readme.includes("openapi-gateway.json"));
+  assert.ok(readme.includes("INTEGRATION_ENV_GROUPS"));
+  assert.ok(readme.includes("INTEGRATION_ENV_GROUP_LABELS"));
+});
+
+test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("INTEGRATION_ENV_GROUPS"));
+  assert.ok(readme.includes("INTEGRATION_ENV_GROUP_LABELS"));
+  assert.ok(readme.includes("integrationsReadiness.ts"));
+  assert.ok(readme.includes("x-dial-sor"));
 });
 
 test("S136 integrations README package table matches workspace package names", async () => {
@@ -640,7 +652,10 @@ test("S136 integrations README package table matches workspace package names", a
   assert.ok(readme.includes("adapters/psp"));
   assert.ok(readme.includes("apps/worker-queues"));
   assert.ok(readme.includes("packages/ledger"));
-  assert.ok(readme.includes("S136") || readme.includes("S135"));
+  assert.ok(
+    /S1(3[5-9]|4\d|5\d)/.test(readme),
+    "root README build status should cite a recent integration stage",
+  );
 });
 
 test("S95 Supabase password → DialSession bridge", async () => {
