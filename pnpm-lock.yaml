@@ -45,6 +45,9 @@ importers:
       '@dial/adapter-whatsapp':
         specifier: workspace:*
         version: link:../../adapters/whatsapp
+      '@dial/catalogue':
+        specifier: workspace:*
+        version: link:../../packages/catalogue
       '@dial/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens

@@ -51,7 +51,7 @@ export default async function AuthHomePage() {
         }}
       >
         <a
-          href="#shop"
+          href="/spare"
           style={{
             display: "block",
             padding: dialTokens.space.lg,

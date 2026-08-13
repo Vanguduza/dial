@@ -1,17 +1,17 @@
 # DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
-**Updated:** 2026-08-12  
+**Updated:** 2026-08-13  
 **Auto-advance:** ON — when current stage is green, start next immediately (no human wait).
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S21** — T2 Catalogue+Search |
-| `current_issue` | https://github.com/Vanguduza/dial/issues/7 |
-| `current_branch` | `build/t2-catalogue` |
-| `prior_stage` | **S20** T1 — **green** ([#5](https://github.com/Vanguduza/dial/issues/5)) |
-| `prior_commit_s20` | https://github.com/Vanguduza/dial/commit/5bc9d1a |
-| `next_stage` | **S22** after S21 green |
+| `current_stage` | **S22** — T3 Spare UI |
+| `current_issue` | https://github.com/Vanguduza/dial/issues/11 |
+| `current_branch` | `build/t3-spare-ui` |
+| `prior_stage` | **S21** T2 — **green** ([#7](https://github.com/Vanguduza/dial/issues/7)) |
+| `prior_commit_s21` | _(this land)_ |
+| `next_stage` | **S23** after S22 green |
 | `blocked_on_human` | none (S99 customer-open only later) |
 
 ## Completed
@@ -24,9 +24,10 @@
 | S11 E1a | 2026-08-12 | Matrix A + money-path audit; issue #3 closed; `761c9fd` |
 | S12 E1b | 2026-08-12 | Matrix A2; admin Daily ZiG UI + API; EcoCash `fx_rate_id`; issue #4 |
 | S20 T1 | 2026-08-12 | Sign-in/up; auth home Shop\|Services; `@dial/identity` RLS profiles tests; issue #5 |
+| S21 T2 | 2026-08-13 | Meili settings + stub docs; B2B hide informal; Factory approve/reject; `GET /api/search/spare`; SQL stub + SandPIM ADR; typecheck/test green; issue #7 |
 
 ## Auto-advance note
 
-S20 → S21 executed without founder confirm per workplan §0 / ENH-006. Issue [#7](https://github.com/Vanguduza/dial/issues/7) opened.
+S21 → S22 executed without founder confirm per workplan §0 / ENH-006.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

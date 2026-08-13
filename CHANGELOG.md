@@ -24,7 +24,10 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - S11 E1a thin path started: `@dial/ledger`, `@dial/tax` (agency `FiscalReceiptQueued`), `runE1aMoneySpine` in `@dial/payments` (OfferSnapshot → webhook → ledger → FDMS outbox).
 - S11 E1a expand: D-43 `PSP_ADAPTER_REGISTRY` (Paynow/ContiPay/EcoCash/PayPal/COD/escrow), Job Reserve authorize/capture, tech WHT 30%/ITF263, gateway `POST /api/webhooks/psp` (sig+idempotency), money outbox stub, Matrix A sign-off + `docs/agent-audits/money-path-S11-E1a-2026-08-12.md` (Admin Daily ZiG = S12).
 - S12 E1b: admin Daily ZiG UI (`/admin/fx/daily-zig`) + `GET/POST /api/admin/fx/daily-zig` (fail-closed `INTERNAL_API_SECRET`), `listFxRateAudit`, EcoCash `fx_rate_id` evidence; Matrix A2 filled ([#4](https://github.com/Vanguduza/dial/issues/4)).
+- S21 T2 Catalogue+Search **green** (Pack §15): Meili settings + stub docs; B2B hide informal; Factory human approve/reject; gateway `GET /api/search/spare` + admin review; SandPIM ADR; typecheck/test green ([#7](https://github.com/Vanguduza/dial/issues/7)).
 - S21 T2 thin vertical started: Meili `spare_offers_v1` settings (`offerSource` / `supplierFormality`), B2B hide informal, Catalogue Factory ingest/review + `search_no_result_events`, SandPIM ADR ([#7](https://github.com/Vanguduza/dial/issues/7)).
+- Windows Prime handshake patch `scripts/patch-prime-agent-windows-handshake.mjs` (WMIC start-id + TTL; applied by Dev Manager starter) — unblocks daemon worker hello/`worker_auth` on Windows (#748/#1077).
+- S22 T3 Spare UI thin vertical started: `/spare` browse + PDP + USD cart (design-tokens, agency disclosure, B2B session filter) ([#11](https://github.com/Vanguduza/dial/issues/11)).
 - S20 T1 Identity **green** (Pack §15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).
@@ -37,6 +40,10 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - Authority docs + `AGENTS.md` / always-on rules: D-log range through **D-61**; evaluation status → Adopted with modification.
 - **D-61 definite:** Development Prime = mandatory Build orchestrator (before workspace); production multi-step/learning = capability pipeline + Temporal/BullMQ + Factory — no prod agent adapter.
 - **D-61 founder clarification:** Dev Manager = managerial authority throughout Build (Blueprint §8.0); Prime = mandatory session/runtime harness hosting that role (not a competing project manager); learning/troubleshooting/ERP Improvement outcomes via Factory stack without Prime as production driver.
+
+### Fixed
+
+- Windows Prime 0.7.2 daemon handshake livelock (worker hello / `worker_auth` timeout): `scripts/patch-prime-agent-windows-handshake.mjs` replaces PowerShell `getProcessStartId` with WMIC + TTL cache; starter applies it before launch. Smoke: `PONG` and `/dev-manager` template load.
 
 ## [0.0.0] — 2026-08-11
 

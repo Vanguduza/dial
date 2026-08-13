@@ -1,11 +1,11 @@
-# Start DIAL Dev Manager inside Prime Agent (Windows — D-61 harness only).
+# Start DIAL Dev Manager inside Prime Agent (Windows - D-61 harness only).
 # No production data path. Not CI SoR. Does not add a production Prime adapter.
 #
 # Usage (from anywhere):
-#   powershell -ExecutionPolicy Bypass -File C:\Users\j\Desktop\DIAL\scripts\start-dial-dev-manager-prime.ps1
+#   powershell -ExecutionPolicy Bypass -File C:\DIAL\scripts\start-dial-dev-manager-prime.ps1
 #
 # What it does:
-#   1) Ensures Cursor→Prime bridge is up on http://127.0.0.1:8765/v1
+#   1) Ensures Cursor->Prime bridge is up on http://127.0.0.1:8765/v1
 #   2) Launches prime-agent in the DIAL repo with Cursor Auto + /dev-manager prompt
 
 $ErrorActionPreference = "Stop"
@@ -40,6 +40,15 @@ if (-not (Get-Command prime-agent -ErrorAction SilentlyContinue)) {
   Write-Error "prime-agent not found on PATH. Install: npm i -g prime-agent@0.7.2 (or current MIT release)."
 }
 
+# Windows: avoid PowerShell process-identity lookups blocking daemon hello/auth.
+$HandshakePatch = Join-Path $PSScriptRoot "patch-prime-agent-windows-handshake.mjs"
+if (Test-Path $HandshakePatch) {
+  & node $HandshakePatch
+  if ($LASTEXITCODE -ne 0) {
+    Write-Error "Prime Windows handshake patch failed."
+  }
+}
+
 if (-not (Test-Path $DevManagerPrompt)) {
   Write-Error "Missing Dev Manager prompt template: $DevManagerPrompt"
 }
@@ -53,7 +62,7 @@ Write-Host "Dev Manager prompt: $DevManagerPrompt"
 Write-Host "Model routing: cursor / auto (local bridge :$BridgePort)"
 
 if (-not (Test-BridgeUp)) {
-  Write-Host "Cursor bridge is down — starting in a new window..."
+  Write-Host "Cursor bridge is down - starting in a new window..."
   Start-Process -FilePath "powershell.exe" -ArgumentList @(
     "-NoExit",
     "-ExecutionPolicy", "Bypass",

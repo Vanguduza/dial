@@ -17,7 +17,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
-| ENH-005 | **Development Prime** mandatory Build **harness** (`prime-agent`, MIT) — install before workspace bootstrap; hosts Dev Manager | `in_progress` | **D-61** — injected: `.prime/agent/` Auto + `/dev-manager` sync + workplan idle ban; Windows `scripts/start-dial-dev-manager-prime.ps1`; Cursor bridge Auto; **reject** prod Prime adapter / alternate frameworks |
+| ENH-005 | **Development Prime** mandatory Build **harness** (`prime-agent`, MIT) — install before workspace bootstrap; hosts Dev Manager | `in_progress` | **D-61** — injected: `.prime/agent/` Auto + `/dev-manager` sync + workplan idle ban; Windows `scripts/start-dial-dev-manager-prime.ps1`; Cursor bridge Auto; **Windows handshake patch** `scripts/patch-prime-agent-windows-handshake.mjs` (WMIC start-id; #748/#1077); **reject** prod Prime adapter / alternate frameworks |
 
 ---
 

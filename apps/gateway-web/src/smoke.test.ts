@@ -1,6 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  __resetCatalogueForTests,
+  approveCatalogueReview,
+  enqueueCatalogueIngest,
+  listCatalogueReviewQueue,
+  meiliFilterForSession,
+  searchOffers,
+} from "@dial/catalogue";
+import {
   __resetPaymentsForTests,
   createCheckoutPayment,
   getActiveFxRate,
@@ -94,4 +102,33 @@ test("T1 Pack §15: sign-up profile + session aligns; anonymous has no Shop home
   );
   assert.equal(getSessionFromToken(undefined), null);
   assert.ok(getSessionFromToken(token));
+});
+
+/** S21 T2 evidence: session buyerSegment drives B2B hide informal; body role ignored. */
+test("T2 search path: B2B session excludes informal; meili filter formal-only", () => {
+  __resetCatalogueForTests();
+  __resetAuthForTests();
+  const b2c = createSession({ email: "b2c@dial.test", buyerSegment: "b2c" });
+  const b2b = createSession({ email: "fleet@dial.test", buyerSegment: "b2b" });
+  assert.equal(b2c.session.buyerSegment, "b2c");
+  assert.equal(b2b.session.buyerSegment, "b2b");
+
+  const roleB2c = getSessionFromToken(b2c.token)?.buyerSegment ?? "b2c";
+  const roleB2b = getSessionFromToken(b2b.token)?.buyerSegment ?? "b2c";
+  const hitsB2c = searchOffers("wiper", { sessionRole: roleB2c });
+  const hitsB2b = searchOffers("wiper", { sessionRole: roleB2b });
+  assert.ok(hitsB2c.some((h) => h.supplierFormality === "informal"));
+  assert.equal(hitsB2b.length, 0);
+  assert.equal(
+    meiliFilterForSession(roleB2b),
+    'offerSource = "MARKETPLACE" AND supplierFormality = "formal"',
+  );
+});
+
+test("T2 admin catalogue review: human approve only", () => {
+  __resetCatalogueForTests();
+  const batch = enqueueCatalogueIngest(1);
+  assert.equal(batch.status, "pending_review");
+  const reviewId = listCatalogueReviewQueue()[0]!.reviewId;
+  assert.equal(approveCatalogueReview(reviewId).status, "approved");
 });

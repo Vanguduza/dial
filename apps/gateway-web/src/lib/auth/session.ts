@@ -6,6 +6,8 @@ export type DialSession = {
   userId: string;
   email: string;
   role: "customer" | "ops_admin" | "technician";
+  /** Spare buyer segment for Meili/search (D-49). Session only — never from body. */
+  buyerSegment: "b2c" | "b2b";
 };
 
 const COOKIE = "dial_session";
@@ -16,6 +18,7 @@ export function createSession(input: {
   email: string;
   userId?: string;
   role?: DialSession["role"];
+  buyerSegment?: DialSession["buyerSegment"];
 }): { token: string; session: DialSession } {
   const email = input.email.trim().toLowerCase();
   if (!email) throw new Error("email required");
@@ -26,6 +29,7 @@ export function createSession(input: {
       `usr_${Buffer.from(email).toString("base64url").slice(0, 16)}`,
     email,
     role: input.role ?? "customer",
+    buyerSegment: input.buyerSegment ?? "b2c",
   };
   sessions.set(token, session);
   return { token, session };

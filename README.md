@@ -21,7 +21,7 @@ Production orchestration: **Dev Manager** is the managerial authority throughout
 
 ### Windows one-shot (preferred)
 
-Prereqs once: `npm i -g prime-agent cursor-api-proxy`, Cursor Agent CLI (`agent login` or `CURSOR_API_KEY`).
+Prereqs once: `npm i -g prime-agent cursor-api-proxy`, Cursor Agent CLI (`agent login` or `CURSOR_API_KEY`). The starter applies `scripts/patch-prime-agent-windows-handshake.mjs` so Prime 0.7.2 can create sessions on Windows.
 
 ```powershell
 # From repo root — starts Cursor bridge if down, then Prime with /dev-manager
@@ -35,7 +35,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-dial-dev-manager-prime.
 powershell -File $env:USERPROFILE\.prime\agent\start-cursor-bridge.ps1
 
 # terminal B — Prime harness on DIAL
-cd C:\Users\j\Desktop\DIAL
+cd C:\DIAL
 prime-agent --provider cursor --model auto
 # then expand /dev-manager  (or paste docs/prompts/DIAL_DEV_MANAGER_CURSOR_PROMPT.md)
 ```

@@ -49,7 +49,11 @@ _None._
 
 ## Resolved
 
-_None yet._
+| ID | Title | Severity | Status | Surface | Repro | Owner | Opened |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| BUG-001 | Prime 0.7.2 Windows daemon never completes worker hello/`worker_auth` (PowerShell `getProcessStartId` livelock) | blocker | fixed | Prime harness / D-61 | `prime-agent -p --provider cursor --model auto --no-session -- "PONG"` timed out 30s | DIAL | 2026-08-13 |
+
+Fix: `scripts/patch-prime-agent-windows-handshake.mjs` (WMIC + TTL cache); applied by `scripts/start-dial-dev-manager-prime.ps1`. Verified 2026-08-13: print `PONG` and `/dev-manager` template load. Upstream: [prime-agent#1077](https://github.com/PrimeIntellect-ai/prime-agent/issues/1077) / [#748](https://github.com/PrimeIntellect-ai/prime-agent/issues/748).
 
 ---
 

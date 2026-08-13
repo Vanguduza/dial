@@ -3,13 +3,16 @@ import { test } from "node:test";
 import {
   __resetCatalogueForTests,
   addToCart,
+  approveCatalogueReview,
   createCart,
   enqueueCatalogueIngest,
+  getCatalogueIngestBatch,
   listCatalogueReviewQueue,
   listMeiliStubDocuments,
   listSearchNoResultEvents,
   MEILI_SPARE_OFFERS_V1_SETTINGS,
   meiliFilterForSession,
+  rejectCatalogueReview,
   searchOffers,
 } from "./index.js";
 
@@ -69,4 +72,20 @@ test("T2 Catalogue Factory ingest/review + search_no_result_events (D-53)", () =
   const events = listSearchNoResultEvents();
   assert.equal(events.length, 1);
   assert.equal(events[0]?.query, "totally-missing-sku-xyz");
+});
+
+test("T2 human approve/reject — no auto-publish (D-53/D-54)", () => {
+  __resetCatalogueForTests();
+  const batch = enqueueCatalogueIngest(2);
+  const queued = listCatalogueReviewQueue()[0]!;
+  const approved = approveCatalogueReview(queued.reviewId);
+  assert.equal(approved.status, "approved");
+  assert.equal(getCatalogueIngestBatch(batch.batchId)?.status, "approved");
+  assert.throws(() => approveCatalogueReview(queued.reviewId));
+
+  const batch2 = enqueueCatalogueIngest(1);
+  const queued2 = listCatalogueReviewQueue().find((r) => r.batchId === batch2.batchId)!;
+  const rejected = rejectCatalogueReview(queued2.reviewId);
+  assert.equal(rejected.status, "rejected");
+  assert.equal(getCatalogueIngestBatch(batch2.batchId)?.status, "rejected");
 });

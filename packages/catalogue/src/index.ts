@@ -270,6 +270,41 @@ export function listCatalogueReviewQueue(): CatalogueReviewItem[] {
   return reviewQueue.map((r) => ({ ...r }));
 }
 
+export function getCatalogueIngestBatch(
+  batchId: string,
+): CatalogueIngestBatch | undefined {
+  const batch = ingestBatches.get(batchId);
+  return batch ? { ...batch } : undefined;
+}
+
+/**
+ * Human approve only (D-53 / D-54) — never auto-publish from AI.
+ * Marks review + batch approved; live Meili index remains Phase 0 / E5a.
+ */
+export function approveCatalogueReview(reviewId: string): CatalogueReviewItem {
+  const item = reviewQueue.find((r) => r.reviewId === reviewId);
+  if (!item) throw new Error(`Unknown review ${reviewId}`);
+  if (item.status !== "queued") {
+    throw new Error(`Review ${reviewId} is already ${item.status}`);
+  }
+  item.status = "approved";
+  const batch = ingestBatches.get(item.batchId);
+  if (batch) batch.status = "approved";
+  return { ...item };
+}
+
+export function rejectCatalogueReview(reviewId: string): CatalogueReviewItem {
+  const item = reviewQueue.find((r) => r.reviewId === reviewId);
+  if (!item) throw new Error(`Unknown review ${reviewId}`);
+  if (item.status !== "queued") {
+    throw new Error(`Review ${reviewId} is already ${item.status}`);
+  }
+  item.status = "rejected";
+  const batch = ingestBatches.get(item.batchId);
+  if (batch) batch.status = "rejected";
+  return { ...item };
+}
+
 export function createCart(): Cart {
   const cart: Cart = {
     id: `cart_${Date.now().toString(36)}`,
