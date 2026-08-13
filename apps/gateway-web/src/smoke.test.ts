@@ -593,3 +593,85 @@ test("S118 PayPal/FDMS webhook routes: durable accept + duplicate + fail-closed"
   if (prevFdms === undefined) delete process.env.FDMS_ACTIVATION_KEY;
   else process.env.FDMS_ACTIVATION_KEY = prevFdms;
 });
+
+test("S119 Paynow webhook durable claim + fixture payments SoR bridge", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevKey = process.env.PAYNOW_INTEGRATION_KEY;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { __resetIdempotencyForTests } = await import("@dial/shared");
+  const { __resetLedgerForTests } = await import("@dial/ledger");
+  const { __resetTaxForTests } = await import("@dial/tax");
+  const { POST, __testPaynowPayments } = await import(
+    "./app/api/webhooks/paynow/route.js"
+  );
+  __resetIdempotencyForTests();
+  __testPaynowPayments.reset();
+  __resetLedgerForTests();
+  __resetTaxForTests();
+
+  const authorized = await __testPaynowPayments.runE1aMoneySpine({
+    orderId: "ord_s119",
+    supplierDisplayName: "S119 Spares",
+    formality: "formal",
+    amountUsdMinor: 20_00n,
+    dialFeeUsdMinor: 2_00n,
+    buyerSegment: "b2c",
+    channel: "web",
+    pspEventId: "psp_s119_unused",
+    signatureValid: false,
+  });
+  assert.equal(authorized.intent.status, "authorized");
+
+  const body = new URLSearchParams({
+    reference: authorized.intent.id,
+    status: "Paid",
+    paynowreference: "pn_s119",
+  }).toString();
+
+  const first = await POST(
+    new Request("http://localhost/api/webhooks/paynow", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body,
+    }),
+  );
+  assert.equal(first.status, 200);
+  const firstJson = (await first.json()) as {
+    ok: boolean;
+    bridge?: string;
+    duplicate?: boolean;
+  };
+  assert.equal(firstJson.ok, true);
+  assert.equal(firstJson.bridge, "captured");
+  assert.equal(
+    __testPaynowPayments.getPaymentIntent(authorized.intent.id)?.status,
+    "captured",
+  );
+
+  const dup = await POST(
+    new Request("http://localhost/api/webhooks/paynow", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body,
+    }),
+  );
+  assert.equal(((await dup.json()) as { duplicate?: boolean }).duplicate, true);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.PAYNOW_INTEGRATION_KEY = "live_key_for_hash";
+  const bad = await POST(
+    new Request("http://localhost/api/webhooks/paynow", {
+      method: "POST",
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "x-paynow-hash": "DEADBEEF",
+      },
+      body: "reference=x&status=Paid&paynowreference=bad",
+    }),
+  );
+  assert.equal(bad.status, 401);
+
+  process.env.DIAL_INTEGRATION_MODE = prevMode;
+  if (prevKey === undefined) delete process.env.PAYNOW_INTEGRATION_KEY;
+  else process.env.PAYNOW_INTEGRATION_KEY = prevKey;
+});

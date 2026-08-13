@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S118** — PayPal + FDMS webhook durable smoke — **green** |
+| `current_stage` | **S119** — Paynow durable claim + fixture payments SoR bridge — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S117** ContiPay/EcoCash webhook smoke — **green** |
-| `next_stage` | **S119** Paynow webhook durable claim + payments SoR bridge in fixture |
+| `prior_stage` | **S118** PayPal/FDMS webhook smoke — **green** |
+| `next_stage` | **S120** WhatsApp webhook durable claim + Meta HMAC fail-closed smoke |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S117 | 2026-08-13/14 | through ContiPay/EcoCash webhooks |
-| S118 | 2026-08-14 | PayPal/FDMS durable claim + fail-closed |
+| S91–S118 | 2026-08-13/14 | through PayPal/FDMS webhooks |
+| S119 | 2026-08-14 | Paynow durable + fixture `admitPspWebhookEvent` bridge |
 
 ## Note
 

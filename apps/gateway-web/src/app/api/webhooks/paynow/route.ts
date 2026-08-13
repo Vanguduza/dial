@@ -1,12 +1,25 @@
 /**
- * Paynow result webhook — SHA512 hash + idempotency (Pack §6.6 / D-43).
+ * Paynow result webhook — SHA512 hash + durable idempotency (Pack §6.6 / D-43 / S119).
+ * Fixture: bridges into payments SoR when `reference` matches a known intent id.
  */
 import { NextResponse } from "next/server";
 import { PaynowAdapter } from "@dial/adapter-psp";
-import { admitPspWebhookEvent } from "@dial/payments";
-import { claimProcessedEvent } from "@dial/shared";
+import {
+  __resetPaymentsForTests,
+  admitPspWebhookEvent,
+  getPaymentIntent,
+  runE1aMoneySpine,
+} from "@dial/payments";
+import { claimProcessedEventDurable } from "@dial/shared";
 
 export const runtime = "nodejs";
+
+/** Test-only: same module graph as this route (avoids dual payments instances under tsx). */
+export const __testPaynowPayments = {
+  reset: __resetPaymentsForTests,
+  runE1aMoneySpine,
+  getPaymentIntent,
+};
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
@@ -15,23 +28,33 @@ export async function POST(req: Request) {
     const adapter = new PaynowAdapter();
     const admission = await adapter.verifyWebhook(headers, rawBody);
     if (
-      claimProcessedEvent({ eventId: admission.eventId, source: "paynow" }) ===
-      "duplicate"
+      (await claimProcessedEventDurable({
+        eventId: admission.eventId,
+        source: "paynow",
+      })) === "duplicate"
     ) {
       return NextResponse.json({ ok: true, duplicate: true });
     }
-    // Bridge into payments SoR when intent known — fixture-safe.
-    if (admission.providerRef && process.env.DIAL_INTEGRATION_MODE !== "fixture") {
-      admitPspWebhookEvent({
-        eventId: admission.eventId,
-        intentId: String(
-          (admission.payload as { reference?: string })?.reference ?? "",
-        ),
+
+    const intentId = String(
+      (admission.payload as { reference?: string })?.reference ?? "",
+    );
+    let bridge:
+      | "captured"
+      | "rejected_signature"
+      | "duplicate"
+      | "ignored"
+      | "skipped" = "skipped";
+    if (intentId && getPaymentIntent(intentId)) {
+      bridge = admitPspWebhookEvent({
+        eventId: `paynow_bridge_${admission.eventId}`,
+        intentId,
         signatureValid: true,
         action: admission.status === "paid" ? "capture" : "ignore",
       });
     }
-    return NextResponse.json({ ok: true, admission });
+
+    return NextResponse.json({ ok: true, admission, bridge });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "webhook error" },
