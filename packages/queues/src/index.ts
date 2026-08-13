@@ -257,3 +257,52 @@ export async function startOutboxSideEffectsWorker(input: {
     },
   };
 }
+
+/**
+ * Redis / BullMQ health ping (S125).
+ * Fixture: enqueue+drain ReindexAll without Redis. Sandbox/live: fail closed without REDIS_URL.
+ * Never echoes Redis credentials.
+ */
+export async function pingQueuesHealth(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{
+  ok: boolean;
+  mode: IntegrationMode;
+  redisConfigured: boolean;
+  queues: {
+    searchIndexer: string;
+    outboxSideEffects: string;
+    fdmsDay: string;
+  };
+  fixtureEnqueueOk?: boolean;
+  error?: string;
+}> {
+  const mode = integrationMode(env);
+  const redisConfigured = Boolean(env.REDIS_URL?.trim());
+  const queues = {
+    searchIndexer: QUEUE_SEARCH_INDEXER,
+    outboxSideEffects: QUEUE_OUTBOX_SIDE_EFFECTS,
+    fdmsDay: QUEUE_FDMS_DAY,
+  };
+  if (mode === "fixture") {
+    const enq = await enqueueSearchIndexerJob({ type: "ReindexAll" }, env);
+    const drained = drainFixtureSearchJobs();
+    return {
+      ok: true,
+      mode,
+      redisConfigured,
+      queues,
+      fixtureEnqueueOk: enq.mode === "fixture" && drained.length >= 1,
+    };
+  }
+  if (!redisConfigured) {
+    return {
+      ok: false,
+      mode,
+      redisConfigured,
+      queues,
+      error: "REDIS_URL unset — fail closed",
+    };
+  }
+  return { ok: true, mode, redisConfigured, queues };
+}

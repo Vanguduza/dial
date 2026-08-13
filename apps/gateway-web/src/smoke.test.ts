@@ -324,6 +324,9 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
       informalB2bLeaks: number;
       meili?: { ok: boolean; ensureApplied?: boolean };
     };
+    queues?: {
+      health?: { ok: boolean; fixtureEnqueueOk?: boolean };
+    };
   };
   assert.equal(body.mode, "fixture");
   assert.ok(body.groups.some((g) => g.label === "paynow"));
@@ -334,6 +337,8 @@ test("S92 integration health groups are enumerable (no secret leak)", async () =
   assert.ok(body.fdms?.fixtureDayId);
   assert.equal(body.search?.meili?.ok, true);
   assert.equal(body.search?.meili?.ensureApplied, true);
+  assert.equal(body.queues?.health?.ok, true);
+  assert.equal(body.queues?.health?.fixtureEnqueueOk, true);
   const blob = JSON.stringify(body);
   assert.equal(blob.includes("sk_live"), false);
   assert.equal(/Bearer\s+\w+/.test(blob), false);

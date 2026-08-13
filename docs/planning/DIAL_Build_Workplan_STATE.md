@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S124** — Meili search health ping expand — **green** |
+| `current_stage` | **S125** — Redis/queues health ping — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S123** FDMS Gateway health ping — **green** |
-| `next_stage` | **S125** Redis/queues health ping on integrations health |
+| `prior_stage` | **S124** Meili search health ping — **green** |
+| `next_stage` | **S126** Temporal worker options health expand (namespace ping fixture) |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S123 | 2026-08-13/14 | through FDMS health |
-| S124 | 2026-08-14 | `pingMeiliHealth` nested under health `search.meili` |
+| S91–S124 | 2026-08-13/14 | through Meili health |
+| S125 | 2026-08-14 | `pingQueuesHealth` under `queues.health` |
 
 ## Note
 

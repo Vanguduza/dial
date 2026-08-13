@@ -9,7 +9,12 @@ import { listCanonicalPspMethods } from "@dial/adapter-psp";
 import { pingLiteLlm } from "@dial/ai";
 import { searchHealthSnapshot, pingMeiliHealth } from "@dial/catalogue";
 import { listMoneyOutbox } from "@dial/ledger";
-import { QUEUE_FDMS_DAY, QUEUE_OUTBOX_SIDE_EFFECTS, QUEUE_SEARCH_INDEXER } from "@dial/queues";
+import {
+  QUEUE_FDMS_DAY,
+  QUEUE_OUTBOX_SIDE_EFFECTS,
+  QUEUE_SEARCH_INDEXER,
+  pingQueuesHealth,
+} from "@dial/queues";
 import { getFiscalDayState } from "@dial/tax";
 import { createTemporalWorkerOptions } from "@dial/worker-temporal";
 
@@ -45,6 +50,7 @@ export async function GET(): Promise<NextResponse> {
   const maps = await pingMapsHealth();
   const fdms = await pingFdmsHealth();
   const meili = await pingMeiliHealth();
+  const queuesHealth = await pingQueuesHealth();
 
   const body = {
     ok: true,
@@ -82,6 +88,7 @@ export async function GET(): Promise<NextResponse> {
       searchIndexer: QUEUE_SEARCH_INDEXER,
       outboxSideEffects: QUEUE_OUTBOX_SIDE_EFFECTS,
       fdmsDay: QUEUE_FDMS_DAY,
+      health: queuesHealth,
     },
     fiscalDay: getFiscalDayState(),
     moneyOutbox: { depth: listMoneyOutbox().length },

@@ -66,3 +66,21 @@ test("S94 sandbox fail closed without REDIS_URL / INTERNAL_API_SECRET", async ()
   );
   process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
+
+test("S125 pingQueuesHealth fixture ok + sandbox fail-closed without Redis", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetQueuesForTests();
+  const { pingQueuesHealth } = await import("./index.js");
+  const fx = await pingQueuesHealth();
+  assert.equal(fx.ok, true);
+  assert.equal(fx.mode, "fixture");
+  assert.equal(fx.fixtureEnqueueOk, true);
+  assert.equal(fx.queues.searchIndexer, "dial-search-indexer");
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.REDIS_URL;
+  const closed = await pingQueuesHealth();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
