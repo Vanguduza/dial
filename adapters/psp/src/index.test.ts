@@ -138,3 +138,37 @@ test("S105 Paynow redirect fixture + escrow hold/release stub", async () => {
   });
   assert.ok(rel.instructionId.startsWith("escrow_rel_"));
 });
+
+test("S108 PayPal Orders fixture + escrow capture webhook", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const registry = createPspRegistry();
+  const pp = await registry.paypal.createPayment({
+    ...baseInput("paypal"),
+    escrowPreferred: true,
+  });
+  assert.equal(pp.status, "redirect_required");
+  assert.ok(pp.redirectUrl?.includes("checkoutnow"));
+  assert.equal(registry.paypal.capabilities().supportsHold, true);
+  const admission = await registry.paypal.verifyWebhook(
+    {},
+    JSON.stringify({
+      eventId: "pp_evt_1",
+      id: pp.providerRef,
+      status: "paid",
+      resource: { id: pp.providerRef },
+    }),
+  );
+  assert.ok(admission.eventId);
+
+  const escrowCap = await registry.psp_escrow.verifyWebhook(
+    {},
+    JSON.stringify({
+      eventId: "escrow_cap_1",
+      type: "escrow.capture",
+      holdId: "escrow_fx_ord_test_1",
+      status: "captured",
+    }),
+  );
+  assert.equal(escrowCap.status, "paid");
+  assert.equal(escrowCap.type, "escrow.capture");
+});

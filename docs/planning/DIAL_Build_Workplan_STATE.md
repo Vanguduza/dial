@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S107** — FDMS submitReceipt shape + day queue drain — **green** |
+| `current_stage` | **S108** — PayPal Orders + escrow capture webhook — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S106** Meta WA template registry — **green** |
-| `next_stage` | **S108** PayPal Orders fixture expand + escrow webhook capture path |
+| `prior_stage` | **S107** FDMS shapes + day queue drain — **green** |
+| `next_stage` | **S109** VROOM plan fixture + delivery ETA from maps duration |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S106 | 2026-08-13 | through Meta WA template registry |
-| S107 | 2026-08-13 | agency receipt classes + drainFixtureFdmsDayJobs→process |
+| S91–S107 | 2026-08-13 | through FDMS day queue drain |
+| S108 | 2026-08-13 | PayPal checkoutnow fixture + escrow.capture → paid |
 
 ## Note
 
