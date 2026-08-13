@@ -28,3 +28,11 @@ test("S94 enqueueAndProcessIndexerJob via BullMQ fixture queue", async () => {
   assert.equal(results.length, 1);
   assert.equal(results[0]?.job.type, "ReindexAll");
 });
+
+test("S100 bootstrapLocalSearchIndex fixture", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { bootstrapLocalSearchIndex } = await import("./index.js");
+  const boot = await bootstrapLocalSearchIndex();
+  assert.ok(boot.indexUid);
+  assert.equal(boot.mode, "fixture");
+});

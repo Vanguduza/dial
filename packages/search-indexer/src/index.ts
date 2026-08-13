@@ -84,4 +84,16 @@ export async function drainIndexerOutbox(
   return out;
 }
 
+/**
+ * S100 — ensure Meili spare index settings exist (compose-up bootstrap).
+ * Fixture: no network. Sandbox/live: fail closed without MEILI_*.
+ */
+export async function bootstrapLocalSearchIndex(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ indexUid: string; mode: ReturnType<typeof integrationMode> }> {
+  assertSandboxDeps(env);
+  const ensured = await ensureSpareOffersIndex();
+  return { indexUid: ensured.indexUid, mode: integrationMode(env) };
+}
+
 export { integrationMode } from "@dial/queues";

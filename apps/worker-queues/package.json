@@ -1,19 +1,18 @@
 {
-  "name": "@dial/ai",
+  "name": "@dial/worker-queues",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --import tsx --test src/**/*.test.ts",
-    "eval:smoke": "node --import tsx evals/run-smoke.mjs",
+    "start": "node --import tsx src/run.ts",
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {
-    "zod": "^3.24.2"
+    "@dial/queues": "workspace:*",
+    "@dial/search-indexer": "workspace:*",
+    "@dial/tax": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.15.21",

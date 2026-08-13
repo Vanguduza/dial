@@ -25,7 +25,9 @@ Use **Cursor models only** via the local bridge (`http://127.0.0.1:8765/v1`). De
 2. Working directory = DIAL repo root.
 3. Start Dev Manager via **`/dev-manager`** (project prompt) or paste `docs/prompts/DIAL_DEV_MANAGER_CURSOR_PROMPT.md`.
 4. Read `docs/planning/DIAL_Build_Workplan_STATE.md` → continue `current_stage`.
-5. When a stage is green, **immediately** open the next stage ticket and start Build — idle between stages is banned (`docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md`). S99 customer-open is the only non-auto gate.
+5. When a stage is green, **immediately** open the next stage ticket and start Build — idle between stages is banned (`docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md`). Customer-open ops gates are not an eng pause.
+6. **Cursor chat is not a daemon:** Auto-advance is policy *inside* the agent turn. Ending a turn with a status dump while `current_stage` is incomplete (or just went green) violates the idle ban. Either keep building in the same turn, or arm a `/loop` wake (`AGENT_LOOP_WAKE_dev_manager`) so the next tick continues `STATE.md` without waiting for a human message.
+7. **Stage green ⇒ commit + push in the same turn** before stopping tool calls. Living docs + `DIAL_Build_Workplan_STATE.md` ride in that commit. Prefer lefthook post-commit auto-push; if it misses, `git push` immediately.
 
 ## Workplan SoR
 

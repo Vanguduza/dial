@@ -12,7 +12,10 @@
     "lint": "turbo run lint --continue",
     "dev:gateway": "pnpm --filter @dial/gateway-web dev",
     "dev:worker": "pnpm --filter @dial/worker-temporal start",
-    "compose:up": "docker compose up -d redis meilisearch"
+    "dev:queues": "pnpm --filter @dial/worker-queues start",
+    "compose:up": "docker compose up -d redis meilisearch",
+    "bootstrap:search": "pnpm --filter @dial/search-indexer run bootstrap",
+    "eval:smoke": "pnpm --filter @dial/ai run eval:smoke"
   },
   "devDependencies": {
     "lefthook": "^1.11.13",

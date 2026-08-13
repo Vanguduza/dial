@@ -79,7 +79,7 @@ test("E6a/T8 MetricContract + shadow promote + Simulated never auto-pays", () =>
 
 test("LiteLLM fixture completion never requires keys", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
-  const { completeViaLiteLlm } = await import("./litellm.js");
+  const { completeViaLiteLlm, pingLiteLlm } = await import("./litellm.js");
   const out = await completeViaLiteLlm({
     messages: [{ role: "user", content: "Battery dead" }],
   });
@@ -92,4 +92,7 @@ test("LiteLLM fixture completion never requires keys", async () => {
       ],
     }),
   );
+  const ping = await pingLiteLlm();
+  assert.equal(ping.ok, true);
+  assert.equal(ping.mode, "fixture");
 });

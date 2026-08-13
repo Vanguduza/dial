@@ -4,10 +4,9 @@
 import { NextResponse } from "next/server";
 import { PaynowAdapter } from "@dial/adapter-psp";
 import { admitPspWebhookEvent } from "@dial/payments";
+import { claimProcessedEvent } from "@dial/shared";
 
 export const runtime = "nodejs";
-
-const seen = new Set<string>();
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
@@ -15,10 +14,12 @@ export async function POST(req: Request) {
   try {
     const adapter = new PaynowAdapter();
     const admission = await adapter.verifyWebhook(headers, rawBody);
-    if (seen.has(admission.eventId)) {
+    if (
+      claimProcessedEvent({ eventId: admission.eventId, source: "paynow" }) ===
+      "duplicate"
+    ) {
       return NextResponse.json({ ok: true, duplicate: true });
     }
-    seen.add(admission.eventId);
     // Bridge into payments SoR when intent known — fixture-safe.
     if (admission.providerRef && process.env.DIAL_INTEGRATION_MODE !== "fixture") {
       admitPspWebhookEvent({

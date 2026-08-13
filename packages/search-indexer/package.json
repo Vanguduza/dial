@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --import tsx --test src/**/*.test.ts",
+    "bootstrap": "node --import tsx scripts/bootstrap.mjs",
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {

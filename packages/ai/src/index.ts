@@ -94,4 +94,4 @@ export {
   type CommandCentreMode,
 } from "./intelligence.js";
 
-export { completeViaLiteLlm, type LiteLlmCompletion } from "./litellm.js";
+export { completeViaLiteLlm, pingLiteLlm, type LiteLlmCompletion } from "./litellm.js";

@@ -81,3 +81,34 @@ export async function completeViaLiteLlm(input: {
     model: data.model ?? input.model ?? "unknown",
   });
 }
+
+/** Lightweight readiness probe for /api/health/integrations. */
+export async function pingLiteLlm(): Promise<{
+  ok: boolean;
+  mode: IntegrationMode;
+  model?: string;
+  error?: string;
+}> {
+  const mode = integrationMode();
+  try {
+    if (mode === "fixture") {
+      return { ok: true, mode, model: "fixture-gemini" };
+    }
+    const base = requireSecret("LITELLM_BASE_URL").replace(/\/$/, "");
+    requireSecret("LITELLM_API_KEY");
+    const res = await fetch(`${base}/health`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${process.env.LITELLM_API_KEY}` },
+    });
+    if (!res.ok) {
+      return { ok: false, mode, error: `LiteLLM health HTTP ${res.status}` };
+    }
+    return { ok: true, mode, model: "gemini/gemini-2.0-flash" };
+  } catch (e) {
+    return {
+      ok: false,
+      mode,
+      error: e instanceof Error ? e.message : "LiteLLM ping failed",
+    };
+  }
+}

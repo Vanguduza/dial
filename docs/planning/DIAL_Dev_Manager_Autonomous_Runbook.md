@@ -22,6 +22,8 @@
 
 **Idle ban:** Do **not** end a Dev Manager turn waiting for founder input while `current_stage` is incomplete or while a stage just went green. Always leave the session either (a) mid-build on the active stage, or (b) having opened+started the next stage. The only allowed pause is the §5 hard-stop list.
 
+**Cursor / chat harness note:** Auto-advance does **not** mean a background process continues after the agent turn ends. Cursor only runs when a message (or loop wake) arrives. Ending a turn with “next is Sxx” and no further tool calls **is idle**. Prefer: continue Build in the same turn, or arm a recurring `/loop` wake that re-reads `DIAL_Build_Workplan_STATE.md` and continues.
+
 ---
 
 ## 1. Continuous loop (every session)
@@ -32,11 +34,14 @@ PRIORITY 0  →  env green + auto-push path OK (S00)
 TICKET      →  exactly one active thin-vertical (or expand in-ticket)
 BUILD       →  dial-tracer-slice: thin green path → expand DoD
 GATES       →  typecheck/test; money-path / grill / AI review when in scope
-LAND        →  commit + living docs same PR + auto-push + update STATE.md
+LAND        →  on stage green: **commit + push immediately** (living docs + STATE in same commit) then AUTO-ADVANCE
 AUTO-ADVANCE →  if stage green (DoD 100%+evidence) → open next stage ticket
-                 AND start Build immediately — NO human confirm, NO idle wait
+                 AND start Build immediately — NO human confirm, NO idle wait,
+                 NO ending the turn after “next is Sxx” without either more Build
+                 or a wake loop tick already armed
 ```
 
+**Stage-green gate (mandatory):** When `current_stage` flips to green, Dev Manager **must** `git add` evidence + living docs + STATE, `git commit`, and `git push` to `origin` **before** narrating completion. Skipping push is an idle-ban violation equal to stopping between stages.
 Never: parallel T1+ product trains before active thin-vertical ticket exists.  
 Never: close ticket as “tracer done” with blank matrix cells.  
 Never: pause between green stage and next stage for founder preference when prefer/lock exists.
@@ -91,9 +96,10 @@ Do **not** ask between stages. Update `DIAL_Build_Workplan_STATE.md` on every tr
 2. Small commits; message explains **why**
 3. Same PR: code + `CHANGELOG` / `README` / `ENHANCEMENTS` / `BUGS` as applicable
 4. Lefthook pre-commit: typecheck + test must pass
-5. Post-commit: `scripts/git-auto-push.ps1` → `origin` (`Vanguduza/dial`)
-6. Never `--force` to `main`/`master`
-7. Issue comment when thin path green and when DoD rows flip to Y
+5. **On every stage green:** commit + push in the same turn (do not batch “later”)
+6. Post-commit: `scripts/git-auto-push.ps1` → `origin` (`Vanguduza/dial`); if hook misses, push manually
+7. Never `--force` to `main`/`master`
+8. Issue comment when thin path green and when DoD rows flip to Y
 
 ---
 

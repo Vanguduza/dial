@@ -1,17 +1,16 @@
-# Promptfoo outline (D-54 / D-56) — fill providers when LITELLM_* set.
-# Run: npx promptfoo eval -c packages/ai/evals/promptfooconfig.yaml
-# CI stays fixture-guidedIntake until Promptfoo is wired in T7 expand.
+# Promptfoo golden assertions (D-54 / D-56) — CI smoke via evals/run-smoke.mjs.
+# Optional full eval when Promptfoo CLI is installed:
+#   npx promptfoo eval -c packages/ai/evals/promptfooconfig.yaml
+# CI stays fixture-guidedIntake until LITELLM_* is set for live providers.
 
-description: DIAL packages/ai guidedIntake golden assertions (outline)
+description: DIAL packages/ai guidedIntake golden assertions (no money)
 
 prompts:
   - "Customer text: {{customerText}}\nReturn JobAssessment JSON only. Never include price or amountMinor."
 
 providers:
-  - id: echo
-    config:
-      # Replace with litellm:gemini/... when LITELLM_BASE_URL is set
-      type: echo
+  - id: file://providers/guided-intake-fixture.mjs
+    label: guidedIntake-fixture
 
 tests:
   - vars:
@@ -21,5 +20,14 @@ tests:
         value: amountMinor
       - type: not-contains
         value: '"price"'
+      - type: contains
+        value: needsHumanQuote
+  - vars:
+      customerText: "Emergency tow after accident"
+    assert:
+      - type: not-contains
+        value: amountMinor
+      - type: contains
+        value: '"urgency":"emergency"'
       - type: contains
         value: needsHumanQuote

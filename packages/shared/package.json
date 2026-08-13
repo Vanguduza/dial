@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./money": "./src/money.ts"
+    "./money": "./src/money.ts",
+    "./idempotency": "./src/idempotency.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",

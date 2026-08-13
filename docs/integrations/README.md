@@ -19,9 +19,13 @@
 | `@dial/adapter-maps` | Nominatim / OSRM / VROOM | `NOMINATIM_URL`, `OSRM_URL`, `VROOM_URL` |
 | `@dial/adapter-whatsapp` Cloud API | Graph send template/text + GET verify | `WHATSAPP_*` |
 | `@dial/catalogue` Meili client | Index settings + upsert | `MEILI_*` |
-| `@dial/queues` | BullMQ search + outbox side-effect queues | `REDIS_URL`, `INTERNAL_API_SECRET` |
-| `@dial/worker-temporal` | DeliveryDispatch in-process + Temporal client | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
+| `@dial/queues` | BullMQ search + outbox + FDMS day queues | `REDIS_URL`, `INTERNAL_API_SECRET` |
+| `@dial/worker-temporal` | DeliveryDispatch in-process + Temporal client/SDK worker | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
+| `@dial/worker-queues` | BullMQ FDMS day + search-indexer workers | `REDIS_URL` (non-fixture) |
 | `@dial/search-indexer` | Meili reindex jobs via queues | `MEILI_*`, `REDIS_URL` |
+| `@dial/tax` | FDMS outbox drain + fiscal-day open/close | `FDMS_*` |
+| `@dial/shared` idempotency | `claimProcessedEvent` (→ SQL `processed_events`) | — |
+| `@dial/ai` Promptfoo smoke | `pnpm eval:smoke` / CI guidedIntake no-money | optional `LITELLM_*` |
 
 ## Gateway webhook routes
 
@@ -34,6 +38,7 @@
 | `POST /api/webhooks/fdms` | FDMS acknowledge / submit |
 | `GET\|POST /api/webhooks/whatsapp` | Meta challenge + HMAC |
 | `POST /api/webhooks/psp` | Generic escrow shim (legacy) |
+| `GET\|POST /api/admin/fdms/day` | Fiscal-day open/close (fail-closed `INTERNAL_API_SECRET`) |
 
 ## Still ops / credentials (eng continues either way)
 
@@ -41,12 +46,14 @@
 - Escrow partner contract (ENH-020)
 - ZIMRA device credentials field-map refine (ENH-022)
 
-## Local compose (S92)
+## Local compose (S92+)
 
 ```bash
 docker compose up -d redis meilisearch
 docker compose --profile temporal up -d   # optional Temporal + UI
 pnpm --filter @dial/worker-temporal start  # in-process DeliveryDispatchWorkflow
+pnpm --filter @dial/worker-queues start    # BullMQ workers (fixture exits OK)
+pnpm eval:smoke                            # Promptfoo CI golden no-money
 curl -s http://localhost:3000/api/health/integrations | jq .
 ```
 

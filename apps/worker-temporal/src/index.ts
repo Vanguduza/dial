@@ -138,4 +138,63 @@ export function assertInternalSecretForSideEffects(
   }
 }
 
+export type SdkWorkerHandle = {
+  mode: "fixture" | "sandbox" | "live";
+  taskQueue: string;
+  workflows: string[];
+  /** Start polling (no-op in fixture). */
+  run: () => Promise<void>;
+  stop: () => Promise<void>;
+};
+
+/**
+ * S101 — Temporal SDK worker registration path.
+ * Fixture: no NativeConnection (CI-safe). Sandbox/live: Worker.create against compose.
+ */
+export async function createTemporalSdkWorker(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<SdkWorkerHandle> {
+  const modeRaw = (env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  const mode: "fixture" | "sandbox" | "live" =
+    modeRaw === "sandbox" || modeRaw === "live" ? modeRaw : "fixture";
+  const opts = createTemporalWorkerOptions(env);
+  assertInternalSecretForSideEffects(env);
+
+  if (mode === "fixture") {
+    return {
+      mode,
+      taskQueue: opts.taskQueue,
+      workflows: opts.workflows,
+      run: async () => undefined,
+      stop: async () => undefined,
+    };
+  }
+
+  const { NativeConnection, Worker } = await import("@temporalio/worker");
+  const connection = await NativeConnection.connect({ address: opts.address });
+  const worker = await Worker.create({
+    connection,
+    namespace: opts.namespace,
+    taskQueue: opts.taskQueue,
+    workflowsPath: new URL("./workflows.ts", import.meta.url).pathname,
+    activities: await import("./activities.js"),
+  });
+
+  let running: Promise<void> | undefined;
+  return {
+    mode,
+    taskQueue: opts.taskQueue,
+    workflows: opts.workflows,
+    run: async () => {
+      running = worker.run();
+      await running;
+    },
+    stop: async () => {
+      worker.shutdown();
+      await connection.close();
+    },
+  };
+}
+
 export { DeliveryDispatchWorkflow } from "./workflows.js";
+export { activityCreateAndDispatch } from "./activities.js";

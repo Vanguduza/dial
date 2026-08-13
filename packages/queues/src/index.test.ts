@@ -2,10 +2,13 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   __resetQueuesForTests,
+  drainFixtureFdmsDayJobs,
   drainFixtureOutboxJobs,
   drainFixtureSearchJobs,
+  enqueueFdmsDayJob,
   enqueueOutboxSideEffect,
   enqueueSearchIndexerJob,
+  startFdmsDayWorker,
   startSearchIndexerWorker,
 } from "./index.js";
 
@@ -27,6 +30,22 @@ test("S94 BullMQ fixture enqueue/drain without Redis", async () => {
   assert.equal(drainFixtureOutboxJobs().length, 1);
 
   const worker = await startSearchIndexerWorker({
+    processor: async () => undefined,
+  });
+  assert.equal(worker.mode, "fixture");
+  await worker.stop();
+});
+
+test("S97 FDMS day queue fixture enqueue/drain", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetQueuesForTests();
+  const q = await enqueueFdmsDayJob({ action: "open", requestedBy: "ops" });
+  assert.equal(q.mode, "fixture");
+  assert.ok(q.jobId.startsWith("fx_fd_"));
+  const drained = drainFixtureFdmsDayJobs();
+  assert.equal(drained.length, 1);
+  assert.equal(drained[0]?.action, "open");
+  const worker = await startFdmsDayWorker({
     processor: async () => undefined,
   });
   assert.equal(worker.mode, "fixture");

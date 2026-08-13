@@ -19,6 +19,11 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-032 | **Supabase Auth + search-indexer** — GoTrue client scaffold; Meili outbox consumer | `done` | S93 — fixture CI; sandbox needs Redis/Meili/Supabase env |
 | ENH-033 | **BullMQ + Temporal client** — queue host + DeliveryDispatch start path | `done` | S94 — `@dial/queues` + `@temporalio/client` |
 | ENH-034 | **FDMS outbox drain + Supabase session bridge** | `done` | S95 — tax drain + sign-in password path |
+| ENH-035 | **Promptfoo CI smoke + FDMS day workers** | `done` | S96 — `eval:smoke`; open/close day via Gateway |
+| ENH-036 | **FDMS day BullMQ + admin API** | `done` | S97 — `QUEUE_FDMS_DAY` + `/api/admin/fdms/day` |
+| ENH-037 | **Queue worker host + health expand** | `done` | S98 — `@dial/worker-queues`; health queues/fiscalDay |
+| ENH-038 | **LiteLLM ping + Meili bootstrap** | `done` | S100 — health litellm + `pnpm bootstrap:search` |
+| ENH-039 | **Temporal SDK worker + shared webhook idempotency** | `done` | S101 — `@temporalio/worker` path + `claimProcessedEvent` |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

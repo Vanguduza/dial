@@ -3,10 +3,9 @@
  */
 import { NextResponse } from "next/server";
 import { EcoCashDirectAdapter } from "@dial/adapter-psp";
+import { claimProcessedEvent } from "@dial/shared";
 
 export const runtime = "nodejs";
-
-const seen = new Set<string>();
 
 export async function POST(req: Request) {
   const rawBody = await req.text();
@@ -16,10 +15,14 @@ export async function POST(req: Request) {
       headers,
       rawBody,
     );
-    if (seen.has(admission.eventId)) {
+    if (
+      claimProcessedEvent({
+        eventId: admission.eventId,
+        source: "ecocash",
+      }) === "duplicate"
+    ) {
       return NextResponse.json({ ok: true, duplicate: true });
     }
-    seen.add(admission.eventId);
     return NextResponse.json({ ok: true, admission });
   } catch (e) {
     return NextResponse.json(

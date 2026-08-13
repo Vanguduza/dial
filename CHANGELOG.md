@@ -45,6 +45,11 @@ Living doc: update in the **same PR** as the change (Blueprint §8.0.2). Move `U
 - S93 Supabase Auth client scaffold (`signInWithPassword` fixture/live) + `@dial/search-indexer` outbox job drain (Meili ensure/upsert; Redis required outside fixture).
 - S94 `@dial/queues` BullMQ (fixture in-memory / Redis live) + Temporal client `startDeliveryDispatch` + search-indexer enqueue path.
 - S95 FDMS outbox drain via Virtual Gateway + gateway Supabase password→DialSession bridge on `/api/auth/sign-in`.
+- S96 Promptfoo CI smoke (`packages/ai/evals` + `pnpm eval:smoke`) + FDMS fiscal-day open/close workers in `@dial/tax`.
+- S97 FDMS day BullMQ queue + fail-closed admin `POST/GET /api/admin/fdms/day` (fixture runs processor inline).
+- S98 `@dial/worker-queues` BullMQ host + integrations health exposes queue names + fiscalDay snapshot.
+- S100 LiteLLM `pingLiteLlm` on integrations health + Meili `bootstrapLocalSearchIndex` (`pnpm bootstrap:search`).
+- S101 Temporal SDK worker registration (`createTemporalSdkWorker`) + shared `claimProcessedEvent` idempotency on PSP/FDMS webhooks.
 - S20 T1 Identity **green** (Pack §15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow search→cart→checkout buttons + webhook idempotency).

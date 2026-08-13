@@ -43,3 +43,32 @@ test("S95 drainFdmsOutbox submits via Gateway adapter (fixture)", async () => {
   assert.ok(results[0]?.fiscalCode);
   assert.equal(listQueuedFdmsReceipts().length, 0);
 });
+
+test("S96 FDMS open/close day worker (fixture)", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetTaxForTests();
+  const {
+    runFdmsOpenDay,
+    runFdmsCloseDay,
+    getFiscalDayState,
+  } = await import("./index.js");
+  await assert.rejects(() => runFdmsCloseDay(), /not open/);
+  const opened = await runFdmsOpenDay({ enqueueSideEffects: true });
+  assert.ok(opened.fiscalDayId);
+  assert.ok(opened.openedAt);
+  assert.equal(opened.closedAt, null);
+  const closed = await runFdmsCloseDay({ enqueueSideEffects: true });
+  assert.equal(closed.fiscalDayId, opened.fiscalDayId);
+  assert.ok(closed.closedAt);
+  assert.equal(getFiscalDayState().closedAt, closed.closedAt);
+});
+
+test("S97 processFdmsDayJob open then close", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetTaxForTests();
+  const { processFdmsDayJob, getFiscalDayState } = await import("./index.js");
+  await processFdmsDayJob({ action: "open" });
+  assert.ok(getFiscalDayState().fiscalDayId);
+  await processFdmsDayJob({ action: "close" });
+  assert.ok(getFiscalDayState().closedAt);
+});

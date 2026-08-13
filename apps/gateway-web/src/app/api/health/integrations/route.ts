@@ -4,6 +4,9 @@
  */
 import { NextResponse } from "next/server";
 import { listCanonicalPspMethods } from "@dial/adapter-psp";
+import { pingLiteLlm } from "@dial/ai";
+import { QUEUE_FDMS_DAY, QUEUE_OUTBOX_SIDE_EFFECTS, QUEUE_SEARCH_INDEXER } from "@dial/queues";
+import { getFiscalDayState } from "@dial/tax";
 import { createTemporalWorkerOptions } from "@dial/worker-temporal";
 
 export const runtime = "nodejs";
@@ -23,7 +26,7 @@ function group(label: string, keys: string[]) {
   };
 }
 
-export async function GET() {
+export async function GET(): Promise<NextResponse> {
   const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
   let temporal: { ok: boolean; error?: string } = { ok: true };
   try {
@@ -34,6 +37,7 @@ export async function GET() {
       error: e instanceof Error ? e.message : "temporal config error",
     };
   }
+  const litellm = await pingLiteLlm();
 
   const body = {
     ok: true,
@@ -64,6 +68,13 @@ export async function GET() {
       group("internal", ["INTERNAL_API_SECRET"]),
     ],
     temporal,
+    litellm,
+    queues: {
+      searchIndexer: QUEUE_SEARCH_INDEXER,
+      outboxSideEffects: QUEUE_OUTBOX_SIDE_EFFECTS,
+      fdmsDay: QUEUE_FDMS_DAY,
+    },
+    fiscalDay: getFiscalDayState(),
     note:
       mode === "fixture"
         ? "Fixture mode — missing keys OK for CI"

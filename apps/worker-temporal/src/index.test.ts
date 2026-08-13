@@ -54,3 +54,14 @@ test("S94 startDeliveryDispatch uses in-process path in fixture", async () => {
   assert.equal(boot.taskQueue, TEMPORAL_TASK_QUEUE);
   assert.ok(boot.workflows.includes(WORKFLOW_DELIVERY_DISPATCH));
 });
+
+test("S101 Temporal SDK worker fixture registers without NativeConnection", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { createTemporalSdkWorker } = await import("./index.js");
+  const sdk = await createTemporalSdkWorker();
+  assert.equal(sdk.mode, "fixture");
+  assert.equal(sdk.taskQueue, TEMPORAL_TASK_QUEUE);
+  assert.ok(sdk.workflows.includes(WORKFLOW_DELIVERY_DISPATCH));
+  await sdk.run();
+  await sdk.stop();
+});
