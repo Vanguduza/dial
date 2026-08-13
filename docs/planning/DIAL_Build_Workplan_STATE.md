@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S121** — Escrow PSP webhook durable smoke — **green** |
+| `current_stage` | **S122** — Maps health ping on integrations — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S120** WhatsApp durable + HMAC — **green** |
-| `next_stage` | **S122** Maps health ping (Nominatim/OSRM fixture) on integrations health |
+| `prior_stage` | **S121** Escrow PSP webhook — **green** |
+| `next_stage` | **S123** FDMS Gateway health ping on integrations health |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S120 | 2026-08-13/14 | through WA webhook |
-| S121 | 2026-08-14 | `/api/webhooks/escrow` durable + bad-sig/fail-closed |
+| S91–S121 | 2026-08-13/14 | through escrow webhook |
+| S122 | 2026-08-14 | `pingMapsHealth` + health `maps` snapshot |
 
 ## Note
 

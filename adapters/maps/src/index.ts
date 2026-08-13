@@ -100,3 +100,48 @@ export async function planVroomJob(input: {
   if (!res.ok) throw new Error(`VROOM HTTP ${res.status}`);
   return { provider: "vroom", summary: "ok" };
 }
+
+/**
+ * Integration health ping (S122) — fixture always ok; sandbox/live checks env (+ optional HEAD).
+ * Never echoes secrets.
+ */
+export async function pingMapsHealth(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{
+  ok: boolean;
+  mode: IntegrationMode;
+  nominatim: boolean;
+  osrm: boolean;
+  vroom: boolean;
+  error?: string;
+}> {
+  const mode = integrationMode(env);
+  if (mode === "fixture") {
+    const point = await geocodeNominatim("Harare");
+    const route = await estimateRouteOsrm(point, {
+      lat: point.lat + 0.01,
+      lon: point.lon + 0.01,
+    });
+    return {
+      ok: true,
+      mode,
+      nominatim: true,
+      osrm: route.provider === "fixture",
+      vroom: true,
+    };
+  }
+  const nominatim = Boolean(env.NOMINATIM_URL?.trim());
+  const osrm = Boolean(env.OSRM_URL?.trim());
+  const vroom = Boolean(env.VROOM_URL?.trim());
+  if (!nominatim || !osrm) {
+    return {
+      ok: false,
+      mode,
+      nominatim,
+      osrm,
+      vroom,
+      error: "NOMINATIM_URL / OSRM_URL unset — fail closed",
+    };
+  }
+  return { ok: true, mode, nominatim, osrm, vroom };
+}

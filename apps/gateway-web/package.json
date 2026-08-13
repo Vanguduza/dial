@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@dial/adapter-fdms": "workspace:*",
+    "@dial/adapter-maps": "workspace:*",
     "@dial/adapter-psp": "workspace:*",
     "@dial/adapter-whatsapp": "workspace:*",
     "@dial/ai": "workspace:*",

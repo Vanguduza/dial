@@ -19,3 +19,21 @@ test("maps fixture: nominatim + osrm + vroom without keys", async () => {
   });
   assert.equal(plan.provider, "fixture");
 });
+
+test("S122 pingMapsHealth fixture ok + sandbox fail-closed without URLs", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { pingMapsHealth } = await import("./index.js");
+  const fx = await pingMapsHealth();
+  assert.equal(fx.ok, true);
+  assert.equal(fx.mode, "fixture");
+  assert.equal(fx.nominatim, true);
+  assert.equal(fx.osrm, true);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.NOMINATIM_URL;
+  delete process.env.OSRM_URL;
+  const closed = await pingMapsHealth();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});

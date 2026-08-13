@@ -84,6 +84,9 @@ importers:
       '@dial/adapter-fdms':
         specifier: workspace:*
         version: link:../../adapters/fdms
+      '@dial/adapter-maps':
+        specifier: workspace:*
+        version: link:../../adapters/maps
       '@dial/adapter-psp':
         specifier: workspace:*
         version: link:../../adapters/psp
