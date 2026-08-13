@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S117** — ContiPay/EcoCash webhook route smoke — **green** |
+| `current_stage` | **S118** — PayPal + FDMS webhook durable smoke — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S116** worker money outbox drain — **green** |
-| `next_stage` | **S118** PayPal + FDMS webhook route durable idempotency smoke |
+| `prior_stage` | **S117** ContiPay/EcoCash webhook smoke — **green** |
+| `next_stage` | **S119** Paynow webhook durable claim + payments SoR bridge in fixture |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S116 | 2026-08-13 | through worker money outbox |
-| S117 | 2026-08-14 | ContiPay/EcoCash routes: durable claim + accept/dup/bad-sig |
+| S91–S117 | 2026-08-13/14 | through ContiPay/EcoCash webhooks |
+| S118 | 2026-08-14 | PayPal/FDMS durable claim + fail-closed |
 
 ## Note
 

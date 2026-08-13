@@ -1,10 +1,10 @@
 /**
- * FDMS / ZIMRA Virtual Gateway webhook — fiscal events (D-40a / D-59).
+ * FDMS / ZIMRA Virtual Gateway webhook — fiscal events (D-40a / D-59 / S118).
  * Fail closed without FDMS_ACTIVATION_KEY outside fixture mode.
  */
 import { NextResponse } from "next/server";
 import { ZimraVirtualGatewayAdapter } from "@dial/adapter-fdms";
-import { claimProcessedEvent } from "@dial/shared";
+import { claimProcessedEventDurable } from "@dial/shared";
 
 export const runtime = "nodejs";
 
@@ -25,8 +25,10 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "eventId required" }, { status: 400 });
   }
   if (
-    claimProcessedEvent({ eventId: body.eventId, source: "fdms" }) ===
-    "duplicate"
+    (await claimProcessedEventDurable({
+      eventId: body.eventId,
+      source: "fdms",
+    })) === "duplicate"
   ) {
     return NextResponse.json({ ok: true, duplicate: true });
   }

@@ -1,9 +1,9 @@
 /**
- * PayPal webhook — Orders v2 verify (D-43).
+ * PayPal webhook — Orders v2 verify + durable idempotency (D-43 / S118).
  */
 import { NextResponse } from "next/server";
 import { PayPalAdapter } from "@dial/adapter-psp";
-import { claimProcessedEvent } from "@dial/shared";
+import { claimProcessedEventDurable } from "@dial/shared";
 
 export const runtime = "nodejs";
 
@@ -13,10 +13,10 @@ export async function POST(req: Request) {
   try {
     const admission = await new PayPalAdapter().verifyWebhook(headers, rawBody);
     if (
-      claimProcessedEvent({
+      (await claimProcessedEventDurable({
         eventId: admission.eventId,
         source: "paypal",
-      }) === "duplicate"
+      })) === "duplicate"
     ) {
       return NextResponse.json({ ok: true, duplicate: true });
     }

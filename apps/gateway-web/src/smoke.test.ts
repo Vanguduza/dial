@@ -516,3 +516,80 @@ test("S117 ContiPay/EcoCash webhook routes: accept + duplicate + sandbox bad-sig
   if (prevEco === undefined) delete process.env.ECOCASH_WEBHOOK_SECRET;
   else process.env.ECOCASH_WEBHOOK_SECRET = prevEco;
 });
+
+test("S118 PayPal/FDMS webhook routes: durable accept + duplicate + fail-closed", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevPp = process.env.PAYPAL_WEBHOOK_ID;
+  const prevFdms = process.env.FDMS_ACTIVATION_KEY;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { __resetIdempotencyForTests } = await import("@dial/shared");
+  __resetIdempotencyForTests();
+
+  const { POST: ppPost } = await import("./app/api/webhooks/paypal/route.js");
+  const { POST: fdmsPost } = await import("./app/api/webhooks/fdms/route.js");
+
+  const ppBody = JSON.stringify({
+    id: "WH-S118",
+    event_type: "PAYMENT.CAPTURE.COMPLETED",
+    resource: { id: "CAP-S118" },
+  });
+  const pp1 = await ppPost(
+    new Request("http://localhost/api/webhooks/paypal", {
+      method: "POST",
+      headers: { "paypal-transmission-id": "txn_s118" },
+      body: ppBody,
+    }),
+  );
+  assert.equal(pp1.status, 200);
+  assert.equal(((await pp1.json()) as { ok: boolean }).ok, true);
+  const pp2 = await ppPost(
+    new Request("http://localhost/api/webhooks/paypal", {
+      method: "POST",
+      headers: { "paypal-transmission-id": "txn_s118" },
+      body: ppBody,
+    }),
+  );
+  assert.equal(((await pp2.json()) as { duplicate?: boolean }).duplicate, true);
+
+  const fdms1 = await fdmsPost(
+    new Request("http://localhost/api/webhooks/fdms", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ eventId: "fdms_s118", type: "ack" }),
+    }),
+  );
+  assert.equal(fdms1.status, 200);
+  const fdms2 = await fdmsPost(
+    new Request("http://localhost/api/webhooks/fdms", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ eventId: "fdms_s118", type: "ack" }),
+    }),
+  );
+  assert.equal(((await fdms2.json()) as { duplicate?: boolean }).duplicate, true);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.PAYPAL_WEBHOOK_ID;
+  const badPp = await ppPost(
+    new Request("http://localhost/api/webhooks/paypal", {
+      method: "POST",
+      body: JSON.stringify({ id: "x" }),
+    }),
+  );
+  assert.equal(badPp.status, 401);
+  delete process.env.FDMS_ACTIVATION_KEY;
+  const badFdms = await fdmsPost(
+    new Request("http://localhost/api/webhooks/fdms", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ eventId: "fdms_closed" }),
+    }),
+  );
+  assert.equal(badFdms.status, 503);
+
+  process.env.DIAL_INTEGRATION_MODE = prevMode;
+  if (prevPp === undefined) delete process.env.PAYPAL_WEBHOOK_ID;
+  else process.env.PAYPAL_WEBHOOK_ID = prevPp;
+  if (prevFdms === undefined) delete process.env.FDMS_ACTIVATION_KEY;
+  else process.env.FDMS_ACTIVATION_KEY = prevFdms;
+});
