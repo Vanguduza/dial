@@ -3,6 +3,7 @@
  * Never echoes secret values (D-47).
  */
 import { NextResponse } from "next/server";
+import { pingFdmsHealth } from "@dial/adapter-fdms";
 import { pingMapsHealth } from "@dial/adapter-maps";
 import { listCanonicalPspMethods } from "@dial/adapter-psp";
 import { pingLiteLlm } from "@dial/ai";
@@ -42,6 +43,7 @@ export async function GET(): Promise<NextResponse> {
   }
   const litellm = await pingLiteLlm();
   const maps = await pingMapsHealth();
+  const fdms = await pingFdmsHealth();
 
   const body = {
     ok: true,
@@ -74,6 +76,7 @@ export async function GET(): Promise<NextResponse> {
     temporal,
     litellm,
     maps,
+    fdms,
     queues: {
       searchIndexer: QUEUE_SEARCH_INDEXER,
       outboxSideEffects: QUEUE_OUTBOX_SIDE_EFFECTS,

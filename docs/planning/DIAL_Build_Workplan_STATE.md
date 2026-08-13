@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S122** — Maps health ping on integrations — **green** |
+| `current_stage` | **S123** — FDMS Gateway health ping — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S121** Escrow PSP webhook — **green** |
-| `next_stage` | **S123** FDMS Gateway health ping on integrations health |
+| `prior_stage` | **S122** Maps health ping — **green** |
+| `next_stage` | **S124** Meili search health ping expand (host reachability fixture) |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S121 | 2026-08-13/14 | through escrow webhook |
-| S122 | 2026-08-14 | `pingMapsHealth` + health `maps` snapshot |
+| S91–S122 | 2026-08-13/14 | through maps health |
+| S123 | 2026-08-14 | `pingFdmsHealth` + health `fdms` snapshot |
 
 ## Note
 

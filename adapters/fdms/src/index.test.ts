@@ -42,3 +42,21 @@ test("S107 submitReceipt live-shape fields (amountMinor string, agency class)", 
     assert.ok(r.fiscalCode);
   }
 });
+
+test("S123 pingFdmsHealth fixture ok + sandbox fail-closed without keys", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { pingFdmsHealth } = await import("./index.js");
+  const fx = await pingFdmsHealth();
+  assert.equal(fx.ok, true);
+  assert.equal(fx.mode, "fixture");
+  assert.ok(fx.fixtureDayId);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.FDMS_BASE_URL;
+  delete process.env.FDMS_DEVICE_ID;
+  delete process.env.FDMS_ACTIVATION_KEY;
+  const closed = await pingFdmsHealth();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});

@@ -45,6 +45,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-058 | **WhatsApp webhook durable + HMAC smoke** | `done` | S120 — challenge + claimProcessedEventDurable + 401/503 |
 | ENH-059 | **Escrow PSP webhook durable smoke** | `done` | S121 — `/api/webhooks/escrow` + bad-sig/fail-closed |
 | ENH-060 | **Maps health ping on integrations** | `done` | S122 — pingMapsHealth Nominatim/OSRM fixture |
+| ENH-061 | **FDMS Gateway health ping** | `done` | S123 — pingFdmsHealth fixture day + sandbox fail-closed |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

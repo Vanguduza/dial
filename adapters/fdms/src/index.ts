@@ -99,3 +99,47 @@ export class CloudEsdSignerStub implements FdmsSigner {
     return { signature: `cloudesd_stub_${body.length}` };
   }
 }
+
+/**
+ * Integration health ping (S123) — fixture opens a stub day; sandbox/live checks env only.
+ * Never echoes activation keys.
+ */
+export async function pingFdmsHealth(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{
+  ok: boolean;
+  mode: IntegrationMode;
+  baseUrl: boolean;
+  deviceId: boolean;
+  activationKey: boolean;
+  fixtureDayId?: string;
+  error?: string;
+}> {
+  const mode = integrationMode(env);
+  const baseUrl = Boolean(env.FDMS_BASE_URL?.trim());
+  const deviceId = Boolean(env.FDMS_DEVICE_ID?.trim());
+  const activationKey = Boolean(env.FDMS_ACTIVATION_KEY?.trim());
+  if (mode === "fixture") {
+    const gw = new ZimraVirtualGatewayAdapter();
+    const day = await gw.openFiscalDay();
+    return {
+      ok: true,
+      mode,
+      baseUrl,
+      deviceId,
+      activationKey,
+      fixtureDayId: day.fiscalDayId,
+    };
+  }
+  if (!baseUrl || !deviceId || !activationKey) {
+    return {
+      ok: false,
+      mode,
+      baseUrl,
+      deviceId,
+      activationKey,
+      error: "FDMS_BASE_URL / DEVICE_ID / ACTIVATION_KEY unset — fail closed",
+    };
+  }
+  return { ok: true, mode, baseUrl, deviceId, activationKey };
+}
