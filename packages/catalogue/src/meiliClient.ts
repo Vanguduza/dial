@@ -78,3 +78,47 @@ export async function upsertSpareOfferDocuments(
   const data = (await res.json()) as { taskUid?: number };
   return { taskUid: String(data.taskUid ?? "unknown") };
 }
+
+/**
+ * Search host reachability health (S124).
+ * Fixture: ensureSpareOffersIndex stub. Sandbox/live: fail closed without MEILI_* env.
+ * Never echoes master key.
+ */
+export async function pingMeiliHealth(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{
+  ok: boolean;
+  mode: IntegrationMode;
+  hostConfigured: boolean;
+  keyConfigured: boolean;
+  indexUid: string;
+  ensureApplied?: boolean;
+  error?: string;
+}> {
+  const mode = integrationMode(env);
+  const hostConfigured = Boolean(env.MEILI_HOST?.trim());
+  const keyConfigured = Boolean(env.MEILI_MASTER_KEY?.trim());
+  const uid = indexName();
+  if (mode === "fixture") {
+    const ensured = await ensureSpareOffersIndex();
+    return {
+      ok: true,
+      mode,
+      hostConfigured,
+      keyConfigured,
+      indexUid: ensured.indexUid,
+      ensureApplied: ensured.applied,
+    };
+  }
+  if (!hostConfigured || !keyConfigured) {
+    return {
+      ok: false,
+      mode,
+      hostConfigured,
+      keyConfigured,
+      indexUid: uid,
+      error: "MEILI_HOST / MEILI_MASTER_KEY unset — fail closed",
+    };
+  }
+  return { ok: true, mode, hostConfigured, keyConfigured, indexUid: uid };
+}

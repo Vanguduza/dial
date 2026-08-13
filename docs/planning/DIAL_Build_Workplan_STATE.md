@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S123** — FDMS Gateway health ping — **green** |
+| `current_stage` | **S124** — Meili search health ping expand — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S122** Maps health ping — **green** |
-| `next_stage` | **S124** Meili search health ping expand (host reachability fixture) |
+| `prior_stage` | **S123** FDMS Gateway health ping — **green** |
+| `next_stage` | **S125** Redis/queues health ping on integrations health |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S122 | 2026-08-13/14 | through maps health |
-| S123 | 2026-08-14 | `pingFdmsHealth` + health `fdms` snapshot |
+| S91–S123 | 2026-08-13/14 | through FDMS health |
+| S124 | 2026-08-14 | `pingMeiliHealth` nested under health `search.meili` |
 
 ## Note
 

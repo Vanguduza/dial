@@ -79,6 +79,24 @@ test("S110 informal B2B leak=0 + search health snapshot", async () => {
   assert.ok(health.marketplaceDocCount > 0);
 });
 
+test("S124 pingMeiliHealth fixture ok + sandbox fail-closed without host", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { pingMeiliHealth } = await import("./index.js");
+  const fx = await pingMeiliHealth();
+  assert.equal(fx.ok, true);
+  assert.equal(fx.mode, "fixture");
+  assert.equal(fx.ensureApplied, true);
+  assert.ok(fx.indexUid);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.MEILI_HOST;
+  delete process.env.MEILI_MASTER_KEY;
+  const closed = await pingMeiliHealth();
+  assert.equal(closed.ok, false);
+  assert.ok(closed.error?.includes("fail closed"));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
 test("T2 Catalogue Factory ingest/review + search_no_result_events (D-53)", () => {
   __resetCatalogueForTests();
   const batch = enqueueCatalogueIngest(3);

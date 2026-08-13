@@ -416,5 +416,6 @@ export function __resetCatalogueForTests(): void {
 
 export {
   ensureSpareOffersIndex,
+  pingMeiliHealth,
   upsertSpareOfferDocuments,
 } from "./meiliClient.js";

@@ -7,7 +7,7 @@ import { pingFdmsHealth } from "@dial/adapter-fdms";
 import { pingMapsHealth } from "@dial/adapter-maps";
 import { listCanonicalPspMethods } from "@dial/adapter-psp";
 import { pingLiteLlm } from "@dial/ai";
-import { searchHealthSnapshot } from "@dial/catalogue";
+import { searchHealthSnapshot, pingMeiliHealth } from "@dial/catalogue";
 import { listMoneyOutbox } from "@dial/ledger";
 import { QUEUE_FDMS_DAY, QUEUE_OUTBOX_SIDE_EFFECTS, QUEUE_SEARCH_INDEXER } from "@dial/queues";
 import { getFiscalDayState } from "@dial/tax";
@@ -44,6 +44,7 @@ export async function GET(): Promise<NextResponse> {
   const litellm = await pingLiteLlm();
   const maps = await pingMapsHealth();
   const fdms = await pingFdmsHealth();
+  const meili = await pingMeiliHealth();
 
   const body = {
     ok: true,
@@ -84,7 +85,10 @@ export async function GET(): Promise<NextResponse> {
     },
     fiscalDay: getFiscalDayState(),
     moneyOutbox: { depth: listMoneyOutbox().length },
-    search: searchHealthSnapshot(),
+    search: {
+      ...searchHealthSnapshot(),
+      meili,
+    },
     note:
       mode === "fixture"
         ? "Fixture mode — missing keys OK for CI"
