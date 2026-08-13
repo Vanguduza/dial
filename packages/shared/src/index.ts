@@ -10,3 +10,4 @@ export {
   claimProcessedEventDurable,
   integrationMode as processedEventsIntegrationMode,
 } from "./processedEvents.js";
+export { pingInternalApiHealth } from "./internalApi.js";

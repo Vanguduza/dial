@@ -16,6 +16,7 @@ import {
   QUEUE_SEARCH_INDEXER,
   pingQueuesHealth,
 } from "@dial/queues";
+import { pingInternalApiHealth } from "@dial/shared";
 import { getFiscalDayState } from "@dial/tax";
 import { pingTemporalHealth } from "@dial/worker-temporal";
 
@@ -46,6 +47,7 @@ export async function GET(): Promise<NextResponse> {
   const queuesHealth = await pingQueuesHealth();
   const whatsapp = await pingWhatsAppHealth();
   const psp = await pingPspHealth();
+  const internal = await pingInternalApiHealth();
 
   const probes = {
     temporal: temporal.ok,
@@ -56,6 +58,7 @@ export async function GET(): Promise<NextResponse> {
     queues: queuesHealth.ok,
     whatsapp: whatsapp.ok,
     psp: psp.ok,
+    internal: internal.ok,
   };
   const ready = Object.values(probes).every(Boolean);
 
@@ -95,6 +98,7 @@ export async function GET(): Promise<NextResponse> {
     fdms,
     whatsapp,
     psp,
+    internal,
     queues: {
       searchIndexer: QUEUE_SEARCH_INDEXER,
       outboxSideEffects: QUEUE_OUTBOX_SIDE_EFFECTS,

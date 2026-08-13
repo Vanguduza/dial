@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S130** — PSP health ping aggregate — **green** |
+| `current_stage` | **S131** — Internal API secret health probe — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S129** WhatsApp Cloud health ping — **green** |
-| `next_stage` | **S131** Internal API secret health probe on integrations |
+| `prior_stage` | **S130** PSP health ping aggregate — **green** |
+| `next_stage` | **S132** `.env.example` sync with health groups + readiness checklist cross-links |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S129 | 2026-08-13/14 | through WA health ping |
-| S130 | 2026-08-14 | `pingPspHealth` rails + health `psp` / probes |
+| S91–S130 | 2026-08-13/14 | through PSP health ping |
+| S131 | 2026-08-14 | `pingInternalApiHealth` + health `internal` / probes |
 
 ## Note
 
