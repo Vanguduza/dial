@@ -419,6 +419,31 @@ test("S144 sandbox health group labels match INTEGRATION_ENV_GROUPS", async () =
   }
 });
 
+test("S145 live health group labels match INTEGRATION_ENV_GROUPS", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  process.env.DIAL_INTEGRATION_MODE = "live";
+  try {
+    const { INTEGRATION_ENV_GROUPS } = await import(
+      "./lib/integrationsReadiness.js"
+    );
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode: string;
+      groups: Array<{ label: string }>;
+    };
+    assert.equal(body.mode, "live");
+    assert.deepEqual(
+      body.groups.map((g) => g.label),
+      INTEGRATION_ENV_GROUPS.map((g) => g.label),
+      "live groups[] labels must match INTEGRATION_ENV_GROUPS order exactly",
+    );
+  } finally {
+    process.env.DIAL_INTEGRATION_MODE = prevMode;
+  }
+});
+
 test("S132 .env.example lists every integrations health group key", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const { readFileSync } = await import("node:fs");
