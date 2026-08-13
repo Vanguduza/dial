@@ -140,6 +140,9 @@ test("Chatwoot handoff carries order/job/cart ids; §10 returns/referral/consent
   assert.ok(handoff.orderId);
   assert.ok(handoff.cartId);
   assert.equal(handoff.searchQuery, "filter");
+  assert.ok(handoff.chatwootContactId);
+  assert.ok(handoff.inboxId);
+  assert.ok(handoff.erpTicketId);
 
   const ret = flowSpareReturns(s.sessionId, {
     orderId: review.review.orderId,
@@ -153,6 +156,25 @@ test("Chatwoot handoff carries order/job/cart ids; §10 returns/referral/consent
   const cons = flowConsentCentre(s.sessionId, { marketing: true });
   assert.equal(cons.consents.marketing, true);
   assert.equal(cons.consents.vehicleHub, false);
+});
+
+test("S111 support ticket flow + Chatwoot id contract", async () => {
+  __resetWhatsappForTests();
+  const {
+    flowSupportTicket,
+    assertChatwootHandoffIdContract,
+    getSupportTicket,
+  } = await import("./index.js");
+  const s = startFlow("FLOW_SUPPORT_TICKET", "cust_s111");
+  const out = flowSupportTicket(s.sessionId, {
+    topic: "payment_help",
+    orderId: "ord_s111",
+  });
+  assertChatwootHandoffIdContract(out.handoff);
+  assert.equal(out.ticket.statusFrom, "erp");
+  assert.equal(out.ticket.status, "pending_human");
+  assert.equal(out.ticket.orderId, "ord_s111");
+  assert.equal(getSupportTicket(out.ticket.ticketId)?.conversationKey, out.handoff.conversationKey);
 });
 
 test("No Baileys / whatsapp-web.js in workspace package.json files (D-40)", () => {

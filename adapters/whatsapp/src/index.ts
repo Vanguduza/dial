@@ -95,6 +95,12 @@ export type ConsentState = {
 
 export type ChatwootHandoff = {
   conversationKey: string;
+  /** Chatwoot-side contact stub — filled when CHATWOOT_* keys land. */
+  chatwootContactId: string;
+  /** Inbox routing stub (ENH — ops configures live inbox). */
+  inboxId: string;
+  /** ERP support ticket id — Chatwoot is not SoR for status. */
+  erpTicketId: string;
   customerId?: string;
   orderId?: string;
   jobId?: string;
@@ -103,8 +109,20 @@ export type ChatwootHandoff = {
   topic: string;
 };
 
+export type SupportTicket = {
+  ticketId: string;
+  conversationKey: string;
+  topic: string;
+  status: "open" | "pending_human";
+  statusFrom: "erp";
+  customerId?: string;
+  orderId?: string;
+  jobId?: string;
+};
+
 const sessions = new Map<string, FlowSession>();
 const handoffs = new Map<string, ChatwootHandoff>();
+const supportTickets = new Map<string, SupportTicket>();
 const referrals = new Map<string, { code: string; balancePromoCreditMinor: bigint }>();
 
 export function verifyMetaSignature(input: {
@@ -335,8 +353,15 @@ export function openChatwootHandoff(
   input: { topic: string; jobId?: string; orderId?: string },
 ): ChatwootHandoff {
   const session = requireSession(sessionId);
+  const conversationKey = `cw_${session.sessionId}_${Date.now().toString(36)}`;
+  const erpTicketId = `tkt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
   const handoff: ChatwootHandoff = {
-    conversationKey: `cw_${session.sessionId}_${Date.now().toString(36)}`,
+    conversationKey,
+    chatwootContactId:
+      process.env.CHATWOOT_CONTACT_ID_STUB?.trim() ||
+      `cw_contact_${session.customerId ?? session.sessionId}`,
+    inboxId: process.env.CHATWOOT_INBOX_ID?.trim() || "inbox_fx_support",
+    erpTicketId,
     topic: input.topic,
   };
   if (session.customerId !== undefined) handoff.customerId = session.customerId;
@@ -349,8 +374,55 @@ export function openChatwootHandoff(
     handoff.searchQuery = session.lastSearchQuery;
   }
   handoffs.set(handoff.conversationKey, handoff);
+
+  const ticket: SupportTicket = {
+    ticketId: erpTicketId,
+    conversationKey,
+    topic: input.topic,
+    status: "open",
+    statusFrom: "erp",
+  };
+  if (handoff.customerId !== undefined) ticket.customerId = handoff.customerId;
+  if (handoff.orderId !== undefined) ticket.orderId = handoff.orderId;
+  if (handoff.jobId !== undefined) ticket.jobId = handoff.jobId;
+  supportTickets.set(ticket.ticketId, ticket);
+
   session.lastScreen = "chatwoot_handoff";
   return handoff;
+}
+
+/** Assert required Chatwoot/ERP id fields present (S111 contract). */
+export function assertChatwootHandoffIdContract(h: ChatwootHandoff): void {
+  if (!h.conversationKey) throw new Error("conversationKey required");
+  if (!h.chatwootContactId) throw new Error("chatwootContactId required");
+  if (!h.inboxId) throw new Error("inboxId required");
+  if (!h.erpTicketId) throw new Error("erpTicketId required");
+  if (!h.topic) throw new Error("topic required");
+}
+
+/** FLOW_SUPPORT_TICKET — opens ERP ticket + Chatwoot handoff ids (Chatwoot ≠ status SoR). */
+export function flowSupportTicket(
+  sessionId: string,
+  input: { topic: string; orderId?: string; jobId?: string },
+): { session: FlowSession; handoff: ChatwootHandoff; ticket: SupportTicket } {
+  const session = requireSession(sessionId);
+  session.flowId = "FLOW_SUPPORT_TICKET";
+  const handoff = openChatwootHandoff(sessionId, {
+    topic: input.topic,
+    ...(input.orderId !== undefined ? { orderId: input.orderId } : {}),
+    ...(input.jobId !== undefined ? { jobId: input.jobId } : {}),
+  });
+  assertChatwootHandoffIdContract(handoff);
+  const ticket = supportTickets.get(handoff.erpTicketId);
+  if (!ticket) throw new Error("Expected ERP ticket for handoff");
+  ticket.status = "pending_human";
+  session.lastScreen = "support_ticket";
+  return { session, handoff, ticket: { ...ticket } };
+}
+
+export function getSupportTicket(ticketId: string): SupportTicket | undefined {
+  const t = supportTickets.get(ticketId);
+  return t ? { ...t } : undefined;
 }
 
 /** §10 MVP — returns stub (ERP creates claim; Chatwoot not SoR). */
@@ -434,6 +506,7 @@ export function __resetWhatsappForTests(): void {
   sessions.clear();
   __resetIdempotencyForTests();
   handoffs.clear();
+  supportTickets.clear();
   referrals.clear();
 }
 

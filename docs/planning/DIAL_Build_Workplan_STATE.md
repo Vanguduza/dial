@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S110** — B2B informal leak=0 + search health — **green** |
+| `current_stage` | **S111** — Chatwoot handoff ids + support ticket — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S109** VROOM plan + maps ETA — **green** |
-| `next_stage` | **S111** Chatwoot handoff id contract + support ticket stub expand |
+| `prior_stage` | **S110** B2B informal leak + search health — **green** |
+| `next_stage` | **S112** Consent centre expand + referral promo-credit only evidence |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S109 | 2026-08-13 | through VROOM/maps ETA |
-| S110 | 2026-08-13 | `countInformalB2bLeaks` + health `search` snapshot |
+| S91–S110 | 2026-08-13 | through search health |
+| S111 | 2026-08-13 | `assertChatwootHandoffIdContract` + `flowSupportTicket` |
 
 ## Note
 
