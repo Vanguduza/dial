@@ -67,8 +67,8 @@ function id(prefix: string): string {
 }
 
 /**
- * Route estimate — uses @dial/adapter-maps when not fixture and OSRM_URL set;
- * otherwise deterministic stub (never Google/Mapbox — D-44).
+ * Route estimate — always via @dial/adapter-maps (fixture/sandbox/live).
+ * Never Google/Mapbox (D-44). Falls back to stub only if adapter import fails.
  */
 export async function estimateRoute(input: {
   from: string;
@@ -78,8 +78,7 @@ export async function estimateRoute(input: {
   etaMinutes: number;
   provider: "osrm_vroom_stub" | "osrm" | "fixture" | "vroom";
 }> {
-  const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
-  if (mode !== "fixture" && process.env.OSRM_URL?.trim()) {
+  try {
     const maps = await import("@dial/adapter-maps");
     const from = await maps.geocodeNominatim(input.from);
     const to = await maps.geocodeNominatim(input.to);
@@ -89,8 +88,9 @@ export async function estimateRoute(input: {
       etaMinutes: Math.max(1, Math.round(route.durationSeconds / 60)),
       provider: route.provider,
     };
+  } catch {
+    return estimateRouteStub(input);
   }
-  return estimateRouteStub(input);
 }
 
 /** OSRM/VROOM stub — not Google/Mapbox (D-44). */

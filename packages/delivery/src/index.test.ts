@@ -5,6 +5,7 @@ import {
   acceptOffer,
   capturePod,
   createDeliveryJob,
+  estimateRoute,
   estimateRouteStub,
   getDeliveryJob,
   listFifoQueue,
@@ -82,10 +83,10 @@ test("E3a reject/timeout → reassign; zero couriers → FIFO", () => {
   assert.equal(getDeliveryJob(j2.id)?.status, "queued_fifo");
 });
 
-test("S92 estimateRoute uses stub in fixture mode", async () => {
+test("S103 estimateRoute bridges @dial/adapter-maps in fixture", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
-  const { estimateRoute } = await import("./index.js");
-  const r = await estimateRoute({ from: "A", to: "B" });
-  assert.equal(r.provider, "osrm_vroom_stub");
+  const r = await estimateRoute({ from: "Harare CBD", to: "Avondale" });
+  assert.equal(r.provider, "fixture");
   assert.ok(r.distanceMeters > 0);
+  assert.ok(r.etaMinutes >= 1);
 });

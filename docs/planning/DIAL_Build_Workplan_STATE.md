@@ -6,21 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S102** — WA/PSP admit→shared + durable processed_events — **green** |
+| `current_stage` | **S103** — shared webhook smoke + maps distance bridge — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S101** Temporal SDK worker + webhook idempotency — **green** |
-| `next_stage` | **S103** gateway webhook smoke using shared store + maps distance fixture bridge |
+| `prior_stage` | **S102** WA/PSP durable idempotency — **green** |
+| `next_stage` | **S104** ContiPay/EcoCash createPayment live-shape fixtures + COD settle USD evidence |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S95 | 2026-08-13 | adapters → compose → auth → queues → FDMS drain |
-| S96–S98 | 2026-08-13 | Promptfoo / FDMS day / worker-queues |
-| S100–S101 | 2026-08-13 | LiteLLM/Meili + Temporal SDK + claimProcessedEvent |
-| S102 | 2026-08-13 | WA+PSP → shared store; `claimProcessedEventDurable` |
+| S91–S102 | 2026-08-13 | integration readiness through durable idempotency |
+| S103 | 2026-08-13 | gateway shared-store smoke; delivery→maps fixture bridge |
 
 ## Note
 

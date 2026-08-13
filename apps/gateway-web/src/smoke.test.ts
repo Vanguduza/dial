@@ -340,3 +340,29 @@ test("S95 Supabase password → DialSession bridge", async () => {
   assert.equal(session.email, "buyer@dial.test");
   assert.equal(getSessionFromToken(token)?.userId, session.userId);
 });
+
+test("S103 shared idempotency store dedupes across webhook sources", async () => {
+  const {
+    __resetIdempotencyForTests,
+    claimProcessedEvent,
+  } = await import("@dial/shared");
+  __resetIdempotencyForTests();
+  assert.equal(
+    claimProcessedEvent({ eventId: "same_id", source: "paynow" }),
+    "accepted",
+  );
+  assert.equal(
+    claimProcessedEvent({ eventId: "same_id", source: "paynow" }),
+    "duplicate",
+  );
+  assert.equal(
+    claimProcessedEvent({ eventId: "same_id", source: "fdms" }),
+    "accepted",
+  );
+  const { admitWebhookEvent, __resetWhatsappForTests } = await import(
+    "@dial/adapter-whatsapp"
+  );
+  __resetWhatsappForTests();
+  assert.equal(admitWebhookEvent("wa_s103"), "accepted");
+  assert.equal(admitWebhookEvent("wa_s103"), "duplicate");
+});
