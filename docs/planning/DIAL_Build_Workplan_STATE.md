@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S139** — Shared INTEGRATION_ENV_GROUPS — **green** |
+| `current_stage` | **S140** — Document INTEGRATION_ENV_GROUPS SoR — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S138** Health probes from INTEGRATION_PROBE_KEYS — **green** |
-| `next_stage` | **S140** Document INTEGRATION_ENV_GROUPS in integrations README + OpenAPI x-dial note |
+| `prior_stage` | **S139** Shared INTEGRATION_ENV_GROUPS — **green** |
+| `next_stage` | **S141** Admin integrations UI shows env-group SoR hint + OpenAPI link prominence |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S138 | 2026-08-13/14 | through probe SoR builder |
-| S139 | 2026-08-14 | `INTEGRATION_ENV_GROUPS` + listIntegrationEnvGroupSnapshots |
+| S91–S139 | 2026-08-13/14 | through INTEGRATION_ENV_GROUPS |
+| S140 | 2026-08-14 | README SoR + OpenAPI `x-dial-sor` |
 
 ## Note
 

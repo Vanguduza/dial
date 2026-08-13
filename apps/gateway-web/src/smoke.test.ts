@@ -457,6 +457,23 @@ test("S134 OpenAPI skeleton covers health + webhook paths", async () => {
   };
   assert.ok(served.openapi?.startsWith("3."));
   assert.ok(served.paths?.["/api/health/integrations"]);
+  const withSor = served as {
+    info?: { "x-dial-sor"?: { probes?: string; envGroups?: string } };
+  };
+  assert.ok(withSor.info?.["x-dial-sor"]?.probes?.includes("INTEGRATION_PROBE_KEYS"));
+  assert.ok(withSor.info?.["x-dial-sor"]?.envGroups?.includes("INTEGRATION_ENV_GROUPS"));
+});
+
+test("S140 integrations README documents INTEGRATION_ENV_GROUPS SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("INTEGRATION_ENV_GROUPS"));
+  assert.ok(integ.includes("listIntegrationEnvGroupSnapshots"));
+  assert.ok(integ.includes("x-dial-sor"));
 });
 
 test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {

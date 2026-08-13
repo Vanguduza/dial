@@ -60,7 +60,9 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 
 **`ready` meaning:** aggregate of Temporal, LiteLLM, Maps, FDMS, Meili, Queues, WhatsApp, PSP, and Internal API secret health probes — not a substitute for ops credential approval.
 
-### Health groups ↔ `.env.example` (S132)
+### Health groups ↔ `.env.example` (S132 / S139 / S140)
+
+**SoR:** `INTEGRATION_ENV_GROUPS` in `apps/gateway-web/src/lib/integrationsReadiness.ts` (via `listIntegrationEnvGroupSnapshots`). Do not edit the table below without updating that constant — smoke tests assert labels + keys against OpenAPI and `.env.example`.
 
 | Health `groups[].label` | Keys (must appear in root `.env.example`) |
 | --- | --- |
@@ -112,3 +114,5 @@ Machine-readable outline of health + inbound webhooks + fail-closed admin routes
 Schemas stay opaque for webhook bodies (signature + idempotency SoR in adapters). Expand fields when vendor contracts lock (ENH-020…022).
 
 **Probes (S137):** OpenAPI `IntegrationsProbes` requires `temporal`, `litellm`, `maps`, `fdms`, `meili`, `queues`, `whatsapp`, `psp`, `internal` — kept in sync with `INTEGRATION_PROBE_KEYS` in gateway-web.
+
+**Env groups (S139/S140):** OpenAPI `groups[].label` enum + `info.x-dial-sor` point at `INTEGRATION_ENV_GROUPS` (same module).

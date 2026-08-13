@@ -3,7 +3,12 @@
   "info": {
     "title": "DIAL Gateway — integration surface (skeleton)",
     "version": "0.1.0",
-    "description": "S134 skeleton for API-key drop-in readiness. Documents health + inbound webhook shapes. Never includes secret values. Authoritative eng behaviour remains Pack/adapters; this is a contract outline for vendors/ops."
+    "description": "S134 skeleton for API-key drop-in readiness. Documents health + inbound webhook shapes. Never includes secret values. Authoritative eng behaviour remains Pack/adapters; this is a contract outline for vendors/ops.",
+    "x-dial-sor": {
+      "probes": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_PROBE_KEYS",
+      "envGroups": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_ENV_GROUPS",
+      "docs": "docs/integrations/README.md"
+    }
   },
   "servers": [
     {
