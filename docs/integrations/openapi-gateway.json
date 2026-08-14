@@ -11,6 +11,7 @@
       "healthNote": "apps/gateway-web/src/lib/integrationsReadiness.ts#buildIntegrationsHealthNote",
       "healthNoteUiMax": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_HEALTH_NOTE_UI_MAX",
       "noteBuilderHint": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID",
+      "noteBuilderDocs": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_NOTE_BUILDER_SOR_DOCS",
       "docs": "docs/integrations/README.md"
     }
   },
