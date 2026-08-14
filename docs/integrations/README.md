@@ -70,6 +70,8 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 
 `ready === integrationsReady(probes)` — every boolean in `probes` is true (Temporal, LiteLLM, Maps, FDMS, Meili, Queues, WhatsApp, PSP, Internal). It is **not** “all env groups configured.”
 
+**S211 / S233:** Fixture mode may report `ready=true` with **zero configured** groups (`configured=false` for every `groups[]` entry) — probes alone drive `ready`.
+
 ### Health groups ↔ `.env.example` (S132 / S139 / S140)
 
 **SoR:** `INTEGRATION_ENV_GROUPS` in `apps/gateway-web/src/lib/integrationsReadiness.ts` (via `listIntegrationEnvGroupSnapshots`). Ordered label tuple: `INTEGRATION_ENV_GROUP_LABELS` (derived — do not maintain a parallel list). Do not edit the table below without updating that constant — smoke tests assert labels + keys against OpenAPI and `.env.example`.

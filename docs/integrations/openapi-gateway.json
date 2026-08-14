@@ -279,7 +279,8 @@
           "200": {
             "description": "Accepted or duplicate idempotent (signature verified)"
           },
-          "401": { "description": "Bad signature" }
+          "401": { "description": "Bad signature" },
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
       }
     },

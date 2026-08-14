@@ -1879,6 +1879,238 @@ test("S230 served x-dial-sor webhook+ready keys match disk", async () => {
   }
 });
 
+test("S231 served OpenAPI info.description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { description?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as { info?: { description?: string } };
+  assert.equal(served.info?.description, disk.info?.description);
+  assert.ok((served.info?.description ?? "").includes("webhookSignature"));
+  assert.ok((served.info?.description ?? "").length > 40);
+});
+
+test("S232 served WebhookOpaqueBody description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components?: {
+      schemas?: { WebhookOpaqueBody?: { description?: string } };
+    };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: { WebhookOpaqueBody?: { description?: string } };
+    };
+  };
+  assert.equal(
+    served.components?.schemas?.WebhookOpaqueBody?.description,
+    disk.components?.schemas?.WebhookOpaqueBody?.description,
+  );
+  assert.ok(
+    served.components?.schemas?.WebhookOpaqueBody?.description?.includes(
+      "processed_events",
+    ),
+  );
+});
+
+test("S233 integrations README cites S211 zero-configured", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(readme.includes("S211"));
+  assert.ok(readme.includes("S233") || readme.includes("zero configured") || readme.includes("configured=false"));
+  assert.ok(
+    readme.includes("zero configured") ||
+      readme.includes("configured=false") ||
+      readme.includes("every `groups[]`"),
+  );
+});
+
+test("S234 served tags.webhooks description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { tags?: Array<{ name: string; description?: string }> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    tags?: Array<{ name: string; description?: string }>;
+  };
+  const diskWh = disk.tags?.find((t) => t.name === "webhooks");
+  const servedWh = served.tags?.find((t) => t.name === "webhooks");
+  assert.equal(servedWh?.description, diskWh?.description);
+  assert.ok(servedWh?.description?.includes("claimProcessedEvent"));
+});
+
+test("S235 served OpenAPI healthNote matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { healthNote?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { healthNote?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.healthNote,
+    disk.info?.["x-dial-sor"]?.healthNote,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.healthNote?.includes(
+      "buildIntegrationsHealthNote",
+    ),
+  );
+});
+
+test("S236 served webhook POSTs document 503 fail-closed", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: { "503"?: { description?: string } } } }
+    >;
+  };
+  const posts = Object.keys(served.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    const d503 = served.paths[p]?.post?.responses?.["503"]?.description ?? "";
+    assert.ok(d503.length > 0, `${p} must document 503 fail-closed`);
+    assert.ok(
+      /fail-closed|misconfig/i.test(d503),
+      `${p} 503 must mention fail-closed/misconfig`,
+    );
+  }
+});
+
+test("S237 served IntegrationsHealth.mode enum is fixture|sandbox|live", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: {
+        IntegrationsHealth?: {
+          properties?: { mode?: { enum?: string[] } };
+        };
+      };
+    };
+  };
+  const modeEnum =
+    served.components?.schemas?.IntegrationsHealth?.properties?.mode?.enum ??
+    [];
+  assert.deepEqual([...modeEnum].sort(), ["fixture", "live", "sandbox"]);
+});
+
+test("S238 sandbox health note differs from fixture under empty env", async () => {
+  const { INTEGRATION_ENV_GROUPS, buildIntegrationsHealthNote } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const saved: Record<string, string | undefined> = {};
+  for (const g of INTEGRATION_ENV_GROUPS) {
+    for (const k of g.keys) {
+      saved[k] = process.env[k];
+      delete process.env[k];
+    }
+  }
+  try {
+    process.env.DIAL_INTEGRATION_MODE = "sandbox";
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    const body = (await res.json()) as { note?: string; mode?: string };
+    assert.equal(body.mode, "sandbox");
+    assert.equal(body.note, buildIntegrationsHealthNote("sandbox"));
+    assert.ok(body.note?.startsWith("Sandbox/live"));
+    assert.notEqual(body.note, buildIntegrationsHealthNote("fixture"));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
+});
+
+test("S239 served OpenAPI paths equal disk path keys", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { paths: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as { paths: Record<string, unknown> };
+  assert.deepEqual(
+    Object.keys(served.paths).sort(),
+    Object.keys(disk.paths).sort(),
+  );
+  assert.ok(Object.keys(served.paths).some((p) => p.startsWith("/api/webhooks/")));
+  assert.ok(served.paths["/api/health/integrations"]);
+  assert.ok(served.paths["/api/openapi"]);
+});
+
+test("S240 served webhook POST bodies ref WebhookOpaqueBody", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        post?: {
+          requestBody?: {
+            content?: Record<string, { schema?: { $ref?: string } }>;
+          };
+        };
+      }
+    >;
+  };
+  const posts = Object.keys(served.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    const content = served.paths[p]?.post?.requestBody?.content ?? {};
+    const refs = Object.values(content).map((c) => c.schema?.$ref ?? "");
+    assert.ok(
+      refs.some((r) => r.includes("WebhookOpaqueBody")),
+      `${p} must $ref WebhookOpaqueBody`,
+    );
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
