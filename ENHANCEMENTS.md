@@ -202,6 +202,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-218 | **Admin FDMS day security SoR** | `done` | S280 — InternalApiSecret on GET/POST |
 | ENH-219 | **Daily ZiG GET fail-closed** | done | S281 — no INTERNAL_API_SECRET |
 | ENH-220 | **ContiPay signature header SoR** | `done` | S282 — x-contipay-signature |
+| ENH-221 | **WhatsApp hub signature header** | `done` | S283 — x-hub-signature-256 |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
