@@ -134,6 +134,18 @@ test("S163 buildIntegrationsHealthNote uses INTEGRATION_ENV_GROUP_LABELS", async
   assert.equal(live, sandbox);
 });
 
+test("S176 note-builder SoR docs pointer constants", async () => {
+  const {
+    INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
+    INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
+  } = await import("./integrationsReadiness.js");
+  assert.equal(INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID, "note-builder-sor-hint");
+  assert.equal(
+    INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
+    "docs/integrations/README.md",
+  );
+});
+
 test("S139 INTEGRATION_ENV_GROUPS match OpenAPI label enum + .env.example keys", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

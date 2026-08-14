@@ -160,6 +160,15 @@ export function buildIntegrationsHealthNote(mode: string): string {
   return `Sandbox/live — missing groups will fail closed on use; ready=all probes ok; groups labels=${labels}`;
 }
 
+/**
+ * S176 — admin `data-testid` + docs pointer for note-builder SoR cross-link (no secrets).
+ */
+export const INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID =
+  "note-builder-sor-hint" as const;
+
+export const INTEGRATIONS_NOTE_BUILDER_SOR_DOCS =
+  "docs/integrations/README.md" as const;
+
 export function listIntegrationEnvGroupSnapshots(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): Array<{

@@ -782,6 +782,33 @@ test("S175 S135 parity includes note-builder-sor-hint on both admin pages", asyn
   assert.ok(integ.includes("env-groups-sor-hint"));
 });
 
+test("S176 admin pages use INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID string", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const {
+    INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
+    INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
+  } = await import("./lib/integrationsReadiness.js");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  assert.ok(
+    cost.includes(`data-testid="${INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"`),
+  );
+  assert.ok(
+    integ.includes(`data-testid="${INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"`),
+  );
+  assert.equal(
+    INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
+    "docs/integrations/README.md",
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
