@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S202** — Admin integrations ready≠groups hint — **green** |
+| `current_stage` | **S203** — Served OpenAPI webhook 200s mention idempotent — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S201** Integrations README webhook OpenAPI SoR — **green** |
-| `next_stage` | **S203** Smoke: served OpenAPI webhook POST 200s mention idempotent |
+| `prior_stage` | **S202** Admin ready≠groups hint — **green** |
+| `next_stage` | **S204** OpenAPI info.description mentions webhookSignature |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S201 | 2026-08-13/14 | through README webhook SoR |
-| S202 | 2026-08-14 | INTEGRATIONS_READY_VS_GROUPS_HINT_ID on admin UI |
+| S91–S202 | 2026-08-13/14 | through admin ready≠groups |
+| S203 | 2026-08-14 | served webhook POST 200 idempotent |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S203 | Smoke: served OpenAPI webhook POST 200s mention idempotent |
 | S204 | OpenAPI info.description mentions webhookSignature |
 | S205 | Cost-health page parity for ready≠groups hint |
 | S206 | OpenAPI x-dial-sor.readyVsGroupsHint → HINT_ID |
 | S207 | Docs cite INTEGRATIONS_READY_VS_GROUPS_HINT_ID |
+| S208 | .env.example cites readyVsGroupsHint |
 
 ## Note
 
