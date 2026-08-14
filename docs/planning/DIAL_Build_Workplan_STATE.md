@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S318** — PSP webhook 401 description matches disk — **green** |
+| `current_stage` | **S319** — all webhook POST 401 descriptions match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S317** — green |
-| `next_stage` | **S319 all webhook POST 401 descriptions match disk** |
+| `prior_stage` | **S318** — green |
+| `next_stage` | **S320 admin FDMS day OpenAPI documents 401** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S317 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S318 | 2026-08-14 | PSP webhook 401 served equals disk |
+| S91–S318 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S319 | 2026-08-14 | all webhook POST 401 served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S319 | all webhook POST 401 descriptions match disk |
 | S320 | admin FDMS day OpenAPI documents 401 |
 | S321 | daily-zig OpenAPI documents 401 |
 | S322 | all admin paths document 401 |
 | S323 | WhatsApp GET 403 challenge documented |
+| S324 | ContiPay 200 idempotent description locked |
 
 ## Note
 
