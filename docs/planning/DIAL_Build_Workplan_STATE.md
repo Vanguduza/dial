@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S155** — Cost-health stub surfaces truncated health note — **green** |
+| `current_stage` | **S156** — Integrations README documents admin note truncation — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S154** Admin readiness UI surfaces truncated health note — **green** |
-| `next_stage` | **S156** Integrations README documents admin note truncation |
+| `prior_stage` | **S155** Cost-health stub surfaces truncated health note — **green** |
+| `next_stage` | **S157** OpenAPI documents admin note truncation SoR |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S154 | 2026-08-13/14 | through admin truncated health note |
-| S155 | 2026-08-14 | cost-health stub health-note parity |
+| S91–S155 | 2026-08-13/14 | through cost-health truncated note |
+| S156 | 2026-08-14 | README admin note truncation contract |
 
 ## Note
 

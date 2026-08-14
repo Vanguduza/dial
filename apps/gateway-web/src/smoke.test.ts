@@ -671,6 +671,19 @@ test("S155 cost-health stub surfaces truncated health note", async () => {
   assert.ok(cost.includes("/api/health/integrations"));
 });
 
+test("S156 integrations README documents admin health note truncation", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
+  assert.ok(integ.includes("truncateIntegrationsHealthNote"));
+  assert.ok(integ.includes("/admin/integrations"));
+  assert.ok(integ.includes("/admin/cost-health"));
+});
+
 test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
