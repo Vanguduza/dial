@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S368** — admin daily-zig GET summary matches disk — **green** |
+| `current_stage` | **S369** — all admin GET summaries match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S367** — green |
-| `next_stage` | **S369 all admin GET summaries match disk** |
+| `prior_stage` | **S368** — green |
+| `next_stage` | **S370 all admin POST summaries match disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S367 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S368 | 2026-08-14 | Daily ZiG GET summary includes Daily ZiG |
+| S91–S368 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S369 | 2026-08-14 | all admin GET summaries served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S369 | all admin GET summaries match disk |
 | S370 | all admin POST summaries match disk |
 | S371 | all path operationIds match disk |
 | S372 | ContiPay operationId matches disk |
 | S373 | WhatsApp POST operationId matches disk |
+| S374 | info.x-dial-sor keys match disk |
 
 ## Note
 
