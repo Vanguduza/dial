@@ -1,4 +1,4 @@
-﻿# DIAL Build — Workplan STATE
+# DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S221** — webhookSignature served==disk — **green** |
+| `current_stage` | **S222** — webhookIdempotency served==disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S220** Admin HINT_ID exports no literals — **green** |
-| `next_stage` | **S222** webhookIdempotency served==disk |
+| `prior_stage` | **S221** webhookSignature served==disk — **green** |
+| `next_stage` | **S223** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S220 | 2026-08-13/14 | through admin HINT_ID export-only |
-| S221 | 2026-08-14 | served webhookSignature matches disk |
+| S91–S221 | 2026-08-13/14 | through prior |
+| S222 | 2026-08-14 | webhookIdempotency served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S222 | webhookIdempotency served==disk |
 | S223 | Fixture note cites groups labels with empty env |
 | S224 | Root README cites S211 zero-configured ready |
 | S225 | readyVsGroups served==disk |
 | S226 | Served OpenAPI never embeds secret values |
+| S227 | Served webhook POST 401s document signature failure |
 
 ## Note
 
