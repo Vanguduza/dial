@@ -5015,6 +5015,257 @@ test("S370 all admin POST summaries match disk", async () => {
   }
 });
 
+test("S371 all path operationIds match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      Record<string, { operationId?: string } | undefined>
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const methods = ["get", "post", "put", "patch", "delete"] as const;
+  let count = 0;
+  for (const p of Object.keys(disk.paths).sort()) {
+    const diskPath = disk.paths[p];
+    const servedPath = served.paths[p];
+    assert.ok(servedPath, `missing served path ${p}`);
+    for (const method of methods) {
+      const diskOp: { operationId?: string } | undefined = diskPath?.[method];
+      const servedOp: { operationId?: string } | undefined =
+        servedPath?.[method];
+      if (!diskOp) {
+        assert.equal(servedOp, undefined, `${p} ${method} unexpected`);
+        continue;
+      }
+      assert.ok(servedOp, `${p} ${method} missing`);
+      assert.equal(
+        servedOp.operationId,
+        diskOp.operationId,
+        `${p} ${method} operationId`,
+      );
+      assert.ok(
+        (servedOp.operationId ?? "").length > 0,
+        `${p} ${method} empty operationId`,
+      );
+      count += 1;
+    }
+  }
+  assert.ok(count >= 15, `expected many operationIds, got ${count}`);
+});
+
+test("S372 ContiPay operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/contipay"]?.post?.operationId,
+    disk.paths["/api/webhooks/contipay"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/contipay"]?.post?.operationId,
+    "webhookContipay",
+  );
+});
+
+test("S373 WhatsApp POST operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.post?.operationId,
+    disk.paths["/api/webhooks/whatsapp"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.post?.operationId,
+    "webhookWhatsapp",
+  );
+});
+
+test("S374 info.x-dial-sor keys match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: Record<string, string> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    Object.keys(served.info?.["x-dial-sor"] ?? {}).sort(),
+    Object.keys(disk.info?.["x-dial-sor"] ?? {}).sort(),
+  );
+  for (const key of [
+    "probes",
+    "docs",
+    "webhookSignature",
+    "webhookIdempotency",
+    "readyVsGroups",
+  ]) {
+    assert.ok(
+      Object.keys(served.info?.["x-dial-sor"] ?? {}).includes(key),
+      `missing x-dial-sor.${key}`,
+    );
+  }
+});
+
+test("S375 openapi top-level keys match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as Record<string, unknown>;
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as Record<string, unknown>;
+  assert.deepEqual(Object.keys(served).sort(), Object.keys(disk).sort());
+  for (const key of [
+    "openapi",
+    "info",
+    "servers",
+    "tags",
+    "paths",
+    "components",
+  ]) {
+    assert.ok(Object.keys(served).includes(key), `missing top-level ${key}`);
+  }
+});
+
+test("S376 info.x-dial-sor values match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: Record<string, string> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.info?.["x-dial-sor"], disk.info?.["x-dial-sor"]);
+});
+
+test("S377 WhatsApp GET operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.get?.operationId,
+    disk.paths["/api/webhooks/whatsapp"]?.get?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.get?.operationId,
+    "webhookWhatsappChallenge",
+  );
+});
+
+test("S378 Paynow operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/paynow"]?.post?.operationId,
+    disk.paths["/api/webhooks/paynow"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/paynow"]?.post?.operationId,
+    "webhookPaynow",
+  );
+});
+
+test("S379 FDMS webhook operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/fdms"]?.post?.operationId,
+    disk.paths["/api/webhooks/fdms"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/fdms"]?.post?.operationId,
+    "webhookFdms",
+  );
+});
+
+test("S380 openapi top-level keys equal openapi|info|servers|tags|paths|components", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as Record<string, unknown>;
+  assert.deepEqual(Object.keys(served).sort(), [
+    "components",
+    "info",
+    "openapi",
+    "paths",
+    "servers",
+    "tags",
+  ]);
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
