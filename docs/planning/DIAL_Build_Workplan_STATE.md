@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S192** — OpenAPI x-dial-sor asserts noteBuilderHint + noteBuilderDocs — **green** |
+| `current_stage` | **S193** — Fixture mode allows ready=true with incomplete env groups — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S191** Smoke: live health ready false when probe fails — **green** |
-| `next_stage` | **S193** Fixture mode allows ready=true with incomplete env groups |
+| `prior_stage` | **S192** OpenAPI x-dial-sor asserts noteBuilderHint + noteBuilderDocs — **green** |
+| `next_stage` | **S194** Document ready vs groups configured semantics |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S191 | 2026-08-13/14 | through live ready=false |
-| S192 | 2026-08-14 | served OpenAPI x-dial-sor HINT + DOCS keys |
+| S91–S192 | 2026-08-13/14 | through OpenAPI HINT+DOCS keys |
+| S193 | 2026-08-14 | fixture ready=true with incomplete groups |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S193 | Fixture mode allows ready=true with incomplete env groups |
-| S194 | Document ready vs groups configured semantics in integrations README |
-| S195 | Smoke: note text differs fixture vs sandbox/live via builder |
-| S196 | OpenAPI webhook path table documents signature+idempotency SoR |
+| S194 | Document ready vs groups configured semantics |
+| S195 | Smoke: note text differs fixture vs sandbox/live |
+| S196 | OpenAPI webhook paths document signature+idempotency SoR |
 | S197 | Smoke: OpenAPI webhook paths never embed secret values |
+| S198 | OpenAPI webhooks tag + x-dial-sor.webhookIdempotency pointer |
 
 ## Note
 

@@ -991,6 +991,98 @@ test("S192 OpenAPI x-dial-sor includes noteBuilderHint and noteBuilderDocs", asy
   );
 });
 
+test("S193 fixture ready=true even when env groups incomplete", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+      groups?: Array<{ label: string; configured: boolean; missing: string[] }>;
+    };
+    assert.equal(body.mode, "fixture");
+    assert.equal(body.ready, true);
+    assert.ok(body.groups && body.groups.length > 0);
+    const incomplete = body.groups!.filter((g) => !g.configured);
+    assert.ok(
+      incomplete.length > 0,
+      "fixture CI expects at least one incomplete env group",
+    );
+    assert.ok(incomplete.every((g) => g.missing.length > 0));
+    assert.ok(
+      Object.values(body.probes ?? {}).every((v) => v === true),
+      "fixture probes must all be true when ready=true",
+    );
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+  }
+});
+
+test("S195 health note text differs fixture vs sandbox/live", async () => {
+  const { buildIntegrationsHealthNote } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const fixture = buildIntegrationsHealthNote("fixture");
+  const sandbox = buildIntegrationsHealthNote("sandbox");
+  const live = buildIntegrationsHealthNote("live");
+  assert.ok(fixture.startsWith("Fixture mode"));
+  assert.ok(sandbox.startsWith("Sandbox/live"));
+  assert.equal(sandbox, live);
+  assert.notEqual(fixture, sandbox);
+  assert.ok(fixture.includes("groups labels="));
+  assert.ok(sandbox.includes("groups labels="));
+
+  for (const mode of ["fixture", "sandbox"] as const) {
+    process.env.DIAL_INTEGRATION_MODE = mode;
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { note?: string; mode?: string };
+    assert.equal(body.mode, mode);
+    assert.equal(body.note, buildIntegrationsHealthNote(mode));
+  }
+});
+
+test("S197 OpenAPI webhook paths never embed secret values", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const banned = [
+    "sk_live",
+    "sk_test",
+    "service_role",
+    "whsec_",
+    "Bearer ",
+    "BEGIN PRIVATE KEY",
+  ];
+  for (const s of banned) {
+    assert.equal(raw.includes(s), false, `OpenAPI must not contain ${s}`);
+  }
+  const spec = JSON.parse(raw) as {
+    paths: Record<string, { post?: { responses?: Record<string, unknown> } }>;
+  };
+  const webhookPaths = Object.keys(spec.paths).filter((p) =>
+    p.startsWith("/api/webhooks/"),
+  );
+  assert.ok(webhookPaths.length >= 8);
+  for (const p of webhookPaths) {
+    const post = spec.paths[p]?.post;
+    if (!post) continue;
+    const blob = JSON.stringify(post);
+    for (const s of banned) {
+      assert.equal(blob.includes(s), false, `${p} must not contain ${s}`);
+    }
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
