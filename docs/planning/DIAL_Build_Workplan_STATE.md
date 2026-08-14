@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S460** — tags include webhooks health admin — **green** |
+| `current_stage` | **S461** — Paynow Hash parameter locked — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S459** admin security InternalApiSecret only — **green** |
-| `next_stage` | **S461** Paynow Hash parameter locked |
+| `prior_stage` | **S460** tags include webhooks health admin — **green** |
+| `next_stage` | **S462** ContiPay signature header locked |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S459 | 2026-08-13/14 | through prior |
-| S460 | 2026-08-14 | tags exact admin|health|webhooks |
+| S91–S460 | 2026-08-13/14 | through prior |
+| S461 | 2026-08-14 | Paynow Hash header parameter |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S461 | Paynow Hash parameter locked |
 | S462 | ContiPay signature header locked |
 | S463 | WhatsApp hub signature header locked |
 | S464 | webhook POST tags webhooks only |
 | S465 | admin path tags admin only |
+| S466 | health path tags health only |
 
 ## Note
 
