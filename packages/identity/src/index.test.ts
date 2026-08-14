@@ -7,7 +7,12 @@ import {
   selectProfileAs,
   signInByEmail,
   signUp,
+  signUpWithPassword,
+  signInWithPassword,
+  upsertProfileAfterAuth,
   updateProfileAs,
+  getSupabasePublicConfig,
+  getSupabaseServerConfig,
 } from "./index.js";
 
 test("T1 sign-up/sign-in creates and resolves profile", () => {
@@ -17,6 +22,7 @@ test("T1 sign-up/sign-in creates and resolves profile", () => {
     displayName: "Buyer One",
   });
   assert.equal(created.role, "customer");
+  assert.equal(created.buyerSegment, "b2c");
   assert.equal(signInByEmail("Buyer@dial.test")?.userId, created.userId);
   assert.equal(signInByEmail("missing@dial.test"), null);
   assert.throws(() =>
@@ -60,11 +66,6 @@ test("T1 RLS profiles: own CRUD; cross-tenant deny; admin all", () => {
 
 test("S93 Supabase Auth fixture sign-in + fail-closed server config", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
-  const {
-    getSupabasePublicConfig,
-    getSupabaseServerConfig,
-    signInWithPassword,
-  } = await import("./supabaseAuth.js");
   const pub = getSupabasePublicConfig();
   assert.ok(pub.url);
   assert.ok(pub.anonKey);
@@ -82,4 +83,33 @@ test("S93 Supabase Auth fixture sign-in + fail-closed server config", async () =
   delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   assert.throws(() => getSupabasePublicConfig());
   process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
+test("PD1 Supabase sign-up + profile upsert (fixture) + short password reject", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetIdentityForTests();
+  await assert.rejects(
+    () =>
+      signUpWithPassword({
+        email: "new@dial.test",
+        password: "short",
+      }),
+    /at least 8/,
+  );
+  const auth = await signUpWithPassword({
+    email: "new@dial.test",
+    password: "password1",
+  });
+  assert.ok(auth.accessToken.startsWith("sb_fx_"));
+  const profile = await upsertProfileAfterAuth({
+    userId: auth.userId,
+    email: auth.email,
+    displayName: "New User",
+    buyerSegment: "b2b",
+    accessToken: auth.accessToken,
+  });
+  assert.equal(profile.buyerSegment, "b2b");
+  assert.equal(signInByEmail("new@dial.test")?.displayName, "New User");
+  const ctx = rlsContextFromProfile(profile);
+  assert.equal(selectProfileAs(ctx, profile.userId)?.buyerSegment, "b2b");
 });

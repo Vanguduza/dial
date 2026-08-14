@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
-import { signUp } from "@dial/identity";
-import { createSession, sessionCookieName } from "../../../../lib/auth/session";
+import {
+  createSessionFromSupabaseSignUp,
+  sessionCookieName,
+} from "../../../../lib/auth/session";
 
-/** T1 sign-up stub — creates profile (RLS SoR) + session cookie. */
+/**
+ * PD1 sign-up — Supabase Auth + profiles row + DialSession cookie.
+ * Rejects body userId/role (D-47). Password required.
+ */
 export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") ?? "";
   let email = "";
   let displayName = "";
+  let password = "";
 
   if (contentType.includes("application/json")) {
     const body = (await req.json()) as {
@@ -14,6 +20,7 @@ export async function POST(req: Request) {
       identifier?: string;
       displayName?: string;
       name?: string;
+      password?: string;
       userId?: string;
       role?: string;
     };
@@ -25,6 +32,7 @@ export async function POST(req: Request) {
     }
     email = (body.email ?? body.identifier ?? "").trim();
     displayName = (body.displayName ?? body.name ?? "").trim();
+    password = body.password ?? "";
   } else {
     const form = await req.formData();
     if (form.has("userId") || form.has("role")) {
@@ -35,6 +43,7 @@ export async function POST(req: Request) {
     }
     email = String(form.get("identifier") ?? form.get("email") ?? "").trim();
     displayName = String(form.get("displayName") ?? form.get("name") ?? "").trim();
+    password = String(form.get("password") ?? "");
   }
 
   if (!email) {
@@ -43,18 +52,22 @@ export async function POST(req: Request) {
   if (!displayName) {
     return NextResponse.json({ error: "displayName required" }, { status: 400 });
   }
+  if (!password) {
+    return NextResponse.json({ error: "password required" }, { status: 400 });
+  }
 
   try {
-    const profile = signUp({ email, displayName });
-    const { token, session } = createSession({
-      email: profile.email,
-      userId: profile.userId,
-      role: profile.role === "admin" ? "ops_admin" : "customer",
+    const { token, session } = await createSessionFromSupabaseSignUp({
+      email,
+      password,
+      displayName,
     });
     const res = NextResponse.json({
       ok: true,
       userId: session.userId,
       email: session.email,
+      buyerSegment: session.buyerSegment,
+      auth: "supabase",
       next: "/home",
     });
     res.cookies.set(sessionCookieName(), token, {

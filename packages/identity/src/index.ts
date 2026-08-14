@@ -1,15 +1,18 @@
 /**
- * T1 Identity — profiles + RLS policy stub (Pack §12 / §15).
+ * T1 / PD1 Identity — profiles + RLS (Pack §12 / §15).
  * Auth context is always session-derived; never trust body userId/email/role (D-47).
+ * Fixture: in-memory SoR. Sandbox/live: PostgREST `profiles` with service-role upsert + JWT RLS reads.
  */
 
 export type ProfileRole = "customer" | "technician" | "supplier" | "admin";
+export type BuyerSegment = "b2c" | "b2b";
 
 export type Profile = {
   userId: string;
   email: string;
   displayName: string;
   role: ProfileRole;
+  buyerSegment: BuyerSegment;
   createdAt: string;
 };
 
@@ -19,54 +22,187 @@ export type RlsContext = {
   role: ProfileRole;
 };
 
-const profiles = new Map<string, Profile>();
-const emailIndex = new Map<string, string>();
+type IdentityStore = {
+  profiles: Map<string, Profile>;
+  emailIndex: Map<string, string>;
+};
+
+function store(): IdentityStore {
+  const g = globalThis as typeof globalThis & {
+    __dialIdentityStore?: IdentityStore;
+  };
+  if (!g.__dialIdentityStore) {
+    g.__dialIdentityStore = {
+      profiles: new Map(),
+      emailIndex: new Map(),
+    };
+  }
+  return g.__dialIdentityStore;
+}
 
 function userIdFromEmail(email: string): string {
   return `usr_${Buffer.from(email).toString("base64url").slice(0, 16)}`;
 }
 
 export function __resetIdentityForTests(): void {
-  profiles.clear();
-  emailIndex.clear();
+  const s = store();
+  s.profiles.clear();
+  s.emailIndex.clear();
+}
+
+function putProfile(profile: Profile): Profile {
+  const s = store();
+  s.profiles.set(profile.userId, profile);
+  s.emailIndex.set(profile.email, profile.userId);
+  return { ...profile };
 }
 
 export function signUp(input: {
   email: string;
   displayName: string;
   role?: ProfileRole;
+  buyerSegment?: BuyerSegment;
+  /** When set (after GoTrue), use auth user id instead of email-derived id. */
+  userId?: string;
 }): Profile {
   const email = input.email.trim().toLowerCase();
   const displayName = input.displayName.trim();
   if (!email) throw new Error("email required");
   if (!displayName) throw new Error("displayName required");
-  if (emailIndex.has(email)) throw new Error("email already registered");
+  const s = store();
+  if (s.emailIndex.has(email)) throw new Error("email already registered");
 
   const role = input.role ?? "customer";
   const profile: Profile = {
-    userId: userIdFromEmail(email),
+    userId: input.userId ?? userIdFromEmail(email),
     email,
     displayName,
     role,
+    buyerSegment: input.buyerSegment ?? "b2c",
     createdAt: new Date().toISOString(),
   };
-  profiles.set(profile.userId, profile);
-  emailIndex.set(email, profile.userId);
-  return { ...profile };
+  return putProfile(profile);
 }
 
 export function signInByEmail(emailRaw: string): Profile | null {
   const email = emailRaw.trim().toLowerCase();
   if (!email) return null;
-  const userId = emailIndex.get(email);
+  const userId = store().emailIndex.get(email);
   if (!userId) return null;
-  const profile = profiles.get(userId);
+  const profile = store().profiles.get(userId);
   return profile ? { ...profile } : null;
 }
 
 export function getProfileByUserId(userId: string): Profile | null {
-  const profile = profiles.get(userId);
+  const profile = store().profiles.get(userId);
   return profile ? { ...profile } : null;
+}
+
+/**
+ * Upsert profile after AuthN (fixture memory + optional PostgREST).
+ * Never accepts role/userId from request body — caller passes auth-derived ids only.
+ */
+export async function upsertProfileAfterAuth(input: {
+  userId: string;
+  email: string;
+  displayName: string;
+  role?: ProfileRole;
+  buyerSegment?: BuyerSegment;
+  accessToken?: string;
+}): Promise<Profile> {
+  const email = input.email.trim().toLowerCase();
+  const displayName = input.displayName.trim();
+  if (!input.userId) throw new Error("userId required");
+  if (!email) throw new Error("email required");
+  if (!displayName) throw new Error("displayName required");
+
+  const existing =
+    store().profiles.get(input.userId) ?? signInByEmail(email);
+  const profile: Profile = {
+    userId: input.userId,
+    email,
+    displayName,
+    role: input.role ?? existing?.role ?? "customer",
+    buyerSegment: input.buyerSegment ?? existing?.buyerSegment ?? "b2c",
+    createdAt: existing?.createdAt ?? new Date().toISOString(),
+  };
+  putProfile(profile);
+
+  const { integrationMode, getSupabaseServerConfig, getSupabaseRestUrl } =
+    await import("./supabaseAuth.js");
+  if (integrationMode() === "fixture") {
+    return { ...profile };
+  }
+
+  const { serviceRoleKey, anonKey } = getSupabaseServerConfig();
+  const base = getSupabaseRestUrl();
+  const res = await fetch(`${base}/rest/v1/profiles`, {
+    method: "POST",
+    headers: {
+      apikey: anonKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Content-Type": "application/json",
+      Prefer: "resolution=merge-duplicates,return=representation",
+    },
+    body: JSON.stringify({
+      user_id: profile.userId,
+      email: profile.email,
+      display_name: profile.displayName,
+      role: profile.role,
+      buyer_segment: profile.buyerSegment,
+      created_at: profile.createdAt,
+    }),
+  });
+  if (!res.ok) {
+    throw new Error(`profiles upsert HTTP ${res.status}`);
+  }
+  return { ...profile };
+}
+
+/** Load profile by auth user id — memory first; PostgREST with user JWT when configured. */
+export async function fetchProfileForAuthUser(input: {
+  userId: string;
+  accessToken?: string;
+}): Promise<Profile | null> {
+  const local = getProfileByUserId(input.userId);
+  if (local) return local;
+
+  const { integrationMode, getSupabasePublicConfig, getSupabaseRestUrl } =
+    await import("./supabaseAuth.js");
+  if (integrationMode() === "fixture") return null;
+  if (!input.accessToken) return null;
+
+  const { anonKey } = getSupabasePublicConfig();
+  const base = getSupabaseRestUrl();
+  const res = await fetch(
+    `${base}/rest/v1/profiles?user_id=eq.${encodeURIComponent(input.userId)}&select=*`,
+    {
+      headers: {
+        apikey: anonKey,
+        Authorization: `Bearer ${input.accessToken}`,
+      },
+    },
+  );
+  if (!res.ok) return null;
+  const rows = (await res.json()) as Array<{
+    user_id: string;
+    email: string;
+    display_name: string;
+    role: ProfileRole;
+    buyer_segment?: BuyerSegment;
+    created_at: string;
+  }>;
+  const row = rows[0];
+  if (!row) return null;
+  const profile: Profile = {
+    userId: row.user_id,
+    email: row.email,
+    displayName: row.display_name,
+    role: row.role,
+    buyerSegment: row.buyer_segment ?? "b2c",
+    createdAt: row.created_at,
+  };
+  return putProfile(profile);
 }
 
 function assertNoBodyUserId(bodyUserId: string | undefined): void {
@@ -97,19 +233,22 @@ export function selectProfileAs(
 export function updateProfileAs(
   ctx: RlsContext,
   targetUserId: string,
-  patch: { displayName?: string },
+  patch: { displayName?: string; buyerSegment?: BuyerSegment },
   opts?: { bodyUserId?: string },
 ): Profile {
   assertNoBodyUserId(opts?.bodyUserId);
   if (!canAccessProfile(ctx, targetUserId)) {
     throw new Error("RLS deny: profiles update");
   }
-  const existing = profiles.get(targetUserId);
+  const existing = store().profiles.get(targetUserId);
   if (!existing) throw new Error("profile not found");
   if (patch.displayName !== undefined) {
     const displayName = patch.displayName.trim();
     if (!displayName) throw new Error("displayName required");
     existing.displayName = displayName;
+  }
+  if (patch.buyerSegment !== undefined) {
+    existing.buyerSegment = patch.buyerSegment;
   }
   return { ...existing };
 }
@@ -123,17 +262,33 @@ export function listProfilesAs(
   if (ctx.role !== "admin") {
     throw new Error("RLS deny: profiles list");
   }
-  return [...profiles.values()].map((p) => ({ ...p }));
+  return [...store().profiles.values()].map((p) => ({ ...p }));
 }
 
 export function rlsContextFromProfile(profile: Profile): RlsContext {
   return { userId: profile.userId, role: profile.role };
 }
 
+export function rlsContextFromSession(session: {
+  userId: string;
+  role: "customer" | "ops_admin" | "technician";
+}): RlsContext {
+  const role: ProfileRole =
+    session.role === "ops_admin"
+      ? "admin"
+      : session.role === "technician"
+        ? "technician"
+        : "customer";
+  return { userId: session.userId, role };
+}
+
 export {
   getSupabasePublicConfig,
   getSupabaseServerConfig,
+  getSupabaseRestUrl,
   signInWithPassword,
+  signUpWithPassword,
+  getUserFromAccessToken,
   integrationMode as supabaseIntegrationMode,
   type SupabasePublicConfig,
   type SupabaseServerConfig,

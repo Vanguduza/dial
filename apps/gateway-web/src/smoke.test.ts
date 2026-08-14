@@ -7693,24 +7693,119 @@ test("S136 integrations README package table matches workspace package names", a
   assert.ok(readme.includes("apps/worker-queues"));
   assert.ok(readme.includes("packages/ledger"));
   assert.ok(
-    /S1(3[5-9]|4\d|5\d)/.test(readme),
-    "root README build status should cite a recent integration stage",
+    /PD[1-4]|S1(3[5-9]|4\d|5\d)/.test(readme),
+    "root README build status should cite product-depth (PD*) or recent integration stage",
   );
 });
 
 test("S95 Supabase password → DialSession bridge", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   __resetAuthForTests();
+  __resetIdentityForTests();
   const { createSessionFromSupabasePassword } = await import(
     "./lib/auth/session.js"
   );
   const { token, session, accessToken } = await createSessionFromSupabasePassword({
     email: "buyer@dial.test",
-    password: "secret",
+    password: "secret12",
   });
   assert.ok(accessToken.startsWith("sb_fx_"));
   assert.equal(session.email, "buyer@dial.test");
   assert.equal(getSessionFromToken(token)?.userId, session.userId);
+});
+
+test("PD1 Auth depth: sign-up/in → profile RLS → /me AuthZ; body userId refused", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetAuthForTests();
+  __resetIdentityForTests();
+  const {
+    createSessionFromSupabaseSignUp,
+    createSessionFromSupabasePassword,
+    assertResourceAccess: assertAccess,
+    sessionCookieName: cookieName,
+  } = await import("./lib/auth/session.js");
+  const {
+    selectProfileAs,
+    rlsContextFromSession,
+    upsertProfileAfterAuth,
+  } = await import("@dial/identity");
+
+  const email = `pd1_${Date.now().toString(36)}@dial.test`;
+  const signedUp = await createSessionFromSupabaseSignUp({
+    email,
+    password: "password1",
+    displayName: "PD1 User",
+    buyerSegment: "b2c",
+  });
+  assert.equal(signedUp.session.email, email);
+  assert.equal(signedUp.session.buyerSegment, "b2c");
+
+  const ctx = rlsContextFromSession(signedUp.session);
+  assert.equal(
+    selectProfileAs(ctx, signedUp.session.userId)?.displayName,
+    "PD1 User",
+  );
+  assert.throws(() =>
+    selectProfileAs(ctx, signedUp.session.userId, { bodyUserId: "attacker" }),
+  );
+  assert.doesNotThrow(() =>
+    assertAccess({
+      session: signedUp.session,
+      resourceOwnerId: signedUp.session.userId,
+      resourceKind: "profile",
+    }),
+  );
+  assert.throws(() =>
+    assertAccess({
+      session: signedUp.session,
+      resourceOwnerId: "usr_other",
+      resourceKind: "profile",
+    }),
+  );
+
+  const again = await createSessionFromSupabasePassword({
+    email,
+    password: "password1",
+  });
+  assert.equal(again.session.userId, signedUp.session.userId);
+
+  // Re-pin profile row before /me (other smoke tests may reset in-memory identity).
+  await upsertProfileAfterAuth({
+    userId: again.session.userId,
+    email: again.session.email,
+    displayName: "PD1 User",
+    buyerSegment: "b2c",
+  });
+
+  const { GET: meGet } = await import("./app/api/auth/me/route.js");
+  const ok = await meGet(
+    new Request("http://localhost/api/auth/me", {
+      headers: {
+        cookie: `${cookieName()}=${again.token}`,
+      },
+    }),
+  );
+  assert.equal(ok.status, 200);
+  const body = (await ok.json()) as { displayName?: string; buyerSegment?: string };
+  assert.equal(body.displayName, "PD1 User");
+  assert.equal(body.buyerSegment, "b2c");
+
+  const bad = await meGet(
+    new Request("http://localhost/api/auth/me?userId=attacker", {
+      headers: { cookie: `${cookieName()}=${again.token}` },
+    }),
+  );
+  assert.equal(bad.status, 400);
+
+  const { POST: signInPost } = await import("./app/api/auth/sign-in/route.js");
+  const noPw = await signInPost(
+    new Request("http://localhost/api/auth/sign-in", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ email }),
+    }),
+  );
+  assert.equal(noPw.status, 400);
 });
 
 test("S103 shared idempotency store dedupes across webhook sources", async () => {

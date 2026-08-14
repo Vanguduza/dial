@@ -57,6 +57,22 @@ export default function SignInPage() {
               }}
             />
           </label>
+          <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
+            Password
+            <input
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              minLength={8}
+              style={{
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: `1px solid ${dialTokens.color.brand.primary}33`,
+                fontSize: 16,
+              }}
+            />
+          </label>
           <button
             type="submit"
             style={{
@@ -79,7 +95,7 @@ export default function SignInPage() {
           </a>
         </p>
         <p style={{ marginTop: dialTokens.space.md, fontSize: 12, opacity: 0.6 }}>
-          Auth-first — Shop | Services only after sign-in (Pack T1)
+          Auth-first — Supabase Auth + Shop | Services after sign-in (PD1)
         </p>
       </section>
     </main>

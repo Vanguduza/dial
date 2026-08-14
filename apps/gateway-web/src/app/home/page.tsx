@@ -82,7 +82,7 @@ export default async function AuthHomePage() {
         </a>
       </nav>
       <p style={{ maxWidth: 720, margin: `${dialTokens.space.xl} auto 0`, fontSize: 12, opacity: 0.55 }}>
-        Auth-first home (Pack T1) — profiles RLS via @dial/identity; live Supabase in Phase 0
+        Auth-first home (PD1) — Supabase Auth + profiles RLS (@dial/identity); Shop | Services after AuthN
       </p>
     </main>
   );

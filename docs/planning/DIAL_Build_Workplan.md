@@ -53,18 +53,50 @@ Stages are ordered. **Do not skip ahead** except where noted (E2a may land WA ag
 | 28 | `S28` | **E5a** Catalogue Factory CSV→approve→Meili; B2B informal leak=0 | new issue | E5 DoD 100% | `S29` |
 | 29 | `S29` | **E6a** / **T8** Factory shadow+MetricContract + CC Actual/Simulated | new issue | E6 DoD + Pack T8 | `S30` |
 | 30 | `S30` | **T9** Hardening (IDOR, webhooks, Semgrep baseline, Simulated≠pay) | new issue | Pack §15 T9 + Appendix A.1 | `S90` |
-| 90 | `S90` | **Eng Build complete** | Dev Manager | All S10–S30 green; living docs current | `S99` (ops) |
+| 90 | `S90` | **Eng Build complete** | Dev Manager | All S10–S30 green; living docs current | **`PD1`** (product depth) — not S99 yet |
 | 99 | `S99` | **Customer-open** | Founder/ops | Appendix C / Blueprint §8.1 — **not auto** | END |
 
 **Note on order S22→S23→S24:** Pack narrative is T3 then T4 then T5, but money spine T5 is required before deep Tech money and jobs. This workplan runs **T3 Spare UI → T5 Money full → T4 Tech UI** so Tech booking can bind to real quote/money stubs. Do not reopen locks.
 
 **D-53 Commercial Simulation:** scaffold after `S23` green (optional overlay; not a new stage number).
 
+### 1b. Product-depth band (post-S90 eng spine)
+
+Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages**. Auto-advance follows this authored band only. **S99 remains human-only.** Groceries Build (**G1**) waits until Auth + Meili + Spare + sandbox PSP are green.
+
+| # | Stage ID | Name | Owns | Green when | Next (auto) |
+| ---: | --- | --- | --- | --- | --- |
+| 101 | `PD1` | **Auth depth** — live Supabase Auth + Postgres profiles/RLS | new issue | Sign-in/up password→GoTrue; DialSession from auth user + profile row; Shop\|Services home gated; profiles RLS + object AuthZ tests; fixture CI green; sandbox/live fail-closed on missing env | `PD2` |
+| 102 | `PD2` | **Search depth** — live Meili + Catalogue Factory → `spare_offers` | new issue | Index bootstrap; Factory approve→upsert; B2B informal filter leak=0 (D-49); gateway search against real/fixture Meili | `PD3` |
+| 103 | `PD3` | **Spare depth** — browse/cart against live search path | new issue | `/spare` + checkout stubs bind to PD2 offers; USD browse (D-57); EcoCash\|COD buttons | `PD4` |
+| 104 | `PD4` | **PSP sandbox** — Paynow/EcoCash sandbox adapters (no invent OpenAPI) | new issue | Sandbox mode fail-closed; webhook sig+idempotency; money path still DIAL packages SoR | `G1` (plan) or hold |
+| 110 | `G1` | **Groceries thin vertical** (food/pantry) | plan issue | Plan DoD + Auth/Meili/Spare/PSP deps green — **do not start code until deps green** | (later) |
+
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope.
+
 ---
 
 ## 2. Stage detail — active / near
 
-### S10 — E2a (CURRENT)
+### PD1 — Auth depth (**GREEN** 2026-08-14)
+
+| | |
+| --- | --- |
+| Issue | [#21](https://github.com/Vanguduza/dial/issues/21) |
+| Branch | `build/t4-tech-ui` |
+| Evidence | Password sign-up/in → GoTrue fixture; profiles RLS + `0002_profiles_auth_rls.sql`; DialSession + `/home` Shop\|Services; `GET /api/auth/me` object AuthZ; T |
+| Green → | Auto-open **PD2** Meili + Catalogue Factory |
+
+### PD2 — Search depth (CURRENT)
+
+| | |
+| --- | --- |
+| Issue | [#22](https://github.com/Vanguduza/dial/issues/22) |
+| Branch | `build/t4-tech-ui` (continue) |
+| Thin path | Meili `spare_offers` bootstrap + Factory approve→upsert; B2B informal leak=0 (D-49); gateway search |
+| Green → | Auto-open **PD3** Spare depth |
+
+### S10 — E2a (historical)
 
 | | |
 | --- | --- |

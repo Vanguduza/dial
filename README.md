@@ -99,7 +99,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/search-indexer` | Meili reindex jobs |
 | `packages/ai` | guidedIntake + LiteLLM + Intelligence stubs (D-61) |
 
-**Build status:** auto-advance on `build/t4-tech-ui` — integration readiness through **S149** (root README env-group label SoR). Customer-open (**S99**) stays human-gated.
+**Build status:** eng spine **S90** green; product-depth band **PD1** Auth landed → next **PD2** Meili/Factory. OpenAPI invent paused. Customer-open (**S99**) stays human-gated.
 
 ### Gateway integration surface (plug-in)
 

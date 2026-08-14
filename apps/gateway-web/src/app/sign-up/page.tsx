@@ -71,6 +71,22 @@ export default function SignUpPage() {
               }}
             />
           </label>
+          <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
+            Password
+            <input
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              minLength={8}
+              style={{
+                padding: "12px 14px",
+                borderRadius: 8,
+                border: `1px solid ${dialTokens.color.brand.primary}33`,
+                fontSize: 16,
+              }}
+            />
+          </label>
           <button
             type="submit"
             style={{

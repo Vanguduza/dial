@@ -1,7 +1,9 @@
 /**
- * T1 Identity session stub (Pack §15) — JWT/Supabase later.
+ * PD1 Identity session — DialSession cookie cache over Supabase Auth + profiles.
  * Never trust userId/email/role from request body (D-47).
  */
+import type { ProfileRole } from "@dial/identity";
+
 export type DialSession = {
   userId: string;
   email: string;
@@ -12,7 +14,23 @@ export type DialSession = {
 
 const COOKIE = "dial_session";
 
-const sessions = new Map<string, DialSession>();
+type SessionStore = Map<string, DialSession>;
+
+function sessions(): SessionStore {
+  const g = globalThis as typeof globalThis & {
+    __dialSessionStore?: SessionStore;
+  };
+  if (!g.__dialSessionStore) {
+    g.__dialSessionStore = new Map();
+  }
+  return g.__dialSessionStore;
+}
+
+function dialRoleFromProfile(role: ProfileRole): DialSession["role"] {
+  if (role === "admin") return "ops_admin";
+  if (role === "technician") return "technician";
+  return "customer";
+}
 
 export function createSession(input: {
   email: string;
@@ -31,18 +49,21 @@ export function createSession(input: {
     role: input.role ?? "customer",
     buyerSegment: input.buyerSegment ?? "b2c",
   };
-  sessions.set(token, session);
+  sessions().set(token, session);
   return { token, session };
 }
 
 export function getSessionFromToken(token: string | undefined): DialSession | null {
   if (!token) return null;
-  return sessions.get(token) ?? null;
+  return sessions().get(token) ?? null;
 }
 
 export function parseSessionCookie(cookieHeader: string | null): string | undefined {
   if (!cookieHeader) return undefined;
-  const part = cookieHeader.split(";").map((s) => s.trim()).find((s) => s.startsWith(`${COOKIE}=`));
+  const part = cookieHeader
+    .split(";")
+    .map((s) => s.trim())
+    .find((s) => s.startsWith(`${COOKIE}=`));
   return part?.slice(COOKIE.length + 1);
 }
 
@@ -54,9 +75,10 @@ export type ProtectedResourceKind =
   | "promo_credit"
   | "delivery_job"
   | "delivery_offer"
-  | "courier_location";
+  | "courier_location"
+  | "profile";
 
-/** Object-level AuthZ stub — resource owner must match session, never body. */
+/** Object-level AuthZ — resource owner must match session, never body. */
 export function assertResourceAccess(input: {
   session: DialSession;
   resourceOwnerId: string;
@@ -84,29 +106,81 @@ export function sessionCookieName(): string {
 }
 
 export function __resetAuthForTests(): void {
-  sessions.clear();
+  sessions().clear();
 }
 
 /**
- * Bridge Supabase GoTrue password sign-in → DialSession cookie SoR (S95).
- * Fixture uses identity package token shape; never trusts body userId/role.
+ * Supabase password sign-in → profile row → DialSession cookie SoR (PD1).
+ * Never trusts body userId/role; loads role + buyerSegment from profile.
  */
 export async function createSessionFromSupabasePassword(input: {
   email: string;
   password: string;
   buyerSegment?: DialSession["buyerSegment"];
 }): Promise<{ token: string; session: DialSession; accessToken: string }> {
-  const { signInWithPassword } = await import("@dial/identity");
+  const {
+    signInWithPassword,
+    fetchProfileForAuthUser,
+    upsertProfileAfterAuth,
+  } = await import("@dial/identity");
   const auth = await signInWithPassword({
     email: input.email,
     password: input.password,
   });
-  const created = createSession({
-    email: auth.email,
+  let profile = await fetchProfileForAuthUser({
     userId: auth.userId,
+    accessToken: auth.accessToken,
+  });
+  if (!profile) {
+    profile = await upsertProfileAfterAuth({
+      userId: auth.userId,
+      email: auth.email,
+      displayName: auth.email.split("@")[0] || "DIAL user",
+      accessToken: auth.accessToken,
+      ...(input.buyerSegment !== undefined
+        ? { buyerSegment: input.buyerSegment }
+        : {}),
+    });
+  }
+  const created = createSession({
+    email: profile.email,
+    userId: profile.userId,
+    role: dialRoleFromProfile(profile.role),
+    buyerSegment: input.buyerSegment ?? profile.buyerSegment,
+  });
+  return { ...created, accessToken: auth.accessToken };
+}
+
+/**
+ * Supabase password sign-up → profile upsert → DialSession (PD1).
+ */
+export async function createSessionFromSupabaseSignUp(input: {
+  email: string;
+  password: string;
+  displayName: string;
+  buyerSegment?: DialSession["buyerSegment"];
+}): Promise<{ token: string; session: DialSession; accessToken: string }> {
+  const { signUpWithPassword, upsertProfileAfterAuth } = await import(
+    "@dial/identity"
+  );
+  const auth = await signUpWithPassword({
+    email: input.email,
+    password: input.password,
+  });
+  const profile = await upsertProfileAfterAuth({
+    userId: auth.userId,
+    email: auth.email,
+    displayName: input.displayName,
+    accessToken: auth.accessToken,
     ...(input.buyerSegment !== undefined
       ? { buyerSegment: input.buyerSegment }
       : {}),
+  });
+  const created = createSession({
+    email: profile.email,
+    userId: profile.userId,
+    role: dialRoleFromProfile(profile.role),
+    buyerSegment: profile.buyerSegment,
   });
   return { ...created, accessToken: auth.accessToken };
 }

@@ -11,6 +11,8 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD1 Auth depth** — Supabase Auth password sign-up/in (`signUpWithPassword` / `signInWithPassword`), profiles upsert + RLS migration `0002_profiles_auth_rls.sql`, DialSession from auth user + profile (`buyerSegment`), `GET /api/auth/me` with object AuthZ, password fields on gateway sign-in/up; fixture CI + sandbox/live fail-closed ([#21](https://github.com/Vanguduza/dial/issues/21)).
+- **Product-depth workplan band** (`PD1`→`PD4` + `G1` wait) in `DIAL_Build_Workplan.md` — auto-advance within band; OpenAPI invent paused; S99 human-only.
 - Windows Dev Manager starter `scripts/start-dial-dev-manager-prime.ps1` â€” starts Cursor bridge if down, launches `prime-agent` with Cursor **Auto** + `/dev-manager` (D-61 harness only; no prod data).
 - Root living docs (`README.md`, `CHANGELOG.md`, `ENHANCEMENTS.md`, `BUGS.md`) and Build Blueprint Â§8.0 requirements for responsive web UX + automatic doc maintenance.
 - **D-61** locked companion `DIAL_AI_Kernel_Prime_Agent_Adopted.md` â€” Dev Manager = Build managerial authority; Prime = mandatory harness hosting it; prod = capability pipeline + Temporal/BullMQ (no agent adapter); Â§5.3 affirmed.

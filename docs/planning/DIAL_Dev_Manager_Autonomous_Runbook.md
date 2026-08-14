@@ -74,7 +74,7 @@ Phase 0 stays stub: live Meta send, live EcoCash keys, approved template IDs (EN
 
 ## 3. End-to-end stage queue (auto-advance)
 
-**Full table + green gates:** `DIAL_Build_Workplan.md` (S00→S90 eng; S99 customer-open = human only).
+**Full table + green gates:** `DIAL_Build_Workplan.md` (S00→S90 eng; **PD1→PD4** product depth; S99 customer-open = human only).
 
 When **S10 E2a** goes green, Dev Manager **immediately** opens and starts:
 
@@ -84,9 +84,11 @@ When **S10 E2a** goes green, Dev Manager **immediately** opens and starts:
 | S12 | **E1b** | Daily ZiG admin + EcoCash ZiG/`fx_rate_id` |
 | S20…S30 | T1 → T3 → T5 → T4 → E3a → T6 → E4a/T7 → E5a → E6a/T8 → T9 | Pack §15 ACs = Done |
 | S90 | Eng Build complete | Living docs current |
+| **PD1…PD4** | Product depth | Auth → Meili/Factory → Spare → sandbox PSP — **auto within band**; no OpenAPI invent |
+| **G1** | Groceries | Plan/code only after PD1–PD4 deps green |
 | S99 | Customer-open | **Not auto** — Appendix C / Blueprint §8.1 |
 
-Do **not** ask between stages. Update `DIAL_Build_Workplan_STATE.md` on every transition.
+Do **not** ask between stages. Update `DIAL_Build_Workplan_STATE.md` on every transition. Do **not** invent S466+ OpenAPI micro-stages.
 
 ---
 

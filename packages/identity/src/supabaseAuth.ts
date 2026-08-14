@@ -1,7 +1,7 @@
 /**
- * Supabase Auth client scaffold (Pack §6.1 / T1 expand).
- * Fixture mode keeps cookie session SoR; sandbox/live uses env URLs (fail closed).
- * Never put SUPABASE_SERVICE_ROLE_KEY behind NEXT_PUBLIC_.
+ * Supabase Auth client (Pack §6.1 / PD1).
+ * Fixture mode keeps deterministic tokens for CI; sandbox/live uses GoTrue HTTP (fail closed).
+ * Never put SUPABASE_SERVICE_ROLE_KEY behind NEXT_PUBLIC_/VITE_.
  */
 export type IntegrationMode = "fixture" | "sandbox" | "live";
 
@@ -67,6 +67,14 @@ export function getSupabaseServerConfig(
   return { ...pub, serviceRoleKey };
 }
 
+function fixtureUserId(email: string): string {
+  return `usr_${Buffer.from(email).toString("base64url").slice(0, 16)}`;
+}
+
+function fixtureAccessToken(email: string): string {
+  return `sb_fx_${Buffer.from(email).toString("base64url").slice(0, 24)}`;
+}
+
 /**
  * Exchange email/password for a session token shape.
  * Fixture: deterministic local token. Live: POST /auth/v1/token (GoTrue).
@@ -80,21 +88,24 @@ export async function signInWithPassword(input: {
 
   if (integrationMode() === "fixture") {
     return {
-      accessToken: `sb_fx_${Buffer.from(email).toString("base64url").slice(0, 24)}`,
-      userId: `usr_${Buffer.from(email).toString("base64url").slice(0, 16)}`,
+      accessToken: fixtureAccessToken(email),
+      userId: fixtureUserId(email),
       email,
     };
   }
 
   const { url, anonKey } = getSupabasePublicConfig();
-  const res = await fetch(`${url.replace(/\/$/, "")}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: {
-      apikey: anonKey,
-      "Content-Type": "application/json",
+  const res = await fetch(
+    `${url.replace(/\/$/, "")}/auth/v1/token?grant_type=password`,
+    {
+      method: "POST",
+      headers: {
+        apikey: anonKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password: input.password }),
     },
-    body: JSON.stringify({ email, password: input.password }),
-  });
+  );
   if (!res.ok) throw new Error(`Supabase sign-in HTTP ${res.status}`);
   const data = (await res.json()) as {
     access_token?: string;
@@ -108,4 +119,91 @@ export async function signInWithPassword(input: {
     userId: data.user.id,
     email: data.user.email ?? email,
   };
+}
+
+/**
+ * Register email/password via GoTrue.
+ * Fixture: deterministic user id (mirrors sign-in). Live: POST /auth/v1/signup.
+ */
+export async function signUpWithPassword(input: {
+  email: string;
+  password: string;
+}): Promise<{ accessToken: string; userId: string; email: string }> {
+  const email = input.email.trim().toLowerCase();
+  if (!email || !input.password) throw new Error("email and password required");
+  if (input.password.length < 8) {
+    throw new Error("password must be at least 8 characters");
+  }
+
+  if (integrationMode() === "fixture") {
+    return {
+      accessToken: fixtureAccessToken(email),
+      userId: fixtureUserId(email),
+      email,
+    };
+  }
+
+  const { url, anonKey } = getSupabasePublicConfig();
+  const res = await fetch(`${url.replace(/\/$/, "")}/auth/v1/signup`, {
+    method: "POST",
+    headers: {
+      apikey: anonKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password: input.password }),
+  });
+  if (!res.ok) throw new Error(`Supabase sign-up HTTP ${res.status}`);
+  const data = (await res.json()) as {
+    access_token?: string;
+    user?: { id?: string; email?: string };
+  };
+  if (!data.user?.id) {
+    throw new Error("Supabase sign-up missing user");
+  }
+  // Email-confirm projects may omit access_token; sign-in immediately when missing.
+  if (data.access_token) {
+    return {
+      accessToken: data.access_token,
+      userId: data.user.id,
+      email: data.user.email ?? email,
+    };
+  }
+  return signInWithPassword({ email, password: input.password });
+}
+
+/** Resolve user from access token (fixture decode or GoTrue /user). */
+export async function getUserFromAccessToken(
+  accessToken: string,
+): Promise<{ userId: string; email: string } | null> {
+  if (!accessToken) return null;
+  if (integrationMode() === "fixture") {
+    if (!accessToken.startsWith("sb_fx_")) return null;
+    // Round-trip: token embeds base64url email prefix used at issue time —
+    // callers should prefer DialSession; this is AuthN smoke only.
+    return null;
+  }
+  const { url, anonKey } = getSupabasePublicConfig();
+  const res = await fetch(`${url.replace(/\/$/, "")}/auth/v1/user`, {
+    headers: {
+      apikey: anonKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  if (!res.ok) return null;
+  const data = (await res.json()) as { id?: string; email?: string };
+  if (!data.id || !data.email) return null;
+  return { userId: data.id, email: data.email.toLowerCase() };
+}
+
+/** PostgREST base URL — prefers NEXT_PUBLIC_SUPABASE_URL; falls back to SUPABASE_URL. */
+export function getSupabaseRestUrl(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  const url =
+    env.NEXT_PUBLIC_SUPABASE_URL?.trim() || env.SUPABASE_URL?.trim() || "";
+  if (integrationMode(env) === "fixture") {
+    return url || "http://127.0.0.1:54321";
+  }
+  if (!url) throw new Error("SUPABASE URL unset — fail closed");
+  return url.replace(/\/$/, "");
 }
