@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S387** — admin POST operationIds match disk — **green** |
+| `current_stage` | **S388** — getIntegrationsHealth operationId matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S386** admin GET operationIds match disk — **green** |
-| `next_stage` | **S388** getIntegrationsHealth operationId matches disk |
+| `prior_stage` | **S387** admin POST operationIds match disk — **green** |
+| `next_stage` | **S389** getOpenApiSkeleton operationId matches disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S386 | 2026-08-13/14 | through admin GET operationIds |
-| S387 | 2026-08-14 | admin POST operationIds served equals disk |
+| S91–S387 | 2026-08-13/14 | through admin POST operationIds |
+| S388 | 2026-08-14 | getIntegrationsHealth operationId served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S388 | getIntegrationsHealth operationId matches disk |
 | S389 | getOpenApiSkeleton operationId matches disk |
 | S390 | all path operationIds non-empty |
 | S391 | adminFdmsDayGet operationId locked |
 | S392 | adminMoneyOutboxGet operationId locked |
+| S393 | adminFxDailyZigGet operationId locked |
 
 ## Note
 
