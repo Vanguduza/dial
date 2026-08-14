@@ -4140,6 +4140,226 @@ test("S330 money outbox 401 description matches disk", async () => {
   }
 });
 
+test("S331 FDMS day 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, { description?: string }> };
+        post?: { responses?: Record<string, { description?: string }> };
+      }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  for (const method of ["get", "post"] as const) {
+    assert.equal(
+      served.paths["/api/admin/fdms/day"]?.[method]?.responses?.["401"]
+        ?.description,
+      disk.paths["/api/admin/fdms/day"]?.[method]?.responses?.["401"]
+        ?.description,
+      `fdms day ${method} 401`,
+    );
+  }
+});
+
+test("S332 Paynow 200 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/paynow"]?.post?.responses?.["200"]
+      ?.description,
+    disk.paths["/api/webhooks/paynow"]?.post?.responses?.["200"]?.description,
+  );
+});
+
+test("S333 EcoCash 200 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/ecocash"]?.post?.responses?.["200"]
+      ?.description,
+    disk.paths["/api/webhooks/ecocash"]?.post?.responses?.["200"]?.description,
+  );
+});
+
+test("S334 WhatsApp POST 200 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.post?.responses?.["200"]
+      ?.description,
+    disk.paths["/api/webhooks/whatsapp"]?.post?.responses?.["200"]?.description,
+  );
+});
+
+test("S335 openapi servers description locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    servers?: Array<{ url?: string; description?: string }>;
+  };
+  const local = served.servers?.find((s) => s.url === "http://localhost:3000");
+  assert.ok(local, "missing localhost:3000 server");
+  assert.equal(local?.description, "Local gateway-web");
+});
+
+test("S336 servers url+description match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { servers?: Array<{ url?: string; description?: string }> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.servers, disk.servers);
+  assert.ok((disk.servers?.length ?? 0) >= 1);
+});
+
+test("S337 FDMS day GET 200 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { get?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/fdms/day"]?.get?.responses?.["200"]?.description,
+    disk.paths["/api/admin/fdms/day"]?.get?.responses?.["200"]?.description,
+  );
+});
+
+test("S338 health integrations 200 never echoes secrets", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { get?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const d200 =
+    served.paths["/api/health/integrations"]?.get?.responses?.["200"]
+      ?.description ?? "";
+  assert.ok(/never echoes secrets/i.test(d200));
+  assert.equal(d200.includes("sk_live"), false);
+  assert.equal(d200.includes("service_role"), false);
+});
+
+test("S339 WhatsApp GET 200 Challenge echo matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { get?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.get?.responses?.["200"]
+      ?.description,
+    disk.paths["/api/webhooks/whatsapp"]?.get?.responses?.["200"]?.description,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.get?.responses?.["200"]
+      ?.description,
+    "Challenge echo",
+  );
+});
+
+test("S340 openapi tags names match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { tags?: Array<{ name: string }> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    (served.tags ?? []).map((t) => t.name).sort(),
+    (disk.tags ?? []).map((t) => t.name).sort(),
+  );
+  for (const name of ["admin", "health", "webhooks"]) {
+    assert.ok((served.tags ?? []).some((t) => t.name === name));
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
