@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S389** — getOpenApiSkeleton operationId matches disk — **green** |
+| `current_stage` | **S390** — all path operationIds non-empty — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S388** getIntegrationsHealth operationId matches disk — **green** |
-| `next_stage` | **S390** all path operationIds non-empty |
+| `prior_stage` | **S389** getOpenApiSkeleton operationId matches disk — **green** |
+| `next_stage` | **S391** adminFdmsDayGet operationId locked |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S388 | 2026-08-13/14 | through getIntegrationsHealth operationId |
-| S389 | 2026-08-14 | getOpenApiSkeleton operationId served==disk |
+| S91–S389 | 2026-08-13/14 | through getOpenApiSkeleton operationId |
+| S390 | 2026-08-14 | all served path operationIds non-empty |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S390 | all path operationIds non-empty |
 | S391 | adminFdmsDayGet operationId locked |
 | S392 | adminMoneyOutboxGet operationId locked |
 | S393 | adminFxDailyZigGet operationId locked |
 | S394 | adminFdmsDayPost operationId locked |
+| S395 | adminMoneyOutboxDrain operationId locked |
 
 ## Note
 
