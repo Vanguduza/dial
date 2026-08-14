@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S259** — served getIntegrationsHealth operationId locked — **green** |
+| `current_stage` | **S260** — served OpenAPI title+version match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S258** groups required fields — **green** |
-| `next_stage` | **S260** |
+| `prior_stage` | **S259** getIntegrationsHealth operationId — **green** |
+| `next_stage` | **S261** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S258 | 2026-08-13/14 | through prior |
-| S259 | 2026-08-14 | served getIntegrationsHealth operationId locked |
+| S91–S259 | 2026-08-13/14 | through prior |
+| S260 | 2026-08-14 | served OpenAPI title+version match disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S260 | served OpenAPI title+version match disk |
 | S261 | Served IntegrationsHealth.required includes ready+mode+probes+groups |
 | S262 | Sandbox webhook fail-closed 503 when INTERNAL_API_SECRET unset |
 | S263 | Fixture webhook accepts without INTERNAL_API_SECRET |
 | S264 | Served servers url localhost:3000 |
+| S265 | OpenAPI tags include health+webhooks+admin |
 
 ## Note
 
