@@ -684,6 +684,49 @@ test("S156 integrations README documents admin health note truncation", async ()
   assert.ok(integ.includes("/admin/cost-health"));
 });
 
+test("S157 OpenAPI documents admin health note truncation SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: {
+      "x-dial-sor"?: { healthNoteUiMax?: string };
+    };
+    components: {
+      schemas: {
+        IntegrationsHealth: {
+          properties: { note?: { description?: string } };
+        };
+      };
+    };
+  };
+  assert.ok(
+    spec.info?.["x-dial-sor"]?.healthNoteUiMax?.includes(
+      "INTEGRATIONS_HEALTH_NOTE_UI_MAX",
+    ),
+  );
+  const desc =
+    spec.components.schemas.IntegrationsHealth.properties.note?.description ??
+    "";
+  assert.ok(desc.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
+  assert.ok(desc.includes("truncateIntegrationsHealthNote"));
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { healthNoteUiMax?: string } };
+  };
+  assert.ok(
+    served.info?.["x-dial-sor"]?.healthNoteUiMax?.includes(
+      "INTEGRATIONS_HEALTH_NOTE_UI_MAX",
+    ),
+  );
+});
+
 test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

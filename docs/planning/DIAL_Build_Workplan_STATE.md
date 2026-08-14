@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S156** — Integrations README documents admin note truncation — **green** |
+| `current_stage` | **S157** — OpenAPI documents admin note truncation SoR — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S155** Cost-health stub surfaces truncated health note — **green** |
-| `next_stage` | **S157** OpenAPI documents admin note truncation SoR |
+| `prior_stage` | **S156** Integrations README documents admin note truncation — **green** |
+| `next_stage` | **S158** Root README documents admin note truncation |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S155 | 2026-08-13/14 | through cost-health truncated note |
-| S156 | 2026-08-14 | README admin note truncation contract |
+| S91–S156 | 2026-08-13/14 | through README admin note truncation |
+| S157 | 2026-08-14 | OpenAPI x-dial-sor.healthNoteUiMax + note description |
 
 ## Note
 

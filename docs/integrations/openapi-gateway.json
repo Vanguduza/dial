@@ -8,6 +8,7 @@
       "probes": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_PROBE_KEYS",
       "envGroups": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_ENV_GROUPS",
       "envGroupLabels": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_ENV_GROUP_LABELS",
+      "healthNoteUiMax": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_HEALTH_NOTE_UI_MAX",
       "docs": "docs/integrations/README.md"
     }
   },
@@ -383,7 +384,7 @@
           },
           "note": {
             "type": "string",
-            "description": "Mode guidance plus ordered groups labels=… from INTEGRATION_ENV_GROUP_LABELS (S151/S152)."
+            "description": "Mode guidance plus ordered groups labels=… from INTEGRATION_ENV_GROUP_LABELS (S151/S152). Admin UIs truncate via truncateIntegrationsHealthNote / INTEGRATIONS_HEALTH_NOTE_UI_MAX (S154/S157); full note remains in JSON."
           }
         }
       },
