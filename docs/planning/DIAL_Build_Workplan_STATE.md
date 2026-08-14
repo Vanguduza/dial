@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S254** — fixture internal probe ok without INTERNAL_API_SECRET — **green** |
+| `current_stage` | **S255** — served x-dial-sor.probes matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S253** sandbox internal probe fail — **green** |
-| `next_stage` | **S255** |
+| `prior_stage` | **S254** fixture internal probe ok — **green** |
+| `next_stage` | **S256** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S253 | 2026-08-13/14 | through prior |
-| S254 | 2026-08-14 | fixture internal probe ok without INTERNAL_API_SECRET |
+| S91–S254 | 2026-08-13/14 | through prior |
+| S255 | 2026-08-14 | served x-dial-sor.probes matches disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S255 | served x-dial-sor.probes matches disk |
 | S256 | served x-dial-sor.docs matches disk |
 | S257 | live internal probe fails without INTERNAL_API_SECRET |
 | S258 | served IntegrationsHealth.groups required fields |
 | S259 | served getIntegrationsHealth operationId locked |
+| S260 | served OpenAPI title+version match disk |
 
 ## Note
 
