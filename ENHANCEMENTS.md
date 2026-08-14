@@ -263,6 +263,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-279 | **OpenAPI 3.0.3 lock** | done | S341 — openapi field |
 | ENH-280 | **ContiPay HMAC summary lock** | `done` | S342 — ContiPay HMAC webhook |
 | ENH-281 | **InternalApiSecret served==disk** | `done` | S343 — full scheme object |
+| ENH-282 | **OpenAPI schemas key set** | `done` | S344 — Health/Probes/OpaqueBody |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
