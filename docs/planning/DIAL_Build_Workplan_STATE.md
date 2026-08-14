@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S354** — openapi info.title matches disk — **green** |
+| `current_stage` | **S355** — openapi info.version matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S353** — green |
-| `next_stage` | **S355 openapi info.version matches disk** |
+| `prior_stage` | **S354** — green |
+| `next_stage` | **S356 EcoCash summary matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S353 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S354 | 2026-08-14 | info.title DIAL Gateway served equals disk |
+| S91–S354 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S355 | 2026-08-14 | info.version 0.1.0 served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S355 | openapi info.version matches disk |
 | S356 | EcoCash summary matches disk |
 | S357 | PayPal summary matches disk |
 | S358 | Escrow summary matches disk |
 | S359 | WhatsApp GET summary matches disk |
+| S360 | openapi info.title+version match disk pair |
 
 ## Note
 
