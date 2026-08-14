@@ -106,12 +106,13 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | URL / doc | Purpose |
 | --- | --- |
 | `/api/health/integrations` | `ready` / `probes` / env groups (no secrets) |
-| `/admin/integrations` | Ops UI for the same snapshot |
+| `/admin/integrations` | Ops UI for the same snapshot (truncated health `note`) |
+| `/admin/cost-health` | Cost stub + truncated health `note` parity |
 | `/api/openapi` | OpenAPI 3 skeleton (health + webhooks + admin) |
 | [`docs/integrations/README.md`](./docs/integrations/README.md) | Key-drop-in checklist + health group map |
 | [`docs/integrations/openapi-gateway.json`](./docs/integrations/openapi-gateway.json) | Spec file SoR for the skeleton |
 
-Env-group SoR: `INTEGRATION_ENV_GROUPS` + ordered `INTEGRATION_ENV_GROUP_LABELS` in `apps/gateway-web/src/lib/integrationsReadiness.ts` (OpenAPI `info.x-dial-sor`). See [`docs/integrations/README.md`](./docs/integrations/README.md) for key-drop-in checklist.
+Env-group SoR: `INTEGRATION_ENV_GROUPS` + ordered `INTEGRATION_ENV_GROUP_LABELS` in `apps/gateway-web/src/lib/integrationsReadiness.ts` (OpenAPI `info.x-dial-sor`). Admin UIs truncate health `note` via `truncateIntegrationsHealthNote` / `INTEGRATIONS_HEALTH_NOTE_UI_MAX` (`x-dial-sor.healthNoteUiMax`). See [`docs/integrations/README.md`](./docs/integrations/README.md) for key-drop-in checklist.
 
 ## Companions (high-signal)
 

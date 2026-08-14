@@ -769,6 +769,16 @@ test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => 
   assert.ok(readme.includes("x-dial-sor"));
 });
 
+test("S158 root README documents admin health note truncation", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
+  assert.ok(readme.includes("truncateIntegrationsHealthNote"));
+  assert.ok(readme.includes("healthNoteUiMax"));
+  assert.ok(readme.includes("/admin/cost-health"));
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");
