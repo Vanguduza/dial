@@ -3638,6 +3638,258 @@ test("S310 money outbox POST 401 with wrong secret", async () => {
   }
 });
 
+test("S311 Paynow 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/paynow"]?.post?.responses?.["401"]
+      ?.description,
+    disk.paths["/api/webhooks/paynow"]?.post?.responses?.["401"]?.description,
+  );
+});
+
+test("S312 EcoCash 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/ecocash"]?.post?.responses?.["401"]
+      ?.description,
+    disk.paths["/api/webhooks/ecocash"]?.post?.responses?.["401"]?.description,
+  );
+});
+
+test("S313 ContiPay 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/contipay"]?.post?.responses?.["401"]
+      ?.description,
+    disk.paths["/api/webhooks/contipay"]?.post?.responses?.["401"]?.description,
+  );
+});
+
+test("S314 FDMS webhook 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/fdms"]?.post?.responses?.["401"]?.description,
+    disk.paths["/api/webhooks/fdms"]?.post?.responses?.["401"]?.description,
+  );
+});
+
+test("S315 WhatsApp POST 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.post?.responses?.["401"]
+      ?.description,
+    disk.paths["/api/webhooks/whatsapp"]?.post?.responses?.["401"]?.description,
+  );
+  assert.ok(
+    (served.paths["/api/webhooks/whatsapp"]?.post?.responses?.["401"]
+      ?.description ?? "")
+      .toUpperCase()
+      .includes("HMAC"),
+  );
+});
+
+test("S316 Escrow webhook 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/escrow"]?.post?.responses?.["401"]
+      ?.description,
+    disk.paths["/api/webhooks/escrow"]?.post?.responses?.["401"]?.description,
+  );
+});
+
+test("S317 PayPal webhook 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/paypal"]?.post?.responses?.["401"]
+      ?.description,
+    disk.paths["/api/webhooks/paypal"]?.post?.responses?.["401"]?.description,
+  );
+});
+
+test("S318 PSP webhook 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/psp"]?.post?.responses?.["401"]?.description,
+    disk.paths["/api/webhooks/psp"]?.post?.responses?.["401"]?.description,
+  );
+});
+
+test("S319 all webhook POST 401 descriptions match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const posts = Object.keys(disk.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && disk.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    assert.equal(
+      served.paths[p]?.post?.responses?.["401"]?.description,
+      disk.paths[p]?.post?.responses?.["401"]?.description,
+      `${p} 401 served==disk`,
+    );
+    assert.ok(
+      (served.paths[p]?.post?.responses?.["401"]?.description ?? "").length > 0,
+      `${p} must document 401`,
+    );
+  }
+});
+
+test("S320 admin FDMS day OpenAPI documents 401", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, { description?: string }> };
+        post?: { responses?: Record<string, { description?: string }> };
+      }
+    >;
+  };
+  const path = served.paths["/api/admin/fdms/day"];
+  for (const method of ["get", "post"] as const) {
+    const d401 = path?.[method]?.responses?.["401"]?.description ?? "";
+    assert.ok(
+      /missing|invalid|internal secret/i.test(d401),
+      `fdms day ${method} 401`,
+    );
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
