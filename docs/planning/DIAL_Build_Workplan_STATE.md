@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S396** — adminFxDailyZigPost operationId locked — **green** |
+| `current_stage` | **S397** — all admin operationIds match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S395** adminMoneyOutboxDrain operationId locked — **green** |
-| `next_stage` | **S397** all admin operationIds match disk |
+| `prior_stage` | **S396** adminFxDailyZigPost operationId locked — **green** |
+| `next_stage` | **S398** tags names match disk sorted |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S395 | 2026-08-13/14 | through adminMoneyOutboxDrain |
-| S396 | 2026-08-14 | adminFxDailyZigPost operationId locked |
+| S91–S396 | 2026-08-13/14 | through prior |
+| S397 | 2026-08-14 | all admin operationIds served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S397 | all admin operationIds match disk |
 | S398 | tags names match disk sorted |
 | S399 | servers url match disk |
 | S400 | info.description matches disk |
 | S401 | servers description match disk |
+| S402 | tags descriptions match disk |
 
 ## Note
 
