@@ -918,6 +918,21 @@ test("S168 .env.example cites buildIntegrationsHealthNote SoR", async () => {
   assert.ok(envExample.includes("integrationsReadiness.ts"));
 });
 
+test("S177 .env.example cites note-builder-sor-hint contract", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes(INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID));
+  assert.ok(envExample.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
+  assert.ok(envExample.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+});
+
 test("S162 served OpenAPI healthNoteUiMax matches INTEGRATIONS_HEALTH_NOTE_UI_MAX export", async () => {
   const { INTEGRATIONS_HEALTH_NOTE_UI_MAX } = await import(
     "./lib/integrationsReadiness.js"
