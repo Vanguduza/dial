@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S302** — Paynow 503 description matches disk — **green** |
+| `current_stage` | **S303** — EcoCash 503 description matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S301** — green |
-| `next_stage` | **S303 EcoCash 503 description matches disk** |
+| `prior_stage` | **S302** — green |
+| `next_stage` | **S304 FDMS webhook 503 description matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S301 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S302 | 2026-08-14 | Paynow 503 served equals disk |
+| S91–S302 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S303 | 2026-08-14 | EcoCash 503 served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S303 | EcoCash 503 description matches disk |
 | S304 | FDMS webhook 503 description matches disk |
 | S305 | PSP webhook 503 description matches disk |
 | S306 | Escrow webhook 503 description matches disk |
 | S307 | PayPal webhook 503 description matches disk |
+| S308 | money outbox OpenAPI documents 401 |
 
 ## Note
 
