@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
+  INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
   INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
   parseIntegrationsHealth,
   truncateIntegrationsHealthNote,
@@ -11,7 +12,7 @@ import {
  * T9 cost/health dashboard stub — no live secrets; links to MetricContract / CC.
  * S142: OpenAPI primary CTA + INTEGRATION_ENV_GROUPS SoR hint (parity with /admin/integrations).
  * S155: truncated health `note` from GET /api/health/integrations.
- * S179: note-builder hint uses INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID.
+ * S179/S185: note-builder hint uses HINT_ID + cites DOCS constant.
  */
 export default function CostHealthStubPage() {
   const [note, setNote] = useState<string | null>(null);
@@ -65,7 +66,8 @@ export default function CostHealthStubPage() {
         Note-builder SoR: <code>buildIntegrationsHealthNote</code> (
         <a href="/api/openapi">OpenAPI</a>{" "}
         <code>x-dial-sor.healthNote</code>) · full note in{" "}
-        <a href="/api/health/integrations">Health JSON</a>.
+        <a href="/api/health/integrations">Health JSON</a> · docs{" "}
+        <code>{INTEGRATIONS_NOTE_BUILDER_SOR_DOCS}</code>.
       </p>
       {note ? (
         <p

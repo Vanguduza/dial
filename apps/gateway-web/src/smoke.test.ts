@@ -832,6 +832,30 @@ test("S179 admin UI imports HINT_ID for data-testid", async () => {
   }
 });
 
+test("S185 admin UI cites DOCS constant in note-builder hint copy", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { INTEGRATIONS_NOTE_BUILDER_SOR_DOCS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  for (const src of [cost, integ]) {
+    assert.ok(src.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+    assert.ok(src.includes("{INTEGRATIONS_NOTE_BUILDER_SOR_DOCS}"));
+  }
+  assert.equal(
+    INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
+    "docs/integrations/README.md",
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
