@@ -1,4 +1,4 @@
-# DIAL Build — Workplan STATE
+﻿# DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S240** — Served webhook POST bodies ref WebhookOpaqueBody — **green** |
+| `current_stage` | **S241** — healthNoteUiMax served==disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S239** Served path set lock — **green** |
-| `next_stage` | **S241** |
+| `prior_stage` | **S240** Webhook POST bodies ref WebhookOpaqueBody — **green** |
+| `next_stage` | **S242** noteBuilderDocs served==disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S239 | 2026-08-13/14 | through prior |
-| S240 | 2026-08-14 | Served webhook POST bodies ref WebhookOpaqueBody |
+| S91–S240 | 2026-08-13/14 | through webhook opaque $ref |
+| S241 | 2026-08-14 | served healthNoteUiMax matches disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S241 | Served healthNoteUiMax matches disk |
-| S242 | OpenAPI noteBuilderDocs served matches disk |
-| S243 | Live mode note equals sandbox note builder |
-| S244 | Served probes schema required keys match INTEGRATION_PROBE_KEYS |
-| S245 | Sandbox ready=false without Redis (queues probe) |
+| S242 | noteBuilderDocs served==disk |
+| S243 | live note equals sandbox builder |
+| S244 | probes required keys match INTEGRATION_PROBE_KEYS |
+| S245 | sandbox ready=false without Redis |
+| S246 | fixture ready=true without Redis |
 
 ## Note
 

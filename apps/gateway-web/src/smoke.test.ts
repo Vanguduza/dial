@@ -2111,6 +2111,260 @@ test("S240 served webhook POST bodies ref WebhookOpaqueBody", async () => {
   }
 });
 
+test("S241 served OpenAPI healthNoteUiMax matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { healthNoteUiMax?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { healthNoteUiMax?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.healthNoteUiMax,
+    disk.info?.["x-dial-sor"]?.healthNoteUiMax,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.healthNoteUiMax?.includes(
+      "INTEGRATIONS_HEALTH_NOTE_UI_MAX",
+    ),
+  );
+});
+
+test("S242 served OpenAPI noteBuilderDocs matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { noteBuilderDocs?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { noteBuilderDocs?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.noteBuilderDocs,
+    disk.info?.["x-dial-sor"]?.noteBuilderDocs,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.noteBuilderDocs?.includes(
+      "INTEGRATIONS_NOTE_BUILDER_SOR_DOCS",
+    ),
+  );
+});
+
+test("S243 live health note equals sandbox builder", async () => {
+  const { buildIntegrationsHealthNote } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const live = buildIntegrationsHealthNote("live");
+  const sandbox = buildIntegrationsHealthNote("sandbox");
+  assert.equal(live, sandbox);
+  assert.ok(live.startsWith("Sandbox/live"));
+
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  process.env.DIAL_INTEGRATION_MODE = "live";
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { note?: string; mode?: string };
+    assert.equal(body.mode, "live");
+    assert.equal(body.note, buildIntegrationsHealthNote("live"));
+    assert.equal(body.note, buildIntegrationsHealthNote("sandbox"));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+  }
+});
+
+test("S244 served probes required keys match INTEGRATION_PROBE_KEYS", async () => {
+  const { INTEGRATION_PROBE_KEYS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: { IntegrationsProbes?: { required?: string[] } };
+    };
+  };
+  const required = served.components?.schemas?.IntegrationsProbes?.required ?? [];
+  assert.deepEqual(
+    [...required].sort(),
+    [...INTEGRATION_PROBE_KEYS].sort(),
+  );
+});
+
+test("S245 sandbox ready=false without Redis (queues probe)", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevRedis = process.env.REDIS_URL;
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.REDIS_URL;
+  try {
+    const { integrationsReady } = await import(
+      "./lib/integrationsReadiness.js"
+    );
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+      groups?: Array<{ label: string; configured: boolean }>;
+    };
+    assert.equal(body.mode, "sandbox");
+    assert.equal(body.probes?.queues, false);
+    assert.equal(body.ready, false);
+    assert.equal(body.ready, integrationsReady(body.probes ?? {}));
+    const redisGroup = body.groups?.find((g) => g.label === "redis");
+    assert.ok(redisGroup);
+    assert.equal(redisGroup?.configured, false);
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevRedis === undefined) delete process.env.REDIS_URL;
+    else process.env.REDIS_URL = prevRedis;
+  }
+});
+
+test("S246 fixture ready=true without Redis", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevRedis = process.env.REDIS_URL;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.REDIS_URL;
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+    };
+    assert.equal(body.mode, "fixture");
+    assert.equal(body.ready, true);
+    assert.equal(body.probes?.queues, true);
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevRedis === undefined) delete process.env.REDIS_URL;
+    else process.env.REDIS_URL = prevRedis;
+  }
+});
+
+test("S247 served OpenAPI noteBuilderHint matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { noteBuilderHint?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { noteBuilderHint?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.noteBuilderHint,
+    disk.info?.["x-dial-sor"]?.noteBuilderHint,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.noteBuilderHint?.includes(
+      "INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID",
+    ),
+  );
+});
+
+test("S248 served OpenAPI envGroups matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { envGroups?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { envGroups?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.envGroups,
+    disk.info?.["x-dial-sor"]?.envGroups,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.envGroups?.includes("INTEGRATION_ENV_GROUPS"),
+  );
+});
+
+test("S249 served OpenAPI envGroupLabels matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { envGroupLabels?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { envGroupLabels?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.envGroupLabels,
+    disk.info?.["x-dial-sor"]?.envGroupLabels,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.envGroupLabels?.includes(
+      "INTEGRATION_ENV_GROUP_LABELS",
+    ),
+  );
+});
+
+test("S250 live ready=false without Redis (queues probe)", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevRedis = process.env.REDIS_URL;
+  process.env.DIAL_INTEGRATION_MODE = "live";
+  delete process.env.REDIS_URL;
+  try {
+    const { integrationsReady } = await import(
+      "./lib/integrationsReadiness.js"
+    );
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+    };
+    assert.equal(body.mode, "live");
+    assert.equal(body.probes?.queues, false);
+    assert.equal(body.ready, false);
+    assert.equal(body.ready, integrationsReady(body.probes ?? {}));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevRedis === undefined) delete process.env.REDIS_URL;
+    else process.env.REDIS_URL = prevRedis;
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
