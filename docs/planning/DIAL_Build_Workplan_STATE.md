@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S186** — `.env.example` cites noteBuilderDocs OpenAPI key — **green** |
+| `current_stage` | **S187** — Integrations README cites x-dial-sor.noteBuilderDocs — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S185** Admin UI cites DOCS constant in note-builder hint — **green** |
-| `next_stage` | **S187** Integrations README cites x-dial-sor.noteBuilderDocs |
+| `prior_stage` | **S186** `.env.example` cites noteBuilderDocs OpenAPI key — **green** |
+| `next_stage` | **S188** Root README cites x-dial-sor.noteBuilderDocs |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S185 | 2026-08-13/14 | through admin DOCS hint copy |
-| S186 | 2026-08-14 | .env.example cites noteBuilderDocs |
+| S91–S186 | 2026-08-13/14 | through .env.example noteBuilderDocs |
+| S187 | 2026-08-14 | integrations README cites noteBuilderDocs |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S187 | Integrations README cites `x-dial-sor.noteBuilderDocs` |
 | S188 | Root README cites `x-dial-sor.noteBuilderDocs` |
 | S189 | OpenAPI `info.description` mentions `noteBuilderDocs` |
 | S190 | Smoke: sandbox health `ready` false when any probe fails |
 | S191 | Smoke: live health `ready` false when any probe fails |
+| S192 | OpenAPI S134 x-dial-sor asserts noteBuilderDocs present |
 
 ## Note
 
