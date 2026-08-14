@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S249** — envGroupLabels served==disk — **green** |
+| `current_stage` | **S250** — live ready=false without Redis — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S248** envGroups served==disk — **green** |
-| `next_stage` | **S250** |
+| `prior_stage` | **S249** envGroupLabels served==disk — **green** |
+| `next_stage` | **S251** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S248 | 2026-08-13/14 | through prior |
-| S249 | 2026-08-14 | envGroupLabels served==disk |
+| S91–S249 | 2026-08-13/14 | through prior |
+| S250 | 2026-08-14 | live ready=false without Redis |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S250 | live ready=false without Redis |
 | S251 | Served probes schema properties match INTEGRATION_PROBE_KEYS |
 | S252 | OpenAPI groups label enum matches INTEGRATION_ENV_GROUP_LABELS |
 | S253 | Sandbox internal probe fails without INTERNAL_API_SECRET |
 | S254 | Fixture internal probe ok without INTERNAL_API_SECRET |
+| S255 | Served x-dial-sor.probes matches disk |
 
 ## Note
 
