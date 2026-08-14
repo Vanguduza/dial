@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S218** — Empty-env group snapshots all unconfigured — **green** |
+| `current_stage` | **S219** — .env.example cites fixture ready without configured — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S217** Served WebhookOpaqueBody processed_events — **green** |
-| `next_stage` | **S219** |
+| `prior_stage` | **S218** Empty-env snapshots all unconfigured — **green** |
+| `next_stage` | **S220** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S217 | 2026-08-13/14 | through prior |
-| S218 | 2026-08-14 | Empty-env group snapshots all unconfigured |
+| S91–S218 | 2026-08-13/14 | through prior |
+| S219 | 2026-08-14 | .env.example cites fixture ready without configured |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S219 | .env.example cites fixture ready without configured |
 | S220 | Admin pages bind HINT_ID exports not literals |
 | S221 | OpenAPI webhookSignature served matches disk |
 | S222 | OpenAPI webhookIdempotency served matches disk |
 | S223 | Fixture note still cites groups labels with empty env |
+| S224 | Root README cites S211 zero-configured ready |
 
 ## Note
 
