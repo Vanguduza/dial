@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S439** — tags count locked — **green** |
+| `current_stage` | **S440** — servers count locked — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S438** Paynow responses match disk — **green** |
-| `next_stage` | **S440** servers count locked |
+| `prior_stage` | **S439** tags count locked — **green** |
+| `next_stage` | **S441** EcoCash responses match disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S438 | 2026-08-13/14 | through prior |
-| S439 | 2026-08-14 | tags count served equals disk |
+| S91–S439 | 2026-08-13/14 | through prior |
+| S440 | 2026-08-14 | servers count equals 1 |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S440 | servers count locked |
 | S441 | EcoCash responses match disk |
 | S442 | FDMS webhook responses match disk |
 | S443 | WhatsApp POST responses match disk |
 | S444 | health integrations responses match disk |
+| S445 | openapi path responses match disk |
 
 ## Note
 
