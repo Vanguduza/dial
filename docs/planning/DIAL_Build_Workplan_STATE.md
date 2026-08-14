@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S235** — healthNote served==disk — **green** |
+| `current_stage` | **S236** — Served webhook POSTs document 503 fail-closed — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S234** tags.webhooks served==disk — **green** |
-| `next_stage` | **S236** |
+| `prior_stage` | **S235** healthNote served==disk — **green** |
+| `next_stage` | **S237** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S234 | 2026-08-13/14 | through prior |
-| S235 | 2026-08-14 | healthNote served==disk |
+| S91–S235 | 2026-08-13/14 | through prior |
+| S236 | 2026-08-14 | Served webhook POSTs document 503 fail-closed |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S236 | Served webhook POSTs document 503 fail-closed |
 | S237 | Served mode enum fixture|sandbox|live |
 | S238 | Sandbox note differs from fixture under empty env |
 | S239 | Served OpenAPI paths equal disk path keys |
 | S240 | Served webhook POST bodies ref WebhookOpaqueBody |
+| S241 | Served healthNoteUiMax matches disk |
 
 ## Note
 
