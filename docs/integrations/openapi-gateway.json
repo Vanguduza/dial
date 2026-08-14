@@ -384,7 +384,7 @@
           },
           "note": {
             "type": "string",
-            "description": "Mode guidance plus ordered groups labels=… from INTEGRATION_ENV_GROUP_LABELS (S151/S152). Admin UIs truncate via truncateIntegrationsHealthNote / INTEGRATIONS_HEALTH_NOTE_UI_MAX (S154/S157); full note remains in JSON."
+            "description": "Built by buildIntegrationsHealthNote(mode): mode guidance plus ordered groups labels=… from INTEGRATION_ENV_GROUP_LABELS (S151/S152/S163/S165). Admin UIs truncate via truncateIntegrationsHealthNote / INTEGRATIONS_HEALTH_NOTE_UI_MAX (S154/S157); full note remains in JSON."
           }
         }
       },

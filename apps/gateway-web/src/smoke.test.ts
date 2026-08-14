@@ -870,6 +870,33 @@ test("S164 health route note comes from buildIntegrationsHealthNote", async () =
   }
 });
 
+test("S165 OpenAPI + README document buildIntegrationsHealthNote", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    components: {
+      schemas: {
+        IntegrationsHealth: {
+          properties: { note?: { description?: string } };
+        };
+      };
+    };
+  };
+  assert.ok(integ.includes("buildIntegrationsHealthNote"));
+  const desc =
+    spec.components.schemas.IntegrationsHealth.properties.note?.description ??
+    "";
+  assert.ok(desc.includes("buildIntegrationsHealthNote"));
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");
