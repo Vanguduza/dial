@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S336** — servers url+description match disk — **green** |
+| `current_stage` | **S337** — FDMS day GET 200 description matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S335** — green |
-| `next_stage` | **S337 FDMS day GET 200 description matches disk** |
+| `prior_stage` | **S336** — green |
+| `next_stage` | **S338 health integrations 200 never echoes secrets** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S335 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S336 | 2026-08-14 | servers array served equals disk |
+| S91–S336 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S337 | 2026-08-14 | FDMS day GET 200 Fiscal day snapshot |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S337 | FDMS day GET 200 description matches disk |
 | S338 | health integrations 200 never echoes secrets |
 | S339 | WhatsApp GET 200 Challenge echo matches disk |
 | S340 | openapi tags names match disk |
 | S341 | openapi version 3.0.3 locked |
+| S342 | ContiPay summary ContiPay HMAC locked |
 
 ## Note
 
