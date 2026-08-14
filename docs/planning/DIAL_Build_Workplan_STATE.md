@@ -6,11 +6,11 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S379** — FDMS webhook operationId matches disk — **green** |
+| `current_stage` | **S380** — openapi top-level keys equal openapi|info|servers|tags|paths|components — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S378** Paynow operationId matches disk — **green** |
-| `next_stage` | **S380** openapi top-level keys equal openapi|info|servers|tags|paths|components |
+| `prior_stage` | **S379** FDMS webhook operationId matches disk — **green** |
+| `next_stage` | **S381** EcoCash operationId matches disk |
 | `blocked_on_human` | none |
 
 ## Completed
@@ -26,16 +26,17 @@
 | S377 | 2026-08-14 | WhatsApp GET operationId webhookWhatsappChallenge served==disk |
 | S378 | 2026-08-14 | Paynow operationId webhookPaynow served==disk |
 | S379 | 2026-08-14 | FDMS webhook operationId webhookFdms served==disk |
+| S380 | 2026-08-14 | openapi top-level keys exact openapi|info|servers|tags|paths|components |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S380 | openapi top-level keys equal openapi|info|servers|tags|paths|components |
 | S381 | EcoCash operationId matches disk |
 | S382 | PayPal operationId matches disk |
 | S383 | Escrow operationId matches disk |
 | S384 | PSP operationId matches disk |
+| S385 | all webhook POST operationIds match disk |
 
 ## Note
 
