@@ -5649,6 +5649,209 @@ test("S395 adminMoneyOutboxDrain operationId locked", async () => {
   );
 });
 
+test("S396 adminFxDailyZigPost operationId locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/fx/daily-zig"]?.post?.operationId,
+    disk.paths["/api/admin/fx/daily-zig"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/admin/fx/daily-zig"]?.post?.operationId,
+    "adminFxDailyZigPost",
+  );
+});
+
+test("S397 all admin operationIds match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      Record<string, { operationId?: string } | undefined>
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const methods = ["get", "post"] as const;
+  const adminPaths = Object.keys(disk.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  assert.ok(adminPaths.length >= 3, `expected admin paths, got ${adminPaths.length}`);
+  let count = 0;
+  for (const p of adminPaths) {
+    for (const method of methods) {
+      const diskOp: { operationId?: string } | undefined = disk.paths[p]?.[method];
+      const servedOp: { operationId?: string } | undefined =
+        served.paths[p]?.[method];
+      if (!diskOp) {
+        assert.equal(servedOp, undefined, `${p} ${method} unexpected`);
+        continue;
+      }
+      assert.equal(
+        servedOp?.operationId,
+        diskOp.operationId,
+        `${p} ${method} operationId`,
+      );
+      count += 1;
+    }
+  }
+  assert.ok(count >= 6, `expected admin ops, got ${count}`);
+});
+
+test("S398 tags names match disk sorted", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { tags?: Array<{ name?: string }> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const diskNames = (disk.tags ?? []).map((t) => t.name).sort();
+  const servedNames = (served.tags ?? []).map((t) => t.name).sort();
+  assert.deepEqual(servedNames, diskNames);
+  assert.ok(diskNames.length >= 3, `expected tags, got ${diskNames.length}`);
+});
+
+test("S399 servers url match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { servers?: Array<{ url?: string }> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(served.servers?.[0]?.url, disk.servers?.[0]?.url);
+  assert.ok((served.servers?.[0]?.url ?? "").length > 0);
+});
+
+test("S400 info.description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { description?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(served.info?.description, disk.info?.description);
+  assert.ok((served.info?.description ?? "").length > 0);
+});
+
+test("S401 servers description match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { servers?: Array<{ description?: string }> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.servers?.[0]?.description,
+    disk.servers?.[0]?.description,
+  );
+  assert.ok((served.servers?.[0]?.description ?? "").length > 0);
+});
+
+test("S402 tags descriptions match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { tags?: Array<{ name?: string; description?: string }> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const byName = (tags: typeof disk.tags) =>
+    Object.fromEntries(
+      (tags ?? []).map((t) => [t.name ?? "", t.description ?? ""]),
+    );
+  assert.deepEqual(byName(served.tags), byName(disk.tags));
+});
+
+test("S403 path count equals disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { paths: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(Object.keys(served.paths).length, Object.keys(disk.paths).length);
+  assert.ok(Object.keys(disk.paths).length >= 10);
+});
+
+test("S404 openapi version string matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { openapi?: string };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(served.openapi, disk.openapi);
+  assert.equal(served.openapi, "3.0.3");
+});
+
+test("S405 info.title matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { title?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(served.info?.title, disk.info?.title);
+  assert.ok((served.info?.title ?? "").includes("DIAL"));
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
