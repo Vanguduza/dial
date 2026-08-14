@@ -1,8 +1,36 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import {
+  parseIntegrationsHealth,
+  truncateIntegrationsHealthNote,
+} from "../../../lib/integrationsReadiness.js";
+
 /**
  * T9 cost/health dashboard stub — no live secrets; links to MetricContract / CC.
  * S142: OpenAPI primary CTA + INTEGRATION_ENV_GROUPS SoR hint (parity with /admin/integrations).
+ * S155: truncated health `note` from GET /api/health/integrations.
  */
 export default function CostHealthStubPage() {
+  const [note, setNote] = useState<string | null>(null);
+
+  const refreshNote = useCallback(async () => {
+    try {
+      const res = await fetch("/api/health/integrations");
+      const data: unknown = await res.json();
+      if (!res.ok) return;
+      const parsed = parseIntegrationsHealth(data);
+      if ("error" in parsed || !parsed.note) return;
+      setNote(parsed.note);
+    } catch {
+      /* stub — ignore fetch errors */
+    }
+  }, []);
+
+  useEffect(() => {
+    void refreshNote();
+  }, [refreshNote]);
+
   return (
     <main
       style={{
@@ -26,6 +54,21 @@ export default function CostHealthStubPage() {
         <code>INTEGRATION_ENV_GROUP_LABELS</code> (OpenAPI{" "}
         <code>info.x-dial-sor</code>) — see readiness UI for live probes.
       </p>
+      {note ? (
+        <p
+          style={{
+            margin: "0 0 1rem",
+            maxWidth: "36rem",
+            color: "#94a3b8",
+            fontSize: 13,
+            lineHeight: 1.5,
+          }}
+          data-testid="health-note"
+          title={note}
+        >
+          {truncateIntegrationsHealthNote(note)}
+        </p>
+      ) : null}
       <p style={{ margin: "0 0 1.25rem" }}>
         <a
           href="/api/openapi"

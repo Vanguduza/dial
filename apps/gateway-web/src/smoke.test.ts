@@ -658,6 +658,19 @@ test("S154 admin integrations UI surfaces truncated health note", async () => {
   assert.ok(page.includes('data-testid="health-note"'));
 });
 
+test("S155 cost-health stub surfaces truncated health note", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  assert.ok(cost.includes("truncateIntegrationsHealthNote"));
+  assert.ok(cost.includes("parseIntegrationsHealth"));
+  assert.ok(cost.includes('data-testid="health-note"'));
+  assert.ok(cost.includes("/api/health/integrations"));
+});
+
 test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
