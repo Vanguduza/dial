@@ -395,6 +395,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-411 | **Product-depth band PD5–PD9** authored (Android → supplier-web → delivery-android → iOS → technician) | `done` | Workplan §1b; S99 stays launch-only |
 | ENH-412 | **PD5 Customer Android** — Compose Spare thin vertical vs gateway APIs | `done` | [#26](https://github.com/Vanguduza/dial/issues/26); thin vertical green; expand polish deferred |
 | ENH-413 | **PD6 Supplier-web** — Pack §9.4 onboard/costs/heartbeat/confirm/statements | `done` | [#27](https://github.com/Vanguduza/dial/issues/27); `@dial/suppliers` |
+| ENH-414 | **PD7 Delivery Android** — offer/POD/COD + MapLibre admin track | `done` | [#28](https://github.com/Vanguduza/dial/issues/28); `@dial/delivery` SoR |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

@@ -29,3 +29,6 @@ pnpm-debug.log*
 apps/customer-android/app/build/
 apps/customer-android/core/network/build/
 apps/customer-android/.cxx/
+apps/delivery-android/app/build/
+apps/delivery-android/core/network/build/
+apps/delivery-android/.cxx/

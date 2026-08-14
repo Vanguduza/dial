@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — PD1–PD5 + G1 green; **PD6 green**. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD7** green. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD7** — Delivery Android (next eng) |
-| `current_issue` | _(open when starting PD7)_ |
+| `current_stage` | **PD8** — Customer iOS (next eng) |
+| `current_issue` | _(open when starting PD8)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD6** Supplier-web — **green** ([#27](https://github.com/Vanguduza/dial/issues/27)) |
-| `next_stage` | **PD7** Delivery Android |
+| `prior_stage` | **PD7** Delivery Android — **green** ([#28](https://github.com/Vanguduza/dial/issues/28)) |
+| `next_stage` | **PD8** Customer iOS |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -26,12 +26,12 @@
 | **G1** | 2026-08-14 | grocery_offers_v1 thin vertical; [#25](https://github.com/Vanguduza/dial/issues/25) |
 | **PD5** | 2026-08-14 | Customer Android Compose Spare thin vertical; [#26](https://github.com/Vanguduza/dial/issues/26) |
 | **PD6** | 2026-08-15 | Supplier-web Pack §9.4 thin vertical; [#27](https://github.com/Vanguduza/dial/issues/27) |
+| **PD7** | 2026-08-15 | Delivery Android + MapLibre admin track; [#28](https://github.com/Vanguduza/dial/issues/28) |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD7** | Delivery Android (foodhub-compose patterns; MapLibre) |
 | **PD8** | Customer iOS SwiftUI Spare parity |
 | **PD9** | Technician Android (Now in Android) |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |

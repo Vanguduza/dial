@@ -8,9 +8,11 @@ import {
   estimateRoute,
   estimateRouteStub,
   getDeliveryJob,
+  listCourierLocations,
   listFifoQueue,
   reconcileCodAfterPod,
   rejectOffer,
+  runPd7DeliveryThinVertical,
   setCourierAvailable,
   startDeliveryDispatchWorkflow,
   startTransit,
@@ -111,4 +113,14 @@ test("S109 VROOM plan + maps ETA on createDeliveryJobWithMaps", async () => {
   });
   assert.equal(job.etaMinutes, plan.etaMinutes);
   assert.ok((job.distanceMeters ?? 0) > 0);
+});
+
+test("PD7 thin: available → offer → accept → POD → COD + courier location", () => {
+  const result = runPd7DeliveryThinVertical({ courierId: "cour_pd7_t" });
+  assert.equal(result.jobStatus, "pod_captured");
+  assert.equal(result.workflowPhase, "complete");
+  assert.equal(result.codReconciled, true);
+  assert.equal(result.codUsdMinor, "2500");
+  assert.equal(result.location.courierId, "cour_pd7_t");
+  assert.ok(listCourierLocations().some((l) => l.courierId === "cour_pd7_t"));
 });

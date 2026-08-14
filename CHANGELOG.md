@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD7 Delivery Android** — `apps/delivery-android` Compose rider (C-5); gateway `/api/delivery/courier` offer accept/reject → transit → POD/COD vs `@dial/delivery`; admin `/admin/delivery/track` MapLibre pins from courier locations (D-44); [#28](https://github.com/Vanguduza/dial/issues/28).
 - **PD6 Supplier-web** — `@dial/suppliers` + `/supplier` portal (onboarding tier ladder, USD cost upload, heartbeat inbox, confirm-SLA queue, statements/co-op lines); Pack §9.4 / Mercur patterns only; [#27](https://github.com/Vanguduza/dial/issues/27).
 - **PD5 Customer Android (thin vertical)** — `apps/customer-android` Jetpack Compose (C-5); `:core:network` DialGatewayClient; Spare browse/cart/checkout vs gateway; `POST /api/spare/checkout` shared ERP path; [#26](https://github.com/Vanguduza/dial/issues/26). Product-depth band extended **PD5–PD9** (supplier-web → delivery-android → iOS → technician).
 - **G1 Groceries thin vertical** — Meili `grocery_offers_v1` (food/pantry); `/grocery` USD browse; `GET /api/search/grocery` session SoR; EcoCash|COD → Job Reserve → delivery job; B2B informal hide (D-49); no liquor / no DIAL_OWNED; audit `docs/agent-audits/money-path-G1-2026-08-14.md` ([#25](https://github.com/Vanguduza/dial/issues/25)).

@@ -356,6 +356,142 @@ export function getWorkflow(workflowId: string): DeliveryDispatchWorkflowState |
   return w ? { ...w } : undefined;
 }
 
+export type CourierAvailability = "available" | "busy" | "offline";
+
+export type CourierLocation = {
+  courierId: CourierId;
+  lat: number;
+  lng: number;
+  recordedAt: string;
+  jobId?: string;
+};
+
+const courierAvailability = new Map<CourierId, CourierAvailability>();
+const courierLocations = new Map<CourierId, CourierLocation>();
+
+export function setCourierAvailabilityStatus(
+  courierId: CourierId,
+  status: CourierAvailability,
+): void {
+  courierAvailability.set(courierId, status);
+  setCourierAvailable(courierId, status === "available");
+}
+
+export function getCourierAvailability(
+  courierId: CourierId,
+): CourierAvailability {
+  return courierAvailability.get(courierId) ?? "offline";
+}
+
+/** Live location for MapLibre admin track (D-44) — never Google as SoR. */
+export function postCourierLocation(input: {
+  courierId: CourierId;
+  lat: number;
+  lng: number;
+  jobId?: string;
+}): CourierLocation {
+  if (!Number.isFinite(input.lat) || !Number.isFinite(input.lng)) {
+    throw new TypeError("lat/lng must be finite numbers");
+  }
+  const loc: CourierLocation = {
+    courierId: input.courierId,
+    lat: input.lat,
+    lng: input.lng,
+    recordedAt: new Date().toISOString(),
+    ...(input.jobId ? { jobId: input.jobId } : {}),
+  };
+  courierLocations.set(input.courierId, loc);
+  return { ...loc };
+}
+
+export function getCourierLocation(
+  courierId: CourierId,
+): CourierLocation | undefined {
+  const loc = courierLocations.get(courierId);
+  return loc ? { ...loc } : undefined;
+}
+
+export function listCourierLocations(): CourierLocation[] {
+  return [...courierLocations.values()].map((l) => ({ ...l }));
+}
+
+export function listOffersForCourier(courierId: CourierId): DeliveryOffer[] {
+  return [...offers.values()]
+    .filter((o) => o.courierId === courierId)
+    .map((o) => ({ ...o }));
+}
+
+export function listJobsForCourier(courierId: CourierId): DeliveryJob[] {
+  return [...jobs.values()]
+    .filter((j) => j.assignedCourierId === courierId || j.offerId)
+    .filter((j) => {
+      if (j.assignedCourierId === courierId) return true;
+      const offer = j.offerId ? offers.get(j.offerId) : undefined;
+      return offer?.courierId === courierId && offer.status === "pending";
+    })
+    .map((j) => ({ ...j }));
+}
+
+export function getOffer(offerId: string): DeliveryOffer | undefined {
+  const o = offers.get(offerId);
+  return o ? { ...o } : undefined;
+}
+
+/**
+ * PD7 thin vertical: available → offer → accept → transit → POD → COD USD.
+ */
+export function runPd7DeliveryThinVertical(input?: {
+  courierId?: string;
+  orderId?: string;
+  codUsdMinor?: bigint;
+}): {
+  courierId: string;
+  jobId: string;
+  offerId: string;
+  workflowId: string;
+  jobStatus: DeliveryJobStatus;
+  workflowPhase: DeliveryDispatchWorkflowState["phase"];
+  codReconciled: boolean;
+  codUsdMinor?: string;
+  location: CourierLocation;
+} {
+  const courierId = input?.courierId ?? "cour_pd7";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+  const job = createDeliveryJob({
+    orderId: input?.orderId ?? "ord_pd7",
+    from: "supplier_hub_harare",
+    to: "customer_avondale",
+    codUsdMinor: input?.codUsdMinor ?? 25_00n,
+  });
+  const wf = startDeliveryDispatchWorkflow(job.id);
+  const offerId = getDeliveryJob(job.id)!.offerId!;
+  acceptOffer(offerId, courierId);
+  setCourierAvailabilityStatus(courierId, "busy");
+  startTransit(job.id);
+  const loc = postCourierLocation({
+    courierId,
+    lat: -17.8292,
+    lng: 31.0522,
+    jobId: job.id,
+  });
+  capturePod(job.id);
+  const cod = reconcileCodAfterPod(job.id);
+  return {
+    courierId,
+    jobId: job.id,
+    offerId,
+    workflowId: wf.workflowId,
+    jobStatus: getDeliveryJob(job.id)!.status,
+    workflowPhase: getWorkflow(wf.workflowId)!.phase,
+    codReconciled: cod.reconciled,
+    ...(cod.amountUsd
+      ? { codUsdMinor: cod.amountUsd.amountMinor.toString() }
+      : {}),
+    location: loc,
+  };
+}
+
 export function __resetDeliveryForTests(): void {
   jobs.clear();
   offers.clear();
@@ -363,4 +499,6 @@ export function __resetDeliveryForTests(): void {
   availableCouriers.clear();
   offeredCouriersByJob.clear();
   fifoQueue.length = 0;
+  courierAvailability.clear();
+  courierLocations.clear();
 }
