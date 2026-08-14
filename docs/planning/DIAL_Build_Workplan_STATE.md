@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S169** — Admin SoR hints mention note builder — **green** |
+| `current_stage` | **S170** — Smoke: served OpenAPI healthNote fragment locks to export — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S168** `.env.example` cites note builder SoR — **green** |
-| `next_stage` | **S170** Smoke: served OpenAPI healthNote fragment locks to export |
+| `prior_stage` | **S169** Admin SoR hints mention note builder — **green** |
+| `next_stage` | **S171** Admin UI copy cross-links note-builder SoR |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S168 | 2026-08-13/14 | through .env.example note builder |
-| S169 | 2026-08-14 | admin hints cite buildIntegrationsHealthNote |
+| S91–S169 | 2026-08-13/14 | through admin note-builder hints |
+| S170 | 2026-08-14 | served OpenAPI healthNote ↔ export lock |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S170 | Smoke: served OpenAPI `healthNote` fragment locks to builder export |
 | S171 | Admin UI copy cross-links note-builder SoR |
 | S172 | Integrations README cites root README note-builder parity |
 | S173 | OpenAPI info.description mentions note builder SoR |
 | S174 | Smoke: admin pages link health JSON + OpenAPI for note SoR |
+| S175 | Export shared `NOTE_BUILDER_SOR` label constant for UI/docs |
 
 ## Note
 

@@ -970,6 +970,30 @@ test("S166 OpenAPI x-dial-sor.healthNote points at buildIntegrationsHealthNote",
   assert.ok(integ.includes("x-dial-sor.healthNote"));
 });
 
+test("S170 served OpenAPI healthNote fragment locks to buildIntegrationsHealthNote export", async () => {
+  const { buildIntegrationsHealthNote } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  assert.equal(typeof buildIntegrationsHealthNote, "function");
+  assert.ok(buildIntegrationsHealthNote("fixture").includes("groups labels="));
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { healthNote?: string } };
+  };
+  const ptr = served.info?.["x-dial-sor"]?.healthNote ?? "";
+  assert.ok(
+    ptr.endsWith("#buildIntegrationsHealthNote"),
+    `expected fragment #buildIntegrationsHealthNote, got ${ptr}`,
+  );
+  assert.ok(
+    ptr.includes("integrationsReadiness.ts"),
+    `expected integrationsReadiness.ts path, got ${ptr}`,
+  );
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");
