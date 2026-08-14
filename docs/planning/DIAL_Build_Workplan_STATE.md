@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S265** — OpenAPI tags include health+webhooks+admin — **green** |
+| `current_stage` | **S266** — served getOpenApiSkeleton operationId locked — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S264** — green |
-| `next_stage` | **S266 served getOpenApiSkeleton operationId locked** |
+| `prior_stage` | **S265** — green |
+| `next_stage` | **S267 sandbox PSP webhook 503 without PSP_WEBHOOK_SECRET** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S264 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S265 | 2026-08-14 | OpenAPI tags health+webhooks+admin |
+| S91–S265 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S266 | 2026-08-14 | getOpenApiSkeleton operationId |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S266 | served getOpenApiSkeleton operationId locked |
 | S267 | sandbox PSP webhook 503 without PSP_WEBHOOK_SECRET |
 | S268 | fixture FDMS accepts without FDMS_ACTIVATION_KEY |
 | S269 | served InternalApiSecret security scheme locked |
 | S270 | admin money outbox uses InternalApiSecret |
+| S271 | served ContiPay webhook path+operationId locked |
 
 ## Note
 
