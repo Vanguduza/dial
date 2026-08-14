@@ -856,6 +856,59 @@ test("S185 admin UI cites DOCS constant in note-builder hint copy", async () => 
   );
 });
 
+test("S186 .env.example cites noteBuilderDocs OpenAPI key", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("noteBuilderDocs"));
+  assert.ok(envExample.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+  assert.ok(envExample.includes("x-dial-sor"));
+});
+
+test("S187 integrations README cites x-dial-sor.noteBuilderDocs", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("x-dial-sor.noteBuilderDocs"));
+  assert.ok(integ.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+});
+
+test("S188 root README cites x-dial-sor.noteBuilderDocs", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("noteBuilderDocs"));
+  assert.ok(readme.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+  assert.ok(readme.includes("x-dial-sor"));
+});
+
+test("S189 OpenAPI info.description mentions noteBuilderDocs", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as { info?: { description?: string } };
+  assert.ok(spec.info?.description?.includes("noteBuilderDocs"));
+  assert.ok(spec.info?.description?.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as { info?: { description?: string } };
+  assert.ok(served.info?.description?.includes("noteBuilderDocs"));
+  assert.ok(
+    served.info?.description?.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"),
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
