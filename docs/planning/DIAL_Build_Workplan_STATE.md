@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S262** — sandbox webhook 503 without INTERNAL_API_SECRET — **green** |
+| `current_stage` | **S263** — fixture webhook accepts without INTERNAL_API_SECRET — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S261** — green |
-| `next_stage` | **S263 fixture webhook accepts without INTERNAL_API_SECRET** |
+| `prior_stage` | **S262** — green |
+| `next_stage` | **S264 served servers url localhost:3000** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S261 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S262 | 2026-08-14 | sandbox FDMS webhook fail-closed |
+| S91–S262 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S263 | 2026-08-14 | fixture ContiPay accepts without secret |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S263 | fixture webhook accepts without INTERNAL_API_SECRET |
 | S264 | served servers url localhost:3000 |
 | S265 | OpenAPI tags include health+webhooks+admin |
 | S266 | served getOpenApiSkeleton operationId locked |
 | S267 | sandbox PSP webhook 503 without PSP_WEBHOOK_SECRET |
+| S268 | fixture FDMS accepts without FDMS_ACTIVATION_KEY |
 
 ## Note
 
