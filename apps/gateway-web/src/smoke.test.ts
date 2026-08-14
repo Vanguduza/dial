@@ -627,6 +627,37 @@ test("S153 integrations README documents health note groups labels contract", as
   assert.ok(integ.includes("IntegrationsHealth.note"));
 });
 
+test("S154 admin integrations UI surfaces truncated health note", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const {
+    INTEGRATIONS_HEALTH_NOTE_UI_MAX,
+    parseIntegrationsHealth,
+    truncateIntegrationsHealthNote,
+  } = await import("./lib/integrationsReadiness.js");
+  const { GET } = await import("./app/api/health/integrations/route.js");
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const body = (await res.json()) as unknown;
+  const parsed = parseIntegrationsHealth(body);
+  assert.ok(!("error" in parsed));
+  assert.ok(typeof parsed.note === "string" && parsed.note.length > 0);
+  assert.ok(parsed.note.includes("groups labels="));
+  const shown = truncateIntegrationsHealthNote(parsed.note);
+  assert.ok(shown.length <= INTEGRATIONS_HEALTH_NOTE_UI_MAX);
+  if (parsed.note.length > INTEGRATIONS_HEALTH_NOTE_UI_MAX) {
+    assert.ok(shown.endsWith("…"));
+  }
+
+  const page = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  assert.ok(page.includes("truncateIntegrationsHealthNote"));
+  assert.ok(page.includes('data-testid="health-note"'));
+});
+
 test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

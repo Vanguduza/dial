@@ -26,7 +26,25 @@ export type IntegrationsHealthSnapshot = {
     presentCount: number;
     requiredCount: number;
   }>;
+  /** S154 — optional health note (never secrets); UI truncates via helper. */
+  note?: string;
 };
+
+/** S154 — admin readiness UI max visible chars for health `note`. */
+export const INTEGRATIONS_HEALTH_NOTE_UI_MAX = 120;
+
+/**
+ * S154 — truncate health note for admin display (ellipsis; no secret values).
+ */
+export function truncateIntegrationsHealthNote(
+  note: string,
+  maxLen: number = INTEGRATIONS_HEALTH_NOTE_UI_MAX,
+): string {
+  if (maxLen < 1) return "";
+  if (note.length <= maxLen) return note;
+  if (maxLen === 1) return "…";
+  return `${note.slice(0, maxLen - 1)}…`;
+}
 
 export function parseIntegrationsHealth(
   body: unknown,
@@ -45,11 +63,13 @@ export function parseIntegrationsHealth(
   const groups = Array.isArray(b.groups)
     ? (b.groups as IntegrationsHealthSnapshot["groups"])
     : [];
+  const note = typeof b.note === "string" ? b.note : undefined;
   return {
     ready: b.ready,
     mode: b.mode,
     probes,
     groups,
+    ...(note !== undefined ? { note } : {}),
   };
 }
 

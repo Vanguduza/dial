@@ -5,12 +5,13 @@ import { useCallback, useEffect, useState } from "react";
 import {
   parseIntegrationsHealth,
   probeEntries,
+  truncateIntegrationsHealthNote,
   type IntegrationsHealthSnapshot,
 } from "../../../lib/integrationsReadiness.js";
 
 /**
- * S133 Admin integrations readiness — ready/probes/groups from
- * GET /api/health/integrations (never displays secret values).
+ * S133/S154 Admin integrations readiness — ready/probes/groups + truncated
+ * health note from GET /api/health/integrations (never displays secret values).
  */
 export default function IntegrationsReadinessPage() {
   const [snap, setSnap] = useState<IntegrationsHealthSnapshot | null>(null);
@@ -136,6 +137,21 @@ export default function IntegrationsReadinessPage() {
             </p>
           ) : null}
         </div>
+
+        {snap?.note ? (
+          <p
+            style={{
+              marginTop: dialTokens.space.md,
+              fontSize: 13,
+              opacity: 0.85,
+              lineHeight: 1.5,
+            }}
+            data-testid="health-note"
+            title={snap.note}
+          >
+            {truncateIntegrationsHealthNote(snap.note)}
+          </p>
+        ) : null}
 
         {message ? (
           <p style={{ marginTop: dialTokens.space.md, fontSize: 14 }} role="alert">

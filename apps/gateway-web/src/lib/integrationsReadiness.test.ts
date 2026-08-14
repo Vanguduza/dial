@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  INTEGRATIONS_HEALTH_NOTE_UI_MAX,
   parseIntegrationsHealth,
   probeEntries,
+  truncateIntegrationsHealthNote,
 } from "./integrationsReadiness.js";
 
 test("S133 parseIntegrationsHealth + probeEntries", () => {
@@ -27,10 +29,34 @@ test("S133 parseIntegrationsHealth + probeEntries", () => {
   assert.equal(ok.ready, true);
   assert.equal(ok.mode, "fixture");
   assert.equal(ok.groups[0]?.label, "maps");
+  assert.equal(ok.note, undefined);
   assert.deepEqual(probeEntries(ok.probes), [
     { name: "maps", ok: true },
     { name: "psp", ok: false },
   ]);
+});
+
+test("S154 parseIntegrationsHealth note + truncateIntegrationsHealthNote", () => {
+  const withNote = parseIntegrationsHealth({
+    ready: false,
+    mode: "fixture",
+    probes: {},
+    groups: [],
+    note: "Fixture mode — groups labels=whatsapp,paynow",
+  });
+  assert.ok(!("error" in withNote));
+  assert.equal(withNote.note, "Fixture mode — groups labels=whatsapp,paynow");
+
+  const short = "short note";
+  assert.equal(truncateIntegrationsHealthNote(short), short);
+  const long = "x".repeat(INTEGRATIONS_HEALTH_NOTE_UI_MAX + 40);
+  const truncated = truncateIntegrationsHealthNote(long);
+  assert.equal(truncated.length, INTEGRATIONS_HEALTH_NOTE_UI_MAX);
+  assert.ok(truncated.endsWith("…"));
+  assert.equal(
+    truncated,
+    `${"x".repeat(INTEGRATIONS_HEALTH_NOTE_UI_MAX - 1)}…`,
+  );
 });
 
 test("S137 INTEGRATION_PROBE_KEYS match OpenAPI IntegrationsProbes required", async () => {
