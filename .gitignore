@@ -32,4 +32,7 @@ apps/customer-android/.cxx/
 apps/delivery-android/app/build/
 apps/delivery-android/core/network/build/
 apps/delivery-android/.cxx/
+apps/technician-android/app/build/
+apps/technician-android/core/network/build/
+apps/technician-android/.cxx/
 apps/customer-ios/.build/

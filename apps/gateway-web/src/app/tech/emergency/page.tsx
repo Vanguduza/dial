@@ -26,9 +26,10 @@ export default function TechEmergencyPage() {
         >
           Emergency
         </h1>
-        <p style={{ fontWeight: 600 }}>AI pricing bypassed — dispatch + rate-card stub only.</p>
+        <p style={{ fontWeight: 600 }}>AI pricing bypassed — dispatch + rate_card draft only.</p>
         <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Draft USD {(Number(quote.draftAmountUsdMinor) / 100).toFixed(2)} — human confirms payable.
+          Draft USD {(Number(quote.draftAmountUsdMinor) / 100).toFixed(2)} ({quote.source}) — human
+          confirms payable.
         </p>
         <Link href="/tech/checklist/emergency_roadside">Open emergency checklist</Link>
       </div>

@@ -1,6 +1,7 @@
 /**
- * Jobs classification / rate-card quote / JobClass+Trade stubs (Pack §15 T6 / D-53).
+ * Jobs SoR — classification, rate-card drafts, Cal.com slots, checklist, evidence (Pack T4/T6 / PD9).
  * Quotes are drafts only — AI never writes payable amounts.
+ * Booking slots = Cal.com (fixture when CALCOM_* unset) — no parallel in-house calendar.
  */
 export type JobClassDefinition = {
   id: string;
@@ -27,6 +28,55 @@ export type JobQuoteDraft = {
   draftAmountUsdMinor: bigint;
   currency: "USD";
   source: "rate_card";
+  emergency: boolean;
+};
+
+export type BookingSlot = {
+  slotId: string;
+  startAt: string;
+  endAt: string;
+  /** Pack: Cal.com is slot sibling — fixture when keys unset. */
+  source: "calcom" | "calcom_fixture";
+};
+
+export type ChecklistId = "automotive_basic" | "emergency_roadside";
+
+export type Checklist = {
+  id: ChecklistId;
+  title: string;
+  steps: string[];
+};
+
+export type ChecklistRun = {
+  runId: string;
+  jobId: string;
+  checklistId: ChecklistId;
+  stepIndex: number;
+  status: "in_progress" | "completed";
+};
+
+export type JobEvidence = {
+  evidenceId: string;
+  jobId: string;
+  technicianId: string;
+  kind: "photo" | "note";
+  /** Opaque payload ref — never secrets; base64/text stub for fixture. */
+  payloadRef: string;
+  createdAt: string;
+};
+
+export type TechJob = {
+  id: string;
+  customerId: string;
+  technicianId: string | null;
+  jobClassId: string;
+  status: "booked" | "assigned" | "in_progress" | "completed";
+  slotId: string | null;
+  emergency: boolean;
+  quoteId: string;
+  draftAmountUsdMinor: bigint;
+  currency: "USD";
+  createdAt: string;
 };
 
 const trades: TradeDefinition[] = [
@@ -49,7 +99,34 @@ const jobClasses: JobClassDefinition[] = [
   },
 ];
 
+const CHECKLISTS: Checklist[] = [
+  {
+    id: "automotive_basic",
+    title: "Automotive basic intake",
+    steps: [
+      "Confirm vehicle make/model/year",
+      "Capture symptom in customer words",
+      "Photo of fault area (optional)",
+      "Confirm location pin",
+    ],
+  },
+  {
+    id: "emergency_roadside",
+    title: "Emergency roadside",
+    steps: [
+      "Confirm safety / hazards",
+      "Exact landmark / highway km",
+      "Vehicle can move? yes/no",
+      "Dispatch without AI price suggestion",
+    ],
+  },
+];
+
 const valueScores = new Map<string, ValueScoreSnapshot>();
+const jobs = new Map<string, TechJob>();
+const evidence = new Map<string, JobEvidence>();
+const checklistRuns = new Map<string, ChecklistRun>();
+const bookedSlotIds = new Set<string>();
 
 export function listTradeDefinitions(): TradeDefinition[] {
   return trades.map((t) => ({ ...t }));
@@ -102,22 +179,310 @@ export function getValueScoreSnapshot(
   return row ? { ...row } : undefined;
 }
 
-/** Rate-card quote only — not AI-authored payable. */
-export function quoteFromRateCard(jobClassId: string): JobQuoteDraft {
+/** Rate-card quote only — not AI-authored payable. Replaces rate_card_stub path. */
+export function quoteFromRateCard(
+  jobClassId: string,
+  opts?: { emergency?: boolean },
+): JobQuoteDraft {
   const jc = jobClasses.find((j) => j.id === jobClassId);
   if (!jc || jc.lifecycle !== "active") {
     throw new Error(`Unknown or inactive job class ${jobClassId}`);
   }
-  const draftAmountUsdMinor = jobClassId === "jc_roadside" ? 80_00n : 45_00n;
+  const emergency = Boolean(opts?.emergency);
+  const draftAmountUsdMinor =
+    emergency || jobClassId === "jc_roadside" ? 80_00n : 45_00n;
   return {
-    quoteId: `jq_${Date.now().toString(36)}`,
+    quoteId: `jq_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
     jobClassId,
     draftAmountUsdMinor,
     currency: "USD",
     source: "rate_card",
+    emergency,
+  };
+}
+
+/**
+ * Map free-text / legacy jobClass labels → JobClass id for book UI.
+ */
+export function resolveJobClassId(jobClass: string): string {
+  const t = jobClass.trim().toLowerCase();
+  if (!t || t === "diagnostics" || t === "diag" || t === "jc_diag") {
+    return "jc_diag";
+  }
+  if (
+    t === "roadside" ||
+    t === "jc_roadside" ||
+    t.includes("emergency") ||
+    t.includes("roadside")
+  ) {
+    return "jc_roadside";
+  }
+  return "jc_diag";
+}
+
+/** Draft quote for Tech book UI — always rate_card (never rate_card_stub). */
+export function draftTechQuote(input: {
+  jobClass: string;
+  emergency?: boolean;
+}): JobQuoteDraft {
+  const jobClassId = resolveJobClassId(input.jobClass);
+  return quoteFromRateCard(jobClassId, {
+    emergency: Boolean(input.emergency),
+  });
+}
+
+export function listChecklists(): Checklist[] {
+  return CHECKLISTS.map((c) => ({ ...c, steps: [...c.steps] }));
+}
+
+export function getChecklist(id: ChecklistId): Checklist | undefined {
+  const c = CHECKLISTS.find((x) => x.id === id);
+  return c ? { ...c, steps: [...c.steps] } : undefined;
+}
+
+function fixtureSlots(): BookingSlot[] {
+  const base = Date.now();
+  return [0, 1, 2].map((i) => {
+    const start = new Date(base + (i + 1) * 3_600_000);
+    const end = new Date(start.getTime() + 60 * 60_000);
+    return {
+      slotId: `cal_fix_${i}_${start.toISOString().slice(0, 13)}`,
+      startAt: start.toISOString(),
+      endAt: end.toISOString(),
+      source: "calcom_fixture" as const,
+    };
+  });
+}
+
+/**
+ * List bookable slots. Live Cal.com when CALCOM_BASE_URL + CALCOM_API_KEY set;
+ * otherwise Pack-prescribed fixture (still tagged as Cal.com sibling).
+ */
+export async function listBookingSlots(): Promise<BookingSlot[]> {
+  const base = process.env.CALCOM_BASE_URL?.trim();
+  const key = process.env.CALCOM_API_KEY?.trim();
+  if (!base || !key) {
+    return fixtureSlots().filter((s) => !bookedSlotIds.has(s.slotId));
+  }
+  try {
+    const res = await fetch(`${base.replace(/\/$/, "")}/v1/slots`, {
+      headers: { Authorization: `Bearer ${key}`, Accept: "application/json" },
+    });
+    if (!res.ok) {
+      return fixtureSlots().filter((s) => !bookedSlotIds.has(s.slotId));
+    }
+    const json = (await res.json()) as {
+      slots?: Array<{ id?: string; start?: string; end?: string }>;
+    };
+    const slots = (json.slots ?? [])
+      .filter((s) => s.id && s.start && s.end)
+      .map((s) => ({
+        slotId: String(s.id),
+        startAt: String(s.start),
+        endAt: String(s.end),
+        source: "calcom" as const,
+      }))
+      .filter((s) => !bookedSlotIds.has(s.slotId));
+    return slots.length > 0
+      ? slots
+      : fixtureSlots().filter((s) => !bookedSlotIds.has(s.slotId));
+  } catch {
+    return fixtureSlots().filter((s) => !bookedSlotIds.has(s.slotId));
+  }
+}
+
+export function getTechJob(jobId: string): TechJob | undefined {
+  const j = jobs.get(jobId);
+  return j ? { ...j } : undefined;
+}
+
+export function listJobsForTechnician(technicianId: string): TechJob[] {
+  return [...jobs.values()]
+    .filter((j) => j.technicianId === technicianId)
+    .map((j) => ({ ...j }));
+}
+
+export function listJobsForCustomer(customerId: string): TechJob[] {
+  return [...jobs.values()]
+    .filter((j) => j.customerId === customerId)
+    .map((j) => ({ ...j }));
+}
+
+/** Book non-emergency (or emergency without slot) against rate_card + optional Cal.com slot. */
+export function bookTechJob(input: {
+  customerId: string;
+  technicianId?: string;
+  jobClass: string;
+  slotId?: string | null;
+  emergency?: boolean;
+}): TechJob {
+  const emergency = Boolean(input.emergency);
+  if (!emergency && !input.slotId) {
+    throw new Error("Non-emergency book requires Cal.com slotId");
+  }
+  if (input.slotId) {
+    if (bookedSlotIds.has(input.slotId)) {
+      throw new Error(`Slot ${input.slotId} already booked`);
+    }
+    bookedSlotIds.add(input.slotId);
+  }
+  const jobClassId = resolveJobClassId(input.jobClass);
+  const quote = quoteFromRateCard(jobClassId, { emergency });
+  const techId = input.technicianId ?? null;
+  const job: TechJob = {
+    id: `job_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    customerId: input.customerId,
+    technicianId: techId,
+    jobClassId,
+    status: techId ? "assigned" : "booked",
+    slotId: input.slotId ?? null,
+    emergency,
+    quoteId: quote.quoteId,
+    draftAmountUsdMinor: quote.draftAmountUsdMinor,
+    currency: "USD",
+    createdAt: new Date().toISOString(),
+  };
+  jobs.set(job.id, job);
+  return { ...job };
+}
+
+/** Dev/fixture: assign open job to technician. */
+export function assignJobToTechnician(
+  jobId: string,
+  technicianId: string,
+): TechJob {
+  const job = jobs.get(jobId);
+  if (!job) throw new Error(`Unknown job ${jobId}`);
+  job.technicianId = technicianId;
+  job.status = "assigned";
+  return { ...job };
+}
+
+export function startChecklistRun(input: {
+  jobId: string;
+  checklistId: ChecklistId;
+}): ChecklistRun {
+  if (!jobs.has(input.jobId)) throw new Error(`Unknown job ${input.jobId}`);
+  const checklist = getChecklist(input.checklistId);
+  if (!checklist) throw new Error(`Unknown checklist ${input.checklistId}`);
+  const run: ChecklistRun = {
+    runId: `cr_${Date.now().toString(36)}`,
+    jobId: input.jobId,
+    checklistId: input.checklistId,
+    stepIndex: 0,
+    status: "in_progress",
+  };
+  checklistRuns.set(run.runId, run);
+  const job = jobs.get(input.jobId)!;
+  job.status = "in_progress";
+  return { ...run };
+}
+
+export function getChecklistRun(runId: string): ChecklistRun | undefined {
+  const r = checklistRuns.get(runId);
+  return r ? { ...r } : undefined;
+}
+
+export function advanceChecklistStep(runId: string): ChecklistRun {
+  const run = checklistRuns.get(runId);
+  if (!run) throw new Error(`Unknown checklist run ${runId}`);
+  if (run.status === "completed") return { ...run };
+  const checklist = getChecklist(run.checklistId)!;
+  run.stepIndex += 1;
+  if (run.stepIndex >= checklist.steps.length) {
+    run.status = "completed";
+    run.stepIndex = checklist.steps.length;
+    const job = jobs.get(run.jobId);
+    if (job) job.status = "completed";
+  }
+  return { ...run };
+}
+
+export function uploadJobEvidence(input: {
+  jobId: string;
+  technicianId: string;
+  kind: "photo" | "note";
+  payloadRef: string;
+}): JobEvidence {
+  const job = jobs.get(input.jobId);
+  if (!job) throw new Error(`Unknown job ${input.jobId}`);
+  if (job.technicianId && job.technicianId !== input.technicianId) {
+    throw new Error("Technician not assigned to job");
+  }
+  if (!job.technicianId) {
+    job.technicianId = input.technicianId;
+    job.status = job.status === "booked" ? "assigned" : job.status;
+  }
+  const row: JobEvidence = {
+    evidenceId: `ev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 5)}`,
+    jobId: input.jobId,
+    technicianId: input.technicianId,
+    kind: input.kind,
+    payloadRef: input.payloadRef.slice(0, 2048),
+    createdAt: new Date().toISOString(),
+  };
+  evidence.set(row.evidenceId, row);
+  return { ...row };
+}
+
+export function listEvidenceForJob(jobId: string): JobEvidence[] {
+  return [...evidence.values()]
+    .filter((e) => e.jobId === jobId)
+    .map((e) => ({ ...e }));
+}
+
+/** PD9 thin vertical: book (Cal.com fixture) → assign → checklist → evidence. */
+export async function runPd9TechThinVertical(input: {
+  customerId: string;
+  technicianId: string;
+}): Promise<{
+  job: TechJob;
+  slot: BookingSlot;
+  quote: JobQuoteDraft;
+  run: ChecklistRun;
+  evidence: JobEvidence;
+}> {
+  const slots = await listBookingSlots();
+  const slot = slots[0];
+  if (!slot) throw new Error("No Cal.com slots available");
+  const quote = draftTechQuote({ jobClass: "diagnostics", emergency: false });
+  if (quote.source !== "rate_card") {
+    throw new Error("PD9 requires rate_card quote source (not rate_card_stub)");
+  }
+  const job = bookTechJob({
+    customerId: input.customerId,
+    technicianId: input.technicianId,
+    jobClass: "diagnostics",
+    slotId: slot.slotId,
+    emergency: false,
+  });
+  const run = startChecklistRun({
+    jobId: job.id,
+    checklistId: "automotive_basic",
+  });
+  let advanced = advanceChecklistStep(run.runId);
+  while (advanced.status !== "completed") {
+    advanced = advanceChecklistStep(run.runId);
+  }
+  const ev = uploadJobEvidence({
+    jobId: job.id,
+    technicianId: input.technicianId,
+    kind: "photo",
+    payloadRef: "data:image/jpeg;base64,pd9fixture",
+  });
+  return {
+    job: getTechJob(job.id)!,
+    slot,
+    quote,
+    run: getChecklistRun(run.runId)!,
+    evidence: ev,
   };
 }
 
 export function __resetJobsForTests(): void {
   valueScores.clear();
+  jobs.clear();
+  evidence.clear();
+  checklistRuns.clear();
+  bookedSlotIds.clear();
 }

@@ -62,7 +62,7 @@ Stages are ordered. **Do not skip ahead** except where noted (E2a may land WA ag
 
 ### 1b. Product-depth band (post-S90 eng spine)
 
-Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages**. Auto-advance follows this authored band only. **S99 remains human-only (launch)** — not eng next after G1. Founder (2026-08-15): continue **product depth** with **PD5–PD9**.
+Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages**. Auto-advance follows this authored band only. **S99 remains human-only (launch)** — not eng next after G1. Founder (2026-08-15): continue **product depth** with **PD5–PD9**, then **PD10–PD12** ops/experience depth.
 
 | # | Stage ID | Name | Owns | Green when | Next (auto) |
 | ---: | --- | --- | --- | --- | --- |
@@ -75,9 +75,12 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 112 | `PD6` | **Supplier-web** — Mercur vendor-panel patterns | [#27](https://github.com/Vanguduza/dial/issues/27) | Onboard/costs/heartbeat/confirm-SLA/statements vs `@dial/suppliers` | `PD7` |
 | 113 | `PD7` | **Delivery Android** — foodhub-compose patterns + MapLibre | [#28](https://github.com/Vanguduza/dial/issues/28) | Offer accept/reject → POD/COD vs `@dial/delivery`; admin MapLibre track | `PD8` |
 | 114 | `PD8` | **Customer iOS** — SwiftUI Spare parity | [#29](https://github.com/Vanguduza/dial/issues/29) | Same ERP APIs as PD5; tunacosgun patterns; USD + EcoCash\|COD | `PD9` |
-| 115 | `PD9` | **Technician Android** — Now in Android | new issue | Jobs/checklist/Take-Home WHT; offline-first | expand / S99 human |
+| 115 | `PD9` | **Technician Android** — Now in Android | [#30](https://github.com/Vanguduza/dial/issues/30) | Jobs/checklist/evidence/Cal.com book; `rate_card` (not stub); Take-Home WHT | `PD10` |
+| 116 | `PD10` | **Admin money / dispatch / Command Centre** | new issue | Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) | `PD11` |
+| 117 | `PD11` | **FDMS sandbox** — Virtual Gateway agency receipts | new issue | Agency receipt types (D-59); sandbox day open/close; fiscal outbox | `PD12` |
+| 118 | `PD12` | **Meta WA Flows** — Spare + Tech critical Flows | new issue | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate).
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD9 is **PD10**, not S99.
 
 ---
 
@@ -169,9 +172,27 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | SPM DialGatewayClient + XCTest; Node `pd8IosContract.test.ts`; C-5 no Expo |
 | Green → | **PD9** Technician Android |
 
-### PD9 — Technician Android (NEXT)
+### PD9 — Technician Android (**GREEN** 2026-08-15)
 
-Now in Android module layout; jobs/checklist/Take-Home WHT (D-50).
+| | |
+| --- | --- |
+| Issue | [#30](https://github.com/Vanguduza/dial/issues/30) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | `apps/technician-android` Compose + `/api/tech/technician` → Cal.com slots + `rate_card` book → checklist → evidence → Take-Home WHT |
+| Evidence | `runPd9TechThinVertical`; `pd9TechnicianApi.test.ts`; `:core:network` DialTechnicianClient tests; `/tech/book` slots UI |
+| Green → | **PD10** Admin money / dispatch / Command Centre |
+
+### PD10 — Admin money / dispatch / Command Centre (NEXT)
+
+Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) — eng next after PD9 (not S99).
+
+### PD11 — FDMS sandbox
+
+Virtual Gateway agency receipts (D-59); sandbox fiscal day.
+
+### PD12 — Meta WA Flows
+
+Official Cloud API Flows for Spare + Tech critical paths (D-40 / D-57).
 
 ### S10 — E2a (historical)
 

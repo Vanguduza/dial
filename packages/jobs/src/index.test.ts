@@ -2,13 +2,19 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   __resetJobsForTests,
+  bookTechJob,
   classifyJob,
+  draftTechQuote,
   getValueScoreSnapshot,
   isTechnicianEligible,
+  listBookingSlots,
+  listChecklists,
   listJobClassDefinitions,
   listTradeDefinitions,
   quoteFromRateCard,
+  runPd9TechThinVertical,
   setValueScoreSnapshot,
+  uploadJobEvidence,
 } from "./index.js";
 
 test("T6 classification + rate-card quote + eligibility + Value Score", () => {
@@ -39,4 +45,60 @@ test("T6 classification + rate-card quote + eligibility + Value Score", () => {
     }),
     false,
   );
+});
+
+test("PD9 draftTechQuote is rate_card not rate_card_stub", () => {
+  __resetJobsForTests();
+  const normal = draftTechQuote({ jobClass: "diagnostics" });
+  assert.equal(normal.source, "rate_card");
+  assert.equal(normal.emergency, false);
+  const emergency = draftTechQuote({ jobClass: "roadside", emergency: true });
+  assert.equal(emergency.emergency, true);
+  assert.equal(emergency.source, "rate_card");
+  assert.ok(listChecklists().some((c) => c.id === "automotive_basic"));
+  assert.ok(listChecklists().some((c) => c.id === "emergency_roadside"));
+});
+
+test("PD9 Cal.com fixture slots + book requires slot for non-emergency", async () => {
+  __resetJobsForTests();
+  delete process.env.CALCOM_BASE_URL;
+  delete process.env.CALCOM_API_KEY;
+  const slots = await listBookingSlots();
+  assert.ok(slots.length >= 1);
+  assert.equal(slots[0]!.source, "calcom_fixture");
+  assert.throws(() =>
+    bookTechJob({
+      customerId: "cust_1",
+      jobClass: "diagnostics",
+      emergency: false,
+    }),
+  );
+  const job = bookTechJob({
+    customerId: "cust_1",
+    technicianId: "tech_pd9",
+    jobClass: "diagnostics",
+    slotId: slots[0]!.slotId,
+  });
+  assert.equal(job.status, "assigned");
+  assert.equal(job.currency, "USD");
+  const ev = uploadJobEvidence({
+    jobId: job.id,
+    technicianId: "tech_pd9",
+    kind: "note",
+    payloadRef: "arrived on site",
+  });
+  assert.equal(ev.jobId, job.id);
+});
+
+test("PD9 thin vertical book → checklist → evidence", async () => {
+  __resetJobsForTests();
+  const out = await runPd9TechThinVertical({
+    customerId: "cust_pd9",
+    technicianId: "tech_pd9",
+  });
+  assert.equal(out.quote.source, "rate_card");
+  assert.ok(out.slot.source === "calcom_fixture" || out.slot.source === "calcom");
+  assert.equal(out.run.status, "completed");
+  assert.equal(out.evidence.kind, "photo");
+  assert.equal(out.job.status, "completed");
 });

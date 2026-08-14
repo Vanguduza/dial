@@ -442,16 +442,17 @@ test("T5 Pack spine: PSP registry + JobReserve + WHT + FDMS gateway class", asyn
   assert.equal(wh.withholdMinor, 30_00n);
 });
 
-test("T4 Tech stubs: automotive + emergency checklists; emergency bypass flag", async () => {
+test("T4/PD9 Tech: automotive + emergency checklists; rate_card (not stub)", async () => {
   const { draftTechQuote, listChecklists } = await import("./lib/tech/stubs.js");
   const lists = listChecklists();
   assert.ok(lists.some((c) => c.id === "automotive_basic"));
   assert.ok(lists.some((c) => c.id === "emergency_roadside"));
   const normal = draftTechQuote({ jobClass: "diagnostics" });
   assert.equal(normal.emergency, false);
-  assert.equal(normal.source, "rate_card_stub");
+  assert.equal(normal.source, "rate_card");
   const emergency = draftTechQuote({ jobClass: "roadside", emergency: true });
   assert.equal(emergency.emergency, true);
+  assert.equal(emergency.source, "rate_card");
 });
 
 /** S30 T9 / Appendix A.1 — ≥5 resource kinds IDOR denied; cache keys user-scoped. */

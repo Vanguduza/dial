@@ -108,6 +108,9 @@ importers:
       '@dial/identity':
         specifier: workspace:*
         version: link:../../packages/identity
+      '@dial/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       '@dial/ledger':
         specifier: workspace:*
         version: link:../../packages/ledger
