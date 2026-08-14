@@ -74,7 +74,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 111 | `PD5` | **Customer Android** — Compose Spare browse/cart/checkout | [#26](https://github.com/Vanguduza/dial/issues/26) | Native Compose (C-5); gateway auth+search+checkout; USD; EcoCash\|COD | `PD6` |
 | 112 | `PD6` | **Supplier-web** — Mercur vendor-panel patterns | [#27](https://github.com/Vanguduza/dial/issues/27) | Onboard/costs/heartbeat/confirm-SLA/statements vs `@dial/suppliers` | `PD7` |
 | 113 | `PD7` | **Delivery Android** — foodhub-compose patterns + MapLibre | [#28](https://github.com/Vanguduza/dial/issues/28) | Offer accept/reject → POD/COD vs `@dial/delivery`; admin MapLibre track | `PD8` |
-| 114 | `PD8` | **Customer iOS** — SwiftUI Spare parity | new issue | Same ERP APIs as PD5; tunacosgun patterns | `PD9` |
+| 114 | `PD8` | **Customer iOS** — SwiftUI Spare parity | [#29](https://github.com/Vanguduza/dial/issues/29) | Same ERP APIs as PD5; tunacosgun patterns; USD + EcoCash\|COD | `PD9` |
 | 115 | `PD9` | **Technician Android** — Now in Android | new issue | Jobs/checklist/Take-Home WHT; offline-first | expand / S99 human |
 
 **Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate).
@@ -159,11 +159,17 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd7DeliveryThinVertical`; `pd7CourierApi.test.ts`; `:core:network` DialDeliveryClient tests |
 | Green → | **PD8** Customer iOS |
 
-### PD8 — Customer iOS (NEXT)
+### PD8 — Customer iOS (**GREEN** 2026-08-15)
 
-SwiftUI Spare parity vs same gateway APIs (tunacosgun patterns).
+| | |
+| --- | --- |
+| Issue | [#29](https://github.com/Vanguduza/dial/issues/29) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | `apps/customer-ios` SwiftUI + DialCustomerCore → auth → Spare USD browse → EcoCash\|COD |
+| Evidence | SPM DialGatewayClient + XCTest; Node `pd8IosContract.test.ts`; C-5 no Expo |
+| Green → | **PD9** Technician Android |
 
-### PD9 — Technician Android
+### PD9 — Technician Android (NEXT)
 
 Now in Android module layout; jobs/checklist/Take-Home WHT (D-50).
 
