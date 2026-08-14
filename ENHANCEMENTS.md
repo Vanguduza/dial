@@ -293,6 +293,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-309 | **Path operationIds served==disk** | done | S371 — full path/method sweep |
 | ENH-310 | **ContiPay operationId served==disk** | `done` | S372 — webhookContipay |
 | ENH-311 | **WhatsApp POST operationId served==disk** | `done` | S373 — webhookWhatsapp |
+| ENH-312 | **x-dial-sor keys served==disk** | `done` | S374 — key set lock |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
