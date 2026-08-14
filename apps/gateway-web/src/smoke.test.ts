@@ -2615,6 +2615,209 @@ test("S260 served OpenAPI title+version match disk", async () => {
   assert.ok((served.info?.title ?? "").includes("DIAL Gateway"));
 });
 
+test("S261 served IntegrationsHealth.required includes ready+mode+probes+groups", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: { IntegrationsHealth?: { required?: string[] } };
+    };
+  };
+  const required =
+    served.components?.schemas?.IntegrationsHealth?.required ?? [];
+  for (const key of ["ok", "ready", "mode", "probes", "groups"]) {
+    assert.ok(required.includes(key), `IntegrationsHealth.required missing ${key}`);
+  }
+});
+
+test("S262 sandbox webhook 503 without secrets (INTERNAL_API_SECRET unset)", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevInternal = process.env.INTERNAL_API_SECRET;
+  const prevFdms = process.env.FDMS_ACTIVATION_KEY;
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.INTERNAL_API_SECRET;
+  delete process.env.FDMS_ACTIVATION_KEY;
+  try {
+    const { POST } = await import("./app/api/webhooks/fdms/route.js");
+    const res = await POST(
+      new Request("http://localhost/api/webhooks/fdms", {
+        method: "POST",
+        body: JSON.stringify({ eventId: "s262_closed" }),
+      }),
+    );
+    assert.equal(res.status, 503);
+    const body = (await res.json()) as { error?: string };
+    assert.ok(
+      (body.error ?? "").toLowerCase().includes("fail closed") ||
+        (body.error ?? "").includes("FDMS_ACTIVATION_KEY"),
+    );
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevInternal === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prevInternal;
+    if (prevFdms === undefined) delete process.env.FDMS_ACTIVATION_KEY;
+    else process.env.FDMS_ACTIVATION_KEY = prevFdms;
+  }
+});
+
+test("S263 fixture webhook accepts without INTERNAL_API_SECRET", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevInternal = process.env.INTERNAL_API_SECRET;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.INTERNAL_API_SECRET;
+  const { __resetIdempotencyForTests } = await import("@dial/shared");
+  __resetIdempotencyForTests();
+  try {
+    const { POST } = await import("./app/api/webhooks/contipay/route.js");
+    const res = await POST(
+      new Request("http://localhost/api/webhooks/contipay", {
+        method: "POST",
+        body: JSON.stringify({
+          eventId: "s263_fixture",
+          paymentId: "pay_s263",
+          status: "paid",
+        }),
+      }),
+    );
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { ok?: boolean };
+    assert.equal(body.ok, true);
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevInternal === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prevInternal;
+  }
+});
+
+test("S264 served servers url localhost:3000", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    servers?: Array<{ url?: string; description?: string }>;
+  };
+  assert.ok(served.servers && served.servers.length > 0);
+  assert.ok(
+    served.servers!.some((s) => s.url === "http://localhost:3000"),
+  );
+});
+
+test("S265 OpenAPI tags include health+webhooks+admin", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    tags?: Array<{ name: string }>;
+  };
+  const names = (served.tags ?? []).map((t) => t.name).sort();
+  for (const tag of ["admin", "health", "webhooks"]) {
+    assert.ok(names.includes(tag), `missing tag ${tag}`);
+  }
+});
+
+test("S266 served getOpenApiSkeleton operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { get?: { operationId?: string } }>;
+  };
+  assert.equal(
+    served.paths["/api/openapi"]?.get?.operationId,
+    "getOpenApiSkeleton",
+  );
+});
+
+test("S267 sandbox PSP webhook 503 without PSP_WEBHOOK_SECRET", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevSecret = process.env.PSP_WEBHOOK_SECRET;
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.PSP_WEBHOOK_SECRET;
+  try {
+    const { POST } = await import("./app/api/webhooks/psp/route.js");
+    const res = await POST(
+      new Request("http://localhost/api/webhooks/psp", {
+        method: "POST",
+        body: JSON.stringify({ eventId: "s267", intentId: "i267" }),
+      }),
+    );
+    assert.equal(res.status, 503);
+    const body = (await res.json()) as { error?: string };
+    assert.ok((body.error ?? "").includes("PSP_WEBHOOK_SECRET"));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevSecret === undefined) delete process.env.PSP_WEBHOOK_SECRET;
+    else process.env.PSP_WEBHOOK_SECRET = prevSecret;
+  }
+});
+
+test("S268 fixture FDMS webhook accepts without FDMS_ACTIVATION_KEY", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevKey = process.env.FDMS_ACTIVATION_KEY;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.FDMS_ACTIVATION_KEY;
+  const { __resetIdempotencyForTests } = await import("@dial/shared");
+  __resetIdempotencyForTests();
+  try {
+    const { POST } = await import("./app/api/webhooks/fdms/route.js");
+    const res = await POST(
+      new Request("http://localhost/api/webhooks/fdms", {
+        method: "POST",
+        body: JSON.stringify({ eventId: "s268_fixture", type: "ack" }),
+      }),
+    );
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { ok?: boolean };
+    assert.equal(body.ok, true);
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevKey === undefined) delete process.env.FDMS_ACTIVATION_KEY;
+    else process.env.FDMS_ACTIVATION_KEY = prevKey;
+  }
+});
+
+test("S269 served InternalApiSecret security scheme locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      securitySchemes?: {
+        InternalApiSecret?: {
+          type?: string;
+          in?: string;
+          name?: string;
+          description?: string;
+        };
+      };
+    };
+  };
+  const scheme = served.components?.securitySchemes?.InternalApiSecret;
+  assert.equal(scheme?.type, "apiKey");
+  assert.equal(scheme?.in, "header");
+  assert.equal(scheme?.name, "x-internal-secret");
+  assert.ok(scheme?.description?.includes("INTERNAL_API_SECRET"));
+  assert.equal((scheme?.description ?? "").includes("sk_live"), false);
+});
+
+test("S270 served admin money outbox uses InternalApiSecret", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: { security?: Array<Record<string, unknown>> };
+        post?: { security?: Array<Record<string, unknown>> };
+      }
+    >;
+  };
+  const path = served.paths["/api/admin/money/outbox"];
+  assert.ok(path?.get?.security?.some((s) => "InternalApiSecret" in s));
+  assert.ok(path?.post?.security?.some((s) => "InternalApiSecret" in s));
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

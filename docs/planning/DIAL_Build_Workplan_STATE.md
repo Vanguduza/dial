@@ -1,4 +1,4 @@
-# DIAL Build — Workplan STATE
+﻿# DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S260** — served OpenAPI title+version match disk — **green** |
+| `current_stage` | **S261** — IntegrationsHealth.required includes ready+mode+probes+groups — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S259** getIntegrationsHealth operationId — **green** |
-| `next_stage` | **S261** |
+| `prior_stage` | **S260** served OpenAPI title+version match disk — **green** |
+| `next_stage` | **S262** sandbox webhook 503 without INTERNAL_API_SECRET |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S259 | 2026-08-13/14 | through prior |
-| S260 | 2026-08-14 | served OpenAPI title+version match disk |
+| S91–S260 | 2026-08-13/14 | through OpenAPI identity lock |
+| S261 | 2026-08-14 | IntegrationsHealth.required fields locked |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S261 | Served IntegrationsHealth.required includes ready+mode+probes+groups |
-| S262 | Sandbox webhook fail-closed 503 when INTERNAL_API_SECRET unset |
-| S263 | Fixture webhook accepts without INTERNAL_API_SECRET |
-| S264 | Served servers url localhost:3000 |
+| S262 | sandbox webhook 503 without INTERNAL_API_SECRET |
+| S263 | fixture webhook accepts without INTERNAL_API_SECRET |
+| S264 | served servers url localhost:3000 |
 | S265 | OpenAPI tags include health+webhooks+admin |
+| S266 | served getOpenApiSkeleton operationId locked |
 
 ## Note
 

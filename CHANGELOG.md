@@ -209,6 +209,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 - S258 Smoke: served IntegrationsHealth.groups items required fields locked.
 - S259 Smoke: served getIntegrationsHealth operationId locked.
 - S260 Smoke: served OpenAPI title+version match disk.
+- S261 Smoke: served IntegrationsHealth.required includes ready+mode+probes+groups.
 - S20 T1 Identity **green** (Pack Â§15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow searchâ†’cartâ†’checkout buttons + webhook idempotency).
