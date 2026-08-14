@@ -8,6 +8,7 @@
       "probes": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_PROBE_KEYS",
       "envGroups": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_ENV_GROUPS",
       "envGroupLabels": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_ENV_GROUP_LABELS",
+      "healthNote": "apps/gateway-web/src/lib/integrationsReadiness.ts#buildIntegrationsHealthNote",
       "healthNoteUiMax": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_HEALTH_NOTE_UI_MAX",
       "docs": "docs/integrations/README.md"
     }

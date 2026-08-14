@@ -897,6 +897,41 @@ test("S165 OpenAPI + README document buildIntegrationsHealthNote", async () => {
   assert.ok(desc.includes("buildIntegrationsHealthNote"));
 });
 
+test("S166 OpenAPI x-dial-sor.healthNote points at buildIntegrationsHealthNote", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: { "x-dial-sor"?: { healthNote?: string } };
+  };
+  assert.ok(
+    spec.info?.["x-dial-sor"]?.healthNote?.endsWith(
+      "#buildIntegrationsHealthNote",
+    ),
+  );
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { healthNote?: string } };
+  };
+  assert.ok(
+    served.info?.["x-dial-sor"]?.healthNote?.endsWith(
+      "#buildIntegrationsHealthNote",
+    ),
+  );
+
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("x-dial-sor.healthNote"));
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");
