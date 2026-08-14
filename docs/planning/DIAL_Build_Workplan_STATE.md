@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S411** — IntegrationsHealth schema matches disk — **green** |
+| `current_stage` | **S412** — IntegrationsProbes schema matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S410** InternalApiSecret scheme matches disk — **green** |
-| `next_stage` | **S412** IntegrationsProbes schema matches disk |
+| `prior_stage` | **S411** IntegrationsHealth schema matches disk — **green** |
+| `next_stage` | **S413** components top-level keys match disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S410 | 2026-08-13/14 | through prior |
-| S411 | 2026-08-14 | IntegrationsHealth deepEqual disk |
+| S91–S411 | 2026-08-13/14 | through prior |
+| S412 | 2026-08-14 | IntegrationsProbes deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S412 | IntegrationsProbes schema matches disk |
 | S413 | components top-level keys match disk |
 | S414 | InternalApiSecret type apiKey locked |
 | S415 | WebhookOpaqueBody additionalProperties true |
 | S416 | IntegrationsHealth required fields match disk |
+| S417 | IntegrationsProbes required keys match disk |
 
 ## Note
 
