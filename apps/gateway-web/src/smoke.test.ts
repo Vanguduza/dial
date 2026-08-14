@@ -1014,6 +1014,20 @@ test("S171 admin UI copy cross-links note-builder SoR", async () => {
   }
 });
 
+test("S172 integrations README documents note-builder-sor-hint cross-link", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("note-builder-sor-hint"));
+  assert.ok(integ.includes("buildIntegrationsHealthNote"));
+  assert.ok(integ.includes("x-dial-sor.healthNote"));
+  assert.ok(integ.includes("/admin/integrations"));
+  assert.ok(integ.includes("/admin/cost-health"));
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");

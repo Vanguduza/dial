@@ -94,6 +94,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-107 | **Admin hint: note builder** | `done` | S169 — integrations + cost-health |
 | ENH-108 | **OpenAPI healthNote export lock** | `done` | S170 — served fragment matches builder |
 | ENH-109 | **Admin note-builder UI cross-link** | `done` | S171 — note-builder-sor-hint |
+| ENH-110 | **README note-builder-sor-hint** | `done` | S172 — admin cross-link documented |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

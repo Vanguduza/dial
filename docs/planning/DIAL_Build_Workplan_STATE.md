@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S171** — Admin UI copy cross-links note-builder SoR — **green** |
+| `current_stage` | **S172** — Integrations README cites note-builder UI cross-link — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S170** Smoke: served OpenAPI healthNote fragment locks to export — **green** |
-| `next_stage` | **S172** Integrations README cites note-builder UI cross-link |
+| `prior_stage` | **S171** Admin UI copy cross-links note-builder SoR — **green** |
+| `next_stage` | **S173** OpenAPI info.description mentions note builder SoR |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S170 | 2026-08-13/14 | through OpenAPI healthNote export lock |
-| S171 | 2026-08-14 | note-builder-sor-hint on integrations + cost-health |
+| S91–S171 | 2026-08-13/14 | through admin note-builder-sor-hint |
+| S172 | 2026-08-14 | README documents note-builder-sor-hint |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S172 | Integrations README documents admin `note-builder-sor-hint` cross-link |
 | S173 | OpenAPI info.description mentions note builder SoR |
-| S174 | Root README cites admin note-builder cross-link test id |
+| S174 | Root README cites admin note-builder cross-link |
 | S175 | Smoke: S135 parity includes `note-builder-sor-hint` on both admin pages |
-| S176 | Export `INTEGRATIONS_HEALTH_NOTE_SOR` docs pointer constant |
+| S176 | Export docs pointer constant for note-builder SoR |
+| S177 | `.env.example` cites note-builder-sor-hint admin contract |
 
 ## Note
 
