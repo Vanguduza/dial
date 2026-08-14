@@ -615,6 +615,18 @@ test("S147 README + OpenAPI document INTEGRATION_ENV_GROUP_LABELS", async () => 
   );
 });
 
+test("S153 integrations README documents health note groups labels contract", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("groups labels="));
+  assert.ok(integ.includes("INTEGRATION_ENV_GROUP_LABELS"));
+  assert.ok(integ.includes("IntegrationsHealth.note"));
+});
+
 test("S135 admin cost-health + integrations pages link OpenAPI and readiness", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

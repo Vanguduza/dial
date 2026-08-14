@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S152** — OpenAPI IntegrationsHealth.note description — **green** |
+| `current_stage` | **S153** — README health note groups labels= contract — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S151** Health note cites INTEGRATION_ENV_GROUP_LABELS — **green** |
-| `next_stage` | **S153** integrations README documents health note groups labels= contract |
+| `prior_stage` | **S152** OpenAPI IntegrationsHealth.note description — **green** |
+| `next_stage` | **S154** Admin readiness UI surfaces health note (truncated) |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S151 | 2026-08-13/14 | through health note labels |
-| S152 | 2026-08-14 | OpenAPI IntegrationsHealth.note description |
+| S91–S152 | 2026-08-13/14 | through OpenAPI note description |
+| S153 | 2026-08-14 | integrations README health note contract |
 
 ## Note
 

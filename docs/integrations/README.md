@@ -116,3 +116,5 @@ Schemas stay opaque for webhook bodies (signature + idempotency SoR in adapters)
 **Probes (S137):** OpenAPI `IntegrationsProbes` requires `temporal`, `litellm`, `maps`, `fdms`, `meili`, `queues`, `whatsapp`, `psp`, `internal` — kept in sync with `INTEGRATION_PROBE_KEYS` in gateway-web.
 
 **Env groups (S139/S140/S147):** OpenAPI `groups[].label` enum + `info.x-dial-sor.envGroups` point at `INTEGRATION_ENV_GROUPS`; `info.x-dial-sor.envGroupLabels` points at `INTEGRATION_ENV_GROUP_LABELS` (same module).
+
+**Health `note` (S151/S152/S153):** Response JSON `note` includes `groups labels=` followed by the ordered `INTEGRATION_ENV_GROUP_LABELS` tuple (comma-separated). OpenAPI `IntegrationsHealth.note` description documents the same contract — never echoes secret values.
