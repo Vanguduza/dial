@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S447** — Escrow responses match disk — **green** |
+| `current_stage` | **S448** — PSP responses match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S446** PayPal responses match disk — **green** |
-| `next_stage` | **S448** PSP responses match disk |
+| `prior_stage` | **S447** Escrow responses match disk — **green** |
+| `next_stage` | **S449** admin FDMS day responses match disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S446 | 2026-08-13/14 | through prior |
-| S447 | 2026-08-14 | Escrow responses deepEqual disk |
+| S91–S447 | 2026-08-13/14 | through prior |
+| S448 | 2026-08-14 | PSP responses deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S448 | PSP responses match disk |
 | S449 | admin FDMS day responses match disk |
 | S450 | admin money outbox responses match disk |
 | S451 | admin daily-zig responses match disk |
 | S452 | all webhook POST responses match disk |
+| S453 | all admin path responses match disk |
 
 ## Note
 
