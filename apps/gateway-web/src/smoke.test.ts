@@ -1344,6 +1344,63 @@ test("S206 OpenAPI x-dial-sor.readyVsGroupsHint points at HINT_ID", async () => 
   );
 });
 
+test("S207 integrations README cites INTEGRATIONS_READY_VS_GROUPS_HINT_ID", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(readme.includes("INTEGRATIONS_READY_VS_GROUPS_HINT_ID"));
+  assert.ok(readme.includes("readyVsGroupsHint"));
+});
+
+test("S208 .env.example cites readyVsGroupsHint", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("readyVsGroupsHint"));
+  assert.ok(envExample.includes("INTEGRATIONS_READY_VS_GROUPS_HINT_ID"));
+});
+
+test("S209 root README cites readyVsGroupsHint", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("readyVsGroupsHint"));
+  assert.ok(readme.includes("INTEGRATIONS_READY_VS_GROUPS_HINT_ID"));
+});
+
+test("S210 groups[].missing are key names only (no values)", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      groups?: Array<{ missing: string[] }>;
+    };
+    const blob = JSON.stringify(body.groups ?? []);
+    for (const s of ["sk_live", "service_role", "whsec_", "Bearer "]) {
+      assert.equal(blob.includes(s), false, `groups must not contain ${s}`);
+    }
+    for (const g of body.groups ?? []) {
+      for (const key of g.missing) {
+        assert.ok(/^[A-Z][A-Z0-9_]*$/.test(key), `missing key name: ${key}`);
+        assert.ok(!key.includes("="));
+        assert.ok(!key.includes(":"));
+      }
+    }
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
