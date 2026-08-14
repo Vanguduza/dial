@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S193** — Fixture mode allows ready=true with incomplete env groups — **green** |
+| `current_stage` | **S194** — Document ready vs groups configured semantics — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S192** OpenAPI x-dial-sor asserts noteBuilderHint + noteBuilderDocs — **green** |
-| `next_stage` | **S194** Document ready vs groups configured semantics |
+| `prior_stage` | **S193** Fixture ready=true with incomplete env groups — **green** |
+| `next_stage` | **S195** Smoke: note text differs fixture vs sandbox/live |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S192 | 2026-08-13/14 | through OpenAPI HINT+DOCS keys |
-| S193 | 2026-08-14 | fixture ready=true with incomplete groups |
+| S91–S193 | 2026-08-13/14 | through fixture ready≠groups |
+| S194 | 2026-08-14 | README + OpenAPI ready vs groups SoR |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S194 | Document ready vs groups configured semantics |
 | S195 | Smoke: note text differs fixture vs sandbox/live |
 | S196 | OpenAPI webhook paths document signature+idempotency SoR |
 | S197 | Smoke: OpenAPI webhook paths never embed secret values |
-| S198 | OpenAPI webhooks tag + x-dial-sor.webhookIdempotency pointer |
+| S198 | Served OpenAPI includes webhookSignature + webhookIdempotency |
+| S199 | Admin/docs cite ready≠groups configured |
 
 ## Note
 

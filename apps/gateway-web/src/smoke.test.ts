@@ -1023,6 +1023,47 @@ test("S193 fixture ready=true even when env groups incomplete", async () => {
   }
 });
 
+test("S194 docs + OpenAPI document ready vs groups configured", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(readme.includes("### `ready` meaning (S194)"));
+  assert.ok(readme.includes("integrationsReady(probes)"));
+  assert.ok(readme.includes("groups[].configured"));
+  assert.ok(readme.includes("not** “all env groups configured"));
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: { "x-dial-sor"?: { readyVsGroups?: string } };
+    components?: {
+      schemas?: {
+        IntegrationsHealth?: {
+          properties?: {
+            ready?: { description?: string };
+            groups?: { description?: string };
+          };
+        };
+      };
+    };
+  };
+  assert.ok(spec.info?.["x-dial-sor"]?.readyVsGroups?.includes("ready-meaning-s194"));
+  assert.ok(
+    spec.components?.schemas?.IntegrationsHealth?.properties?.ready?.description?.includes(
+      "independent of groups",
+    ),
+  );
+  assert.ok(
+    spec.components?.schemas?.IntegrationsHealth?.properties?.groups?.description?.includes(
+      "configured≠ready",
+    ),
+  );
+});
+
 test("S195 health note text differs fixture vs sandbox/live", async () => {
   const { buildIntegrationsHealthNote } = await import(
     "./lib/integrationsReadiness.js"
@@ -1037,14 +1078,80 @@ test("S195 health note text differs fixture vs sandbox/live", async () => {
   assert.ok(fixture.includes("groups labels="));
   assert.ok(sandbox.includes("groups labels="));
 
-  for (const mode of ["fixture", "sandbox"] as const) {
-    process.env.DIAL_INTEGRATION_MODE = mode;
-    const { GET } = await import("./app/api/health/integrations/route.js");
-    const res = await GET();
-    assert.equal(res.status, 200);
-    const body = (await res.json()) as { note?: string; mode?: string };
-    assert.equal(body.mode, mode);
-    assert.equal(body.note, buildIntegrationsHealthNote(mode));
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  try {
+    for (const mode of ["fixture", "sandbox"] as const) {
+      process.env.DIAL_INTEGRATION_MODE = mode;
+      const { GET } = await import("./app/api/health/integrations/route.js");
+      const res = await GET();
+      assert.equal(res.status, 200);
+      const body = (await res.json()) as { note?: string; mode?: string };
+      assert.equal(body.mode, mode);
+      assert.equal(body.note, buildIntegrationsHealthNote(mode));
+    }
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+  }
+});
+
+test("S196 OpenAPI webhooks document signature + idempotency SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: {
+      "x-dial-sor"?: {
+        webhookSignature?: string;
+        webhookIdempotency?: string;
+      };
+    };
+    tags?: Array<{ name: string; description?: string }>;
+    paths: Record<
+      string,
+      {
+        post?: {
+          responses?: { "200"?: { description?: string }; "401"?: unknown };
+        };
+      }
+    >;
+    components?: {
+      schemas?: { WebhookOpaqueBody?: { description?: string } };
+    };
+  };
+  assert.ok(
+    (spec.info?.["x-dial-sor"]?.webhookSignature ?? "")
+      .toLowerCase()
+      .includes("signature"),
+  );
+  assert.ok(
+    spec.info?.["x-dial-sor"]?.webhookIdempotency?.includes("claimProcessedEvent"),
+  );
+  const whTag = spec.tags?.find((t) => t.name === "webhooks");
+  assert.ok(whTag?.description?.includes("claimProcessedEvent"));
+  assert.ok(whTag?.description?.includes("signature"));
+  assert.ok(
+    spec.components?.schemas?.WebhookOpaqueBody?.description?.includes(
+      "processed_events",
+    ),
+  );
+  const postPaths = Object.keys(spec.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && spec.paths[p]?.post,
+  );
+  assert.ok(postPaths.length >= 8);
+  for (const p of postPaths) {
+    const d200 = spec.paths[p]?.post?.responses?.["200"]?.description ?? "";
+    assert.ok(
+      d200.toLowerCase().includes("idempotent"),
+      `${p} 200 must mention idempotent`,
+    );
+    assert.ok(
+      spec.paths[p]?.post?.responses?.["401"],
+      `${p} must document 401 bad signature`,
+    );
   }
 });
 

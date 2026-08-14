@@ -58,7 +58,17 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 5. Smoke each webhook you enabled (Paynow / ContiPay / EcoCash / PayPal / Escrow / FDMS / WhatsApp) with sig+idempotency.
 6. Confirm ops-only items remain tracked: Meta template IDs (ENH-021), escrow contract (ENH-020), ZIMRA field-map (ENH-022).
 
-**`ready` meaning:** aggregate of Temporal, LiteLLM, Maps, FDMS, Meili, Queues, WhatsApp, PSP, and Internal API secret health probes — not a substitute for ops credential approval.
+**Do not conflate:** ops can see `ready=true` in fixture with incomplete `groups` (S193). Sandbox/live fail closed on webhook/use when the vendor group or probe env is missing — still not ops credential approval.
+
+### `ready` meaning (S194)
+
+| Field | SoR | Fixture | Sandbox / live |
+| --- | --- | --- | --- |
+| `ready` | `integrationsReady(probes)` from probe pings | Usually `true` without secrets (S193) | `false` when any required probe fails (e.g. Redis unset → queues) |
+| `groups[].configured` | `listIntegrationEnvGroupSnapshots` — all keys present | Often `false` / incomplete in CI | Must be `true` for groups you exercise |
+| `groups[].missing` | unset keys only (names, never values) | Expected non-empty for unused vendors | Empty for enabled vendors |
+
+`ready === integrationsReady(probes)` — every boolean in `probes` is true (Temporal, LiteLLM, Maps, FDMS, Meili, Queues, WhatsApp, PSP, Internal). It is **not** “all env groups configured.”
 
 ### Health groups ↔ `.env.example` (S132 / S139 / S140)
 

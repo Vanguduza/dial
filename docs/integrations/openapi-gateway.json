@@ -12,7 +12,10 @@
       "healthNoteUiMax": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_HEALTH_NOTE_UI_MAX",
       "noteBuilderHint": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID",
       "noteBuilderDocs": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_NOTE_BUILDER_SOR_DOCS",
-      "docs": "docs/integrations/README.md"
+      "docs": "docs/integrations/README.md",
+      "readyVsGroups": "docs/integrations/README.md#ready-meaning-s194",
+      "webhookSignature": "Adapter verifySignature / HMAC before mutate (D-47)",
+      "webhookIdempotency": "packages/shared/src/idempotency.ts#claimProcessedEvent → processed_events"
     }
   },
   "servers": [
@@ -23,7 +26,10 @@
   ],
   "tags": [
     { "name": "health" },
-    { "name": "webhooks" },
+    {
+      "name": "webhooks",
+      "description": "S196 — inbound PSP/WA/FDMS callbacks. SoR: verify signature (or vendor verify) then claimProcessedEvent / processed_events idempotency before mutate. Opaque body never documents secret values. Fail-closed 503 when sandbox/live misconfigured."
+    },
     { "name": "admin" }
   ],
   "paths": {
@@ -72,7 +78,9 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate idempotent" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad signature" },
           "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
@@ -100,9 +108,11 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad signature" },
-          "503": { "description": "Fail-closed" }
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
       }
     },
@@ -120,9 +130,11 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad signature" },
-          "503": { "description": "Fail-closed" }
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
       }
     },
@@ -140,9 +152,11 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad signature / verify failed" },
-          "503": { "description": "Fail-closed" }
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
       }
     },
@@ -160,9 +174,11 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad signature" },
-          "503": { "description": "Fail-closed" }
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
       }
     },
@@ -180,9 +196,11 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad signature" },
-          "503": { "description": "Fail-closed" }
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
       }
     },
@@ -234,9 +252,11 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad HMAC" },
-          "503": { "description": "Fail-closed" }
+          "503": { "description": "Fail-closed (sandbox/live misconfig)" }
         }
       }
     },
@@ -255,7 +275,9 @@
           }
         },
         "responses": {
-          "200": { "description": "Accepted or duplicate" },
+          "200": {
+            "description": "Accepted or duplicate idempotent (signature verified)"
+          },
           "401": { "description": "Bad signature" }
         }
       }
@@ -337,7 +359,10 @@
         "required": ["ok", "ready", "mode", "probes", "groups"],
         "properties": {
           "ok": { "type": "boolean" },
-          "ready": { "type": "boolean" },
+          "ready": {
+            "type": "boolean",
+            "description": "S194 — integrationsReady(probes) only; independent of groups[].configured (fixture may be ready=true with incomplete groups — S193)"
+          },
           "mode": {
             "type": "string",
             "enum": ["fixture", "sandbox", "live"]
@@ -347,6 +372,7 @@
           },
           "groups": {
             "type": "array",
+            "description": "S194 — env presence snapshots only; configured≠ready. Names of missing keys, never secret values.",
             "items": {
               "type": "object",
               "required": [
@@ -375,10 +401,14 @@
                     "internal"
                   ]
                 },
-                "configured": { "type": "boolean" },
+                "configured": {
+                  "type": "boolean",
+                  "description": "All required env keys for this group are non-empty"
+                },
                 "missing": {
                   "type": "array",
-                  "items": { "type": "string" }
+                  "items": { "type": "string" },
+                  "description": "Unset key names only — never values"
                 },
                 "presentCount": { "type": "integer" },
                 "requiredCount": { "type": "integer" }
@@ -420,7 +450,7 @@
       },
       "WebhookOpaqueBody": {
         "type": "object",
-        "description": "Vendor payload — verified by adapter signature before mutate; idempotent via processed_events",
+        "description": "Vendor payload — verified by adapter signature before mutate; idempotent via processed_events (S196 SoR: info.x-dial-sor.webhookSignature + webhookIdempotency)",
         "additionalProperties": true
       }
     }
