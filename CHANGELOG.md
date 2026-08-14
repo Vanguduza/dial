@@ -286,6 +286,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 - S335 Smoke: openapi servers description locked.
 - S336 Smoke: servers url+description match disk.
 - S337 Smoke: FDMS day GET 200 description matches disk.
+- S338 Smoke: health integrations 200 never echoes secrets.
 - S20 T1 Identity **green** (Pack Â§15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow searchâ†’cartâ†’checkout buttons + webhook idempotency).
