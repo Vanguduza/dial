@@ -2818,6 +2818,170 @@ test("S270 served admin money outbox uses InternalApiSecret", async () => {
   assert.ok(path?.post?.security?.some((s) => "InternalApiSecret" in s));
 });
 
+test("S271 served ContiPay webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { post?: { operationId?: string; tags?: string[] } }>;
+  };
+  const op = served.paths["/api/webhooks/contipay"]?.post;
+  assert.ok(op, "missing /api/webhooks/contipay");
+  assert.equal(op?.operationId, "webhookContipay");
+  assert.ok(op?.tags?.includes("webhooks"));
+});
+
+test("S272 served FDMS webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { post?: { operationId?: string; tags?: string[] } }>;
+  };
+  const op = served.paths["/api/webhooks/fdms"]?.post;
+  assert.ok(op, "missing /api/webhooks/fdms");
+  assert.equal(op?.operationId, "webhookFdms");
+  assert.ok(op?.tags?.includes("webhooks"));
+});
+
+test("S273 served PSP webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { operationId?: string; deprecated?: boolean; tags?: string[] } }
+    >;
+  };
+  const op = served.paths["/api/webhooks/psp"]?.post;
+  assert.ok(op, "missing /api/webhooks/psp");
+  assert.equal(op?.operationId, "webhookPspLegacy");
+  assert.equal(op?.deprecated, true);
+  assert.ok(op?.tags?.includes("webhooks"));
+});
+
+test("S274 served WhatsApp webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: { operationId?: string; tags?: string[] };
+        post?: { operationId?: string; tags?: string[] };
+      }
+    >;
+  };
+  const path = served.paths["/api/webhooks/whatsapp"];
+  assert.ok(path, "missing /api/webhooks/whatsapp");
+  assert.equal(path?.get?.operationId, "webhookWhatsappChallenge");
+  assert.equal(path?.post?.operationId, "webhookWhatsapp");
+  assert.ok(path?.get?.tags?.includes("webhooks"));
+  assert.ok(path?.post?.tags?.includes("webhooks"));
+});
+
+test("S275 served admin fx daily-zig security locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: {
+          operationId?: string;
+          security?: Array<Record<string, unknown>>;
+          tags?: string[];
+        };
+        post?: {
+          operationId?: string;
+          security?: Array<Record<string, unknown>>;
+          tags?: string[];
+        };
+      }
+    >;
+  };
+  const path = served.paths["/api/admin/fx/daily-zig"];
+  assert.ok(path, "missing /api/admin/fx/daily-zig");
+  assert.equal(path?.get?.operationId, "adminFxDailyZigGet");
+  assert.equal(path?.post?.operationId, "adminFxDailyZigPost");
+  assert.ok(path?.get?.security?.some((s) => "InternalApiSecret" in s));
+  assert.ok(path?.post?.security?.some((s) => "InternalApiSecret" in s));
+  assert.ok(path?.get?.tags?.includes("admin"));
+  assert.ok(path?.post?.tags?.includes("admin"));
+});
+
+test("S276 served EcoCash webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { post?: { operationId?: string; tags?: string[] } }>;
+  };
+  const op = served.paths["/api/webhooks/ecocash"]?.post;
+  assert.ok(op, "missing /api/webhooks/ecocash");
+  assert.equal(op?.operationId, "webhookEcocash");
+  assert.ok(op?.tags?.includes("webhooks"));
+});
+
+test("S277 served Paynow webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { post?: { operationId?: string; tags?: string[] } }>;
+  };
+  const op = served.paths["/api/webhooks/paynow"]?.post;
+  assert.ok(op, "missing /api/webhooks/paynow");
+  assert.equal(op?.operationId, "webhookPaynow");
+  assert.ok(op?.tags?.includes("webhooks"));
+});
+
+test("S278 served PayPal webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { post?: { operationId?: string; tags?: string[] } }>;
+  };
+  const op = served.paths["/api/webhooks/paypal"]?.post;
+  assert.ok(op, "missing /api/webhooks/paypal");
+  assert.equal(op?.operationId, "webhookPaypal");
+  assert.ok(op?.tags?.includes("webhooks"));
+});
+
+test("S279 served Escrow webhook path+operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { post?: { operationId?: string; tags?: string[] } }>;
+  };
+  const op = served.paths["/api/webhooks/escrow"]?.post;
+  assert.ok(op, "missing /api/webhooks/escrow");
+  assert.equal(op?.operationId, "webhookEscrow");
+  assert.ok(op?.tags?.includes("webhooks"));
+});
+
+test("S280 served admin FDMS day uses InternalApiSecret", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: {
+          operationId?: string;
+          security?: Array<Record<string, unknown>>;
+        };
+        post?: {
+          operationId?: string;
+          security?: Array<Record<string, unknown>>;
+        };
+      }
+    >;
+  };
+  const path = served.paths["/api/admin/fdms/day"];
+  assert.ok(path, "missing /api/admin/fdms/day");
+  assert.equal(path?.get?.operationId, "adminFdmsDayGet");
+  assert.equal(path?.post?.operationId, "adminFdmsDayPost");
+  assert.ok(path?.get?.security?.some((s) => "InternalApiSecret" in s));
+  assert.ok(path?.post?.security?.some((s) => "InternalApiSecret" in s));
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

@@ -328,6 +328,31 @@
         }
       }
     },
+    "/api/admin/fx/daily-zig": {
+      "get": {
+        "tags": ["admin"],
+        "summary": "Active Daily ZiG rate + audit (D-57; fail-closed INTERNAL_API_SECRET)",
+        "operationId": "adminFxDailyZigGet",
+        "security": [{ "InternalApiSecret": [] }],
+        "responses": {
+          "200": { "description": "Active rate + audit rows" },
+          "401": { "description": "Missing/invalid internal secret" },
+          "503": { "description": "INTERNAL_API_SECRET unset — fail closed" }
+        }
+      },
+      "post": {
+        "tags": ["admin"],
+        "summary": "Set Daily ZiG rate (audited; integer zigMinorPerUsd)",
+        "operationId": "adminFxDailyZigPost",
+        "security": [{ "InternalApiSecret": [] }],
+        "responses": {
+          "200": { "description": "New active rate" },
+          "400": { "description": "Invalid body" },
+          "401": { "description": "Missing/invalid internal secret" },
+          "503": { "description": "INTERNAL_API_SECRET unset — fail closed" }
+        }
+      }
+    },
     "/api/openapi": {
       "get": {
         "tags": ["health"],
