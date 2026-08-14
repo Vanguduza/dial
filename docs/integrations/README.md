@@ -19,6 +19,7 @@
 | `@dial/adapter-maps` | Nominatim / OSRM / VROOM + `pingMapsHealth` | `NOMINATIM_URL`, `OSRM_URL`, `VROOM_URL` |
 | `@dial/adapter-whatsapp` | Cloud API send/verify + templates + `pingWhatsAppHealth` | `WHATSAPP_*`, optional `WA_TEMPLATE_*` |
 | `@dial/catalogue` | Meili client + informal B2B leak=0 + `pingMeiliHealth` | `MEILI_*` |
+| `@dial/suppliers` | Supplier onboarding / costs / heartbeat / confirm-SLA / statements (PD6) | — |
 | `@dial/payments` | Checkout / Job Reserve / FX / PSP admit SoR | (via PSP adapters) |
 | `@dial/ledger` | Journal + `drainMoneyOutbox` → fiscal side-effects | — |
 | `@dial/queues` | BullMQ search + outbox + FDMS day + `pingQueuesHealth` | `REDIS_URL`, `INTERNAL_API_SECRET` |

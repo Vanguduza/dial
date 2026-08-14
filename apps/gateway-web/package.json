@@ -24,6 +24,7 @@
     "@dial/payments": "workspace:*",
     "@dial/queues": "workspace:*",
     "@dial/shared": "workspace:*",
+    "@dial/suppliers": "workspace:*",
     "@dial/tax": "workspace:*",
     "@dial/worker-temporal": "workspace:*",
     "next": "^15.3.3",

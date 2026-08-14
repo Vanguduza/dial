@@ -120,6 +120,9 @@ importers:
       '@dial/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@dial/suppliers':
+        specifier: workspace:*
+        version: link:../../packages/suppliers
       '@dial/tax':
         specifier: workspace:*
         version: link:../../packages/tax
@@ -394,6 +397,22 @@ importers:
         version: 5.9.3
 
   packages/shared:
+    devDependencies:
+      '@types/node':
+        specifier: ^22.15.21
+        version: 22.20.1
+      tsx:
+        specifier: ^4.19.4
+        version: 4.23.12
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+
+  packages/suppliers:
+    dependencies:
+      '@dial/shared':
+        specifier: workspace:*
+        version: link:../shared
     devDependencies:
       '@types/node':
         specifier: ^22.15.21

@@ -81,6 +81,21 @@ export default async function AuthHomePage() {
           Groceries
         </a>
         <a
+          href="/supplier"
+          style={{
+            display: "block",
+            padding: dialTokens.space.lg,
+            borderRadius: 12,
+            background: dialTokens.color.brand.primary,
+            color: "#fff",
+            textDecoration: "none",
+            fontWeight: 600,
+            textAlign: "center",
+          }}
+        >
+          Supplier
+        </a>
+        <a
           href="/tech"
           style={{
             display: "block",

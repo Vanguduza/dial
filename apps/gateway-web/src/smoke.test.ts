@@ -7920,7 +7920,7 @@ test("S136 integrations README package table matches workspace package names", a
   assert.ok(readme.includes("apps/worker-queues"));
   assert.ok(readme.includes("packages/ledger"));
   assert.ok(
-    /PD[1-4]|S1(3[5-9]|4\d|5\d)/.test(readme),
+    /PD[1-9]|S1(3[5-9]|4\d|5\d)/.test(readme),
     "root README build status should cite product-depth (PD*) or recent integration stage",
   );
 });

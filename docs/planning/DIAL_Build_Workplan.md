@@ -72,7 +72,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 104 | `PD4` | **PSP sandbox** — Paynow/EcoCash sandbox adapters | [#24](https://github.com/Vanguduza/dial/issues/24) | Sandbox fail-closed; webhook→ledger→FiscalReceiptQueued | `G1` |
 | 110 | `G1` | **Groceries thin vertical** (food/pantry) | [#25](https://github.com/Vanguduza/dial/issues/25) | `grocery_offers_v1` → USD → EcoCash\|COD → Job Reserve → delivery | `PD5` |
 | 111 | `PD5` | **Customer Android** — Compose Spare browse/cart/checkout | [#26](https://github.com/Vanguduza/dial/issues/26) | Native Compose (C-5); gateway auth+search+checkout; USD; EcoCash\|COD | `PD6` |
-| 112 | `PD6` | **Supplier-web** — Mercur vendor-panel patterns | new issue | Supplier confirm/heartbeat/upload against DIAL APIs | `PD7` |
+| 112 | `PD6` | **Supplier-web** — Mercur vendor-panel patterns | [#27](https://github.com/Vanguduza/dial/issues/27) | Onboard/costs/heartbeat/confirm-SLA/statements vs `@dial/suppliers` | `PD7` |
 | 113 | `PD7` | **Delivery Android** — foodhub-compose patterns + MapLibre | new issue | Offer accept/reject; POD; courier location → delivery SoR | `PD8` |
 | 114 | `PD8` | **Customer iOS** — SwiftUI Spare parity | new issue | Same ERP APIs as PD5; tunacosgun patterns | `PD9` |
 | 115 | `PD9` | **Technician Android** — Now in Android | new issue | Jobs/checklist/Take-Home WHT; offline-first | expand / S99 human |
@@ -139,11 +139,17 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `apps/customer-android/`; gateway `pd5CheckoutApi.test.ts`; CoolMall patterns / C-5 no Expo |
 | Green → | **PD6** supplier-web |
 
-### PD6 — Supplier-web (NEXT after PD5)
+### PD6 — Supplier-web (**GREEN** 2026-08-15)
 
-Mercur vendor-panel patterns onto DIAL supplier APIs (confirm, heartbeat, catalogue upload). Not a second money SoR.
+| | |
+| --- | --- |
+| Issue | [#27](https://github.com/Vanguduza/dial/issues/27) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | `@dial/suppliers` + `/supplier` portal: onboard → costs USD → heartbeat → confirm SLA → statements |
+| Evidence | `runPd6SupplierThinVertical`; `pd6Portal.test.ts`; Pack §9.4 screens |
+| Green → | **PD7** Delivery Android |
 
-### PD7 — Delivery Android
+### PD7 — Delivery Android (NEXT)
 
 foodhub-compose rider patterns + MapLibre; offer accept/reject; POD; `packages/delivery` SoR.
 
