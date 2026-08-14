@@ -2365,6 +2365,256 @@ test("S250 live ready=false without Redis (queues probe)", async () => {
   }
 });
 
+test("S251 served probes schema properties match INTEGRATION_PROBE_KEYS", async () => {
+  const { INTEGRATION_PROBE_KEYS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: {
+        IntegrationsProbes?: {
+          properties?: Record<string, unknown>;
+          additionalProperties?: boolean;
+        };
+      };
+    };
+  };
+  const props = Object.keys(
+    served.components?.schemas?.IntegrationsProbes?.properties ?? {},
+  );
+  assert.deepEqual([...props].sort(), [...INTEGRATION_PROBE_KEYS].sort());
+  assert.equal(
+    served.components?.schemas?.IntegrationsProbes?.additionalProperties,
+    false,
+  );
+});
+
+test("S252 OpenAPI groups label enum matches INTEGRATION_ENV_GROUP_LABELS", async () => {
+  const { INTEGRATION_ENV_GROUP_LABELS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: {
+        IntegrationsHealth?: {
+          properties?: {
+            groups?: {
+              items?: {
+                properties?: { label?: { enum?: string[] } };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+  const labelEnum =
+    served.components?.schemas?.IntegrationsHealth?.properties?.groups?.items
+      ?.properties?.label?.enum ?? [];
+  assert.deepEqual(
+    [...labelEnum],
+    [...INTEGRATION_ENV_GROUP_LABELS],
+  );
+});
+
+test("S253 sandbox internal probe fails without INTERNAL_API_SECRET", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevSecret = process.env.INTERNAL_API_SECRET;
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.INTERNAL_API_SECRET;
+  try {
+    const { integrationsReady } = await import(
+      "./lib/integrationsReadiness.js"
+    );
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+      groups?: Array<{ label: string; configured: boolean }>;
+      internal?: { ok?: boolean; configured?: boolean };
+    };
+    assert.equal(body.mode, "sandbox");
+    assert.equal(body.probes?.internal, false);
+    assert.equal(body.ready, false);
+    assert.equal(body.ready, integrationsReady(body.probes ?? {}));
+    assert.equal(body.internal?.ok, false);
+    assert.equal(body.internal?.configured, false);
+    const internalGroup = body.groups?.find((g) => g.label === "internal");
+    assert.equal(internalGroup?.configured, false);
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevSecret === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prevSecret;
+  }
+});
+
+test("S254 fixture internal probe ok without INTERNAL_API_SECRET", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevSecret = process.env.INTERNAL_API_SECRET;
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.INTERNAL_API_SECRET;
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+      internal?: { ok?: boolean };
+    };
+    assert.equal(body.mode, "fixture");
+    assert.equal(body.probes?.internal, true);
+    assert.equal(body.internal?.ok, true);
+    assert.equal(body.ready, true);
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevSecret === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prevSecret;
+  }
+});
+
+test("S255 served x-dial-sor.probes matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { probes?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { probes?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.probes,
+    disk.info?.["x-dial-sor"]?.probes,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.probes?.includes("INTEGRATION_PROBE_KEYS"),
+  );
+});
+
+test("S256 served x-dial-sor.docs matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { docs?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { docs?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.docs,
+    disk.info?.["x-dial-sor"]?.docs,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.docs?.includes("docs/integrations/README.md"),
+  );
+});
+
+test("S257 live internal probe fails without INTERNAL_API_SECRET", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevSecret = process.env.INTERNAL_API_SECRET;
+  process.env.DIAL_INTEGRATION_MODE = "live";
+  delete process.env.INTERNAL_API_SECRET;
+  try {
+    const { integrationsReady } = await import(
+      "./lib/integrationsReadiness.js"
+    );
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+    };
+    assert.equal(body.mode, "live");
+    assert.equal(body.probes?.internal, false);
+    assert.equal(body.ready, false);
+    assert.equal(body.ready, integrationsReady(body.probes ?? {}));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevSecret === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prevSecret;
+  }
+});
+
+test("S258 served IntegrationsHealth.groups required fields", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: {
+        IntegrationsHealth?: {
+          properties?: {
+            groups?: {
+              items?: { required?: string[] };
+            };
+          };
+        };
+      };
+    };
+  };
+  const required =
+    served.components?.schemas?.IntegrationsHealth?.properties?.groups?.items
+      ?.required ?? [];
+  assert.deepEqual(
+    [...required].sort(),
+    ["configured", "label", "missing", "presentCount", "requiredCount"].sort(),
+  );
+});
+
+test("S259 served getIntegrationsHealth operationId locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { get?: { operationId?: string; tags?: string[] } }>;
+  };
+  const op = served.paths["/api/health/integrations"]?.get;
+  assert.equal(op?.operationId, "getIntegrationsHealth");
+  assert.ok(op?.tags?.includes("health"));
+});
+
+test("S260 served OpenAPI title+version match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { openapi?: string; info?: { title?: string; version?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    openapi?: string;
+    info?: { title?: string; version?: string };
+  };
+  assert.equal(served.openapi, disk.openapi);
+  assert.equal(served.info?.title, disk.info?.title);
+  assert.equal(served.info?.version, disk.info?.version);
+  assert.ok((served.info?.title ?? "").includes("DIAL Gateway"));
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

@@ -1,4 +1,4 @@
-# DIAL Build — Workplan STATE
+﻿# DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S250** — live ready=false without Redis — **green** |
+| `current_stage` | **S251** — probes schema properties match INTEGRATION_PROBE_KEYS — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S249** envGroupLabels served==disk — **green** |
-| `next_stage` | **S251** |
+| `prior_stage` | **S250** live ready=false without Redis — **green** |
+| `next_stage` | **S252** groups label enum matches INTEGRATION_ENV_GROUP_LABELS |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S249 | 2026-08-13/14 | through prior |
-| S250 | 2026-08-14 | live ready=false without Redis |
+| S91–S250 | 2026-08-13/14 | through live no-Redis fail |
+| S251 | 2026-08-14 | served probes properties match probe keys |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S251 | Served probes schema properties match INTEGRATION_PROBE_KEYS |
-| S252 | OpenAPI groups label enum matches INTEGRATION_ENV_GROUP_LABELS |
-| S253 | Sandbox internal probe fails without INTERNAL_API_SECRET |
-| S254 | Fixture internal probe ok without INTERNAL_API_SECRET |
-| S255 | Served x-dial-sor.probes matches disk |
+| S252 | groups label enum matches INTEGRATION_ENV_GROUP_LABELS |
+| S253 | sandbox internal probe fails without INTERNAL_API_SECRET |
+| S254 | fixture internal probe ok without INTERNAL_API_SECRET |
+| S255 | served x-dial-sor.probes matches disk |
+| S256 | served x-dial-sor.docs matches disk |
 
 ## Note
 
