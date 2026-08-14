@@ -747,6 +747,7 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(cost.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
   assert.ok(cost.includes("openapi-primary-link"));
   assert.ok(cost.includes("env-groups-sor-hint"));
+  assert.ok(cost.includes("note-builder-sor-hint"));
   assert.ok(integ.includes("/api/openapi"));
   assert.ok(integ.includes("/api/health/integrations"));
   assert.ok(integ.includes("INTEGRATION_ENV_GROUPS"));
@@ -754,11 +755,31 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(integ.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
   assert.ok(integ.includes("openapi-primary-link"));
   assert.ok(integ.includes("env-groups-sor-hint"));
+  assert.ok(integ.includes("note-builder-sor-hint"));
   assert.ok(readme.includes("/api/openapi"));
   assert.ok(readme.includes("/admin/integrations"));
   assert.ok(readme.includes("openapi-gateway.json"));
   assert.ok(readme.includes("INTEGRATION_ENV_GROUPS"));
   assert.ok(readme.includes("INTEGRATION_ENV_GROUP_LABELS"));
+});
+
+test("S175 S135 parity includes note-builder-sor-hint on both admin pages", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  assert.ok(cost.includes('data-testid="note-builder-sor-hint"'));
+  assert.ok(integ.includes('data-testid="note-builder-sor-hint"'));
+  assert.ok(cost.includes("openapi-primary-link"));
+  assert.ok(integ.includes("openapi-primary-link"));
+  assert.ok(cost.includes("env-groups-sor-hint"));
+  assert.ok(integ.includes("env-groups-sor-hint"));
 });
 
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
