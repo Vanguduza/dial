@@ -846,6 +846,30 @@ test("S162 served OpenAPI healthNoteUiMax matches INTEGRATIONS_HEALTH_NOTE_UI_MA
   );
 });
 
+test("S164 health route note comes from buildIntegrationsHealthNote", async () => {
+  const { buildIntegrationsHealthNote } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const routeSrc = readFileSync(
+    join(process.cwd(), "src/app/api/health/integrations/route.ts"),
+    "utf8",
+  );
+  assert.ok(routeSrc.includes("buildIntegrationsHealthNote"));
+  assert.equal(routeSrc.includes("INTEGRATION_ENV_GROUP_LABELS.join"), false);
+
+  for (const mode of ["fixture", "sandbox", "live"] as const) {
+    process.env.DIAL_INTEGRATION_MODE = mode;
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { note?: string; mode?: string };
+    assert.equal(body.mode, mode);
+    assert.equal(body.note, buildIntegrationsHealthNote(mode));
+  }
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");

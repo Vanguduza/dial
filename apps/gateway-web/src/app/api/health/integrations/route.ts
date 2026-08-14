@@ -1,6 +1,7 @@
 /**
  * Integration readiness health — reports which env groups are configured.
- * Never echoes secret values (D-47). S128/S138 probes; S139 env groups SoR.
+ * Never echoes secret values (D-47). S128/S138 probes; S139 env groups SoR;
+ * S164 note via buildIntegrationsHealthNote.
  */
 import { NextResponse } from "next/server";
 import { pingFdmsHealth } from "@dial/adapter-fdms";
@@ -20,8 +21,8 @@ import { pingInternalApiHealth } from "@dial/shared";
 import { getFiscalDayState } from "@dial/tax";
 import { pingTemporalHealth } from "@dial/worker-temporal";
 import {
+  buildIntegrationsHealthNote,
   buildIntegrationsProbes,
-  INTEGRATION_ENV_GROUP_LABELS,
   integrationsReady,
   listIntegrationEnvGroupSnapshots,
 } from "../../../../lib/integrationsReadiness.js";
@@ -79,10 +80,7 @@ export async function GET(): Promise<NextResponse> {
       ...searchHealthSnapshot(),
       meili,
     },
-    note:
-      mode === "fixture"
-        ? `Fixture mode — missing keys OK for CI; ready=all probes ok; groups labels=${INTEGRATION_ENV_GROUP_LABELS.join(",")}`
-        : `Sandbox/live — missing groups will fail closed on use; ready=all probes ok; groups labels=${INTEGRATION_ENV_GROUP_LABELS.join(",")}`,
+    note: buildIntegrationsHealthNote(mode),
   };
 
   return NextResponse.json(body);
