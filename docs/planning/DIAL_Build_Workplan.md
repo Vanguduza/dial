@@ -105,14 +105,23 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `searchSpareForSession` / `findOfferForSession`; USD cart; EcoCash\|COD CTAs; B2B informal deep-link deny; T |
 | Green → | Auto-open **PD4** PSP sandbox |
 
-### PD4 — PSP sandbox (CURRENT)
+### PD4 — PSP sandbox (**GREEN** 2026-08-14)
 
 | | |
 | --- | --- |
 | Issue | [#24](https://github.com/Vanguduza/dial/issues/24) |
-| Branch | `build/t4-tech-ui` (continue) |
-| Thin path | Paynow/EcoCash sandbox adapters fail-closed; webhook sig+idempotency; money SoR stays DIAL packages |
-| Green → | G1 plan hold (deps green) — no grocery Build until founder/plan |
+| Branch | `build/t4-tech-ui` |
+| Evidence | `runPd4MoneySpine`; sandbox fail-closed; Paynow/EcoCash webhook → ledger + FiscalReceiptQueued; T + money-path audit |
+| Green → | Open **G1** groceries ticket (deps PD1–PD4 green) |
+
+### G1 — Groceries (CURRENT — plan/ticket)
+
+| | |
+| --- | --- |
+| Issue | [#25](https://github.com/Vanguduza/dial/issues/25) |
+| Branch | `build/t4-tech-ui` (or `build/g1-*` when Build starts) |
+| Thin path | Food/pantry agency reuse of Auth/Meili/Spare/PSP — **DoD in-ticket before scaffold** |
+| Green → | Expand groceries / later S99 human |
 
 ### S10 — E2a (historical)
 

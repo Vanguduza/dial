@@ -205,3 +205,42 @@ test("S130 pingPspHealth fixture ok + sandbox fail-closed without paid rails", a
   assert.ok(closed.error?.includes("fail closed"));
   process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
+
+test("PD4 Paynow/EcoCash sandbox createPayment + verifyWebhook fail-closed without keys", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  for (const k of [
+    "PAYNOW_INTEGRATION_ID",
+    "PAYNOW_INTEGRATION_KEY",
+    "ECOCASH_API_KEY",
+    "ECOCASH_MERCHANT_CODE",
+    "ECOCASH_WEBHOOK_SECRET",
+  ]) {
+    delete process.env[k];
+  }
+  const registry = createPspRegistry();
+  await assert.rejects(
+    () => registry.paynow.createPayment(baseInput("paynow")),
+    /PAYNOW_|fail closed/,
+  );
+  await assert.rejects(
+    () => registry.ecocash_direct.createPayment(baseInput("ecocash_direct")),
+    /ECOCASH_|fail closed/,
+  );
+  await assert.rejects(
+    () =>
+      registry.paynow.verifyWebhook(
+        {},
+        "reference=ord&status=Paid&hash=deadbeef",
+      ),
+    /PAYNOW_|fail closed/,
+  );
+  await assert.rejects(
+    () =>
+      registry.ecocash_direct.verifyWebhook(
+        { "x-ecocash-signature": "x" },
+        JSON.stringify({ eventId: "e1", status: "SUCCESS" }),
+      ),
+    /ECOCASH_|fail closed/,
+  );
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});

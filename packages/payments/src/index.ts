@@ -8,6 +8,7 @@ import {
   claimProcessedEvent,
   __resetIdempotencyForTests,
 } from "@dial/shared";
+import { createVendorPaymentSession } from "./adapterBridge.js";
 
 export type PaymentMethodCode =
   | "ecocash_direct"
@@ -45,6 +46,8 @@ export type PaymentIntent = {
   orderId: string;
   idempotencyKey: string;
   createdAt: string;
+  /** Vendor session ref from @dial/adapter-psp (PD4). */
+  providerRef?: string;
 };
 
 export type CodOrder = {
@@ -421,6 +424,259 @@ export function admitPspWebhookEvent(input: {
   return "captured";
 }
 
+function formalityForOrder(orderId: string): "formal" | "informal" {
+  for (const snap of offerSnapshots.values()) {
+    if (snap.orderId === orderId) return snap.formality;
+  }
+  return "formal";
+}
+
+/**
+ * After verified capture — post DIAL ledger + enqueue FiscalReceiptQueued (agency D-59).
+ * Idempotent on pspEventId. Amounts remain integer minor units (no float / no AI).
+ */
+export async function completePspCaptureSettlement(input: {
+  intentId: string;
+  pspEventId: string;
+  dialFeeUsdMinor?: bigint;
+  channel?: "web" | "wa" | "native";
+}): Promise<{
+  journalId: string;
+  fiscalIds: string[];
+  duplicate: boolean;
+}> {
+  if (settledPspCaptures.has(input.pspEventId)) {
+    return { journalId: "", fiscalIds: [], duplicate: true };
+  }
+  const intent = intents.get(input.intentId);
+  if (!intent) throw new Error("Unknown intent");
+  if (intent.status !== "captured") {
+    throw new Error("Intent must be captured before settlement");
+  }
+
+  const { postPspCaptureSimple, enqueueMoneyOutbox } = await import(
+    "@dial/ledger"
+  );
+  const { enqueueFiscalReceipt } = await import("@dial/tax");
+
+  const journal = postPspCaptureSimple({
+    orderId: intent.orderId,
+    amount: intent.amount,
+    idempotencyKey: `ledger_${input.pspEventId}`,
+  });
+
+  const formality = formalityForOrder(intent.orderId);
+  const channel = input.channel ?? "web";
+  const goodsClass =
+    formality === "formal" ? "GOODS_FORMAL" : "GOODS_INFORMAL";
+  const goods = enqueueFiscalReceipt({
+    orderId: intent.orderId,
+    receiptClass: goodsClass,
+    amount: intent.amount,
+    channel,
+  });
+  const feeMinor = input.dialFeeUsdMinor ?? 100n;
+  const fee = enqueueFiscalReceipt({
+    orderId: intent.orderId,
+    receiptClass: "DIAL_FEE",
+    amount: money(feeMinor, "USD"),
+    channel,
+  });
+  enqueueMoneyOutbox({ kind: "fiscal_queued", refId: goods.id });
+  enqueueMoneyOutbox({ kind: "fiscal_queued", refId: fee.id });
+  settledPspCaptures.add(input.pspEventId);
+
+  return {
+    journalId: journal.id,
+    fiscalIds: [goods.id, fee.id],
+    duplicate: false,
+  };
+}
+
+/**
+ * PD4 thin path: OfferSnapshot → adapter createPayment (Paynow|EcoCash) →
+ * signed webhook verify → admit capture → ledger → FiscalReceiptQueued.
+ * Fixture: no outbound HTTP. Sandbox/live: adapters fail closed without keys.
+ */
+export async function runPd4MoneySpine(input: {
+  rail: "paynow_hosted" | "ecocash_direct";
+  orderId: string;
+  supplierDisplayName: string;
+  formality: "formal" | "informal";
+  amountUsdMinor: bigint;
+  dialFeeUsdMinor: bigint;
+  buyerSegment: "b2c" | "b2b";
+  channel: "web" | "wa" | "native";
+  pspEventId: string;
+  /** When false, stop after authorize (signature rejected). */
+  signatureValid?: boolean;
+  msisdnE164?: string;
+}): Promise<{
+  snapshot: OfferSnapshot;
+  intent: PaymentIntent;
+  vendorSession: { providerRef: string; status: string };
+  journalId: string;
+  fiscalIds: string[];
+  webhook: "captured" | "rejected_signature" | "duplicate";
+}> {
+  const { createPspRegistry } = await import("@dial/adapter-psp");
+
+  assertB2bMayPurchase({
+    buyerSegment: input.buyerSegment,
+    formality: input.formality,
+  });
+
+  const snapshot = freezeOfferSnapshot({
+    orderId: input.orderId,
+    supplierDisplayName: input.supplierDisplayName,
+    formality: input.formality,
+    amountUsdMinor: input.amountUsdMinor,
+  });
+
+  let displayPayable: Money | undefined;
+  let chargeAmount = snapshot.amount;
+  if (input.rail === "ecocash_direct") {
+    const rate = getActiveFxRate();
+    if (!rate) {
+      throw new Error("No active Daily ZiG rate — set via setDailyZigRate before EcoCash");
+    }
+    displayPayable = usdToZig(input.amountUsdMinor, rate);
+    chargeAmount = displayPayable;
+  }
+
+  const vendorSession = await createVendorPaymentSession({
+    method: input.rail,
+    reference: input.orderId,
+    amount: chargeAmount,
+    customer: { msisdnE164: input.msisdnE164 ?? "+263771234567" },
+    metadata: { orderId: input.orderId },
+  });
+
+  const authorizeKey = `pd4_auth_${input.rail}_${input.orderId}`;
+  let intentId = intentsByIdem.get(authorizeKey);
+  let intent = intentId ? intents.get(intentId) : undefined;
+  if (!intent) {
+    intent = {
+      id: id("pi"),
+      method: input.rail,
+      amount: snapshot.amount,
+      ...(displayPayable !== undefined ? { displayPayable } : {}),
+      status: "authorized",
+      orderId: input.orderId,
+      idempotencyKey: authorizeKey,
+      createdAt: new Date().toISOString(),
+      providerRef: vendorSession.providerRef,
+    };
+    intents.set(intent.id, intent);
+    intentsByIdem.set(authorizeKey, intent.id);
+  }
+
+  if (input.signatureValid === false) {
+    return {
+      snapshot,
+      intent,
+      vendorSession: {
+        providerRef: vendorSession.providerRef,
+        status: vendorSession.status,
+      },
+      journalId: "",
+      fiscalIds: [],
+      webhook: "rejected_signature",
+    };
+  }
+
+  const registry = createPspRegistry();
+  const adapter =
+    input.rail === "paynow_hosted"
+      ? registry.paynow
+      : registry.ecocash_direct;
+  const rawBody =
+    input.rail === "paynow_hosted"
+      ? new URLSearchParams({
+          reference: intent.id,
+          paynowreference: vendorSession.providerRef,
+          amount: "10.00",
+          status: "Paid",
+          pollurl: vendorSession.pollUrl ?? "",
+          hash: "",
+        }).toString()
+      : JSON.stringify({
+          eventId: input.pspEventId,
+          transactionId: vendorSession.providerRef,
+          status: "SUCCESS",
+          reference: intent.id,
+        });
+  const admission = await adapter.verifyWebhook({}, rawBody);
+  if (
+    processedPspEvents.has(admission.eventId) ||
+    processedPspEvents.has(input.pspEventId)
+  ) {
+    return {
+      snapshot,
+      intent,
+      vendorSession: {
+        providerRef: vendorSession.providerRef,
+        status: vendorSession.status,
+      },
+      journalId: "",
+      fiscalIds: [],
+      webhook: "duplicate",
+    };
+  }
+
+  const admitted = admitPspWebhookEvent({
+    eventId: input.pspEventId || admission.eventId,
+    intentId: intent.id,
+    signatureValid: true,
+    action: admission.status === "cancelled" ? "ignore" : "capture",
+  });
+  if (admitted === "ignored") {
+    return {
+      snapshot,
+      intent,
+      vendorSession: {
+        providerRef: vendorSession.providerRef,
+        status: vendorSession.status,
+      },
+      journalId: "",
+      fiscalIds: [],
+      webhook: "rejected_signature",
+    };
+  }
+  if (admitted !== "captured") {
+    return {
+      snapshot,
+      intent,
+      vendorSession: {
+        providerRef: vendorSession.providerRef,
+        status: vendorSession.status,
+      },
+      journalId: "",
+      fiscalIds: [],
+      webhook: admitted === "duplicate" ? "duplicate" : "rejected_signature",
+    };
+  }
+
+  const settled = await completePspCaptureSettlement({
+    intentId: intent.id,
+    pspEventId: input.pspEventId,
+    dialFeeUsdMinor: input.dialFeeUsdMinor,
+    channel: input.channel,
+  });
+
+  return {
+    snapshot,
+    intent,
+    vendorSession: {
+      providerRef: vendorSession.providerRef,
+      status: vendorSession.status,
+    },
+    journalId: settled.journalId,
+    fiscalIds: settled.fiscalIds,
+    webhook: settled.duplicate ? "duplicate" : "captured",
+  };
+}
+
 export type CheckoutPayChoice = "ecocash" | "cod";
 
 /**
@@ -456,6 +712,13 @@ export async function createCheckoutPayment(input: {
       fxRateId: rate.fxRateId,
       displayPayable: zig,
     });
+    const vendor = await createVendorPaymentSession({
+      method: "ecocash_direct",
+      reference: input.orderId,
+      amount: zig,
+      customer: { msisdnE164: "+263771234567" },
+      metadata: { fx_rate_id: rate.fxRateId },
+    });
     const intent: PaymentIntent = {
       id: id("pi"),
       method: "ecocash_direct",
@@ -466,6 +729,7 @@ export async function createCheckoutPayment(input: {
       orderId: input.orderId,
       idempotencyKey: input.idempotencyKey,
       createdAt: new Date().toISOString(),
+      providerRef: vendor.providerRef,
     };
     intents.set(intent.id, intent);
     intentsByIdem.set(input.idempotencyKey, intent.id);
@@ -523,6 +787,8 @@ export type OfferSnapshot = {
 
 const offerSnapshots = new Map<string, OfferSnapshot>();
 const processedPspEvents = new Set<string>();
+/** Ledger/fiscal settlement idempotency (PD4) — keyed by psp event id. */
+const settledPspCaptures = new Set<string>();
 
 export function freezeOfferSnapshot(input: {
   orderId: string;
@@ -675,6 +941,7 @@ export function __resetPaymentsForTests(): void {
   codOrders.clear();
   offerSnapshots.clear();
   processedPspEvents.clear();
+  settledPspCaptures.clear();
   __resetIdempotencyForTests();
   jobReserves.clear();
   jobReservesByIdem.clear();

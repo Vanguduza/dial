@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD4 PSP sandbox** — `runPd4MoneySpine` Paynow+EcoCash adapter authorize → signed webhook → ledger → `FiscalReceiptQueued`; checkout EcoCash sets `providerRef`; sandbox fail-closed without `PAYNOW_*`/`ECOCASH_*`; audit `docs/agent-audits/money-path-PD4-2026-08-14.md` ([#24](https://github.com/Vanguduza/dial/issues/24)).
 - **PD3 Spare depth** — `/spare` browse + PDP use `searchOffersAsync` via session helper; B2B cannot deep-link informal; USD cart; EcoCash|COD checkout CTAs (D-57) ([#23](https://github.com/Vanguduza/dial/issues/23)).
 - **PD2 Search depth** — Meili `spare_offers_v1` ensure/upsert/search client; Factory human approve→`publishApprovedBatchToMeili`; gateway `GET /api/search/spare` via `searchOffersAsync` + session buyerSegment (D-49); admin review `publish` action; fixture CI + sandbox/live fail-closed ([#22](https://github.com/Vanguduza/dial/issues/22)).
 - **PD1 Auth depth** — Supabase Auth password sign-up/in (`signUpWithPassword` / `signInWithPassword`), profiles upsert + RLS migration `0002_profiles_auth_rls.sql`, DialSession from auth user + profile (`buyerSegment`), `GET /api/auth/me` with object AuthZ, password fields on gateway sign-in/up; fixture CI + sandbox/live fail-closed ([#21](https://github.com/Vanguduza/dial/issues/21)).

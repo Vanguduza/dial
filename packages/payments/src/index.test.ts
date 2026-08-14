@@ -16,6 +16,7 @@ import {
   listFxRateAudit,
   listPspMethods,
   runE1aMoneySpine,
+  runPd4MoneySpine,
   setDailyZigRate,
   toCanonicalPspCode,
   usdToZig,
@@ -291,4 +292,63 @@ test("S92 bridge: domain method → canonical PSP createPayment (fixture)", asyn
   });
   assert.ok(session.providerRef.includes("paynow"));
   assert.ok(session.redirectUrl || session.status);
+});
+
+test("PD4 spine: Paynow + EcoCash adapter authorize → webhook → ledger → FiscalReceiptQueued", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetPaymentsForTests();
+  __resetLedgerForTests();
+  __resetTaxForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_pd4" });
+
+  const paynow = await runPd4MoneySpine({
+    rail: "paynow_hosted",
+    orderId: "ord_pd4_paynow",
+    supplierDisplayName: "Acme Spares",
+    formality: "formal",
+    amountUsdMinor: 25_00n,
+    dialFeeUsdMinor: 150n,
+    buyerSegment: "b2c",
+    channel: "web",
+    pspEventId: "pd4_paynow_evt_1",
+  });
+  assert.equal(paynow.webhook, "captured");
+  assert.ok(paynow.vendorSession.providerRef.startsWith("paynow_fx_"));
+  assert.equal(paynow.intent.status, "captured");
+  assert.ok(paynow.intent.providerRef);
+  assert.ok(paynow.journalId);
+  assert.equal(paynow.fiscalIds.length, 2);
+  assert.ok(listFdmsOutbox().some((r) => r.receiptClass === "GOODS_FORMAL"));
+  assert.ok(listFdmsOutbox().some((r) => r.receiptClass === "DIAL_FEE"));
+
+  const eco = await runPd4MoneySpine({
+    rail: "ecocash_direct",
+    orderId: "ord_pd4_eco",
+    supplierDisplayName: "Acme Spares",
+    formality: "formal",
+    amountUsdMinor: 12_00n,
+    dialFeeUsdMinor: 100n,
+    buyerSegment: "b2c",
+    channel: "wa",
+    pspEventId: "pd4_eco_evt_1",
+  });
+  assert.equal(eco.webhook, "captured");
+  assert.ok(eco.vendorSession.providerRef.startsWith("eco_fx_"));
+  assert.equal(eco.intent.displayPayable?.currency, "ZWG");
+  assert.ok(eco.journalId);
+
+  const rejected = await runPd4MoneySpine({
+    rail: "paynow_hosted",
+    orderId: "ord_pd4_bad_sig",
+    supplierDisplayName: "Acme Spares",
+    formality: "formal",
+    amountUsdMinor: 5_00n,
+    dialFeeUsdMinor: 50n,
+    buyerSegment: "b2c",
+    channel: "web",
+    pspEventId: "pd4_bad",
+    signatureValid: false,
+  });
+  assert.equal(rejected.webhook, "rejected_signature");
+  assert.equal(rejected.journalId, "");
 });

@@ -324,6 +324,56 @@ test("PD3 Spare UI: searchOffersAsync browse path; B2B hides informal; USD cart;
   assert.doesNotMatch(browseSrc, /searchOffers\(/);
 });
 
+test("PD4 sandbox PSP: adapter spine Paynow+EcoCash → FiscalReceiptQueued; checkout providerRef", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetPaymentsForTests();
+  const { __resetLedgerForTests } = await import("@dial/ledger");
+  const { __resetTaxForTests, listFdmsOutbox } = await import("@dial/tax");
+  __resetLedgerForTests();
+  __resetTaxForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_pd4_gw" });
+
+  const { runPd4MoneySpine } = await import("@dial/payments");
+  const spine = await runPd4MoneySpine({
+    rail: "paynow_hosted",
+    orderId: "ord_pd4_gw",
+    supplierDisplayName: "Acme",
+    formality: "formal",
+    amountUsdMinor: 18_00n,
+    dialFeeUsdMinor: 120n,
+    buyerSegment: "b2c",
+    channel: "web",
+    pspEventId: "pd4_gw_evt",
+  });
+  assert.equal(spine.webhook, "captured");
+  assert.ok(spine.journalId);
+  assert.ok(listFdmsOutbox().length >= 2);
+
+  const { intent } = await createCheckoutPayment({
+    choice: "ecocash",
+    orderId: "ord_pd4_eco_co",
+    amountUsdMinor: 9_00n,
+    idempotencyKey: "pd4-eco-co",
+  });
+  assert.ok(intent?.providerRef?.startsWith("eco_fx_"));
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.PAYNOW_INTEGRATION_ID;
+  delete process.env.PAYNOW_INTEGRATION_KEY;
+  const { createVendorPaymentSession } = await import("@dial/payments");
+  const { money } = await import("@dial/shared");
+  await assert.rejects(
+    () =>
+      createVendorPaymentSession({
+        method: "paynow_hosted",
+        reference: "ord_fail",
+        amount: money(1_00n, "USD"),
+      }),
+    /PAYNOW_|fail closed/,
+  );
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
 /** S22 T3: USD cart → pay-step EcoCash|COD (ZiG only at pay); WA button parity. */
 test("T3 Spare checkout pay-step: EcoCash|COD required; no supplierId; WA parity", async () => {
   __resetCatalogueForTests();
@@ -8284,9 +8334,17 @@ test("S119 Paynow webhook durable claim + fixture payments SoR bridge", async ()
     ok: boolean;
     bridge?: string;
     duplicate?: boolean;
+    settlement?: { journalId?: string; fiscalIds?: string[] };
   };
   assert.equal(firstJson.ok, true);
-  assert.equal(firstJson.bridge, "captured");
+  assert.ok(
+    firstJson.bridge === "captured" || firstJson.bridge === "settled",
+    `expected captured|settled, got ${firstJson.bridge}`,
+  );
+  if (firstJson.bridge === "settled") {
+    assert.ok(firstJson.settlement?.journalId);
+    assert.ok((firstJson.settlement?.fiscalIds?.length ?? 0) >= 1);
+  }
   assert.equal(
     __testPaynowPayments.getPaymentIntent(authorized.intent.id)?.status,
     "captured",

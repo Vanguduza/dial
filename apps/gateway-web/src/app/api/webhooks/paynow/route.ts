@@ -1,14 +1,16 @@
 /**
- * Paynow result webhook — SHA512 hash + durable idempotency (Pack §6.6 / D-43 / S119).
- * Fixture: bridges into payments SoR when `reference` matches a known intent id.
+ * Paynow result webhook — SHA512 hash + durable idempotency (Pack §6.6 / D-43 / PD4).
+ * Fixture: bridges into payments SoR + ledger/FiscalReceiptQueued when reference = intent id.
  */
 import { NextResponse } from "next/server";
 import { PaynowAdapter } from "@dial/adapter-psp";
 import {
   __resetPaymentsForTests,
   admitPspWebhookEvent,
+  completePspCaptureSettlement,
   getPaymentIntent,
   runE1aMoneySpine,
+  runPd4MoneySpine,
 } from "@dial/payments";
 import { claimProcessedEventDurable } from "@dial/shared";
 
@@ -18,6 +20,7 @@ export const runtime = "nodejs";
 export const __testPaynowPayments = {
   reset: __resetPaymentsForTests,
   runE1aMoneySpine,
+  runPd4MoneySpine,
   getPaymentIntent,
 };
 
@@ -44,7 +47,9 @@ export async function POST(req: Request) {
       | "rejected_signature"
       | "duplicate"
       | "ignored"
-      | "skipped" = "skipped";
+      | "skipped"
+      | "settled" = "skipped";
+    let settlement: { journalId: string; fiscalIds: string[] } | undefined;
     if (intentId && getPaymentIntent(intentId)) {
       bridge = admitPspWebhookEvent({
         eventId: `paynow_bridge_${admission.eventId}`,
@@ -52,9 +57,21 @@ export async function POST(req: Request) {
         signatureValid: true,
         action: admission.status === "paid" ? "capture" : "ignore",
       });
+      if (bridge === "captured") {
+        const settled = await completePspCaptureSettlement({
+          intentId,
+          pspEventId: `paynow_settle_${admission.eventId}`,
+          channel: "web",
+        });
+        settlement = {
+          journalId: settled.journalId,
+          fiscalIds: settled.fiscalIds,
+        };
+        bridge = settled.duplicate ? "captured" : "settled";
+      }
     }
 
-    return NextResponse.json({ ok: true, admission, bridge });
+    return NextResponse.json({ ok: true, admission, bridge, settlement });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "webhook error" },

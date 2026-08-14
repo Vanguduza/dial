@@ -99,7 +99,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/search-indexer` | Meili reindex jobs |
 | `packages/ai` | guidedIntake + LiteLLM + Intelligence stubs (D-61) |
 
-**Build status:** eng spine **S90** green; product-depth **PD1–PD3** landed → next **PD4** sandbox PSP. OpenAPI invent paused. Customer-open (**S99**) stays human-gated.
+**Build status:** eng spine **S90** green; product-depth **PD1–PD4** complete → next **G1** groceries (plan/ticket; Build when DoD opens). OpenAPI invent paused. Customer-open (**S99**) stays human-gated.
 
 ### Gateway integration surface (plug-in)
 
