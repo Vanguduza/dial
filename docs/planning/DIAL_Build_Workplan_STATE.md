@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S237** — Served mode enum fixture|sandbox|live — **green** |
+| `current_stage` | **S238** — Sandbox note differs from fixture under empty env — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S236** Webhook 503 fail-closed SoR — **green** |
-| `next_stage` | **S238** |
+| `prior_stage` | **S237** Served mode enum lock — **green** |
+| `next_stage` | **S239** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S236 | 2026-08-13/14 | through prior |
-| S237 | 2026-08-14 | Served mode enum fixture|sandbox|live |
+| S91–S237 | 2026-08-13/14 | through prior |
+| S238 | 2026-08-14 | Sandbox note differs from fixture under empty env |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S238 | Sandbox note differs from fixture under empty env |
 | S239 | Served OpenAPI paths equal disk path keys |
 | S240 | Served webhook POST bodies ref WebhookOpaqueBody |
 | S241 | Served healthNoteUiMax matches disk |
 | S242 | OpenAPI noteBuilderDocs served matches disk |
+| S243 | Live mode note equals sandbox note builder |
 
 ## Note
 
