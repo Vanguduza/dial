@@ -3198,6 +3198,207 @@ test("S290 served admin path keys match disk", async () => {
   assert.ok(diskAdmin.includes("/api/admin/fdms/day"));
 });
 
+test("S291 admin FDMS day GET 503 without INTERNAL_API_SECRET", async () => {
+  const prev = process.env.INTERNAL_API_SECRET;
+  delete process.env.INTERNAL_API_SECRET;
+  try {
+    const { GET } = await import("./app/api/admin/fdms/day/route.js");
+    const res = await GET(new Request("http://localhost/api/admin/fdms/day"));
+    assert.equal(res.status, 503);
+    const body = (await res.json()) as { error?: string };
+    assert.ok((body.error ?? "").includes("INTERNAL_API_SECRET"));
+    assert.equal((body.error ?? "").includes("sk_live"), false);
+  } finally {
+    if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prev;
+  }
+});
+
+test("S292 ContiPay OpenAPI documents 503 fail-closed", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const d503 =
+    served.paths["/api/webhooks/contipay"]?.post?.responses?.["503"]
+      ?.description ?? "";
+  assert.ok(/fail-closed|misconfig/i.test(d503));
+});
+
+test("S293 WhatsApp POST OpenAPI documents 503 fail-closed", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const d503 =
+    served.paths["/api/webhooks/whatsapp"]?.post?.responses?.["503"]
+      ?.description ?? "";
+  assert.ok(/fail-closed|misconfig/i.test(d503));
+});
+
+test("S294 all webhook POSTs document canonical 503 text", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const posts = Object.keys(served.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  const canonical = "Fail-closed (sandbox/live misconfig)";
+  for (const p of posts) {
+    assert.equal(
+      served.paths[p]?.post?.responses?.["503"]?.description,
+      canonical,
+      `${p} 503 description`,
+    );
+  }
+});
+
+test("S295 daily-zig unauthorized 401 with wrong secret", async () => {
+  const prev = process.env.INTERNAL_API_SECRET;
+  process.env.INTERNAL_API_SECRET = "s295_correct";
+  try {
+    const { GET } = await import("./app/api/admin/fx/daily-zig/route.js");
+    const res = await GET(
+      new Request("http://localhost/api/admin/fx/daily-zig", {
+        headers: { "x-internal-secret": "s295_wrong" },
+      }),
+    );
+    assert.equal(res.status, 401);
+    const body = (await res.json()) as { error?: string };
+    assert.equal(body.error, "unauthorized");
+    assert.equal(JSON.stringify(body).includes("s295_correct"), false);
+  } finally {
+    if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prev;
+  }
+});
+
+test("S296 admin FDMS day POST 503 without INTERNAL_API_SECRET", async () => {
+  const prev = process.env.INTERNAL_API_SECRET;
+  delete process.env.INTERNAL_API_SECRET;
+  try {
+    const { POST } = await import("./app/api/admin/fdms/day/route.js");
+    const res = await POST(
+      new Request("http://localhost/api/admin/fdms/day", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "open" }),
+      }),
+    );
+    assert.equal(res.status, 503);
+    const body = (await res.json()) as { error?: string };
+    assert.ok((body.error ?? "").includes("INTERNAL_API_SECRET"));
+  } finally {
+    if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prev;
+  }
+});
+
+test("S297 admin FDMS day 401 with wrong secret", async () => {
+  const prev = process.env.INTERNAL_API_SECRET;
+  process.env.INTERNAL_API_SECRET = "s297_correct";
+  try {
+    const { GET } = await import("./app/api/admin/fdms/day/route.js");
+    const res = await GET(
+      new Request("http://localhost/api/admin/fdms/day", {
+        headers: { "x-internal-secret": "s297_wrong" },
+      }),
+    );
+    assert.equal(res.status, 401);
+    const body = (await res.json()) as { error?: string };
+    assert.equal(body.error, "unauthorized");
+    assert.equal(JSON.stringify(body).includes("s297_correct"), false);
+  } finally {
+    if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prev;
+  }
+});
+
+test("S298 daily-zig OpenAPI documents 503 INTERNAL_API_SECRET unset", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, { description?: string }> };
+        post?: { responses?: Record<string, { description?: string }> };
+      }
+    >;
+  };
+  const path = served.paths["/api/admin/fx/daily-zig"];
+  for (const method of ["get", "post"] as const) {
+    const d503 = path?.[method]?.responses?.["503"]?.description ?? "";
+    assert.ok(
+      d503.includes("INTERNAL_API_SECRET"),
+      `daily-zig ${method} 503 must cite INTERNAL_API_SECRET`,
+    );
+    assert.ok(/fail closed/i.test(d503));
+  }
+});
+
+test("S299 ContiPay 503 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/contipay"]?.post?.responses?.["503"]
+      ?.description,
+    disk.paths["/api/webhooks/contipay"]?.post?.responses?.["503"]?.description,
+  );
+});
+
+test("S300 WhatsApp POST 503 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.post?.responses?.["503"]
+      ?.description,
+    disk.paths["/api/webhooks/whatsapp"]?.post?.responses?.["503"]?.description,
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

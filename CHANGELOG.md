@@ -239,6 +239,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 - S288 Smoke: WhatsApp POST OpenAPI documents 401 Bad HMAC.
 - S289 Smoke: WhatsApp GET challenge query params locked.
 - S290 Smoke: served admin path keys match disk.
+- S291 Smoke: admin FDMS day GET 503 without INTERNAL_API_SECRET.
 - S20 T1 Identity **green** (Pack Â§15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow searchâ†’cartâ†’checkout buttons + webhook idempotency).
