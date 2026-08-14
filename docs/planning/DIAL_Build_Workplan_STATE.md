@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S188** — Root README cites x-dial-sor.noteBuilderDocs — **green** |
+| `current_stage` | **S189** — OpenAPI info.description mentions noteBuilderDocs — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S187** Integrations README cites x-dial-sor.noteBuilderDocs — **green** |
-| `next_stage` | **S189** OpenAPI info.description mentions noteBuilderDocs |
+| `prior_stage` | **S188** Root README cites x-dial-sor.noteBuilderDocs — **green** |
+| `next_stage` | **S190** Smoke: sandbox health ready false when probe fails |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S187 | 2026-08-13/14 | through integrations README noteBuilderDocs |
-| S188 | 2026-08-14 | root README cites noteBuilderDocs |
+| S91–S188 | 2026-08-13/14 | through root README noteBuilderDocs |
+| S189 | 2026-08-14 | OpenAPI info.description cites noteBuilderDocs |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S189 | OpenAPI `info.description` mentions `noteBuilderDocs` |
 | S190 | Smoke: sandbox health `ready` false when any probe fails |
 | S191 | Smoke: live health `ready` false when any probe fails |
-| S192 | OpenAPI S134 x-dial-sor asserts noteBuilderDocs present |
-| S193 | OpenAPI S134 x-dial-sor asserts noteBuilderHint present |
+| S192 | OpenAPI S134 x-dial-sor asserts noteBuilderDocs + noteBuilderHint |
+| S193 | Fixture mode allows ready=true with incomplete env groups |
+| S194 | Document ready vs groups configured semantics in integrations README |
 
 ## Note
 
