@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S298** — daily-zig OpenAPI 503 INTERNAL_API_SECRET — **green** |
+| `current_stage` | **S299** — ContiPay 503 description matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S297** — green |
-| `next_stage` | **S299 ContiPay 503 description matches disk** |
+| `prior_stage` | **S298** — green |
+| `next_stage` | **S300 WhatsApp POST 503 description matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S297 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S298 | 2026-08-14 | daily-zig GET/POST OpenAPI 503 cite secret unset |
+| S91–S298 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S299 | 2026-08-14 | ContiPay 503 served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S299 | ContiPay 503 description matches disk |
 | S300 | WhatsApp POST 503 description matches disk |
 | S301 | money outbox 401 with wrong secret |
 | S302 | Paynow 503 description matches disk |
 | S303 | EcoCash 503 description matches disk |
+| S304 | FDMS webhook 503 description matches disk |
 
 ## Note
 
