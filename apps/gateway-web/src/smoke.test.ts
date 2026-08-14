@@ -985,6 +985,29 @@ test("S178 OpenAPI x-dial-sor.noteBuilderHint points at HINT_ID", async () => {
   );
 });
 
+test("S180 served OpenAPI noteBuilderHint matches HINT_ID export", async () => {
+  const { INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  assert.equal(INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID, "note-builder-sor-hint");
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { noteBuilderHint?: string } };
+  };
+  const ptr = served.info?.["x-dial-sor"]?.noteBuilderHint ?? "";
+  assert.ok(
+    ptr.endsWith(`#INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID`),
+    `expected fragment #INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID, got ${ptr}`,
+  );
+  assert.ok(
+    ptr.includes("integrationsReadiness.ts"),
+    `expected integrationsReadiness.ts path, got ${ptr}`,
+  );
+});
+
 test("S162 served OpenAPI healthNoteUiMax matches INTEGRATIONS_HEALTH_NOTE_UI_MAX export", async () => {
   const { INTEGRATIONS_HEALTH_NOTE_UI_MAX } = await import(
     "./lib/integrationsReadiness.js"
