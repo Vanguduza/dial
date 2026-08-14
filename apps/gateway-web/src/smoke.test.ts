@@ -1052,6 +1052,36 @@ test("S183 OpenAPI x-dial-sor.noteBuilderDocs points at DOCS constant", async ()
   assert.ok(ptr.includes("integrationsReadiness.ts"));
 });
 
+test("S184 served OpenAPI noteBuilderDocs matches DOCS export path", async () => {
+  const { existsSync, readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { INTEGRATIONS_NOTE_BUILDER_SOR_DOCS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const docsPath = join(process.cwd(), "../..", INTEGRATIONS_NOTE_BUILDER_SOR_DOCS);
+  assert.ok(existsSync(docsPath), `missing ${INTEGRATIONS_NOTE_BUILDER_SOR_DOCS}`);
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: {
+      "x-dial-sor"?: { noteBuilderDocs?: string; docs?: string };
+    };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.docs,
+    INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.noteBuilderDocs?.endsWith(
+      "#INTEGRATIONS_NOTE_BUILDER_SOR_DOCS",
+    ),
+  );
+  const body = readFileSync(docsPath, "utf8");
+  assert.ok(body.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+});
+
 test("S162 served OpenAPI healthNoteUiMax matches INTEGRATIONS_HEALTH_NOTE_UI_MAX export", async () => {
   const { INTEGRATIONS_HEALTH_NOTE_UI_MAX } = await import(
     "./lib/integrationsReadiness.js"
