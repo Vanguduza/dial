@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S244** — probes required keys match INTEGRATION_PROBE_KEYS — **green** |
+| `current_stage` | **S245** — sandbox ready=false without Redis — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S243** live note equals sandbox builder — **green** |
-| `next_stage` | **S245** |
+| `prior_stage` | **S244** probes required keys match — **green** |
+| `next_stage` | **S246** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S243 | 2026-08-13/14 | through prior |
-| S244 | 2026-08-14 | probes required keys match INTEGRATION_PROBE_KEYS |
+| S91–S244 | 2026-08-13/14 | through prior |
+| S245 | 2026-08-14 | sandbox ready=false without Redis |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S245 | sandbox ready=false without Redis |
 | S246 | fixture ready=true without Redis |
 | S247 | noteBuilderHint served==disk |
 | S248 | envGroups served==disk |
 | S249 | envGroupLabels served==disk |
+| S250 | live ready=false without Redis |
 
 ## Note
 
