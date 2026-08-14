@@ -100,6 +100,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-113 | **S135 note-builder-sor-hint parity** | `done` | S175 — both admin pages locked |
 | ENH-114 | **Note-builder SoR pointer constants** | `done` | S176 — HINT_ID + DOCS exports |
 | ENH-115 | **.env.example note-builder-sor-hint** | `done` | S177 — HINT_ID + DOCS cited |
+| ENH-116 | **OpenAPI noteBuilderHint SoR** | `done` | S178 — x-dial-sor.noteBuilderHint |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

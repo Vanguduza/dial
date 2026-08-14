@@ -933,6 +933,35 @@ test("S177 .env.example cites note-builder-sor-hint contract", async () => {
   assert.ok(envExample.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
 });
 
+test("S178 OpenAPI x-dial-sor.noteBuilderHint points at HINT_ID", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: { "x-dial-sor"?: { noteBuilderHint?: string } };
+  };
+  assert.ok(
+    spec.info?.["x-dial-sor"]?.noteBuilderHint?.endsWith(
+      "#INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID",
+    ),
+  );
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { noteBuilderHint?: string } };
+  };
+  assert.ok(
+    served.info?.["x-dial-sor"]?.noteBuilderHint?.endsWith(
+      "#INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID",
+    ),
+  );
+});
+
 test("S162 served OpenAPI healthNoteUiMax matches INTEGRATIONS_HEALTH_NOTE_UI_MAX export", async () => {
   const { INTEGRATIONS_HEALTH_NOTE_UI_MAX } = await import(
     "./lib/integrationsReadiness.js"

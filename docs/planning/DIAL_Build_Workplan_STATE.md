@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S177** — `.env.example` cites note-builder-sor-hint contract — **green** |
+| `current_stage` | **S178** — OpenAPI x-dial-sor.noteBuilderHint points at hint id — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S176** Export docs pointer constant for note-builder SoR — **green** |
-| `next_stage` | **S178** OpenAPI x-dial-sor.noteBuilderHint points at hint id |
+| `prior_stage` | **S177** `.env.example` cites note-builder-sor-hint contract — **green** |
+| `next_stage` | **S179** Admin UI imports shared note-builder hint constant |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S176 | 2026-08-13/14 | through note-builder SoR pointer constants |
-| S177 | 2026-08-14 | .env.example cites note-builder-sor-hint + HINT_ID/DOCS |
+| S91–S177 | 2026-08-13/14 | through .env.example note-builder-sor-hint |
+| S178 | 2026-08-14 | x-dial-sor.noteBuilderHint → HINT_ID |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S178 | OpenAPI `x-dial-sor.noteBuilderHint` → HINT_ID constant |
 | S179 | Admin UI imports shared note-builder hint constant for data-testid |
-| S180 | Smoke: served OpenAPI noteBuilderHint matches HINT_ID export |
+| S180 | Smoke: served OpenAPI noteBuilderHint matches HINT_ID export name |
 | S181 | Integrations README cites HINT_ID + DOCS constants |
 | S182 | Root README cites HINT_ID + DOCS constants |
+| S183 | OpenAPI x-dial-sor.noteBuilderDocs points at DOCS constant |
 
 ## Note
 
