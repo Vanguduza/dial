@@ -6058,6 +6058,189 @@ test("S415 WebhookOpaqueBody additionalProperties true", async () => {
   assert.equal(schema?.additionalProperties, true);
 });
 
+test("S416 IntegrationsHealth required fields match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components?: {
+      schemas?: { IntegrationsHealth?: { required?: string[] } };
+    };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    [...(served.components?.schemas?.IntegrationsHealth?.required ?? [])].sort(),
+    [...(disk.components?.schemas?.IntegrationsHealth?.required ?? [])].sort(),
+  );
+  assert.deepEqual(
+    [...(served.components?.schemas?.IntegrationsHealth?.required ?? [])].sort(),
+    ["groups", "mode", "ok", "probes", "ready"],
+  );
+});
+
+test("S417 IntegrationsProbes required keys match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components?: {
+      schemas?: { IntegrationsProbes?: { required?: string[] } };
+    };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    [...(served.components?.schemas?.IntegrationsProbes?.required ?? [])].sort(),
+    [...(disk.components?.schemas?.IntegrationsProbes?.required ?? [])].sort(),
+  );
+  assert.ok(
+    (served.components?.schemas?.IntegrationsProbes?.required ?? []).length >= 9,
+  );
+});
+
+test("S418 all schemas deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { components?: { schemas?: Record<string, unknown> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.components?.schemas, disk.components?.schemas);
+});
+
+test("S419 securitySchemes deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { components?: { securitySchemes?: Record<string, unknown> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.components?.securitySchemes,
+    disk.components?.securitySchemes,
+  );
+});
+
+test("S420 info object keys match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    Object.keys(served.info ?? {}).sort(),
+    Object.keys(disk.info ?? {}).sort(),
+  );
+  for (const key of ["title", "version", "description", "x-dial-sor"]) {
+    assert.ok(
+      Object.keys(served.info ?? {}).includes(key),
+      `missing info.${key}`,
+    );
+  }
+});
+
+test("S421 info deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.info, disk.info);
+});
+
+test("S422 components deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { components?: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.components, disk.components);
+});
+
+test("S423 servers deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { servers?: unknown[] };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.servers, disk.servers);
+});
+
+test("S424 tags deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { tags?: unknown[] };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.tags, disk.tags);
+});
+
+test("S425 openapi document deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as Record<string, unknown>;
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served, disk);
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
