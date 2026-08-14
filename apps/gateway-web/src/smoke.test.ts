@@ -5852,6 +5852,212 @@ test("S405 info.title matches disk", async () => {
   assert.ok((served.info?.title ?? "").includes("DIAL"));
 });
 
+test("S406 info.version matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { version?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(served.info?.version, disk.info?.version);
+  assert.ok((served.info?.version ?? "").length > 0);
+});
+
+test("S407 components.schemas key set match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { components?: { schemas?: Record<string, unknown> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    Object.keys(served.components?.schemas ?? {}).sort(),
+    Object.keys(disk.components?.schemas ?? {}).sort(),
+  );
+  assert.ok(
+    Object.keys(disk.components?.schemas ?? {}).includes("WebhookOpaqueBody"),
+  );
+});
+
+test("S408 securitySchemes key set match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { components?: { securitySchemes?: Record<string, unknown> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    Object.keys(served.components?.securitySchemes ?? {}).sort(),
+    Object.keys(disk.components?.securitySchemes ?? {}).sort(),
+  );
+  assert.deepEqual(
+    Object.keys(served.components?.securitySchemes ?? {}).sort(),
+    ["InternalApiSecret"],
+  );
+});
+
+test("S409 WebhookOpaqueBody schema matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components?: { schemas?: { WebhookOpaqueBody?: Record<string, unknown> } };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.components?.schemas?.WebhookOpaqueBody,
+    disk.components?.schemas?.WebhookOpaqueBody,
+  );
+});
+
+test("S410 InternalApiSecret scheme matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components?: {
+      securitySchemes?: { InternalApiSecret?: Record<string, unknown> };
+    };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.components?.securitySchemes?.InternalApiSecret,
+    disk.components?.securitySchemes?.InternalApiSecret,
+  );
+  assert.equal(
+    (served.components?.securitySchemes?.InternalApiSecret as { name?: string })
+      ?.name,
+    "x-internal-secret",
+  );
+});
+
+test("S411 IntegrationsHealth schema matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components?: {
+      schemas?: { IntegrationsHealth?: Record<string, unknown> };
+    };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.components?.schemas?.IntegrationsHealth,
+    disk.components?.schemas?.IntegrationsHealth,
+  );
+});
+
+test("S412 IntegrationsProbes schema matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    components?: {
+      schemas?: { IntegrationsProbes?: Record<string, unknown> };
+    };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.components?.schemas?.IntegrationsProbes,
+    disk.components?.schemas?.IntegrationsProbes,
+  );
+});
+
+test("S413 components top-level keys match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { components?: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    Object.keys(served.components ?? {}).sort(),
+    Object.keys(disk.components ?? {}).sort(),
+  );
+  assert.deepEqual(Object.keys(served.components ?? {}).sort(), [
+    "schemas",
+    "securitySchemes",
+  ]);
+});
+
+test("S414 InternalApiSecret type apiKey locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      securitySchemes?: {
+        InternalApiSecret?: { type?: string; in?: string; name?: string };
+      };
+    };
+  };
+  const scheme = served.components?.securitySchemes?.InternalApiSecret;
+  assert.equal(scheme?.type, "apiKey");
+  assert.equal(scheme?.in, "header");
+  assert.equal(scheme?.name, "x-internal-secret");
+});
+
+test("S415 WebhookOpaqueBody additionalProperties true", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: {
+        WebhookOpaqueBody?: {
+          type?: string;
+          additionalProperties?: boolean;
+        };
+      };
+    };
+  };
+  const schema = served.components?.schemas?.WebhookOpaqueBody;
+  assert.equal(schema?.type, "object");
+  assert.equal(schema?.additionalProperties, true);
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
