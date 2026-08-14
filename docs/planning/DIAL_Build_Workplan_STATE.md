@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S197** — Smoke: OpenAPI webhooks never embed secrets — **green** |
+| `current_stage` | **S198** — Served OpenAPI webhookSignature + webhookIdempotency — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S196** OpenAPI webhook signature+idempotency SoR — **green** |
-| `next_stage` | **S198** Served OpenAPI includes webhookSignature + webhookIdempotency |
+| `prior_stage` | **S197** OpenAPI webhooks never embed secrets — **green** |
+| `next_stage` | **S199** Root README cites ready≠groups configured |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S196 | 2026-08-13/14 | through webhook OpenAPI SoR |
-| S197 | 2026-08-14 | OpenAPI webhook paths ban secret substrings |
+| S91–S197 | 2026-08-13/14 | through webhook no-secret smoke |
+| S198 | 2026-08-14 | served `/api/openapi` locks webhook SoR keys |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S198 | Served OpenAPI includes webhookSignature + webhookIdempotency |
 | S199 | Root README cites ready≠groups configured (S194) |
 | S200 | .env.example cites ready vs groups SoR |
 | S201 | Integrations README documents webhook OpenAPI SoR keys |
-| S202 | Served OpenAPI readyVsGroups matches disk SoR |
+| S202 | Admin integrations page cites ready≠groups (UI hint) |
+| S203 | Smoke: webhook 200 descriptions mention idempotent on disk+served |
 
 ## Note
 

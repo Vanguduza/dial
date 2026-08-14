@@ -121,7 +121,7 @@ Machine-readable outline of health + inbound webhooks + fail-closed admin routes
 - File: [`openapi-gateway.json`](./openapi-gateway.json)
 - Live: `GET /api/openapi`
 
-Schemas stay opaque for webhook bodies (signature + idempotency SoR in adapters). Expand fields when vendor contracts lock (ENH-020…022).
+Schemas stay opaque for webhook bodies. **Webhook SoR (S196/S201):** OpenAPI `tags.webhooks` + `info.x-dial-sor.webhookSignature` (adapter verify / HMAC before mutate) and `info.x-dial-sor.webhookIdempotency` → `claimProcessedEvent` / `processed_events`. Response `200` = accepted or duplicate idempotent; `401` = bad signature. Never document secret values in the skeleton.
 
 **Probes (S137):** OpenAPI `IntegrationsProbes` requires `temporal`, `litellm`, `maps`, `fdms`, `meili`, `queues`, `whatsapp`, `psp`, `internal` — kept in sync with `INTEGRATION_PROBE_KEYS` in gateway-web.
 

@@ -1190,6 +1190,63 @@ test("S197 OpenAPI webhook paths never embed secret values", async () => {
   }
 });
 
+test("S198 served OpenAPI includes webhookSignature + webhookIdempotency", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: {
+      "x-dial-sor"?: {
+        webhookSignature?: string;
+        webhookIdempotency?: string;
+        readyVsGroups?: string;
+      };
+    };
+    tags?: Array<{ name: string; description?: string }>;
+  };
+  const sor = served.info?.["x-dial-sor"];
+  assert.ok(
+    (sor?.webhookSignature ?? "").toLowerCase().includes("signature"),
+  );
+  assert.ok(sor?.webhookIdempotency?.includes("claimProcessedEvent"));
+  assert.ok(sor?.readyVsGroups?.includes("ready-meaning-s194"));
+  const whTag = served.tags?.find((t) => t.name === "webhooks");
+  assert.ok(whTag?.description?.includes("claimProcessedEvent"));
+});
+
+test("S199 root README cites ready≠groups configured", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("readyVsGroups"));
+  assert.ok(readme.includes("integrationsReady(probes)"));
+  assert.ok(readme.includes("groups[].configured"));
+});
+
+test("S200 .env.example cites ready vs groups SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("readyVsGroups"));
+  assert.ok(envExample.includes("integrationsReady"));
+  assert.ok(envExample.includes("groups[].configured"));
+});
+
+test("S201 integrations README documents webhook OpenAPI SoR keys", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(readme.includes("webhookSignature"));
+  assert.ok(readme.includes("webhookIdempotency"));
+  assert.ok(readme.includes("claimProcessedEvent"));
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
