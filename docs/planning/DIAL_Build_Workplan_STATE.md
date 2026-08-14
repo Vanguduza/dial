@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S225** — readyVsGroups served==disk — **green** |
+| `current_stage` | **S226** — Served OpenAPI never embeds secret values — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S224** Root README cites S211 — **green** |
-| `next_stage` | **S226** |
+| `prior_stage` | **S225** readyVsGroups served==disk — **green** |
+| `next_stage` | **S227** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S224 | 2026-08-13/14 | through prior |
-| S225 | 2026-08-14 | readyVsGroups served==disk |
+| S91–S225 | 2026-08-13/14 | through prior |
+| S226 | 2026-08-14 | Served OpenAPI never embeds secret values |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S226 | Served OpenAPI never embeds secret values |
 | S227 | Served webhook POST 401s document signature failure |
 | S228 | Health note equals builder under empty env |
 | S229 | .env.example cites S211 fixture zero-configured |
 | S230 | Served x-dial-sor webhook+ready keys match disk |
+| S231 | OpenAPI info.description served matches disk |
 
 ## Note
 
