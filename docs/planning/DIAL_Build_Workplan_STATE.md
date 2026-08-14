@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S456** — Paynow parameters match disk — **green** |
+| `current_stage` | **S457** — all webhook POST parameters match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S455** WhatsApp POST parameters match disk — **green** |
-| `next_stage` | **S457** all webhook POST parameters match disk |
+| `prior_stage` | **S456** Paynow parameters match disk — **green** |
+| `next_stage` | **S458** requestBody refs WebhookOpaqueBody |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S455 | 2026-08-13/14 | through WhatsApp POST parameters |
-| S456 | 2026-08-14 | Paynow parameters deepEqual disk |
+| S91–S456 | 2026-08-13/14 | through prior |
+| S457 | 2026-08-14 | all webhook POST parameters deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S457 | all webhook POST parameters match disk |
 | S458 | requestBody refs WebhookOpaqueBody |
 | S459 | admin security InternalApiSecret only |
 | S460 | tags include webhooks health admin |
 | S461 | Paynow Hash parameter locked |
+| S462 | ContiPay signature header locked |
 
 ## Note
 
