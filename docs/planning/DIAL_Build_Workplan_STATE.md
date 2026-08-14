@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S316** — Escrow webhook 401 description matches disk — **green** |
+| `current_stage` | **S317** — PayPal webhook 401 description matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S315** — green |
-| `next_stage` | **S317 PayPal webhook 401 description matches disk** |
+| `prior_stage` | **S316** — green |
+| `next_stage` | **S318 PSP webhook 401 description matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S315 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S316 | 2026-08-14 | Escrow webhook 401 served equals disk |
+| S91–S316 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S317 | 2026-08-14 | PayPal webhook 401 served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S317 | PayPal webhook 401 description matches disk |
 | S318 | PSP webhook 401 description matches disk |
 | S319 | all webhook POST 401 descriptions match disk |
 | S320 | admin FDMS day OpenAPI documents 401 |
 | S321 | daily-zig OpenAPI documents 401 |
+| S322 | all admin paths document 401 |
 
 ## Note
 
