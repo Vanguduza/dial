@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S346** — openapi version matches disk — **green** |
+| `current_stage` | **S347** — ContiPay summary matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S345** — green |
-| `next_stage` | **S347 ContiPay summary matches disk** |
+| `prior_stage` | **S346** — green |
+| `next_stage` | **S348 IntegrationsHealth required matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S345 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S346 | 2026-08-14 | openapi field served equals disk 3.0.3 |
+| S91–S346 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S347 | 2026-08-14 | ContiPay summary served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S347 | ContiPay summary matches disk |
 | S348 | IntegrationsHealth required matches disk |
 | S349 | InternalApiSecret name x-internal-secret locked |
 | S350 | components top-level keys match disk |
 | S351 | Paynow summary matches disk |
+| S352 | WhatsApp POST summary matches disk |
 
 ## Note
 
