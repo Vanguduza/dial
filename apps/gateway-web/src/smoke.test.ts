@@ -1176,6 +1176,18 @@ test("S172 integrations README documents note-builder-sor-hint cross-link", asyn
   assert.ok(integ.includes("/admin/cost-health"));
 });
 
+test("S181 integrations README cites HINT_ID + DOCS constants", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
+  assert.ok(integ.includes("INTEGRATIONS_NOTE_BUILDER_SOR_DOCS"));
+  assert.ok(integ.includes("noteBuilderHint"));
+});
+
 test("S173 OpenAPI info.description mentions note builder SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
