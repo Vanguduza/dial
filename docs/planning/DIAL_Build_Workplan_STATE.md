@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S434** — admin paths all document 401 — **green** |
+| `current_stage` | **S435** — response status codes per path match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S433** path keys sorted match disk — **green** |
-| `next_stage` | **S435** response status codes per path match disk |
+| `prior_stage` | **S434** admin paths all document 401 — **green** |
+| `next_stage` | **S436** webhook GET challenge documented |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S433 | 2026-08-13/14 | through prior |
-| S434 | 2026-08-14 | all admin ops document 401 internal secret |
+| S91–S434 | 2026-08-13/14 | through prior |
+| S435 | 2026-08-14 | per-path response status code sets served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S435 | response status codes per path match disk |
 | S436 | webhook GET challenge documented |
 | S437 | ContiPay responses match disk |
 | S438 | Paynow responses match disk |
 | S439 | tags count locked |
+| S440 | servers count locked |
 
 ## Note
 
