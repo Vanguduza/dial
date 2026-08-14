@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S166** — OpenAPI `x-dial-sor.healthNote` points at builder — **green** |
+| `current_stage` | **S167** — Root README cites `buildIntegrationsHealthNote` — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S165** OpenAPI + README document `buildIntegrationsHealthNote` — **green** |
-| `next_stage` | **S167** Root README cites `buildIntegrationsHealthNote` |
+| `prior_stage` | **S166** OpenAPI `x-dial-sor.healthNote` points at builder — **green** |
+| `next_stage` | **S168** `.env.example` cites note builder SoR |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S165 | 2026-08-13/14 | through README/OpenAPI note builder docs |
-| S166 | 2026-08-14 | x-dial-sor.healthNote → buildIntegrationsHealthNote |
+| S91–S166 | 2026-08-13/14 | through OpenAPI x-dial-sor.healthNote |
+| S167 | 2026-08-14 | root README cites buildIntegrationsHealthNote |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S167 | Root README cites `buildIntegrationsHealthNote` |
 | S168 | `.env.example` header cites note builder SoR |
 | S169 | Admin SoR hints mention `buildIntegrationsHealthNote` |
 | S170 | Smoke: served OpenAPI `healthNote` fragment locks to builder export |
-| S171 | Cost-health / integrations cross-link note-builder SoR in UI copy |
+| S171 | Admin UI copy cross-links note-builder SoR |
+| S172 | Integrations README cites root README + `x-dial-sor.healthNote` parity |
 
 ## Note
 

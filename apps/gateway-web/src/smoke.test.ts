@@ -781,6 +781,15 @@ test("S158 root README documents admin health note truncation", async () => {
   assert.ok(readme.includes("/admin/cost-health"));
 });
 
+test("S167 root README cites buildIntegrationsHealthNote", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("buildIntegrationsHealthNote"));
+  assert.ok(readme.includes("healthNote"));
+  assert.ok(readme.includes("integrationsReadiness.ts"));
+});
+
 test("S159 admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
