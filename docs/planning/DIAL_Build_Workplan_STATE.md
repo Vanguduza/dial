@@ -1,4 +1,4 @@
-﻿# DIAL Build — Workplan STATE
+# DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S301** — money outbox 401 with wrong secret — **green** |
+| `current_stage` | **S302** — Paynow 503 description matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S300** WhatsApp POST 503 description matches disk — **green** |
-| `next_stage` | **S302** Paynow 503 description matches disk |
+| `prior_stage` | **S301** — green |
+| `next_stage` | **S303 EcoCash 503 description matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S300 | 2026-08-13/14 | through WhatsApp 503 served==disk |
-| S301 | 2026-08-14 | money outbox GET 401 wrong secret no echo |
+| S91–S301 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S302 | 2026-08-14 | Paynow 503 served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S302 | Paynow 503 description matches disk |
 | S303 | EcoCash 503 description matches disk |
 | S304 | FDMS webhook 503 description matches disk |
 | S305 | PSP webhook 503 description matches disk |
 | S306 | Escrow webhook 503 description matches disk |
+| S307 | PayPal webhook 503 description matches disk |
 
 ## Note
 
