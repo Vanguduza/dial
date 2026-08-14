@@ -5266,6 +5266,133 @@ test("S380 openapi top-level keys equal openapi|info|servers|tags|paths|componen
   ]);
 });
 
+test("S381 EcoCash operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/ecocash"]?.post?.operationId,
+    disk.paths["/api/webhooks/ecocash"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/ecocash"]?.post?.operationId,
+    "webhookEcocash",
+  );
+});
+
+test("S382 PayPal operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/paypal"]?.post?.operationId,
+    disk.paths["/api/webhooks/paypal"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/paypal"]?.post?.operationId,
+    "webhookPaypal",
+  );
+});
+
+test("S383 Escrow operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/escrow"]?.post?.operationId,
+    disk.paths["/api/webhooks/escrow"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/escrow"]?.post?.operationId,
+    "webhookEscrow",
+  );
+});
+
+test("S384 PSP operationId matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/psp"]?.post?.operationId,
+    disk.paths["/api/webhooks/psp"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/psp"]?.post?.operationId,
+    "webhookPspLegacy",
+  );
+});
+
+test("S385 all webhook POST operationIds match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const webhookPaths = Object.keys(disk.paths)
+    .filter((p) => p.startsWith("/api/webhooks/") && disk.paths[p]?.post)
+    .sort();
+  assert.ok(webhookPaths.length >= 8, `expected webhook POSTs, got ${webhookPaths.length}`);
+  for (const p of webhookPaths) {
+    assert.equal(
+      served.paths[p]?.post?.operationId,
+      disk.paths[p]?.post?.operationId,
+      `${p} operationId`,
+    );
+    assert.ok(
+      (served.paths[p]?.post?.operationId ?? "").length > 0,
+      `${p} empty operationId`,
+    );
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
