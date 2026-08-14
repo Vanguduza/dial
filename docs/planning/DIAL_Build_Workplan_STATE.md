@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S289** — WhatsApp GET challenge query params — **green** |
+| `current_stage` | **S290** — served admin path keys match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S288** — green |
-| `next_stage` | **S290 served admin path keys match disk** |
+| `prior_stage` | **S289** — green |
+| `next_stage` | **S291 admin FDMS day GET 503 without INTERNAL_API_SECRET** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S288 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S289 | 2026-08-14 | WhatsApp hub.mode/verify_token/challenge query |
+| S91–S289 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S290 | 2026-08-14 | served admin paths equal disk admin paths |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S290 | served admin path keys match disk |
 | S291 | admin FDMS day GET 503 without INTERNAL_API_SECRET |
 | S292 | ContiPay 503 fail-closed documented |
 | S293 | WhatsApp POST 503 fail-closed documented |
 | S294 | all webhook POSTs document 503 |
+| S295 | daily-zig unauthorized 401 with wrong secret |
 
 ## Note
 
