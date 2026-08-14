@@ -126,6 +126,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-139 | **README webhook OpenAPI SoR** | `done` | S201 — signature + idempotency keys |
 | ENH-140 | **Admin ready≠groups hint** | `done` | S202 — READY_VS_GROUPS_HINT_ID |
 | ENH-141 | **Served webhook 200 idempotent** | `done` | S203 — OpenAPI smoke |
+| ENH-142 | **OpenAPI desc webhook SoR** | `done` | S204 — info.description |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
