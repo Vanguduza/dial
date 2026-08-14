@@ -136,6 +136,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-152 | **Admin HINT_ID testid parity** | `done` | S214 — both admin pages |
 | ENH-153 | **Checklist ready vs groups** | `done` | S215 — pre-sandbox |
 | ENH-154 | **Served ready schema desc** | `done` | S216 — independent of groups |
+| ENH-155 | **Served opaque body SoR** | `done` | S217 — processed_events |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

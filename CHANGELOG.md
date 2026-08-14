@@ -165,6 +165,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 - S214 Smoke: admin pages share READY_VS_GROUPS + NOTE_BUILDER HINT_ID exports.
 - S215 Docs: integrations README checklist cites ready vs groups before sandbox.
 - S216 Smoke: served IntegrationsHealth.ready description independent of groups.
+- S217 Smoke: served WebhookOpaqueBody documents processed_events.
 - S20 T1 Identity **green** (Pack Â§15): `@dial/identity` profiles + RLS tests; `/sign-up` + `POST /api/auth/sign-up`; session-gated `/home` Shop|Services; body `userId`/role rejected ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - S20 T1 thin vertical started: session cookie AuthN stub, `/home` Shop|Services after sign-in, `assertResourceAccess` rejects body `userId` (D-47) ([#5](https://github.com/Vanguduza/dial/issues/5)).
 - E2a thin vertical packages: `@dial/payments` (FX + EcoCash/COD intents), `@dial/catalogue` (USD cart), `@dial/adapter-whatsapp` (Flow searchâ†’cartâ†’checkout buttons + webhook idempotency).
