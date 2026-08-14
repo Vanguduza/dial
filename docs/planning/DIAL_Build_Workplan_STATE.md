@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S444** — health integrations responses match disk — **green** |
+| `current_stage` | **S445** — openapi path responses match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S443** WhatsApp POST responses match disk — **green** |
-| `next_stage` | **S445** openapi path responses match disk |
+| `prior_stage` | **S444** health integrations responses match disk — **green** |
+| `next_stage` | **S446** PayPal responses match disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S443 | 2026-08-13/14 | through prior |
-| S444 | 2026-08-14 | health integrations responses deepEqual disk |
+| S91–S444 | 2026-08-13/14 | through prior |
+| S445 | 2026-08-14 | openapi path responses deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S445 | openapi path responses match disk |
 | S446 | PayPal responses match disk |
 | S447 | Escrow responses match disk |
 | S448 | PSP responses match disk |
 | S449 | admin FDMS day responses match disk |
+| S450 | admin money outbox responses match disk |
 
 ## Note
 

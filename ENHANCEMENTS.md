@@ -364,6 +364,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-380 | **FDMS webhook responses served==disk** | `done` | S442 — lock |
 | ENH-381 | **WhatsApp POST responses served==disk** | `done` | S443 — lock |
 | ENH-382 | **health integrations responses** | `done` | S444 — lock |
+| ENH-383 | **openapi path responses served==disk** | `done` | S445 — lock |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
