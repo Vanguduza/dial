@@ -33,7 +33,7 @@ export default async function SpareCartPage({
             color: dialTokens.color.brand.primary,
           }}
         >
-          Cart
+          Cart · USD only (D-57) · no ZiG lines
         </h1>
         {!cart || cart.lines.length === 0 ? (
           <p>Your cart is empty.</p>

@@ -1,15 +1,14 @@
 /**
- * T3 Spare browse (Pack §15) — USD-only results (D-57); no supplierId (D-58).
- * Uses @dial/catalogue search with session buyerSegment (D-49).
+ * PD3 Spare browse — USD-only results via searchOffersAsync (D-57); no supplierId (D-58).
+ * Session buyerSegment drives B2B formal-only filter (D-49).
  */
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { dialTokens } from "@dial/design-tokens";
-import { searchOffers } from "@dial/catalogue";
 import {
-  getSessionFromToken,
-  sessionCookieName,
-} from "../../lib/auth/session";
+  searchSpareForSession,
+  sessionFromCookieStore,
+} from "../../lib/spare/sessionSearch";
 
 export default async function SpareBrowsePage({
   searchParams,
@@ -19,9 +18,8 @@ export default async function SpareBrowsePage({
   const params = await searchParams;
   const q = params.q ?? "";
   const jar = await cookies();
-  const session = getSessionFromToken(jar.get(sessionCookieName())?.value);
-  const sessionRole = session?.buyerSegment === "b2b" ? "b2b" : "b2c";
-  const hits = searchOffers(q, { sessionRole });
+  const { sessionRole } = sessionFromCookieStore((name) => jar.get(name));
+  const { hits, source, meiliFilter } = await searchSpareForSession(q, sessionRole);
 
   return (
     <main
@@ -46,9 +44,16 @@ export default async function SpareBrowsePage({
         </p>
         <p style={{ opacity: 0.7, fontSize: 14 }}>
           Browse USD only · agency marketplace ·{" "}
-          {sessionRole === "b2b" ? "B2B formal stock" : "B2C"}
+          {sessionRole === "b2b" ? "B2B formal stock" : "B2C"} · search {source}
         </p>
-        <nav style={{ display: "flex", gap: dialTokens.space.md, flexWrap: "wrap", marginTop: dialTokens.space.sm }}>
+        <nav
+          style={{
+            display: "flex",
+            gap: dialTokens.space.md,
+            flexWrap: "wrap",
+            marginTop: dialTokens.space.sm,
+          }}
+        >
           <Link href="/home">Home</Link>
           <Link href="/spare/cart">Cart</Link>
         </nav>
@@ -57,7 +62,13 @@ export default async function SpareBrowsePage({
       <form
         method="get"
         action="/spare"
-        style={{ maxWidth: 960, margin: `${dialTokens.space.lg} auto 0`, display: "flex", gap: dialTokens.space.sm, flexWrap: "wrap" }}
+        style={{
+          maxWidth: 960,
+          margin: `${dialTokens.space.lg} auto 0`,
+          display: "flex",
+          gap: dialTokens.space.sm,
+          flexWrap: "wrap",
+        }}
       >
         <input
           name="q"
@@ -134,6 +145,16 @@ export default async function SpareBrowsePage({
           No offers for “{q || "empty query"}”.
         </p>
       ) : null}
+      <p
+        style={{
+          maxWidth: 960,
+          margin: `${dialTokens.space.lg} auto 0`,
+          fontSize: 11,
+          opacity: 0.45,
+        }}
+      >
+        PD3 · filter {meiliFilter} · currency USD (no ZiG on browse)
+      </p>
     </main>
   );
 }

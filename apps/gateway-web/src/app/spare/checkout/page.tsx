@@ -166,7 +166,7 @@ export default async function SpareCheckoutPage({
               </form>
             </div>
             <p style={{ fontSize: 12, opacity: 0.6, marginTop: dialTokens.space.md }}>
-              Required pay CTAs only (D-57) — mirrors WA FLOW_SPARE_CHECKOUT EcoCash | COD buttons.
+              Required pay CTAs only (D-57 / PD3) — EcoCash | COD; mirrors WA FLOW_SPARE_CHECKOUT.
             </p>
           </>
         )}

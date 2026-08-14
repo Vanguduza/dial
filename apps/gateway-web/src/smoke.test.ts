@@ -248,6 +248,82 @@ test("PD2 search + Factory publish: session SoR; B2B informal leak=0; query role
   assert.equal(pubBody.doc.id, "off_pd2_gw");
 });
 
+test("PD3 Spare UI: searchOffersAsync browse path; B2B hides informal; USD cart; EcoCash|COD CTAs", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetCatalogueForTests();
+  __resetAuthForTests();
+  __resetPaymentsForTests();
+
+  const {
+    searchSpareForSession,
+    findOfferForSession,
+    sessionRoleFromDialSession,
+  } = await import("./lib/spare/sessionSearch.js");
+
+  const b2c = createSession({ email: "pd3_b2c@dial.test", buyerSegment: "b2c" });
+  const b2b = createSession({ email: "pd3_b2b@dial.test", buyerSegment: "b2b" });
+  assert.equal(sessionRoleFromDialSession(b2c.session), "b2c");
+  assert.equal(sessionRoleFromDialSession(b2b.session), "b2b");
+
+  const browseB2c = await searchSpareForSession("wiper", "b2c");
+  assert.equal(browseB2c.currency, "USD");
+  assert.equal(browseB2c.source, "memory");
+  assert.ok(browseB2c.hits.some((h) => h.supplierFormality === "informal"));
+  assert.ok(
+    browseB2c.hits.every((h) => !("supplierId" in h)),
+    "no supplierId on browse hits",
+  );
+
+  const browseB2b = await searchSpareForSession("wiper", "b2b");
+  assert.equal(
+    browseB2b.hits.filter((h) => h.supplierFormality === "informal").length,
+    0,
+  );
+  assert.match(browseB2b.meiliFilter, /supplierFormality = "formal"/);
+
+  const informalId = "off_wiper_informal_01";
+  assert.ok(await findOfferForSession(informalId, "b2c"));
+  assert.equal(await findOfferForSession(informalId, "b2b"), null);
+
+  const formal = await findOfferForSession("off_filter_oil_kun26", "b2b");
+  assert.ok(formal);
+  const cart = createCart();
+  addToCart(cart.id, formal!.offerId, 1);
+  assert.equal(cart.currency, "USD");
+  assert.ok(cart.lines.every((l) => l.unitPrice.currency === "USD"));
+
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_pd3" });
+  const eco = await createCheckoutPayment({
+    choice: "ecocash",
+    orderId: `ord_pd3_${cart.id}`,
+    amountUsdMinor: cart.total.amountMinor,
+    idempotencyKey: `pd3-eco-${cart.id}`,
+  });
+  assert.equal(eco.intent?.displayPayable?.currency, "ZWG");
+  assert.ok(eco.intent?.fxRateId);
+
+  const { CHECKOUT_PAY_BUTTONS } = await import("@dial/adapter-whatsapp");
+  assert.ok(CHECKOUT_PAY_BUTTONS.some((b) => b.id === "ecocash"));
+  assert.ok(CHECKOUT_PAY_BUTTONS.some((b) => b.id === "cod"));
+
+  const fs = await import("node:fs/promises");
+  const checkoutSrc = await fs.readFile(
+    new URL("./app/spare/checkout/page.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(checkoutSrc, /EcoCash/);
+  assert.match(checkoutSrc, /\bCOD\b/);
+  assert.match(checkoutSrc, /payEcoCash/);
+  assert.match(checkoutSrc, /payCod/);
+
+  const browseSrc = await fs.readFile(
+    new URL("./app/spare/page.tsx", import.meta.url),
+    "utf8",
+  );
+  assert.match(browseSrc, /searchSpareForSession/);
+  assert.doesNotMatch(browseSrc, /searchOffers\(/);
+});
+
 /** S22 T3: USD cart → pay-step EcoCash|COD (ZiG only at pay); WA button parity. */
 test("T3 Spare checkout pay-step: EcoCash|COD required; no supplierId; WA parity", async () => {
   __resetCatalogueForTests();
