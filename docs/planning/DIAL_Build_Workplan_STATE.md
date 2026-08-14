@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S331** — FDMS day 401 description matches disk — **green** |
+| `current_stage` | **S332** — Paynow 200 description matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S330** money outbox 401 description matches disk — **green** |
-| `next_stage` | **S332** Paynow 200 description matches disk |
+| `prior_stage` | **S331** — green |
+| `next_stage` | **S333 EcoCash 200 description matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S330 | 2026-08-13/14 | through money outbox 401 served==disk |
-| S331 | 2026-08-14 | FDMS day GET/POST 401 served equals disk |
+| S91–S331 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S332 | 2026-08-14 | Paynow 200 served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S332 | Paynow 200 description matches disk |
 | S333 | EcoCash 200 description matches disk |
 | S334 | WhatsApp POST 200 description matches disk |
 | S335 | openapi servers description locked |
 | S336 | servers url+description match disk |
+| S337 | FDMS day GET 200 description matches disk |
 
 ## Note
 
