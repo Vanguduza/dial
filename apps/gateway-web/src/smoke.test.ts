@@ -747,7 +747,7 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(cost.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
   assert.ok(cost.includes("openapi-primary-link"));
   assert.ok(cost.includes("env-groups-sor-hint"));
-  assert.ok(cost.includes("note-builder-sor-hint"));
+  assert.ok(cost.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
   assert.ok(integ.includes("/api/openapi"));
   assert.ok(integ.includes("/api/health/integrations"));
   assert.ok(integ.includes("INTEGRATION_ENV_GROUPS"));
@@ -755,7 +755,7 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(integ.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
   assert.ok(integ.includes("openapi-primary-link"));
   assert.ok(integ.includes("env-groups-sor-hint"));
-  assert.ok(integ.includes("note-builder-sor-hint"));
+  assert.ok(integ.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
   assert.ok(readme.includes("/api/openapi"));
   assert.ok(readme.includes("/admin/integrations"));
   assert.ok(readme.includes("openapi-gateway.json"));
@@ -774,8 +774,10 @@ test("S175 S135 parity includes note-builder-sor-hint on both admin pages", asyn
     join(process.cwd(), "src/app/admin/integrations/page.tsx"),
     "utf8",
   );
-  assert.ok(cost.includes('data-testid="note-builder-sor-hint"'));
-  assert.ok(integ.includes('data-testid="note-builder-sor-hint"'));
+  assert.ok(cost.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
+  assert.ok(integ.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
+  assert.ok(cost.includes("data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"));
+  assert.ok(integ.includes("data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"));
   assert.ok(cost.includes("openapi-primary-link"));
   assert.ok(integ.includes("openapi-primary-link"));
   assert.ok(cost.includes("env-groups-sor-hint"));
@@ -797,16 +799,37 @@ test("S176 admin pages use INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID string", async 
     join(process.cwd(), "src/app/admin/integrations/page.tsx"),
     "utf8",
   );
+  assert.equal(INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID, "note-builder-sor-hint");
+  assert.ok(cost.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
+  assert.ok(integ.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
   assert.ok(
-    cost.includes(`data-testid="${INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"`),
+    cost.includes("data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"),
   );
   assert.ok(
-    integ.includes(`data-testid="${INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"`),
+    integ.includes("data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"),
   );
   assert.equal(
     INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
     "docs/integrations/README.md",
   );
+});
+
+test("S179 admin UI imports HINT_ID for data-testid", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  for (const src of [cost, integ]) {
+    assert.ok(src.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
+    assert.ok(src.includes("data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"));
+    assert.equal(src.includes('data-testid="note-builder-sor-hint"'), false);
+  }
 });
 
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
@@ -1108,7 +1131,7 @@ test("S171 admin UI copy cross-links note-builder SoR", async () => {
     "utf8",
   );
   for (const src of [cost, integ]) {
-    assert.ok(src.includes('data-testid="note-builder-sor-hint"'));
+    assert.ok(src.includes("data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"));
     assert.ok(src.includes("buildIntegrationsHealthNote"));
     assert.ok(src.includes("x-dial-sor.healthNote"));
     assert.ok(src.includes("/api/openapi"));

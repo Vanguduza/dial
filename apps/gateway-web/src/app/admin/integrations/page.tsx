@@ -3,6 +3,7 @@
 import { dialTokens } from "@dial/design-tokens";
 import { useCallback, useEffect, useState } from "react";
 import {
+  INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
   parseIntegrationsHealth,
   probeEntries,
   truncateIntegrationsHealthNote,
@@ -10,7 +11,7 @@ import {
 } from "../../../lib/integrationsReadiness.js";
 
 /**
- * S133/S154 Admin integrations readiness — ready/probes/groups + truncated
+ * S133/S154/S179 Admin integrations readiness — ready/probes/groups + truncated
  * health note from GET /api/health/integrations (never displays secret values).
  */
 export default function IntegrationsReadinessPage() {
@@ -90,7 +91,7 @@ export default function IntegrationsReadinessPage() {
         </p>
         <p
           style={{ opacity: 0.75, fontSize: 13, marginTop: dialTokens.space.sm }}
-          data-testid="note-builder-sor-hint"
+          data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}
         >
           Note-builder SoR: <code>buildIntegrationsHealthNote</code> (
           <a href="/api/openapi">OpenAPI</a>{" "}
