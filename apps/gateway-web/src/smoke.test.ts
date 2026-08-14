@@ -498,6 +498,29 @@ test("S151 health note cites INTEGRATION_ENV_GROUP_LABELS", async () => {
   assert.ok(body.note.includes(INTEGRATION_ENV_GROUP_LABELS.join(",")));
 });
 
+test("S152 OpenAPI IntegrationsHealth.note documents groups labels", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    components: {
+      schemas: {
+        IntegrationsHealth: {
+          properties: { note?: { description?: string } };
+        };
+      };
+    };
+  };
+  const desc =
+    spec.components.schemas.IntegrationsHealth.properties.note?.description ??
+    "";
+  assert.ok(desc.includes("INTEGRATION_ENV_GROUP_LABELS"));
+  assert.ok(desc.includes("groups labels"));
+});
+
 test("S134 OpenAPI skeleton covers health + webhook paths", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

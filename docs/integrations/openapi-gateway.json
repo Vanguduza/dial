@@ -381,7 +381,10 @@
               }
             }
           },
-          "note": { "type": "string" }
+          "note": {
+            "type": "string",
+            "description": "Mode guidance plus ordered groups labels=… from INTEGRATION_ENV_GROUP_LABELS (S151/S152)."
+          }
         }
       },
       "IntegrationsProbes": {

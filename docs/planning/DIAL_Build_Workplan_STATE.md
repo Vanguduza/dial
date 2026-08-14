@@ -6,19 +6,19 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S151** — Health note cites INTEGRATION_ENV_GROUP_LABELS — **green** |
+| `current_stage` | **S152** — OpenAPI IntegrationsHealth.note description — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S150** .env.example INTEGRATION_ENV_GROUP_LABELS — **green** |
-| `next_stage` | **S152** OpenAPI IntegrationsHealth description mentions groups labels note |
+| `prior_stage` | **S151** Health note cites INTEGRATION_ENV_GROUP_LABELS — **green** |
+| `next_stage` | **S153** integrations README documents health note groups labels= contract |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S150 | 2026-08-13/14 | through .env.example label SoR |
-| S151 | 2026-08-14 | health JSON note includes INTEGRATION_ENV_GROUP_LABELS |
+| S91–S151 | 2026-08-13/14 | through health note labels |
+| S152 | 2026-08-14 | OpenAPI IntegrationsHealth.note description |
 
 ## Note
 
