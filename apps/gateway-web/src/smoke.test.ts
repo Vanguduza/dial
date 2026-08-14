@@ -807,6 +807,23 @@ test("S159 admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () => {
   assert.ok(integ.includes("env-groups-sor-hint"));
 });
 
+test("S169 admin SoR hints cite buildIntegrationsHealthNote", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  assert.ok(cost.includes("buildIntegrationsHealthNote"));
+  assert.ok(integ.includes("buildIntegrationsHealthNote"));
+  assert.ok(cost.includes("env-groups-sor-hint"));
+  assert.ok(integ.includes("env-groups-sor-hint"));
+});
+
 test("S160 integrations README cites OpenAPI healthNoteUiMax", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
