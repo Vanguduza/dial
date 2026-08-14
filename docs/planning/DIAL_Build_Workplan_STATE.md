@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S437** — ContiPay responses match disk — **green** |
+| `current_stage` | **S438** — Paynow responses match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S436** webhook GET challenge documented — **green** |
-| `next_stage` | **S438** Paynow responses match disk |
+| `prior_stage` | **S437** ContiPay responses match disk — **green** |
+| `next_stage` | **S439** tags count locked |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S436 | 2026-08-13/14 | through prior |
-| S437 | 2026-08-14 | ContiPay responses deepEqual disk |
+| S91–S437 | 2026-08-13/14 | through prior |
+| S438 | 2026-08-14 | Paynow responses deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S438 | Paynow responses match disk |
 | S439 | tags count locked |
 | S440 | servers count locked |
 | S441 | EcoCash responses match disk |
 | S442 | FDMS webhook responses match disk |
+| S443 | WhatsApp POST responses match disk |
 
 ## Note
 
