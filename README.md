@@ -99,7 +99,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/search-indexer` | Meili reindex jobs |
 | `packages/ai` | guidedIntake + LiteLLM + Intelligence stubs (D-61) |
 
-**Build status:** eng spine **S90** green; product-depth **PD1–PD4** + **G1** groceries green → next **S99** customer-open (human-gated). OpenAPI invent paused.
+**Build status:** eng spine **S90** green; product-depth **PD1–PD4** + **G1** green → current **PD5** Customer Android Compose ([#26](https://github.com/Vanguduza/dial/issues/26)). Next eng **PD6** supplier-web. **S99** remains human launch-only. OpenAPI invent paused. No liquor Build.
 
 ### Gateway integration surface (plug-in)
 

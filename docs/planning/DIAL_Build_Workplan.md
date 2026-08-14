@@ -62,17 +62,22 @@ Stages are ordered. **Do not skip ahead** except where noted (E2a may land WA ag
 
 ### 1b. Product-depth band (post-S90 eng spine)
 
-Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages**. Auto-advance follows this authored band only. **S99 remains human-only.** Groceries Build (**G1**) waits until Auth + Meili + Spare + sandbox PSP are green.
+Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages**. Auto-advance follows this authored band only. **S99 remains human-only (launch)** — not eng next after G1. Founder (2026-08-15): continue **product depth** with **PD5–PD9**.
 
 | # | Stage ID | Name | Owns | Green when | Next (auto) |
 | ---: | --- | --- | --- | --- | --- |
-| 101 | `PD1` | **Auth depth** — live Supabase Auth + Postgres profiles/RLS | new issue | Sign-in/up password→GoTrue; DialSession from auth user + profile row; Shop\|Services home gated; profiles RLS + object AuthZ tests; fixture CI green; sandbox/live fail-closed on missing env | `PD2` |
-| 102 | `PD2` | **Search depth** — live Meili + Catalogue Factory → `spare_offers` | new issue | Index bootstrap; Factory approve→upsert; B2B informal filter leak=0 (D-49); gateway search against real/fixture Meili | `PD3` |
-| 103 | `PD3` | **Spare depth** — browse/cart against live search path | new issue | `/spare` + checkout stubs bind to PD2 offers; USD browse (D-57); EcoCash\|COD buttons | `PD4` |
-| 104 | `PD4` | **PSP sandbox** — Paynow/EcoCash sandbox adapters (no invent OpenAPI) | new issue | Sandbox mode fail-closed; webhook sig+idempotency; money path still DIAL packages SoR | `G1` (plan) or hold |
-| 110 | `G1` | **Groceries thin vertical** (food/pantry) | [#25](https://github.com/Vanguduza/dial/issues/25) | Meili `grocery_offers_v1` → USD browse → EcoCash\|COD → Job Reserve → delivery; no liquor | **S99** (human) |
+| 101 | `PD1` | **Auth depth** — live Supabase Auth + Postgres profiles/RLS | [#21](https://github.com/Vanguduza/dial/issues/21) | Sign-in/up password→GoTrue; DialSession; profiles RLS; fixture CI | `PD2` |
+| 102 | `PD2` | **Search depth** — live Meili + Catalogue Factory → `spare_offers` | [#22](https://github.com/Vanguduza/dial/issues/22) | Index bootstrap; Factory approve→upsert; B2B leak=0 | `PD3` |
+| 103 | `PD3` | **Spare depth** — browse/cart against live search path | [#23](https://github.com/Vanguduza/dial/issues/23) | `/spare` USD browse; EcoCash\|COD | `PD4` |
+| 104 | `PD4` | **PSP sandbox** — Paynow/EcoCash sandbox adapters | [#24](https://github.com/Vanguduza/dial/issues/24) | Sandbox fail-closed; webhook→ledger→FiscalReceiptQueued | `G1` |
+| 110 | `G1` | **Groceries thin vertical** (food/pantry) | [#25](https://github.com/Vanguduza/dial/issues/25) | `grocery_offers_v1` → USD → EcoCash\|COD → Job Reserve → delivery | `PD5` |
+| 111 | `PD5` | **Customer Android** — Compose Spare browse/cart/checkout | [#26](https://github.com/Vanguduza/dial/issues/26) | Native Compose (C-5); gateway auth+search+checkout; USD; EcoCash\|COD | `PD6` |
+| 112 | `PD6` | **Supplier-web** — Mercur vendor-panel patterns | new issue | Supplier confirm/heartbeat/upload against DIAL APIs | `PD7` |
+| 113 | `PD7` | **Delivery Android** — foodhub-compose patterns + MapLibre | new issue | Offer accept/reject; POD; courier location → delivery SoR | `PD8` |
+| 114 | `PD8` | **Customer iOS** — SwiftUI Spare parity | new issue | Same ERP APIs as PD5; tunacosgun patterns | `PD9` |
+| 115 | `PD9` | **Technician Android** — Now in Android | new issue | Jobs/checklist/Take-Home WHT; offline-first | expand / S99 human |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate).
 
 ---
 
@@ -122,7 +127,33 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Branch | `build/t4-tech-ui` |
 | Thin path | `grocery_offers_v1` → `/grocery` USD → EcoCash\|COD → Job Reserve → delivery create; food/pantry only |
 | Evidence | catalogue grocery tests; `runG1GroceryThinVertical`; money-path-G1 audit; no DIAL_OWNED / no liquor |
-| Green → | **S99** human/ops only (no eng invent) |
+| Green → | **PD5** Customer Android (product-depth band continues; S99 stays human/launch only) |
+
+### PD5 — Customer Android (CURRENT)
+
+| | |
+| --- | --- |
+| Issue | [#26](https://github.com/Vanguduza/dial/issues/26) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Compose `:app` + `:core:network` → auth cookie → Spare USD browse → EcoCash\|COD `POST /api/spare/checkout` |
+| Evidence | `apps/customer-android/`; gateway `pd5CheckoutApi.test.ts`; CoolMall patterns / C-5 no Expo |
+| Green → | **PD6** supplier-web |
+
+### PD6 — Supplier-web (NEXT after PD5)
+
+Mercur vendor-panel patterns onto DIAL supplier APIs (confirm, heartbeat, catalogue upload). Not a second money SoR.
+
+### PD7 — Delivery Android
+
+foodhub-compose rider patterns + MapLibre; offer accept/reject; POD; `packages/delivery` SoR.
+
+### PD8 — Customer iOS
+
+SwiftUI Spare parity vs same gateway APIs (tunacosgun patterns).
+
+### PD9 — Technician Android
+
+Now in Android module layout; jobs/checklist/Take-Home WHT (D-50).
 
 ### S10 — E2a (historical)
 

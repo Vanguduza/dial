@@ -2,16 +2,16 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
-**Auto-advance:** **ON for product-depth band** — **PD1–PD4 + G1 complete**. OpenAPI invent paused; **S99 human-only** (do not invent PD5/OpenAPI).
+**Auto-advance:** **ON for product-depth band** — PD1–PD4 + G1 green; **PD5–PD9** authored. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S99** — Customer-open (human/ops) |
-| `current_issue` | _(none eng)_ — await founder/ops Appendix C |
+| `current_stage` | **PD5** — Customer Android Compose (Spare) — **in progress** (thin vertical landed; expand DoD open) |
+| `current_issue` | [#26](https://github.com/Vanguduza/dial/issues/26) |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **G1** Groceries thin vertical — **green** ([#25](https://github.com/Vanguduza/dial/issues/25)) |
-| `next_stage` | **S99** only — founder/ops; no eng invent |
-| `blocked_on_human` | **S99** customer-open; liquor counsel gate (no liquor Build) |
+| `prior_stage` | **G1** Groceries — **green** ([#25](https://github.com/Vanguduza/dial/issues/25)) |
+| `next_stage` | **PD6** supplier-web (after PD5 feature DoD green) |
+| `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
 
@@ -22,17 +22,22 @@
 | **PD1** | 2026-08-14 | Supabase Auth + profiles/RLS; [#21](https://github.com/Vanguduza/dial/issues/21) |
 | **PD2** | 2026-08-14 | Meili spare_offers_v1 + Factory; [#22](https://github.com/Vanguduza/dial/issues/22) |
 | **PD3** | 2026-08-14 | Spare browse/PDP/cart vs session search; [#23](https://github.com/Vanguduza/dial/issues/23) |
-| **PD4** | 2026-08-14 | Paynow/EcoCash sandbox spine + webhook settle; [#24](https://github.com/Vanguduza/dial/issues/24); money-path audit |
-| **G1** | 2026-08-14 | grocery_offers_v1 + `/grocery` USD browse → EcoCash\|COD → Job Reserve → delivery; [#25](https://github.com/Vanguduza/dial/issues/25); `money-path-G1-2026-08-14.md` |
+| **PD4** | 2026-08-14 | Paynow/EcoCash sandbox spine + webhook settle; [#24](https://github.com/Vanguduza/dial/issues/24) |
+| **G1** | 2026-08-14 | grocery_offers_v1 thin vertical; [#25](https://github.com/Vanguduza/dial/issues/25) |
 
-## Planned (next)
+## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **S99** | Customer-open — founder/ops; Appendix C / Blueprint §8.1 — **not automatic** |
+| **PD5** | Customer Android Compose — Spare browse/cart/checkout vs gateway (C-5) |
+| **PD6** | Supplier-web (Mercur vendor-panel patterns) |
+| **PD7** | Delivery Android (foodhub-compose patterns; MapLibre) |
+| **PD8** | Customer iOS SwiftUI Spare parity |
+| **PD9** | Technician Android (Now in Android) |
+| **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note
 
-Founder directive (2026-08-14): product-depth PD1–PD4 then G1. Do **not** invent S466+ OpenAPI or PD5. Skip `.github/workflows/*` until workflow scope. Liquor remains counsel-gated.
+Founder (2026-08-15): product depth continues after G1 — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

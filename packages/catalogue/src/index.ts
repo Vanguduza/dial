@@ -394,6 +394,12 @@ export function getCart(cartId: string): Cart | undefined {
   return carts.get(cartId);
 }
 
+/** Lookup marketplace offer by id (PD5 Android + spare checkout API). */
+export function getOffer(offerId: string): StubOffer | undefined {
+  const o = OFFERS.find((x) => x.offerId === offerId);
+  return o ? { ...o } : undefined;
+}
+
 export function addToCart(cartId: string, offerId: string, qty = 1): Cart {
   const cart = carts.get(cartId);
   if (!cart) throw new Error(`Unknown cart ${cartId}`);

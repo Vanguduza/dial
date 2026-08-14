@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD5 Customer Android (thin vertical)** — `apps/customer-android` Jetpack Compose (C-5); `:core:network` DialGatewayClient; Spare browse/cart/checkout vs gateway; `POST /api/spare/checkout` shared ERP path; [#26](https://github.com/Vanguduza/dial/issues/26). Product-depth band extended **PD5–PD9** (supplier-web → delivery-android → iOS → technician).
 - **G1 Groceries thin vertical** — Meili `grocery_offers_v1` (food/pantry); `/grocery` USD browse; `GET /api/search/grocery` session SoR; EcoCash|COD → Job Reserve → delivery job; B2B informal hide (D-49); no liquor / no DIAL_OWNED; audit `docs/agent-audits/money-path-G1-2026-08-14.md` ([#25](https://github.com/Vanguduza/dial/issues/25)).
 - **PD4 PSP sandbox** — `runPd4MoneySpine` Paynow+EcoCash adapter authorize → signed webhook → ledger → `FiscalReceiptQueued`; checkout EcoCash sets `providerRef`; sandbox fail-closed without `PAYNOW_*`/`ECOCASH_*`; audit `docs/agent-audits/money-path-PD4-2026-08-14.md` ([#24](https://github.com/Vanguduza/dial/issues/24)).
 - **PD3 Spare depth** — `/spare` browse + PDP use `searchOffersAsync` via session helper; B2B cannot deep-link informal; USD cart; EcoCash|COD checkout CTAs (D-57) ([#23](https://github.com/Vanguduza/dial/issues/23)).

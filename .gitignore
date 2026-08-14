@@ -18,10 +18,14 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 
-# Prime Agent local runtime (keep settings/prompts; ignore ephemeral state)
-.prime/agent/sessions/
-.prime/agent/npm/
-.prime/agent/git/
-.prime/agent/logs/
-.prime/agent/kernel-venv/
-.prime/agent/*.log
+# Android / Gradle
+**/local.properties
+**/.gradle/
+**/captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+apps/customer-android/app/build/
+apps/customer-android/core/network/build/
+apps/customer-android/.cxx/
