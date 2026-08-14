@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S286** — daily-zig POST 503 without secret — **green** |
+| `current_stage` | **S287** — ContiPay 401 Bad signature documented — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S285** — green |
-| `next_stage` | **S287 ContiPay 401 Bad signature documented** |
+| `prior_stage` | **S286** — green |
+| `next_stage` | **S288 WhatsApp 401 Bad HMAC documented** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S285 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S286 | 2026-08-14 | daily-zig POST fail-closed without secret |
+| S91–S286 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S287 | 2026-08-14 | ContiPay 401 Bad signature response |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S287 | ContiPay 401 Bad signature documented |
 | S288 | WhatsApp 401 Bad HMAC documented |
 | S289 | WhatsApp GET challenge query params |
 | S290 | served admin path keys match disk |
 | S291 | admin FDMS day GET 503 without INTERNAL_API_SECRET |
+| S292 | ContiPay 503 fail-closed documented |
 
 ## Note
 
