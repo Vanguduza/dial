@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S453** — all admin path responses match disk — **green** |
+| `current_stage` | **S454** — ContiPay parameters match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S452** all webhook POST responses match disk — **green** |
-| `next_stage` | **S454** ContiPay parameters match disk |
+| `prior_stage` | **S453** all admin path responses match disk — **green** |
+| `next_stage` | **S455** WhatsApp POST parameters match disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S452 | 2026-08-13/14 | through prior |
-| S453 | 2026-08-14 | all admin path responses deepEqual disk |
+| S91–S453 | 2026-08-13/14 | through prior |
+| S454 | 2026-08-14 | ContiPay parameters deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S454 | ContiPay parameters match disk |
 | S455 | WhatsApp POST parameters match disk |
 | S456 | Paynow parameters match disk |
 | S457 | all webhook POST parameters match disk |
 | S458 | requestBody refs WebhookOpaqueBody |
+| S459 | admin security InternalApiSecret only |
 
 ## Note
 
