@@ -352,6 +352,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-368 | **x-dial-sor key count locked** | `done` | S430 — lock |
 | ENH-369 | **x-dial-sor keys sorted** | `done` | S431 — lock |
 | ENH-370 | **webhook POST 200 idempotent** | `done` | S432 — lock |
+| ENH-371 | **path keys sorted served==disk** | `done` | S433 — lock |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
