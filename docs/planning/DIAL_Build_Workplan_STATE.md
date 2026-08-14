@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S257** — live internal probe fails without INTERNAL_API_SECRET — **green** |
+| `current_stage` | **S258** — served IntegrationsHealth.groups required fields — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S256** served docs SoR pointer — **green** |
-| `next_stage` | **S258** |
+| `prior_stage` | **S257** live internal probe fail — **green** |
+| `next_stage` | **S259** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S256 | 2026-08-13/14 | through prior |
-| S257 | 2026-08-14 | live internal probe fails without INTERNAL_API_SECRET |
+| S91–S257 | 2026-08-13/14 | through prior |
+| S258 | 2026-08-14 | served IntegrationsHealth.groups required fields |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S258 | served IntegrationsHealth.groups required fields |
 | S259 | served getIntegrationsHealth operationId locked |
 | S260 | served OpenAPI title+version match disk |
 | S261 | Served IntegrationsHealth.required includes ready+mode+probes+groups |
 | S262 | Sandbox webhook fail-closed 503 when INTERNAL_API_SECRET unset |
+| S263 | Fixture webhook accepts without INTERNAL_API_SECRET |
 
 ## Note
 
