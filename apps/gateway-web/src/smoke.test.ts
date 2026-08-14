@@ -2982,6 +2982,222 @@ test("S280 served admin FDMS day uses InternalApiSecret", async () => {
   assert.ok(path?.post?.security?.some((s) => "InternalApiSecret" in s));
 });
 
+test("S281 admin fx daily-zig GET 503 without INTERNAL_API_SECRET", async () => {
+  const prev = process.env.INTERNAL_API_SECRET;
+  delete process.env.INTERNAL_API_SECRET;
+  try {
+    const { GET } = await import("./app/api/admin/fx/daily-zig/route.js");
+    const res = await GET(new Request("http://localhost/api/admin/fx/daily-zig"));
+    assert.equal(res.status, 503);
+    const body = (await res.json()) as { error?: string };
+    assert.ok((body.error ?? "").includes("INTERNAL_API_SECRET"));
+    assert.equal((body.error ?? "").includes("sk_live"), false);
+  } finally {
+    if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prev;
+  }
+});
+
+test("S282 served ContiPay signature header documented", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        post?: {
+          parameters?: Array<{
+            name?: string;
+            in?: string;
+            required?: boolean;
+            schema?: { type?: string };
+          }>;
+        };
+      }
+    >;
+  };
+  const params = served.paths["/api/webhooks/contipay"]?.post?.parameters ?? [];
+  const sig = params.find((p) => p.name === "x-contipay-signature");
+  assert.ok(sig, "missing x-contipay-signature parameter");
+  assert.equal(sig?.in, "header");
+  assert.equal(sig?.required, false);
+  assert.equal(sig?.schema?.type, "string");
+});
+
+test("S283 served WhatsApp hub signature header documented", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        post?: {
+          parameters?: Array<{
+            name?: string;
+            in?: string;
+            required?: boolean;
+            schema?: { type?: string };
+          }>;
+        };
+      }
+    >;
+  };
+  const params = served.paths["/api/webhooks/whatsapp"]?.post?.parameters ?? [];
+  const sig = params.find((p) => p.name === "x-hub-signature-256");
+  assert.ok(sig, "missing x-hub-signature-256 parameter");
+  assert.equal(sig?.in, "header");
+  assert.equal(sig?.required, false);
+  assert.equal(sig?.schema?.type, "string");
+});
+
+test("S284 served WebhookOpaqueBody schema locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: {
+        WebhookOpaqueBody?: {
+          type?: string;
+          additionalProperties?: boolean;
+          description?: string;
+        };
+      };
+    };
+  };
+  const schema = served.components?.schemas?.WebhookOpaqueBody;
+  assert.equal(schema?.type, "object");
+  assert.equal(schema?.additionalProperties, true);
+  assert.ok(schema?.description?.includes("processed_events"));
+  assert.ok(schema?.description?.includes("signature"));
+  assert.equal((schema?.description ?? "").includes("sk_live"), false);
+});
+
+test("S285 all admin paths require InternalApiSecret", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      Record<
+        string,
+        { security?: Array<Record<string, unknown>> } | undefined
+      >
+    >;
+  };
+  const adminPaths = Object.keys(served.paths).filter((p) =>
+    p.startsWith("/api/admin/"),
+  );
+  assert.ok(adminPaths.length >= 3, "expected admin paths in OpenAPI");
+  for (const p of adminPaths) {
+    const item = served.paths[p];
+    assert.ok(item, `missing path object ${p}`);
+    for (const method of ["get", "post", "put", "patch", "delete"] as const) {
+      const op = item[method];
+      if (!op) continue;
+      assert.ok(
+        op.security?.some((s) => "InternalApiSecret" in s),
+        `${p} ${method} missing InternalApiSecret`,
+      );
+    }
+  }
+});
+
+test("S286 admin fx daily-zig POST 503 without INTERNAL_API_SECRET", async () => {
+  const prev = process.env.INTERNAL_API_SECRET;
+  delete process.env.INTERNAL_API_SECRET;
+  try {
+    const { POST } = await import("./app/api/admin/fx/daily-zig/route.js");
+    const res = await POST(
+      new Request("http://localhost/api/admin/fx/daily-zig", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ zigMinorPerUsd: "100", setBy: "s286" }),
+      }),
+    );
+    assert.equal(res.status, 503);
+    const body = (await res.json()) as { error?: string };
+    assert.ok((body.error ?? "").includes("INTERNAL_API_SECRET"));
+  } finally {
+    if (prev === undefined) delete process.env.INTERNAL_API_SECRET;
+    else process.env.INTERNAL_API_SECRET = prev;
+  }
+});
+
+test("S287 ContiPay OpenAPI documents 401 Bad signature", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const d401 =
+    served.paths["/api/webhooks/contipay"]?.post?.responses?.["401"]
+      ?.description ?? "";
+  assert.ok(d401.toLowerCase().includes("signature"));
+});
+
+test("S288 WhatsApp POST OpenAPI documents 401 Bad HMAC", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const d401 =
+    served.paths["/api/webhooks/whatsapp"]?.post?.responses?.["401"]
+      ?.description ?? "";
+  assert.ok(d401.toUpperCase().includes("HMAC"));
+});
+
+test("S289 WhatsApp GET challenge query params locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: {
+          parameters?: Array<{ name?: string; in?: string }>;
+        };
+      }
+    >;
+  };
+  const params = served.paths["/api/webhooks/whatsapp"]?.get?.parameters ?? [];
+  for (const name of ["hub.mode", "hub.verify_token", "hub.challenge"]) {
+    const p = params.find((x) => x.name === name);
+    assert.ok(p, `missing query param ${name}`);
+    assert.equal(p?.in, "query");
+  }
+});
+
+test("S290 served admin path keys match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { paths: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as { paths: Record<string, unknown> };
+  const diskAdmin = Object.keys(disk.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  const servedAdmin = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  assert.deepEqual(servedAdmin, diskAdmin);
+  assert.ok(diskAdmin.includes("/api/admin/fx/daily-zig"));
+  assert.ok(diskAdmin.includes("/api/admin/money/outbox"));
+  assert.ok(diskAdmin.includes("/api/admin/fdms/day"));
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
