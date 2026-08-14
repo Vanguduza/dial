@@ -3890,6 +3890,256 @@ test("S320 admin FDMS day OpenAPI documents 401", async () => {
   }
 });
 
+test("S321 daily-zig OpenAPI documents 401", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, { description?: string }> };
+        post?: { responses?: Record<string, { description?: string }> };
+      }
+    >;
+  };
+  const path = served.paths["/api/admin/fx/daily-zig"];
+  assert.ok(path, "missing /api/admin/fx/daily-zig");
+  for (const method of ["get", "post"] as const) {
+    const d401 = path?.[method]?.responses?.["401"]?.description ?? "";
+    assert.ok(
+      /missing|invalid|internal secret/i.test(d401),
+      `daily-zig ${method} 401`,
+    );
+  }
+});
+
+test("S322 all admin paths document 401", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      Record<
+        string,
+        { responses?: Record<string, { description?: string }> } | undefined
+      >
+    >;
+  };
+  const adminPaths = Object.keys(served.paths).filter((p) =>
+    p.startsWith("/api/admin/"),
+  );
+  assert.ok(adminPaths.length >= 3);
+  for (const p of adminPaths) {
+    const item = served.paths[p];
+    assert.ok(item, `missing path object ${p}`);
+    for (const method of ["get", "post", "put", "patch", "delete"] as const) {
+      const op = item[method];
+      if (!op) continue;
+      const d401 = op.responses?.["401"]?.description ?? "";
+      assert.ok(d401.length > 0, `${p} ${method} missing 401`);
+      assert.ok(
+        /missing|invalid|internal secret/i.test(d401),
+        `${p} ${method} 401 must cite internal secret`,
+      );
+    }
+  }
+});
+
+test("S323 WhatsApp GET 403 challenge documented", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { get?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const d403 =
+    served.paths["/api/webhooks/whatsapp"]?.get?.responses?.["403"]
+      ?.description ?? "";
+  assert.ok(/verify token/i.test(d403));
+});
+
+test("S324 ContiPay 200 idempotent description locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const d200 =
+    served.paths["/api/webhooks/contipay"]?.post?.responses?.["200"]
+      ?.description ?? "";
+  assert.ok(/idempotent/i.test(d200));
+  assert.ok(/signature verified/i.test(d200));
+});
+
+test("S325 all webhook POST 200s mention idempotent", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const posts = Object.keys(served.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  const canonical =
+    "Accepted or duplicate idempotent (signature verified)";
+  for (const p of posts) {
+    assert.equal(
+      served.paths[p]?.post?.responses?.["200"]?.description,
+      canonical,
+      `${p} 200 description`,
+    );
+  }
+});
+
+test("S326 WhatsApp GET 403 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { get?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.get?.responses?.["403"]
+      ?.description,
+    disk.paths["/api/webhooks/whatsapp"]?.get?.responses?.["403"]?.description,
+  );
+});
+
+test("S327 ContiPay 200 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/contipay"]?.post?.responses?.["200"]
+      ?.description,
+    disk.paths["/api/webhooks/contipay"]?.post?.responses?.["200"]?.description,
+  );
+});
+
+test("S328 all webhook POST 200 descriptions match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const posts = Object.keys(disk.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && disk.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    assert.equal(
+      served.paths[p]?.post?.responses?.["200"]?.description,
+      disk.paths[p]?.post?.responses?.["200"]?.description,
+      `${p} 200 served==disk`,
+    );
+  }
+});
+
+test("S329 daily-zig 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, { description?: string }> };
+        post?: { responses?: Record<string, { description?: string }> };
+      }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  for (const method of ["get", "post"] as const) {
+    assert.equal(
+      served.paths["/api/admin/fx/daily-zig"]?.[method]?.responses?.["401"]
+        ?.description,
+      disk.paths["/api/admin/fx/daily-zig"]?.[method]?.responses?.["401"]
+        ?.description,
+      `daily-zig ${method} 401`,
+    );
+  }
+});
+
+test("S330 money outbox 401 description matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, { description?: string }> };
+        post?: { responses?: Record<string, { description?: string }> };
+      }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  for (const method of ["get", "post"] as const) {
+    assert.equal(
+      served.paths["/api/admin/money/outbox"]?.[method]?.responses?.["401"]
+        ?.description,
+      disk.paths["/api/admin/money/outbox"]?.[method]?.responses?.["401"]
+        ?.description,
+      `money outbox ${method} 401`,
+    );
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
