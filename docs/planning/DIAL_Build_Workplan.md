@@ -70,7 +70,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 102 | `PD2` | **Search depth** — live Meili + Catalogue Factory → `spare_offers` | new issue | Index bootstrap; Factory approve→upsert; B2B informal filter leak=0 (D-49); gateway search against real/fixture Meili | `PD3` |
 | 103 | `PD3` | **Spare depth** — browse/cart against live search path | new issue | `/spare` + checkout stubs bind to PD2 offers; USD browse (D-57); EcoCash\|COD buttons | `PD4` |
 | 104 | `PD4` | **PSP sandbox** — Paynow/EcoCash sandbox adapters (no invent OpenAPI) | new issue | Sandbox mode fail-closed; webhook sig+idempotency; money path still DIAL packages SoR | `G1` (plan) or hold |
-| 110 | `G1` | **Groceries thin vertical** (food/pantry) | plan issue | Plan DoD + Auth/Meili/Spare/PSP deps green — **do not start code until deps green** | (later) |
+| 110 | `G1` | **Groceries thin vertical** (food/pantry) | [#25](https://github.com/Vanguduza/dial/issues/25) | Meili `grocery_offers_v1` → USD browse → EcoCash\|COD → Job Reserve → delivery; no liquor | **S99** (human) |
 
 **Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope.
 
@@ -114,14 +114,15 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd4MoneySpine`; sandbox fail-closed; Paynow/EcoCash webhook → ledger + FiscalReceiptQueued; T + money-path audit |
 | Green → | Open **G1** groceries ticket (deps PD1–PD4 green) |
 
-### G1 — Groceries (CURRENT — plan/ticket)
+### G1 — Groceries (**GREEN** 2026-08-14)
 
 | | |
 | --- | --- |
 | Issue | [#25](https://github.com/Vanguduza/dial/issues/25) |
-| Branch | `build/t4-tech-ui` (or `build/g1-*` when Build starts) |
-| Thin path | Food/pantry agency reuse of Auth/Meili/Spare/PSP — **DoD in-ticket before scaffold** |
-| Green → | Expand groceries / later S99 human |
+| Branch | `build/t4-tech-ui` |
+| Thin path | `grocery_offers_v1` → `/grocery` USD → EcoCash\|COD → Job Reserve → delivery create; food/pantry only |
+| Evidence | catalogue grocery tests; `runG1GroceryThinVertical`; money-path-G1 audit; no DIAL_OWNED / no liquor |
+| Green → | **S99** human/ops only (no eng invent) |
 
 ### S10 — E2a (historical)
 

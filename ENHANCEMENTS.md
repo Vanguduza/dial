@@ -391,6 +391,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-407 | **PD2 Search depth** — Meili spare_offers_v1 + Factory publish + B2B filter | `done` | [#22](https://github.com/Vanguduza/dial/issues/22); searchOffersAsync; admin publish |
 | ENH-408 | **PD3 Spare depth** — browse/PDP/cart/checkout against session search | `done` | [#23](https://github.com/Vanguduza/dial/issues/23); USD browse; EcoCash\|COD |
 | ENH-409 | **PD4 PSP sandbox** — Paynow/EcoCash adapter spine + webhook settle | `done` | [#24](https://github.com/Vanguduza/dial/issues/24); money-path audit |
+| ENH-410 | **G1 Groceries thin vertical** — grocery_offers_v1 → USD browse → EcoCash\|COD → Job Reserve → delivery | `done` | [#25](https://github.com/Vanguduza/dial/issues/25); food/pantry only; money-path-G1 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

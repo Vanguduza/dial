@@ -448,3 +448,21 @@ export {
   upsertSpareOfferDocuments,
   integrationMode as meiliIntegrationMode,
 } from "./meiliClient.js";
+
+export {
+  MEILI_GROCERY_INDEX_DEFAULT,
+  MEILI_GROCERY_OFFERS_V1_SETTINGS,
+  __resetGroceryForTests,
+  addToGroceryCart,
+  assertGroceryPublishAllowed,
+  countGroceryInformalB2bLeaks,
+  createGroceryCart,
+  getGroceryCart,
+  getGroceryOffer,
+  groceryMeiliFilterForSession,
+  listGroceryMeiliDocuments,
+  searchGroceryOffers,
+  type GroceryCart,
+  type GroceryOffer,
+  type GroceryOfferDocument,
+} from "./grocery.js";

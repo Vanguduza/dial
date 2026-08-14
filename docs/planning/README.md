@@ -12,6 +12,9 @@ Plan diligence outputs. Not a second product SoR — v4 / Pack / D-log win on co
 | [DIAL_Promptfoo_Golden_Assertion_Outline.md](./DIAL_Promptfoo_Golden_Assertion_Outline.md) | Eval assertions / goldens (no CI yet) |
 | [DIAL_Tracer_DoD_Completion_Matrices.md](./DIAL_Tracer_DoD_Completion_Matrices.md) | AC × channel matrices (Plan filled; Build marks Y) |
 | [DIAL_Dev_Manager_Autonomous_Runbook.md](./DIAL_Dev_Manager_Autonomous_Runbook.md) | Build ops loop — prefer/lock defaults; no manual gates |
-| [DIAL_Build_Workplan.md](./DIAL_Build_Workplan.md) | End-to-end stages S00→S90 + **PD1–PD4** product depth (+ S99); **auto-advance on green** within authored spine |
+| [DIAL_Build_Workplan.md](./DIAL_Build_Workplan.md) | End-to-end stages S00→S90 + **PD1–PD4** + **G1** (+ S99 human); **auto-advance on green** within authored spine |
 | [DIAL_Build_Workplan_STATE.md](./DIAL_Build_Workplan_STATE.md) | Live pointer — current stage / issue / next |
+| [DIAL_Groceries_Liquor_Branch_Plan.md](./DIAL_Groceries_Liquor_Branch_Plan.md) | Groceries food/pantry plan (G1 green; liquor counsel-gated) |
+| [DIAL_Groceries_Liquor_Grill_Session.md](./DIAL_Groceries_Liquor_Grill_Session.md) | Grill locks — food unblocked; liquor deferred |
 | [diagrams/](./diagrams/) | Mermaid editorial briefs (money, delivery, Factory/CC) |
+| [`../diagrams/`](../diagrams/) | Grocery layer/money/delivery/Meili/FX/WA diagrams |

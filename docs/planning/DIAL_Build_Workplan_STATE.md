@@ -2,16 +2,16 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
-**Auto-advance:** **ON for product-depth band** — **PD1–PD4 complete**. OpenAPI invent paused; S99 human-only. **G1** unblocked (ticket open; Build after in-ticket DoD).
+**Auto-advance:** **ON for product-depth band** — **PD1–PD4 + G1 complete**. OpenAPI invent paused; **S99 human-only** (do not invent PD5/OpenAPI).
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **G1** — Groceries thin vertical (plan/ticket; Build after DoD) |
-| `current_issue` | [#25](https://github.com/Vanguduza/dial/issues/25) G1 Groceries |
+| `current_stage` | **S99** — Customer-open (human/ops) |
+| `current_issue` | _(none eng)_ — await founder/ops Appendix C |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD4** Sandbox PSP — **green** ([#24](https://github.com/Vanguduza/dial/issues/24)) |
-| `next_stage` | **G1** Build (after DoD/matrix) — then **S99** human/ops |
-| `blocked_on_human` | _(empty for eng)_ — S99 customer-open still human-only; liquor counsel-gated |
+| `prior_stage` | **G1** Groceries thin vertical — **green** ([#25](https://github.com/Vanguduza/dial/issues/25)) |
+| `next_stage` | **S99** only — founder/ops; no eng invent |
+| `blocked_on_human` | **S99** customer-open; liquor counsel gate (no liquor Build) |
 
 ## Completed
 
@@ -23,16 +23,16 @@
 | **PD2** | 2026-08-14 | Meili spare_offers_v1 + Factory; [#22](https://github.com/Vanguduza/dial/issues/22) |
 | **PD3** | 2026-08-14 | Spare browse/PDP/cart vs session search; [#23](https://github.com/Vanguduza/dial/issues/23) |
 | **PD4** | 2026-08-14 | Paynow/EcoCash sandbox spine + webhook settle; [#24](https://github.com/Vanguduza/dial/issues/24); money-path audit |
+| **G1** | 2026-08-14 | grocery_offers_v1 + `/grocery` USD browse → EcoCash\|COD → Job Reserve → delivery; [#25](https://github.com/Vanguduza/dial/issues/25); `money-path-G1-2026-08-14.md` |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| **G1** | Groceries food/pantry thin vertical — ticket open; Build when DoD filled |
 | **S99** | Customer-open — founder/ops; Appendix C / Blueprint §8.1 — **not automatic** |
 
 ## Note
 
-Founder directive (2026-08-14): product-depth PD1–PD4 then G1. Do **not** invent S466+ OpenAPI. Skip `.github/workflows/*` until workflow scope. Groceries plan/diagrams stay unstaged until G1 Build starts.
+Founder directive (2026-08-14): product-depth PD1–PD4 then G1. Do **not** invent S466+ OpenAPI or PD5. Skip `.github/workflows/*` until workflow scope. Liquor remains counsel-gated.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

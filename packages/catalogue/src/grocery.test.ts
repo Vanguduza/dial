@@ -1,0 +1,89 @@
+import assert from "node:assert/strict";
+import { test, beforeEach } from "node:test";
+import {
+  MEILI_GROCERY_INDEX_DEFAULT,
+  MEILI_GROCERY_OFFERS_V1_SETTINGS,
+  __resetGroceryForTests,
+  addToGroceryCart,
+  assertGroceryPublishAllowed,
+  countGroceryInformalB2bLeaks,
+  createGroceryCart,
+  groceryMeiliFilterForSession,
+  listGroceryMeiliDocuments,
+  searchGroceryOffers,
+} from "./grocery.js";
+
+beforeEach(() => {
+  __resetGroceryForTests();
+});
+
+test("G1 Meili grocery_offers_v1 settings + index name", () => {
+  assert.equal(MEILI_GROCERY_INDEX_DEFAULT, "grocery_offers_v1");
+  assert.ok(
+    MEILI_GROCERY_OFFERS_V1_SETTINGS.filterableAttributes.includes(
+      "supplierFormality",
+    ),
+  );
+  assert.ok(
+    MEILI_GROCERY_OFFERS_V1_SETTINGS.filterableAttributes.includes("vertical"),
+  );
+  const docs = listGroceryMeiliDocuments();
+  assert.ok(docs.every((d) => d.currency === "USD" && d.offerSource === "MARKETPLACE"));
+  assert.ok(docs.every((d) => d.vertical === "grocery"));
+});
+
+test("G1 B2B informal leak=0 (D-49)", () => {
+  assert.equal(countGroceryInformalB2bLeaks(""), 0);
+  assert.equal(countGroceryInformalB2bLeaks("bread"), 0);
+  const b2c = searchGroceryOffers("bread", { sessionRole: "b2c" });
+  assert.ok(b2c.some((o) => o.supplierFormality === "informal"));
+  const b2b = searchGroceryOffers("bread", { sessionRole: "b2b" });
+  assert.ok(b2b.every((o) => o.supplierFormality === "formal"));
+  assert.match(
+    groceryMeiliFilterForSession("b2b"),
+    /supplierFormality = "formal"/,
+  );
+});
+
+test("G1 USD cart only; B2B cannot add informal", () => {
+  const cart = createGroceryCart();
+  assert.equal(cart.currency, "USD");
+  const withMilk = addToGroceryCart(cart.id, "groc_milk_1l", 2);
+  assert.equal(withMilk.currency, "USD");
+  assert.equal(withMilk.total.amountMinor, 360n);
+  assert.throws(
+    () =>
+      addToGroceryCart(cart.id, "groc_bread_informal", 1, {
+        buyerSegment: "b2b",
+      }),
+    /B2B cannot purchase informal/,
+  );
+});
+
+test("G1 rejects DIAL_OWNED and liquor/age-gate publish", () => {
+  assert.throws(
+    () =>
+      assertGroceryPublishAllowed({
+        offerSource: "DIAL_OWNED",
+        vertical: "grocery",
+      }),
+    /DIAL_OWNED/,
+  );
+  assert.throws(
+    () =>
+      assertGroceryPublishAllowed({
+        offerSource: "MARKETPLACE",
+        vertical: "liquor",
+      }),
+    /Liquor/,
+  );
+  assert.throws(
+    () =>
+      assertGroceryPublishAllowed({
+        offerSource: "MARKETPLACE",
+        vertical: "grocery",
+        ageGateRequired: true,
+      }),
+    /Liquor/,
+  );
+});

@@ -99,6 +99,9 @@ importers:
       '@dial/catalogue':
         specifier: workspace:*
         version: link:../../packages/catalogue
+      '@dial/delivery':
+        specifier: workspace:*
+        version: link:../../packages/delivery
       '@dial/design-tokens':
         specifier: workspace:*
         version: link:../../packages/design-tokens
