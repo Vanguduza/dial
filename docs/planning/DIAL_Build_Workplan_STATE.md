@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S313** — ContiPay 401 description matches disk — **green** |
+| `current_stage` | **S314** — FDMS webhook 401 description matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S312** — green |
-| `next_stage` | **S314 FDMS webhook 401 description matches disk** |
+| `prior_stage` | **S313** — green |
+| `next_stage` | **S315 WhatsApp POST 401 description matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S312 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S313 | 2026-08-14 | ContiPay 401 served equals disk |
+| S91–S313 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S314 | 2026-08-14 | FDMS webhook 401 served equals disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S314 | FDMS webhook 401 description matches disk |
 | S315 | WhatsApp POST 401 description matches disk |
 | S316 | Escrow webhook 401 description matches disk |
 | S317 | PayPal webhook 401 description matches disk |
 | S318 | PSP webhook 401 description matches disk |
+| S319 | all webhook POST 401 descriptions match disk |
 
 ## Note
 
