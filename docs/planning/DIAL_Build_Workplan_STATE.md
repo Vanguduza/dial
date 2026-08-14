@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S352** — WhatsApp POST summary matches disk — **green** |
+| `current_stage` | **S353** — FDMS webhook summary matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S351** — green |
-| `next_stage` | **S353 FDMS webhook summary matches disk** |
+| `prior_stage` | **S352** — green |
+| `next_stage` | **S354 openapi info.title matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S351 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S352 | 2026-08-14 | WhatsApp POST Meta Cloud API summary |
+| S91–S352 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S353 | 2026-08-14 | FDMS Gateway acknowledge summary |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S353 | FDMS webhook summary matches disk |
 | S354 | openapi info.title matches disk |
 | S355 | openapi info.version matches disk |
 | S356 | EcoCash summary matches disk |
 | S357 | PayPal summary matches disk |
+| S358 | Escrow summary matches disk |
 
 ## Note
 
