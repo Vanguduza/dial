@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S348** — IntegrationsHealth required matches disk — **green** |
+| `current_stage` | **S349** — InternalApiSecret name x-internal-secret locked — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S347** — green |
-| `next_stage` | **S349 InternalApiSecret name x-internal-secret locked** |
+| `prior_stage` | **S348** — green |
+| `next_stage` | **S350 components top-level keys match disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S347 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S348 | 2026-08-14 | IntegrationsHealth.required served equals disk |
+| S91–S348 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S349 | 2026-08-14 | InternalApiSecret header name x-internal-secret |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S349 | InternalApiSecret name x-internal-secret locked |
 | S350 | components top-level keys match disk |
 | S351 | Paynow summary matches disk |
 | S352 | WhatsApp POST summary matches disk |
 | S353 | FDMS webhook summary matches disk |
+| S354 | openapi info.title matches disk |
 
 ## Note
 
