@@ -3,7 +3,7 @@
   "info": {
     "title": "DIAL Gateway — integration surface (skeleton)",
     "version": "0.1.0",
-    "description": "S134 skeleton for API-key drop-in readiness. Documents health + inbound webhook shapes. Never includes secret values. Health JSON note SoR: buildIntegrationsHealthNote (info.x-dial-sor.healthNote); docs pointer INTEGRATIONS_NOTE_BUILDER_SOR_DOCS (info.x-dial-sor.noteBuilderDocs). Authoritative eng behaviour remains Pack/adapters; this is a contract outline for vendors/ops.",
+    "description": "S134 skeleton for API-key drop-in readiness. Documents health + inbound webhook shapes. Never includes secret values. Health JSON note SoR: buildIntegrationsHealthNote (info.x-dial-sor.healthNote); docs pointer INTEGRATIONS_NOTE_BUILDER_SOR_DOCS (info.x-dial-sor.noteBuilderDocs). Webhooks: signature verify + claimProcessedEvent idempotency (info.x-dial-sor.webhookSignature / webhookIdempotency). Authoritative eng behaviour remains Pack/adapters; this is a contract outline for vendors/ops.",
     "x-dial-sor": {
       "probes": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_PROBE_KEYS",
       "envGroups": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATION_ENV_GROUPS",
@@ -12,6 +12,7 @@
       "healthNoteUiMax": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_HEALTH_NOTE_UI_MAX",
       "noteBuilderHint": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID",
       "noteBuilderDocs": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_NOTE_BUILDER_SOR_DOCS",
+      "readyVsGroupsHint": "apps/gateway-web/src/lib/integrationsReadiness.ts#INTEGRATIONS_READY_VS_GROUPS_HINT_ID",
       "docs": "docs/integrations/README.md",
       "readyVsGroups": "docs/integrations/README.md#ready-meaning-s194",
       "webhookSignature": "Adapter verifySignature / HMAC before mutate (D-47)",

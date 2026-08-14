@@ -169,6 +169,12 @@ export const INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID =
 export const INTEGRATIONS_NOTE_BUILDER_SOR_DOCS =
   "docs/integrations/README.md" as const;
 
+/**
+ * S202/S206 — admin `data-testid` for ready≠groups configured SoR (S194).
+ */
+export const INTEGRATIONS_READY_VS_GROUPS_HINT_ID =
+  "ready-vs-groups-sor-hint" as const;
+
 export function listIntegrationEnvGroupSnapshots(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): Array<{

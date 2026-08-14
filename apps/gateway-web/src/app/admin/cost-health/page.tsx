@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
   INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
+  INTEGRATIONS_READY_VS_GROUPS_HINT_ID,
   parseIntegrationsHealth,
   truncateIntegrationsHealthNote,
 } from "../../../lib/integrationsReadiness.js";
@@ -13,6 +14,7 @@ import {
  * S142: OpenAPI primary CTA + INTEGRATION_ENV_GROUPS SoR hint (parity with /admin/integrations).
  * S155: truncated health `note` from GET /api/health/integrations.
  * S179/S185: note-builder hint uses HINT_ID + cites DOCS constant.
+ * S205: ready≠groups hint parity.
  */
 export default function CostHealthStubPage() {
   const [note, setNote] = useState<string | null>(null);
@@ -58,6 +60,14 @@ export default function CostHealthStubPage() {
         <code>info.x-dial-sor</code>) — see readiness UI for live probes.
         Health note: <code>buildIntegrationsHealthNote</code>. Health note UI
         max: <code>INTEGRATIONS_HEALTH_NOTE_UI_MAX</code>.
+      </p>
+      <p
+        style={{ margin: "0 0 1rem", maxWidth: "36rem", color: "#94a3b8", fontSize: 13 }}
+        data-testid={INTEGRATIONS_READY_VS_GROUPS_HINT_ID}
+      >
+        Ready≠groups: <code>ready</code> is <code>integrationsReady(probes)</code>{" "}
+        only — not all <code>groups[].configured</code> (OpenAPI{" "}
+        <code>x-dial-sor.readyVsGroups</code>).
       </p>
       <p
         style={{ margin: "0 0 1rem", maxWidth: "36rem", color: "#94a3b8", fontSize: 13 }}

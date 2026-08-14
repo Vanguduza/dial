@@ -1247,6 +1247,103 @@ test("S201 integrations README documents webhook OpenAPI SoR keys", async () => 
   assert.ok(readme.includes("claimProcessedEvent"));
 });
 
+test("S202 admin integrations page cites ready≠groups hint", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { INTEGRATIONS_READY_VS_GROUPS_HINT_ID } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const src = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  assert.ok(src.includes("INTEGRATIONS_READY_VS_GROUPS_HINT_ID"));
+  assert.ok(src.includes("integrationsReady(probes)"));
+  assert.ok(src.includes("groups[].configured"));
+  assert.ok(src.includes("readyVsGroups"));
+  assert.equal(INTEGRATIONS_READY_VS_GROUPS_HINT_ID, "ready-vs-groups-sor-hint");
+});
+
+test("S203 served OpenAPI webhook POST 200s mention idempotent", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: { "200"?: { description?: string } } } }
+    >;
+  };
+  const posts = Object.keys(served.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    const d = served.paths[p]?.post?.responses?.["200"]?.description ?? "";
+    assert.ok(
+      d.toLowerCase().includes("idempotent"),
+      `${p} served 200 must mention idempotent`,
+    );
+  }
+});
+
+test("S204 OpenAPI info.description mentions webhookSignature", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as { info?: { description?: string } };
+  assert.ok(spec.info?.description?.includes("webhookSignature"));
+  assert.ok(spec.info?.description?.includes("webhookIdempotency"));
+});
+
+test("S205 cost-health page parity for ready≠groups hint", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const src = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  assert.ok(src.includes("INTEGRATIONS_READY_VS_GROUPS_HINT_ID"));
+  assert.ok(src.includes("integrationsReady(probes)"));
+  assert.ok(src.includes("readyVsGroups"));
+});
+
+test("S206 OpenAPI x-dial-sor.readyVsGroupsHint points at HINT_ID", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { INTEGRATIONS_READY_VS_GROUPS_HINT_ID } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: { "x-dial-sor"?: { readyVsGroupsHint?: string } };
+  };
+  assert.ok(
+    spec.info?.["x-dial-sor"]?.readyVsGroupsHint?.includes(
+      "INTEGRATIONS_READY_VS_GROUPS_HINT_ID",
+    ),
+  );
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { readyVsGroupsHint?: string } };
+  };
+  assert.ok(
+    served.info?.["x-dial-sor"]?.readyVsGroupsHint?.includes(
+      INTEGRATIONS_READY_VS_GROUPS_HINT_ID,
+    ) ||
+      served.info?.["x-dial-sor"]?.readyVsGroupsHint?.includes(
+        "INTEGRATIONS_READY_VS_GROUPS_HINT_ID",
+      ),
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");

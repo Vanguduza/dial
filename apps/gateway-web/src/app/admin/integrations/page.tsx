@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   INTEGRATIONS_NOTE_BUILDER_SOR_DOCS,
   INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
+  INTEGRATIONS_READY_VS_GROUPS_HINT_ID,
   parseIntegrationsHealth,
   probeEntries,
   truncateIntegrationsHealthNote,
@@ -12,7 +13,7 @@ import {
 } from "../../../lib/integrationsReadiness.js";
 
 /**
- * S133/S154/S179/S185 Admin integrations readiness — ready/probes/groups + truncated
+ * S133/S154/S179/S185/S202 Admin integrations readiness — ready/probes/groups + truncated
  * health note from GET /api/health/integrations (never displays secret values).
  */
 export default function IntegrationsReadinessPage() {
@@ -89,6 +90,14 @@ export default function IntegrationsReadinessPage() {
           <code>info.x-dial-sor</code>). Health note:{" "}
           <code>buildIntegrationsHealthNote</code>. Health note UI max:{" "}
           <code>INTEGRATIONS_HEALTH_NOTE_UI_MAX</code>.
+        </p>
+        <p
+          style={{ opacity: 0.75, fontSize: 13, marginTop: dialTokens.space.sm }}
+          data-testid={INTEGRATIONS_READY_VS_GROUPS_HINT_ID}
+        >
+          Ready≠groups: <code>ready</code> is <code>integrationsReady(probes)</code>{" "}
+          only — not all <code>groups[].configured</code> (OpenAPI{" "}
+          <code>x-dial-sor.readyVsGroups</code>).
         </p>
         <p
           style={{ opacity: 0.75, fontSize: 13, marginTop: dialTokens.space.sm }}
