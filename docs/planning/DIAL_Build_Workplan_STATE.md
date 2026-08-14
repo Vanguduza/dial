@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S462** — ContiPay signature header locked — **green** |
+| `current_stage` | **S463** — WhatsApp hub signature header locked — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S461** Paynow Hash parameter locked — **green** |
-| `next_stage` | **S463** WhatsApp hub signature header locked |
+| `prior_stage` | **S462** ContiPay signature header locked — **green** |
+| `next_stage` | **S464** webhook POST tags webhooks only |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S461 | 2026-08-13/14 | through prior |
-| S462 | 2026-08-14 | x-contipay-signature header |
+| S91–S462 | 2026-08-13/14 | through prior |
+| S463 | 2026-08-14 | x-hub-signature-256 header |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S463 | WhatsApp hub signature header locked |
 | S464 | webhook POST tags webhooks only |
 | S465 | admin path tags admin only |
 | S466 | health path tags health only |
 | S467 | servers url localhost:3000 |
+| S468 | info.title contains DIAL Gateway |
 
 ## Note
 
