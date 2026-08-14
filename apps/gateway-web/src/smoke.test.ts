@@ -6724,6 +6724,271 @@ test("S445 openapi path responses match disk", async () => {
   );
 });
 
+test("S446 PayPal responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, unknown> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.paths["/api/webhooks/paypal"]?.post?.responses,
+    disk.paths["/api/webhooks/paypal"]?.post?.responses,
+  );
+});
+
+test("S447 Escrow responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, unknown> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.paths["/api/webhooks/escrow"]?.post?.responses,
+    disk.paths["/api/webhooks/escrow"]?.post?.responses,
+  );
+});
+
+test("S448 PSP responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, unknown> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.paths["/api/webhooks/psp"]?.post?.responses,
+    disk.paths["/api/webhooks/psp"]?.post?.responses,
+  );
+});
+
+test("S449 admin FDMS day responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, unknown> };
+        post?: { responses?: Record<string, unknown> };
+      }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const path = "/api/admin/fdms/day";
+  assert.deepEqual(
+    served.paths[path]?.get?.responses,
+    disk.paths[path]?.get?.responses,
+  );
+  assert.deepEqual(
+    served.paths[path]?.post?.responses,
+    disk.paths[path]?.post?.responses,
+  );
+});
+
+test("S450 admin money outbox responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, unknown> };
+        post?: { responses?: Record<string, unknown> };
+      }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const path = "/api/admin/money/outbox";
+  assert.deepEqual(
+    served.paths[path]?.get?.responses,
+    disk.paths[path]?.get?.responses,
+  );
+  assert.deepEqual(
+    served.paths[path]?.post?.responses,
+    disk.paths[path]?.post?.responses,
+  );
+});
+
+test("S451 admin daily-zig responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      {
+        get?: { responses?: Record<string, unknown> };
+        post?: { responses?: Record<string, unknown> };
+      }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const path = "/api/admin/fx/daily-zig";
+  assert.deepEqual(
+    served.paths[path]?.get?.responses,
+    disk.paths[path]?.get?.responses,
+  );
+  assert.deepEqual(
+    served.paths[path]?.post?.responses,
+    disk.paths[path]?.post?.responses,
+  );
+});
+
+test("S452 all webhook POST responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, unknown> } }
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const posts = Object.keys(disk.paths)
+    .filter((p) => p.startsWith("/api/webhooks/") && disk.paths[p]?.post)
+    .sort();
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    assert.deepEqual(
+      served.paths[p]?.post?.responses,
+      disk.paths[p]?.post?.responses,
+      `${p} responses`,
+    );
+  }
+});
+
+test("S453 all admin path responses match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      Record<string, { responses?: Record<string, unknown> } | undefined>
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const methods = ["get", "post"] as const;
+  const adminPaths = Object.keys(disk.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  assert.ok(adminPaths.length >= 3);
+  for (const p of adminPaths) {
+    for (const method of methods) {
+      assert.deepEqual(
+        served.paths[p]?.[method]?.responses,
+        disk.paths[p]?.[method]?.responses,
+        `${p} ${method} responses`,
+      );
+    }
+  }
+});
+
+test("S454 ContiPay parameters match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { parameters?: unknown[] } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.paths["/api/webhooks/contipay"]?.post?.parameters,
+    disk.paths["/api/webhooks/contipay"]?.post?.parameters,
+  );
+});
+
+test("S455 WhatsApp POST parameters match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { parameters?: unknown[] } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.paths["/api/webhooks/whatsapp"]?.post?.parameters,
+    disk.paths["/api/webhooks/whatsapp"]?.post?.parameters,
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
