@@ -1,4 +1,4 @@
-# DIAL Build — Workplan STATE
+﻿# DIAL Build — Workplan STATE
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-14  
@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S220** — Admin pages bind HINT_ID exports not literals — **green** |
+| `current_stage` | **S221** — webhookSignature served==disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S219** .env.example fixture ready cite — **green** |
-| `next_stage` | **S221** |
+| `prior_stage` | **S220** Admin HINT_ID exports no literals — **green** |
+| `next_stage` | **S222** webhookIdempotency served==disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S219 | 2026-08-13/14 | through prior |
-| S220 | 2026-08-14 | Admin pages bind HINT_ID exports not literals |
+| S91–S220 | 2026-08-13/14 | through admin HINT_ID export-only |
+| S221 | 2026-08-14 | served webhookSignature matches disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S221 | OpenAPI webhookSignature served matches disk |
-| S222 | OpenAPI webhookIdempotency served matches disk |
-| S223 | Fixture note still cites groups labels with empty env |
+| S222 | webhookIdempotency served==disk |
+| S223 | Fixture note cites groups labels with empty env |
 | S224 | Root README cites S211 zero-configured ready |
-| S225 | OpenAPI readyVsGroups served matches disk |
+| S225 | readyVsGroups served==disk |
+| S226 | Served OpenAPI never embeds secret values |
 
 ## Note
 

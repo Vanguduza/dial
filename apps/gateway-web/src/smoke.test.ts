@@ -1628,6 +1628,257 @@ test("S220 admin pages bind HINT_ID exports not string literals", async () => {
   }
 });
 
+test("S221 served OpenAPI webhookSignature matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { webhookSignature?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { webhookSignature?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.webhookSignature,
+    disk.info?.["x-dial-sor"]?.webhookSignature,
+  );
+  assert.ok(
+    (served.info?.["x-dial-sor"]?.webhookSignature ?? "")
+      .toLowerCase()
+      .includes("signature"),
+  );
+});
+
+test("S222 served OpenAPI webhookIdempotency matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { webhookIdempotency?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { webhookIdempotency?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.webhookIdempotency,
+    disk.info?.["x-dial-sor"]?.webhookIdempotency,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.webhookIdempotency?.includes(
+      "claimProcessedEvent",
+    ),
+  );
+});
+
+test("S223 fixture note cites groups labels with empty env", async () => {
+  const {
+    INTEGRATION_ENV_GROUPS,
+    INTEGRATION_ENV_GROUP_LABELS,
+    buildIntegrationsHealthNote,
+  } = await import("./lib/integrationsReadiness.js");
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const saved: Record<string, string | undefined> = {};
+  for (const g of INTEGRATION_ENV_GROUPS) {
+    for (const k of g.keys) {
+      saved[k] = process.env[k];
+      delete process.env[k];
+    }
+  }
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as { note?: string; ready?: boolean };
+    assert.equal(body.ready, true);
+    const expected = buildIntegrationsHealthNote("fixture");
+    assert.equal(body.note, expected);
+    assert.ok(body.note?.includes("groups labels="));
+    assert.ok(
+      body.note?.includes(INTEGRATION_ENV_GROUP_LABELS.join(",")),
+      "note must cite full INTEGRATION_ENV_GROUP_LABELS even with empty env",
+    );
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
+});
+
+test("S224 root README cites S211 zero-configured ready", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("S211"));
+  assert.ok(
+    readme.includes("configured=false") ||
+      readme.includes("zero configured") ||
+      readme.includes("no groups configured") ||
+      readme.includes("without configured"),
+  );
+  assert.ok(readme.includes("ready"));
+});
+
+test("S225 served OpenAPI readyVsGroups matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { readyVsGroups?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { readyVsGroups?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.readyVsGroups,
+    disk.info?.["x-dial-sor"]?.readyVsGroups,
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.readyVsGroups?.includes("ready-meaning-s194"),
+  );
+});
+
+test("S226 served OpenAPI never embeds secret values", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const blob = JSON.stringify(await res.json());
+  for (const s of [
+    "sk_live",
+    "sk_test",
+    "service_role",
+    "whsec_",
+    "Bearer ",
+    "BEGIN PRIVATE KEY",
+  ]) {
+    assert.equal(blob.includes(s), false, `served OpenAPI must not contain ${s}`);
+  }
+});
+
+test("S227 served webhook POST 401s document signature failure", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: { "401"?: { description?: string } } } }
+    >;
+  };
+  const posts = Object.keys(served.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    const d401 = served.paths[p]?.post?.responses?.["401"]?.description ?? "";
+    assert.ok(d401.length > 0, `${p} must document 401`);
+    assert.ok(
+      /signature|hmac|verify/i.test(d401),
+      `${p} 401 must mention signature/HMAC/verify`,
+    );
+  }
+});
+
+test("S228 health note equals builder under empty env", async () => {
+  const { INTEGRATION_ENV_GROUPS, buildIntegrationsHealthNote } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const saved: Record<string, string | undefined> = {};
+  for (const g of INTEGRATION_ENV_GROUPS) {
+    for (const k of g.keys) {
+      saved[k] = process.env[k];
+      delete process.env[k];
+    }
+  }
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    const body = (await res.json()) as { note?: string };
+    assert.equal(body.note, buildIntegrationsHealthNote("fixture"));
+    assert.ok(body.note?.startsWith("Fixture mode"));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
+});
+
+test("S229 .env.example cites S211 fixture zero-configured", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("S211"));
+  assert.ok(
+    envExample.includes("configured=false") ||
+      envExample.includes("configured=false") ||
+      envExample.toLowerCase().includes("configured"),
+  );
+});
+
+test("S230 served x-dial-sor webhook+ready keys match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    info?: {
+      "x-dial-sor"?: Record<string, string>;
+    };
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: Record<string, string> };
+  };
+  const keys = [
+    "webhookSignature",
+    "webhookIdempotency",
+    "readyVsGroups",
+    "readyVsGroupsHint",
+    "docs",
+  ] as const;
+  for (const k of keys) {
+    assert.equal(
+      served.info?.["x-dial-sor"]?.[k],
+      disk.info?.["x-dial-sor"]?.[k],
+      `x-dial-sor.${k} served must match disk`,
+    );
+    assert.ok(
+      typeof served.info?.["x-dial-sor"]?.[k] === "string" &&
+        (served.info?.["x-dial-sor"]?.[k]?.length ?? 0) > 0,
+    );
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
