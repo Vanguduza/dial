@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S195** — Smoke: note text differs fixture vs sandbox/live — **green** |
+| `current_stage` | **S196** — OpenAPI webhook signature+idempotency SoR — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S194** Document ready vs groups configured — **green** |
-| `next_stage` | **S196** OpenAPI webhook paths document signature+idempotency SoR |
+| `prior_stage` | **S195** Smoke note differs fixture vs sandbox/live — **green** |
+| `next_stage` | **S197** Smoke: OpenAPI webhook paths never embed secret values |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S194 | 2026-08-13/14 | through ready vs groups docs |
-| S195 | 2026-08-14 | buildIntegrationsHealthNote fixture≠sandbox/live |
+| S91–S195 | 2026-08-13/14 | through note mode variance |
+| S196 | 2026-08-14 | webhooks tag + x-dial-sor signature/idempotency |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S196 | OpenAPI webhook paths document signature+idempotency SoR |
 | S197 | Smoke: OpenAPI webhook paths never embed secret values |
 | S198 | Served OpenAPI includes webhookSignature + webhookIdempotency |
 | S199 | Root README cites ready≠groups configured (S194) |
 | S200 | .env.example cites ready vs groups SoR |
+| S201 | Integrations README documents webhook OpenAPI SoR keys |
 
 ## Note
 
