@@ -148,6 +148,18 @@ export const INTEGRATION_ENV_GROUP_LABELS = INTEGRATION_ENV_GROUPS.map(
   (g) => g.label,
 ) as readonly IntegrationEnvGroupLabel[];
 
+/**
+ * S163 — build health `note` from mode + INTEGRATION_ENV_GROUP_LABELS (never secrets).
+ */
+export function buildIntegrationsHealthNote(mode: string): string {
+  const labels = INTEGRATION_ENV_GROUP_LABELS.join(",");
+  const normalized = mode.toLowerCase();
+  if (normalized === "fixture") {
+    return `Fixture mode — missing keys OK for CI; ready=all probes ok; groups labels=${labels}`;
+  }
+  return `Sandbox/live — missing groups will fail closed on use; ready=all probes ok; groups labels=${labels}`;
+}
+
 export function listIntegrationEnvGroupSnapshots(
   env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env,
 ): Array<{

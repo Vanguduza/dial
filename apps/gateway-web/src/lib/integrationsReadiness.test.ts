@@ -118,6 +118,22 @@ test("S146 INTEGRATION_ENV_GROUP_LABELS tracks INTEGRATION_ENV_GROUPS order", as
   );
 });
 
+test("S163 buildIntegrationsHealthNote uses INTEGRATION_ENV_GROUP_LABELS", async () => {
+  const {
+    INTEGRATION_ENV_GROUP_LABELS,
+    buildIntegrationsHealthNote,
+  } = await import("./integrationsReadiness.js");
+  const labels = INTEGRATION_ENV_GROUP_LABELS.join(",");
+  const fixture = buildIntegrationsHealthNote("fixture");
+  assert.ok(fixture.startsWith("Fixture mode"));
+  assert.ok(fixture.includes(`groups labels=${labels}`));
+  const sandbox = buildIntegrationsHealthNote("sandbox");
+  assert.ok(sandbox.startsWith("Sandbox/live"));
+  assert.ok(sandbox.includes(`groups labels=${labels}`));
+  const live = buildIntegrationsHealthNote("LIVE");
+  assert.equal(live, sandbox);
+});
+
 test("S139 INTEGRATION_ENV_GROUPS match OpenAPI label enum + .env.example keys", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
