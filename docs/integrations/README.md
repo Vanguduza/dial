@@ -52,9 +52,9 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 1. Copy `.env.example` → `.env` (never commit secrets).
 2. Fill vendor groups you intend to exercise (PSP, WA, FDMS, Meili, maps, Redis, Temporal, LiteLLM).
 3. `docker compose up -d redis meilisearch` (+ Temporal profile if needed).
-4. `curl -s http://localhost:3000/api/health/integrations | jq '{ready,mode,probes}'`
-   - Fixture: expect `"ready": true` with all probes green (no secrets required).
-   - Sandbox/live: expect probes green only when required env is set; otherwise probe `ok: false`.
+4. `curl -s http://localhost:3000/api/health/integrations | jq '{ready,mode,probes,groups}'`
+   - Fixture: expect `"ready": true` with all probes green (no secrets required) — **ready≠groups**: `ready` does **not** require any `groups[].configured` (S211 / `integrationsReady(probes)`).
+   - Sandbox/live: expect probes green only when required env is set; otherwise probe `ok: false`. Confirm intended vendor groups show `configured: true` before cutover.
 5. Smoke each webhook you enabled (Paynow / ContiPay / EcoCash / PayPal / Escrow / FDMS / WhatsApp) with sig+idempotency.
 6. Confirm ops-only items remain tracked: Meta template IDs (ENH-021), escrow contract (ENH-020), ZIMRA field-map (ENH-022).
 

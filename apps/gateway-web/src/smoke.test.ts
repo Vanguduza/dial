@@ -1401,6 +1401,233 @@ test("S210 groups[].missing are key names only (no values)", async () => {
   }
 });
 
+test("S211 fixture ready=true with zero groups configured", async () => {
+  const { INTEGRATION_ENV_GROUPS } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const saved: Record<string, string | undefined> = {};
+  for (const g of INTEGRATION_ENV_GROUPS) {
+    for (const k of g.keys) {
+      saved[k] = process.env[k];
+      delete process.env[k];
+    }
+  }
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  try {
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      groups?: Array<{ configured: boolean }>;
+    };
+    assert.equal(body.mode, "fixture");
+    assert.equal(body.ready, true);
+    assert.ok(body.groups && body.groups.length > 0);
+    assert.ok(
+      body.groups!.every((g) => g.configured === false),
+      "fixture ready must not require any group configured=true",
+    );
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
+});
+
+test("S212 served OpenAPI readyVsGroupsHint matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: { readyVsGroupsHint?: string } } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { readyVsGroupsHint?: string } };
+  };
+  assert.equal(
+    served.info?.["x-dial-sor"]?.readyVsGroupsHint,
+    disk.info?.["x-dial-sor"]?.readyVsGroupsHint,
+  );
+  assert.ok(
+    (served.info?.["x-dial-sor"]?.readyVsGroupsHint ?? "").includes(
+      "INTEGRATIONS_READY_VS_GROUPS_HINT_ID",
+    ),
+  );
+});
+
+test("S213 served tags.webhooks description lock", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { tags?: Array<{ name: string; description?: string }> };
+  const diskWh = disk.tags?.find((t) => t.name === "webhooks");
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    tags?: Array<{ name: string; description?: string }>;
+  };
+  const servedWh = served.tags?.find((t) => t.name === "webhooks");
+  assert.equal(servedWh?.description, diskWh?.description);
+  assert.ok(servedWh?.description?.includes("claimProcessedEvent"));
+  assert.ok(
+    (servedWh?.description ?? "").toLowerCase().includes("signature"),
+  );
+  assert.ok(servedWh?.description?.includes("processed_events"));
+});
+
+test("S214 admin testids share HINT_ID export values", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const {
+    INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
+    INTEGRATIONS_READY_VS_GROUPS_HINT_ID,
+  } = await import("./lib/integrationsReadiness.js");
+  const integrations = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  const costHealth = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  for (const src of [integrations, costHealth]) {
+    assert.ok(src.includes("INTEGRATIONS_READY_VS_GROUPS_HINT_ID"));
+    assert.ok(src.includes("INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID"));
+    assert.ok(src.includes("data-testid={INTEGRATIONS_READY_VS_GROUPS_HINT_ID}"));
+    assert.ok(src.includes("data-testid={INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"));
+  }
+  assert.equal(INTEGRATIONS_READY_VS_GROUPS_HINT_ID, "ready-vs-groups-sor-hint");
+  assert.equal(INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID, "note-builder-sor-hint");
+});
+
+test("S215 README checklist cites ready≠groups before sandbox", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  const checklistIdx = readme.indexOf(
+    "Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`",
+  );
+  assert.ok(checklistIdx >= 0);
+  const after = readme.slice(checklistIdx, checklistIdx + 1200);
+  assert.ok(after.includes("ready≠groups") || after.includes("ready!=groups") || after.includes("ready vs groups") || after.includes("ready≠`groups") || after.includes("not all groups[].configured"));
+  assert.ok(after.includes("groups[].configured") || after.includes("configured"));
+  assert.ok(
+    after.includes("integrationsReady(probes)") ||
+      after.includes("ready === integrationsReady") ||
+      after.includes("ready≠groups"),
+  );
+});
+
+test("S216 served IntegrationsHealth.ready description independent of groups", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: {
+        IntegrationsHealth?: {
+          properties?: { ready?: { description?: string } };
+        };
+      };
+    };
+  };
+  const d =
+    served.components?.schemas?.IntegrationsHealth?.properties?.ready
+      ?.description ?? "";
+  assert.ok(d.includes("independent of groups"));
+  assert.ok(d.toLowerCase().includes("integrationsready") || d.includes("integrationsReady") || d.includes("S194"));
+});
+
+test("S217 served WebhookOpaqueBody documents processed_events", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    components?: {
+      schemas?: { WebhookOpaqueBody?: { description?: string } };
+    };
+  };
+  const d = served.components?.schemas?.WebhookOpaqueBody?.description ?? "";
+  assert.ok(d.includes("processed_events"));
+  assert.ok(d.toLowerCase().includes("signature") || d.includes("verify"));
+});
+
+test("S218 listIntegrationEnvGroupSnapshots empty env all unconfigured", async () => {
+  const { listIntegrationEnvGroupSnapshots, INTEGRATION_ENV_GROUPS } =
+    await import("./lib/integrationsReadiness.js");
+  const snaps = listIntegrationEnvGroupSnapshots({});
+  assert.equal(snaps.length, INTEGRATION_ENV_GROUPS.length);
+  assert.ok(snaps.every((g) => g.configured === false));
+  assert.ok(snaps.every((g) => g.missing.length === g.requiredCount));
+  assert.ok(snaps.every((g) => g.presentCount === 0));
+});
+
+test("S219 .env.example cites fixture ready without configured groups", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("fixture"));
+  assert.ok(
+    envExample.includes("configured") ||
+      envExample.includes("readyVsGroups") ||
+      envExample.includes("groups[].configured"),
+  );
+  assert.ok(
+    envExample.includes("S211") ||
+      envExample.includes("readyVsGroups") ||
+      envExample.includes("integrationsReady"),
+  );
+});
+
+test("S220 admin pages bind HINT_ID exports not string literals", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const {
+    INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID,
+    INTEGRATIONS_READY_VS_GROUPS_HINT_ID,
+  } = await import("./lib/integrationsReadiness.js");
+  for (const rel of [
+    "src/app/admin/integrations/page.tsx",
+    "src/app/admin/cost-health/page.tsx",
+  ]) {
+    const src = readFileSync(join(process.cwd(), rel), "utf8");
+    assert.equal(
+      src.includes(`data-testid="${INTEGRATIONS_READY_VS_GROUPS_HINT_ID}"`),
+      false,
+      `${rel} must not hardcode ready-vs-groups testid string`,
+    );
+    assert.equal(
+      src.includes(`data-testid="${INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"`),
+      false,
+      `${rel} must not hardcode note-builder testid string`,
+    );
+    assert.ok(src.includes("{INTEGRATIONS_READY_VS_GROUPS_HINT_ID}"));
+    assert.ok(src.includes("{INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID}"));
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
