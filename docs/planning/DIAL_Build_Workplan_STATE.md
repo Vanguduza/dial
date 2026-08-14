@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S416** — IntegrationsHealth required fields match disk — **green** |
+| `current_stage` | **S417** — IntegrationsProbes required keys match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S415** WebhookOpaqueBody additionalProperties true — **green** |
-| `next_stage` | **S417** IntegrationsProbes required keys match disk |
+| `prior_stage` | **S416** IntegrationsHealth required fields match disk — **green** |
+| `next_stage` | **S418** all schemas deepEqual disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S415 | 2026-08-13/14 | through WebhookOpaqueBody additionalProperties |
-| S416 | 2026-08-14 | IntegrationsHealth required ok|ready|mode|probes|groups |
+| S91–S416 | 2026-08-13/14 | through prior |
+| S417 | 2026-08-14 | IntegrationsProbes required keys served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S417 | IntegrationsProbes required keys match disk |
 | S418 | all schemas deepEqual disk |
 | S419 | securitySchemes deepEqual disk |
 | S420 | info object keys match disk |
 | S421 | info deepEqual disk |
+| S422 | components deepEqual disk |
 
 ## Note
 
