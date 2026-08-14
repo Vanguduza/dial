@@ -4547,6 +4547,216 @@ test("S350 components top-level keys match disk", async () => {
   assert.ok(Object.keys(served.components ?? {}).includes("securitySchemes"));
 });
 
+test("S351 Paynow summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/paynow"]?.post?.summary,
+    disk.paths["/api/webhooks/paynow"]?.post?.summary,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/paynow"]?.post?.summary,
+    "Paynow SHA512 result notification",
+  );
+});
+
+test("S352 WhatsApp POST summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.post?.summary,
+    disk.paths["/api/webhooks/whatsapp"]?.post?.summary,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.post?.summary,
+    "Meta Cloud API inbound (HMAC)",
+  );
+});
+
+test("S353 FDMS webhook summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/fdms"]?.post?.summary,
+    disk.paths["/api/webhooks/fdms"]?.post?.summary,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/fdms"]?.post?.summary,
+    "FDMS Gateway acknowledge / submit callback",
+  );
+});
+
+test("S354 openapi info.title matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { title?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(served.info?.title, disk.info?.title);
+  assert.ok((served.info?.title ?? "").includes("DIAL Gateway"));
+});
+
+test("S355 openapi info.version matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { version?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(served.info?.version, disk.info?.version);
+  assert.equal(served.info?.version, "0.1.0");
+});
+
+test("S356 EcoCash summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/ecocash"]?.post?.summary,
+    disk.paths["/api/webhooks/ecocash"]?.post?.summary,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/ecocash"]?.post?.summary,
+    "EcoCash HMAC webhook",
+  );
+});
+
+test("S357 PayPal summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/paypal"]?.post?.summary,
+    disk.paths["/api/webhooks/paypal"]?.post?.summary,
+  );
+});
+
+test("S358 Escrow summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/escrow"]?.post?.summary,
+    disk.paths["/api/webhooks/escrow"]?.post?.summary,
+  );
+});
+
+test("S359 WhatsApp GET summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.get?.summary,
+    disk.paths["/api/webhooks/whatsapp"]?.get?.summary,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/whatsapp"]?.get?.summary,
+    "Meta hub challenge",
+  );
+});
+
+test("S360 openapi info.title+version match disk pair", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { title?: string; version?: string } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    { title: served.info?.title, version: served.info?.version },
+    { title: disk.info?.title, version: disk.info?.version },
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
