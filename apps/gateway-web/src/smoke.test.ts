@@ -810,6 +810,18 @@ test("S160 integrations README cites OpenAPI healthNoteUiMax", async () => {
   assert.ok(integ.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
 });
 
+test("S161 .env.example header cites INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
+  assert.ok(envExample.includes("healthNoteUiMax"));
+  assert.ok(envExample.includes("integrationsReadiness.ts"));
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");
