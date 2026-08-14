@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S181** — Integrations README cites HINT_ID + DOCS — **green** |
+| `current_stage` | **S182** — Root README cites HINT_ID + DOCS — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S180** Smoke: served OpenAPI noteBuilderHint matches export — **green** |
-| `next_stage` | **S182** Root README cites HINT_ID + DOCS |
+| `prior_stage` | **S181** Integrations README cites HINT_ID + DOCS — **green** |
+| `next_stage` | **S183** OpenAPI noteBuilderDocs → DOCS constant |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S180 | 2026-08-13/14 | through OpenAPI noteBuilderHint export lock |
-| S181 | 2026-08-14 | integrations README cites HINT_ID + DOCS |
+| S91–S181 | 2026-08-13/14 | through integrations README HINT_ID + DOCS |
+| S182 | 2026-08-14 | root README cites HINT_ID + DOCS |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S182 | Root README cites HINT_ID + DOCS |
 | S183 | OpenAPI `x-dial-sor.noteBuilderDocs` → DOCS constant |
 | S184 | Smoke: served OpenAPI noteBuilderDocs matches DOCS export |
 | S185 | Admin UI cites DOCS constant in note-builder hint copy |
 | S186 | `.env.example` cites noteBuilderDocs OpenAPI key |
+| S187 | Integrations README cites x-dial-sor.noteBuilderDocs |
 
 ## Note
 
