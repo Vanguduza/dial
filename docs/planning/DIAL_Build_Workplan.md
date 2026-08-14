@@ -87,14 +87,23 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | Password sign-up/in → GoTrue fixture; profiles RLS + `0002_profiles_auth_rls.sql`; DialSession + `/home` Shop\|Services; `GET /api/auth/me` object AuthZ; T |
 | Green → | Auto-open **PD2** Meili + Catalogue Factory |
 
-### PD2 — Search depth (CURRENT)
+### PD2 — Search depth (**GREEN** 2026-08-14)
 
 | | |
 | --- | --- |
 | Issue | [#22](https://github.com/Vanguduza/dial/issues/22) |
-| Branch | `build/t4-tech-ui` (continue) |
-| Thin path | Meili `spare_offers` bootstrap + Factory approve→upsert; B2B informal leak=0 (D-49); gateway search |
+| Branch | `build/t4-tech-ui` |
+| Evidence | `searchOffersAsync` + Meili client search/upsert; Factory `publishApprovedBatchToMeili`; gateway search session SoR; B2B informal leak=0; index `spare_offers_v1`; T |
 | Green → | Auto-open **PD3** Spare depth |
+
+### PD3 — Spare depth (CURRENT)
+
+| | |
+| --- | --- |
+| Issue | [#23](https://github.com/Vanguduza/dial/issues/23) |
+| Branch | `build/t4-tech-ui` (continue) |
+| Thin path | `/spare` browse/cart bind to PD2 search path; USD browse (D-57); EcoCash\|COD buttons |
+| Green → | Auto-open **PD4** PSP sandbox |
 
 ### S10 — E2a (historical)
 

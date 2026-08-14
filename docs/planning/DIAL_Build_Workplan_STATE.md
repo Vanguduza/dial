@@ -6,11 +6,11 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD2** — Live Meili + Catalogue Factory → spare_offers |
-| `current_issue` | [#22](https://github.com/Vanguduza/dial/issues/22) PD2 Search depth |
+| `current_stage` | **PD3** — Spare depth (browse/cart against live search) |
+| `current_issue` | [#23](https://github.com/Vanguduza/dial/issues/23) PD3 Spare depth |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD1** Auth depth — **green** ([#21](https://github.com/Vanguduza/dial/issues/21)) |
-| `next_stage` | **PD3** Spare depth (auto on PD2 green) |
+| `prior_stage` | **PD2** Search depth — **green** ([#22](https://github.com/Vanguduza/dial/issues/22)) |
+| `next_stage` | **PD4** Sandbox PSP (auto on PD3 green) |
 | `blocked_on_human` | _(empty)_ — S99 still human-only later; groceries G1 not started |
 
 ## Completed
@@ -20,12 +20,12 @@
 | S10–S90 | 2026-08-12/13 | Workplan spine green — eng Build complete |
 | S91–S465 | 2026-08-13/14 | **Post-S90 invent** (OpenAPI micro-band) — **paused by founder** — not workplan SoR |
 | **PD1** | 2026-08-14 | Supabase Auth + profiles/RLS + `/api/auth/me`; [#21](https://github.com/Vanguduza/dial/issues/21); T evidence |
+| **PD2** | 2026-08-14 | Meili spare_offers_v1 + Factory publish + B2B filter; [#22](https://github.com/Vanguduza/dial/issues/22); T evidence |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD2** | Live Meili + Catalogue Factory → spare_offers; B2B informal filter (D-49) |
 | **PD3** | Spare browse/cart against live search path |
 | **PD4** | Sandbox PSP adapters (Paynow/EcoCash) |
 | **G1** | Groceries thin vertical — **blocked until PD1–PD4 green** (plan only until then) |

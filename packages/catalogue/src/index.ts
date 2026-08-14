@@ -1,11 +1,22 @@
 /**
- * Catalogue + Meili search stubs (E2a cart + Pack §15 T2).
+ * Catalogue + Meili search (E2a cart + Pack §15 T2 / PD2).
  * USD browse/cart only (D-57). Agency marketplace only (D-58). B2B hides informal (D-49).
+ * Fixture: in-memory SoR. Sandbox/live: Meili HTTP (fail closed without MEILI_*).
  */
 import { type Money, money } from "@dial/shared";
+import {
+  type OfferSource,
+  type SpareOfferDocument,
+  type SupplierFormality,
+} from "./meiliSettings.js";
+import { integrationMode } from "./meiliClient.js";
 
-export type OfferSource = "MARKETPLACE";
-export type SupplierFormality = "formal" | "informal";
+export type { OfferSource, SpareOfferDocument, SupplierFormality };
+export {
+  MEILI_SPARE_OFFERS_V1_SETTINGS,
+  MEILI_SPARE_INDEX_DEFAULT,
+} from "./meiliSettings.js";
+
 export type SearchSessionRole = "b2c" | "b2b";
 
 export type StubOffer = {
@@ -18,30 +29,6 @@ export type StubOffer = {
   supplierFormality: SupplierFormality;
   oem: string;
   brand: string;
-};
-
-/** Pack §8.1 Meili document shape (customer-facing; no supplierId). */
-export type SpareOfferDocument = {
-  id: string;
-  masterProductId: string;
-  oem: string;
-  normalisedOem: string;
-  description: string;
-  brand: string;
-  qualityTier: string;
-  availability: "available" | "confirm_required" | "sourcing";
-  chassis_codes: string[];
-  engine_codes: string[];
-  categoryPath: string[];
-  priceMinor: number;
-  currency: "USD";
-  warrantyDays: number;
-  deliveryBandId: string;
-  fitmentConfidence: number;
-  stockValidUntil: number;
-  hasRestrictedSku: boolean;
-  offerSource: OfferSource;
-  supplierFormality: SupplierFormality;
 };
 
 export type CartLine = {
@@ -81,53 +68,6 @@ export type SearchNoResultEvent = {
   sessionRole: SearchSessionRole;
   createdAt: string;
 };
-
-/** Pack §8.2 settings — filterable includes offerSource + supplierFormality. */
-export const MEILI_SPARE_OFFERS_V1_SETTINGS = {
-  searchableAttributes: [
-    "oem",
-    "normalisedOem",
-    "description",
-    "brand",
-    "pnc",
-    "chassis_codes",
-    "engine_codes",
-  ],
-  filterableAttributes: [
-    "brand",
-    "qualityTier",
-    "availability",
-    "chassis_codes",
-    "engine_codes",
-    "currency",
-    "deliveryBandId",
-    "hasRestrictedSku",
-    "priceMinor",
-    "fitmentConfidence",
-    "stockValidUntil",
-    "offerSource",
-    "supplierFormality",
-  ],
-  sortableAttributes: ["priceMinor", "fitmentConfidence", "stockValidUntil"],
-  displayedAttributes: [
-    "id",
-    "masterProductId",
-    "oem",
-    "description",
-    "brand",
-    "qualityTier",
-    "availability",
-    "priceMinor",
-    "currency",
-    "warrantyDays",
-    "deliveryBandId",
-    "fitmentConfidence",
-    "hasRestrictedSku",
-    "categoryPath",
-    "offerSource",
-    "supplierFormality",
-  ],
-} as const;
 
 const OFFER_SEED: StubOffer[] = [
   {
@@ -232,6 +172,67 @@ export function searchOffers(
   return hits;
 }
 
+function stubOfferFromMeiliDoc(doc: SpareOfferDocument): StubOffer {
+  const tier = doc.qualityTier;
+  const qualityTier: StubOffer["qualityTier"] =
+    tier === "OEM" || tier === "OES" || tier === "Aftermarket"
+      ? tier
+      : "Aftermarket";
+  return {
+    offerId: doc.id,
+    title: doc.description,
+    unitPriceUsdMinor: BigInt(doc.priceMinor),
+    qualityTier,
+    offerSource: doc.offerSource,
+    supplierFormality: doc.supplierFormality,
+    oem: doc.oem,
+    brand: doc.brand,
+  };
+}
+
+/**
+ * PD2 search path — fixture uses in-memory SoR; sandbox/live hits Meili with
+ * `meiliFilterForSession` (D-49). Never trusts body role (caller passes session).
+ */
+export async function searchOffersAsync(
+  query: string,
+  opts?: { sessionRole?: SearchSessionRole },
+): Promise<{
+  hits: StubOffer[];
+  source: "memory" | "meili";
+  meiliFilter: string;
+  indexUid: string;
+}> {
+  const role = opts?.sessionRole ?? "b2c";
+  const filter = meiliFilterForSession(role);
+  if (integrationMode() === "fixture") {
+    return {
+      hits: searchOffers(query, { sessionRole: role }),
+      source: "memory",
+      meiliFilter: filter,
+      indexUid: process.env.MEILI_SPARE_INDEX?.trim() || "spare_offers_v1",
+    };
+  }
+  const { searchSpareOfferDocuments, spareOffersIndexName } = await import(
+    "./meiliClient.js"
+  );
+  const result = await searchSpareOfferDocuments({ q: query, filter });
+  let hits = result.hits.map(stubOfferFromMeiliDoc);
+  // Defense in depth: never return informal to B2B even if Meili misconfigured.
+  if (role === "b2b") {
+    hits = hits.filter((o) => o.supplierFormality === "formal");
+  }
+  if (query.trim() && hits.length === 0) {
+    recordSearchNoResult(query.trim().toLowerCase(), role);
+  }
+  return {
+    hits,
+    source: "meili",
+    meiliFilter: filter,
+    indexUid: result.indexUid || spareOffersIndexName(),
+  };
+}
+
 /** D-49 regression — B2B search must never return informal (leak count = 0). */
 export function countInformalB2bLeaks(query = ""): number {
   return searchOffers(query, { sessionRole: "b2b" }).filter(
@@ -330,8 +331,8 @@ export function rejectCatalogueReview(reviewId: string): CatalogueReviewItem {
 }
 
 /**
- * E5a: after human approve, publish one SKU into Meili stub docs (B2C visible).
- * Never publishes informal to B2B search (D-49).
+ * E5a / PD2: after human approve, publish one SKU into memory + Meili upsert.
+ * Never publishes informal to B2B search (D-49). Fixture upsert is no-op HTTP.
  */
 export function publishApprovedBatchToMeiliStub(input: {
   batchId: string;
@@ -351,6 +352,31 @@ export function publishApprovedBatchToMeiliStub(input: {
   const review = reviewQueue.find((r) => r.batchId === input.batchId);
   if (review) review.offerId = input.offer.offerId;
   return toMeiliDoc(input.offer);
+}
+
+/**
+ * PD2 publish path — memory publish then ensure index + upsert documents.
+ * Sandbox/live fail closed without MEILI_* (via upsertSpareOfferDocuments).
+ */
+export async function publishApprovedBatchToMeili(input: {
+  batchId: string;
+  offer: StubOffer;
+}): Promise<{
+  doc: SpareOfferDocument;
+  taskUid: string | "fixture";
+  indexUid: string;
+}> {
+  const doc = publishApprovedBatchToMeiliStub(input);
+  const { ensureSpareOffersIndex, upsertSpareOfferDocuments } = await import(
+    "./meiliClient.js"
+  );
+  const ensured = await ensureSpareOffersIndex();
+  const upsert = await upsertSpareOfferDocuments([doc]);
+  return {
+    doc,
+    taskUid: upsert.taskUid,
+    indexUid: upsert.indexUid || ensured.indexUid,
+  };
 }
 
 export function createCart(): Cart {
@@ -417,5 +443,8 @@ export function __resetCatalogueForTests(): void {
 export {
   ensureSpareOffersIndex,
   pingMeiliHealth,
+  searchSpareOfferDocuments,
+  spareOffersIndexName,
   upsertSpareOfferDocuments,
+  integrationMode as meiliIntegrationMode,
 } from "./meiliClient.js";

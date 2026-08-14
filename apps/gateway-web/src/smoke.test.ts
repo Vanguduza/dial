@@ -147,6 +147,107 @@ test("T2 admin catalogue review: human approve only", () => {
   assert.equal(approveCatalogueReview(reviewId).status, "approved");
 });
 
+test("PD2 search + Factory publish: session SoR; B2B informal leak=0; query role refused", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  process.env.INTERNAL_API_SECRET = "pd2_test_secret";
+  __resetCatalogueForTests();
+  __resetAuthForTests();
+
+  const b2b = createSession({ email: "fleet_pd2@dial.test", buyerSegment: "b2b" });
+  const { GET: searchGet } = await import("./app/api/search/spare/route.js");
+  const searchRes = await searchGet(
+    new Request("http://localhost/api/search/spare?q=wiper", {
+      headers: { cookie: `${sessionCookieName()}=${b2b.token}` },
+    }),
+  );
+  assert.equal(searchRes.status, 200);
+  const searchBody = (await searchRes.json()) as {
+    sessionRole: string;
+    searchSource: string;
+    meiliFilter: string;
+    hits: Array<{ supplierFormality: string }>;
+  };
+  assert.equal(searchBody.sessionRole, "b2b");
+  assert.equal(searchBody.searchSource, "memory");
+  assert.match(searchBody.meiliFilter, /supplierFormality = "formal"/);
+  assert.equal(
+    searchBody.hits.filter((h) => h.supplierFormality === "informal").length,
+    0,
+  );
+
+  const badRole = await searchGet(
+    new Request("http://localhost/api/search/spare?q=oil&role=b2b", {
+      headers: { cookie: `${sessionCookieName()}=${b2b.token}` },
+    }),
+  );
+  assert.equal(badRole.status, 400);
+
+  const { POST: reviewPost } = await import(
+    "./app/api/admin/catalogue/review/route.js"
+  );
+  const enq = await reviewPost(
+    new Request("http://localhost/api/admin/catalogue/review", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-internal-secret": "pd2_test_secret",
+      },
+      body: JSON.stringify({ action: "enqueue", rowCount: 1 }),
+    }),
+  );
+  assert.equal(enq.status, 200);
+  const enqBody = (await enq.json()) as {
+    batch: { batchId: string };
+    queue: Array<{ reviewId: string }>;
+  };
+  const approve = await reviewPost(
+    new Request("http://localhost/api/admin/catalogue/review", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-internal-secret": "pd2_test_secret",
+      },
+      body: JSON.stringify({
+        action: "approve",
+        reviewId: enqBody.queue[0]!.reviewId,
+      }),
+    }),
+  );
+  assert.equal(approve.status, 200);
+  const publish = await reviewPost(
+    new Request("http://localhost/api/admin/catalogue/review", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-internal-secret": "pd2_test_secret",
+      },
+      body: JSON.stringify({
+        action: "publish",
+        batchId: enqBody.batch.batchId,
+        offer: {
+          offerId: "off_pd2_gw",
+          title: "PD2 gateway SKU",
+          unitPriceUsdMinor: "3300",
+          qualityTier: "OES",
+          offerSource: "MARKETPLACE",
+          supplierFormality: "formal",
+          oem: "PD2-GW",
+          brand: "Test",
+        },
+      }),
+    }),
+  );
+  assert.equal(publish.status, 200);
+  const pubBody = (await publish.json()) as {
+    taskUid: string;
+    indexUid: string;
+    doc: { id: string };
+  };
+  assert.equal(pubBody.taskUid, "fixture");
+  assert.ok(pubBody.indexUid.includes("spare_offers"));
+  assert.equal(pubBody.doc.id, "off_pd2_gw");
+});
+
 /** S22 T3: USD cart → pay-step EcoCash|COD (ZiG only at pay); WA button parity. */
 test("T3 Spare checkout pay-step: EcoCash|COD required; no supplierId; WA parity", async () => {
   __resetCatalogueForTests();

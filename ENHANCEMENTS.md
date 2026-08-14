@@ -388,6 +388,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-404 | **OpenAPI micro-band pause** — return STATE to S90→S99 spine | `done` | Founder: no invent past workplan; S99 human |
 | ENH-405 | **Product-depth band PD1–PD4** authored in workplan (Auth→Meili→Spare→PSP; G1 waits) | `done` | Auto-advance within band only; no S466+ invent |
 | ENH-406 | **PD1 Auth depth** — live Supabase Auth + profiles/RLS + `/api/auth/me` | `done` | [#21](https://github.com/Vanguduza/dial/issues/21); fixture CI; sandbox/live fail-closed |
+| ENH-407 | **PD2 Search depth** — Meili spare_offers_v1 + Factory publish + B2B filter | `done` | [#22](https://github.com/Vanguduza/dial/issues/22); searchOffersAsync; admin publish |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

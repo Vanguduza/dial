@@ -1,5 +1,5 @@
 /**
- * Catalogue Factory review queue (D-53) — human approve/reject only.
+ * Catalogue Factory review queue (D-53 / PD2) — human approve/reject + Meili publish.
  * Fail closed without INTERNAL_API_SECRET. No AI auto-publish (D-54).
  */
 import { NextResponse } from "next/server";
@@ -7,7 +7,9 @@ import {
   approveCatalogueReview,
   enqueueCatalogueIngest,
   listCatalogueReviewQueue,
+  publishApprovedBatchToMeili,
   rejectCatalogueReview,
+  type StubOffer,
 } from "@dial/catalogue";
 
 export const runtime = "nodejs";
@@ -38,9 +40,11 @@ export async function POST(req: Request) {
   if (denied) return denied;
 
   const body = (await req.json()) as {
-    action?: "enqueue" | "approve" | "reject";
+    action?: "enqueue" | "approve" | "reject" | "publish";
     rowCount?: number;
     reviewId?: string;
+    batchId?: string;
+    offer?: StubOffer & { unitPriceUsdMinor?: string | number | bigint };
   };
 
   try {
@@ -66,8 +70,47 @@ export async function POST(req: Request) {
       const item = rejectCatalogueReview(body.reviewId);
       return NextResponse.json({ ok: true, item });
     }
+    if (body.action === "publish") {
+      if (!body.batchId || !body.offer) {
+        return NextResponse.json(
+          { error: "batchId and offer required for publish" },
+          { status: 400 },
+        );
+      }
+      const raw = body.offer;
+      const minor =
+        typeof raw.unitPriceUsdMinor === "bigint"
+          ? raw.unitPriceUsdMinor
+          : BigInt(String(raw.unitPriceUsdMinor ?? "0"));
+      const offer: StubOffer = {
+        offerId: String(raw.offerId),
+        title: String(raw.title),
+        unitPriceUsdMinor: minor,
+        qualityTier: raw.qualityTier,
+        offerSource: "MARKETPLACE",
+        supplierFormality: raw.supplierFormality,
+        oem: String(raw.oem),
+        brand: String(raw.brand),
+      };
+      if (offer.supplierFormality !== "formal" && offer.supplierFormality !== "informal") {
+        return NextResponse.json(
+          { error: "supplierFormality must be formal|informal" },
+          { status: 400 },
+        );
+      }
+      const published = await publishApprovedBatchToMeili({
+        batchId: body.batchId,
+        offer,
+      });
+      return NextResponse.json({
+        ok: true,
+        doc: published.doc,
+        taskUid: published.taskUid,
+        indexUid: published.indexUid,
+      });
+    }
     return NextResponse.json(
-      { error: "action must be enqueue | approve | reject" },
+      { error: "action must be enqueue | approve | reject | publish" },
       { status: 400 },
     );
   } catch (e) {

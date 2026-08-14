@@ -189,5 +189,58 @@ test("Meili HTTP client fixture ensure+upsert without keys", async () => {
   assert.ok(idx.indexUid);
   const task = await upsertSpareOfferDocuments([]);
   assert.equal(task.taskUid, "fixture");
+  assert.equal(task.indexUid, idx.indexUid);
+});
+
+test("PD2 Factory approve→Meili publish + searchOffersAsync fixture path", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetCatalogueForTests();
+  const {
+    publishApprovedBatchToMeili,
+    searchOffersAsync,
+    countInformalB2bLeaks,
+    spareOffersIndexName,
+  } = await import("./index.js");
+  const batch = enqueueCatalogueIngest(1);
+  approveCatalogueReview(listCatalogueReviewQueue()[0]!.reviewId);
+  const published = await publishApprovedBatchToMeili({
+    batchId: batch.batchId,
+    offer: {
+      offerId: "off_pd2_formal",
+      title: "PD2 formal SKU",
+      unitPriceUsdMinor: 22_00n,
+      qualityTier: "OES",
+      offerSource: "MARKETPLACE",
+      supplierFormality: "formal",
+      oem: "PD2-1",
+      brand: "Test",
+    },
+  });
+  assert.equal(published.taskUid, "fixture");
+  assert.equal(published.indexUid, spareOffersIndexName());
+  assert.equal(published.doc.offerSource, "MARKETPLACE");
+
+  const b2c = await searchOffersAsync("PD2", { sessionRole: "b2c" });
+  assert.equal(b2c.source, "memory");
+  assert.ok(b2c.hits.some((h) => h.offerId === "off_pd2_formal"));
+  assert.match(b2c.meiliFilter, /offerSource = "MARKETPLACE"/);
+
+  const b2b = await searchOffersAsync("wiper", { sessionRole: "b2b" });
+  assert.equal(b2b.source, "memory");
+  assert.equal(
+    b2b.hits.filter((h) => h.supplierFormality === "informal").length,
+    0,
+  );
+  assert.match(b2b.meiliFilter, /supplierFormality = "formal"/);
+  assert.equal(countInformalB2bLeaks("wiper"), 0);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.MEILI_HOST;
+  delete process.env.MEILI_MASTER_KEY;
+  await assert.rejects(
+    () => searchOffersAsync("oil", { sessionRole: "b2c" }),
+    /fail closed|MEILI_/,
+  );
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
 });

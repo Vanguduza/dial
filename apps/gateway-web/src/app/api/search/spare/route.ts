@@ -1,12 +1,12 @@
 /**
- * Pack §10 Spare search proxy — `GET /api/search/spare`.
+ * Pack §10 Spare search proxy — `GET /api/search/spare` (PD2).
  * Session buyerSegment drives B2B formal-only filter (D-49). Never trust body role.
- * Live Meili optional later; stub search via @dial/catalogue (S21).
+ * Fixture: in-memory catalogue. Sandbox/live: Meili HTTP with session filter.
  */
 import { NextResponse } from "next/server";
 import {
   meiliFilterForSession,
-  searchOffers,
+  searchOffersAsync,
   type SearchSessionRole,
 } from "@dial/catalogue";
 import {
@@ -29,31 +29,47 @@ export async function GET(req: Request) {
   const chassis = url.searchParams.get("chassis") ?? undefined;
 
   // D-47: ignore any client-supplied role/userId query params for AuthZ.
-  const sessionRole = sessionRoleFromRequest(req);
-  const hits = searchOffers(q, { sessionRole });
-  const filtered =
-    chassis && chassis.trim()
-      ? hits.filter(
-          (h) =>
-            h.title.toLowerCase().includes(chassis.toLowerCase()) ||
-            h.oem.toLowerCase().includes(chassis.toLowerCase()),
-        )
-      : hits;
+  if (url.searchParams.has("role") || url.searchParams.has("userId")) {
+    return NextResponse.json(
+      { error: "role/userId from query rejected — session SoR only (D-47)" },
+      { status: 400 },
+    );
+  }
 
-  return NextResponse.json({
-    q,
-    sessionRole,
-    meiliFilter: meiliFilterForSession(sessionRole),
-    currency: "USD",
-    hits: filtered.map((h) => ({
-      offerId: h.offerId,
-      title: h.title,
-      unitPriceUsdMinor: h.unitPriceUsdMinor.toString(),
-      qualityTier: h.qualityTier,
-      offerSource: h.offerSource,
-      supplierFormality: h.supplierFormality,
-      oem: h.oem,
-      brand: h.brand,
-    })),
-  });
+  const sessionRole = sessionRoleFromRequest(req);
+  try {
+    const result = await searchOffersAsync(q, { sessionRole });
+    const filtered =
+      chassis && chassis.trim()
+        ? result.hits.filter(
+            (h) =>
+              h.title.toLowerCase().includes(chassis.toLowerCase()) ||
+              h.oem.toLowerCase().includes(chassis.toLowerCase()),
+          )
+        : result.hits;
+
+    return NextResponse.json({
+      q,
+      sessionRole,
+      meiliFilter: result.meiliFilter || meiliFilterForSession(sessionRole),
+      searchSource: result.source,
+      indexUid: result.indexUid,
+      currency: "USD",
+      hits: filtered.map((h) => ({
+        offerId: h.offerId,
+        title: h.title,
+        unitPriceUsdMinor: h.unitPriceUsdMinor.toString(),
+        qualityTier: h.qualityTier,
+        offerSource: h.offerSource,
+        supplierFormality: h.supplierFormality,
+        oem: h.oem,
+        brand: h.brand,
+      })),
+    });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "search failed" },
+      { status: 503 },
+    );
+  }
 }
