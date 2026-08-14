@@ -56,6 +56,15 @@ export default function CostHealthStubPage() {
         Health note: <code>buildIntegrationsHealthNote</code>. Health note UI
         max: <code>INTEGRATIONS_HEALTH_NOTE_UI_MAX</code>.
       </p>
+      <p
+        style={{ margin: "0 0 1rem", maxWidth: "36rem", color: "#94a3b8", fontSize: 13 }}
+        data-testid="note-builder-sor-hint"
+      >
+        Note-builder SoR: <code>buildIntegrationsHealthNote</code> (
+        <a href="/api/openapi">OpenAPI</a>{" "}
+        <code>x-dial-sor.healthNote</code>) · full note in{" "}
+        <a href="/api/health/integrations">Health JSON</a>.
+      </p>
       {note ? (
         <p
           style={{

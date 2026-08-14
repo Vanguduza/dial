@@ -994,6 +994,26 @@ test("S170 served OpenAPI healthNote fragment locks to buildIntegrationsHealthNo
   );
 });
 
+test("S171 admin UI copy cross-links note-builder SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  for (const src of [cost, integ]) {
+    assert.ok(src.includes('data-testid="note-builder-sor-hint"'));
+    assert.ok(src.includes("buildIntegrationsHealthNote"));
+    assert.ok(src.includes("x-dial-sor.healthNote"));
+    assert.ok(src.includes("/api/openapi"));
+    assert.ok(src.includes("/api/health/integrations"));
+  }
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");

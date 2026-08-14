@@ -88,6 +88,15 @@ export default function IntegrationsReadinessPage() {
           <code>buildIntegrationsHealthNote</code>. Health note UI max:{" "}
           <code>INTEGRATIONS_HEALTH_NOTE_UI_MAX</code>.
         </p>
+        <p
+          style={{ opacity: 0.75, fontSize: 13, marginTop: dialTokens.space.sm }}
+          data-testid="note-builder-sor-hint"
+        >
+          Note-builder SoR: <code>buildIntegrationsHealthNote</code> (
+          <a href="/api/openapi">OpenAPI</a>{" "}
+          <code>x-dial-sor.healthNote</code>) · full note in{" "}
+          <a href="/api/health/integrations">Health JSON</a>.
+        </p>
 
         <div
           style={{
