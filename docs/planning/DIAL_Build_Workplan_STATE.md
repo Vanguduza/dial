@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S161** — `.env.example` header → health-note UI max SoR — **green** |
+| `current_stage` | **S162** — Smoke: served OpenAPI healthNoteUiMax matches export — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S160** Integrations README cites OpenAPI healthNoteUiMax — **green** |
-| `next_stage` | **S162** Smoke: served OpenAPI healthNoteUiMax matches export |
+| `prior_stage` | **S161** `.env.example` header → health-note UI max SoR — **green** |
+| `next_stage` | **S163** Export `buildIntegrationsHealthNote` helper |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S160 | 2026-08-13/14 | through README healthNoteUiMax |
-| S161 | 2026-08-14 | .env.example cites INTEGRATIONS_HEALTH_NOTE_UI_MAX |
+| S91–S161 | 2026-08-13/14 | through .env.example HEALTH_NOTE_UI_MAX |
+| S162 | 2026-08-14 | served OpenAPI healthNoteUiMax ↔ export lock |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S162 | Smoke: served OpenAPI `healthNoteUiMax` matches constant export |
 | S163 | Export `buildIntegrationsHealthNote` helper (mode + labels) as SoR |
 | S164 | Health route uses `buildIntegrationsHealthNote` (single note SoR) |
 | S165 | OpenAPI + README document `buildIntegrationsHealthNote` |
-| S166 | Admin/OpenAPI x-dial-sor cites health note builder |
+| S166 | OpenAPI `x-dial-sor.healthNote` points at builder |
+| S167 | Unit smoke: fixture/sandbox/live notes from builder |
 
 ## Note
 

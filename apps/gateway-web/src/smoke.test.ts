@@ -822,6 +822,30 @@ test("S161 .env.example header cites INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () 
   assert.ok(envExample.includes("integrationsReadiness.ts"));
 });
 
+test("S162 served OpenAPI healthNoteUiMax matches INTEGRATIONS_HEALTH_NOTE_UI_MAX export", async () => {
+  const { INTEGRATIONS_HEALTH_NOTE_UI_MAX } = await import(
+    "./lib/integrationsReadiness.js"
+  );
+  assert.equal(typeof INTEGRATIONS_HEALTH_NOTE_UI_MAX, "number");
+  assert.ok(INTEGRATIONS_HEALTH_NOTE_UI_MAX > 0);
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: { "x-dial-sor"?: { healthNoteUiMax?: string } };
+  };
+  const ptr = served.info?.["x-dial-sor"]?.healthNoteUiMax ?? "";
+  assert.ok(
+    ptr.endsWith("#INTEGRATIONS_HEALTH_NOTE_UI_MAX"),
+    `expected fragment #INTEGRATIONS_HEALTH_NOTE_UI_MAX, got ${ptr}`,
+  );
+  assert.ok(
+    ptr.includes("integrationsReadiness.ts"),
+    `expected integrationsReadiness.ts path, got ${ptr}`,
+  );
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");
