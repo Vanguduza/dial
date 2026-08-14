@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S272** — FDMS path+operationId — **green** |
+| `current_stage` | **S273** — PSP path+operationId — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S271** — green |
-| `next_stage` | **S273 PSP path+operationId** |
+| `prior_stage` | **S272** — green |
+| `next_stage` | **S274 WhatsApp path+operationId** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S271 | 2026-08-13/14 | through prior OpenAPI / webhook locks |
-| S272 | 2026-08-14 | FDMS webhookFdms path+operationId |
+| S91–S272 | 2026-08-13/14 | through prior OpenAPI / webhook locks |
+| S273 | 2026-08-14 | PSP webhookPspLegacy path+operationId |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S273 | PSP path+operationId |
 | S274 | WhatsApp path+operationId |
 | S275 | admin fx daily-zig security |
 | S276 | EcoCash path+operationId |
 | S277 | Paynow path+operationId |
+| S278 | PayPal path+operationId |
 
 ## Note
 
