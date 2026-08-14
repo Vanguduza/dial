@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S205** — Cost-health ready≠groups hint parity — **green** |
+| `current_stage` | **S206** — OpenAPI readyVsGroupsHint → HINT_ID — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S204** OpenAPI info.description webhookSignature — **green** |
-| `next_stage` | **S206** OpenAPI x-dial-sor.readyVsGroupsHint → HINT_ID |
+| `prior_stage` | **S205** Cost-health ready≠groups parity — **green** |
+| `next_stage` | **S207** Docs cite INTEGRATIONS_READY_VS_GROUPS_HINT_ID |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S204 | 2026-08-13/14 | through OpenAPI desc webhook SoR |
-| S205 | 2026-08-14 | cost-health READY_VS_GROUPS hint |
+| S91–S205 | 2026-08-13/14 | through cost-health ready≠groups |
+| S206 | 2026-08-14 | x-dial-sor.readyVsGroupsHint |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S206 | OpenAPI x-dial-sor.readyVsGroupsHint → HINT_ID |
 | S207 | Docs cite INTEGRATIONS_READY_VS_GROUPS_HINT_ID |
 | S208 | .env.example cites readyVsGroupsHint |
 | S209 | Root README cites readyVsGroupsHint |
-| S210 | Smoke: groups[].missing are key names only (no values)
+| S210 | Smoke: groups[].missing are key names only (no values) |
+| S211 | Fixture ready=true does not require any group configured=true |
 
 ## Note
 
