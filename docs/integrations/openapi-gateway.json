@@ -292,7 +292,8 @@
         "security": [{ "InternalApiSecret": [] }],
         "responses": {
           "200": { "description": "Fiscal day snapshot" },
-          "401": { "description": "Missing/invalid internal secret" }
+          "401": { "description": "Missing/invalid internal secret" },
+          "503": { "description": "INTERNAL_API_SECRET unset — fail closed" }
         }
       },
       "post": {
@@ -302,7 +303,8 @@
         "security": [{ "InternalApiSecret": [] }],
         "responses": {
           "200": { "description": "Day action result" },
-          "401": { "description": "Missing/invalid internal secret" }
+          "401": { "description": "Missing/invalid internal secret" },
+          "503": { "description": "INTERNAL_API_SECRET unset — fail closed" }
         }
       }
     },
@@ -314,7 +316,8 @@
         "security": [{ "InternalApiSecret": [] }],
         "responses": {
           "200": { "description": "Outbox depth" },
-          "401": { "description": "Missing/invalid internal secret" }
+          "401": { "description": "Missing/invalid internal secret" },
+          "503": { "description": "INTERNAL_API_SECRET unset — fail closed" }
         }
       },
       "post": {
@@ -324,7 +327,8 @@
         "security": [{ "InternalApiSecret": [] }],
         "responses": {
           "200": { "description": "Drain result" },
-          "401": { "description": "Missing/invalid internal secret" }
+          "401": { "description": "Missing/invalid internal secret" },
+          "503": { "description": "INTERNAL_API_SECRET unset — fail closed" }
         }
       }
     },

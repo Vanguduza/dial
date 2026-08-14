@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S425** — openapi document deepEqual disk — **green** |
+| `current_stage` | **S426** — paths deepEqual disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S424** tags deepEqual disk — **green** |
-| `next_stage` | **S426** paths deepEqual disk |
+| `prior_stage` | **S425** openapi document deepEqual disk — **green** |
+| `next_stage` | **S427** path operation count locked |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S424 | 2026-08-13/14 | through prior |
-| S425 | 2026-08-14 | served OpenAPI document deepEqual disk SoR |
+| S91–S425 | 2026-08-13/14 | through full OpenAPI document==disk |
+| S426 | 2026-08-14 | paths deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S426 | paths deepEqual disk |
 | S427 | path operation count locked |
 | S428 | webhook paths all document 401 |
 | S429 | admin paths all document 503 |
 | S430 | x-dial-sor key count locked |
+| S431 | x-dial-sor keys sorted match disk |
 
 ## Note
 

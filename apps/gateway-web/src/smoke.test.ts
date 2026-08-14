@@ -6241,6 +6241,250 @@ test("S425 openapi document deepEqual disk", async () => {
   assert.deepEqual(served, disk);
 });
 
+test("S426 paths deepEqual disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { paths?: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(served.paths, disk.paths);
+});
+
+test("S427 path operation count locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, Record<string, unknown> | undefined>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const methods = ["get", "post", "put", "patch", "delete"] as const;
+  const countOps = (paths: typeof disk.paths) => {
+    let n = 0;
+    for (const p of Object.keys(paths)) {
+      for (const m of methods) {
+        if (paths[p]?.[m]) n += 1;
+      }
+    }
+    return n;
+  };
+  const diskCount = countOps(disk.paths);
+  const servedCount = countOps(served.paths);
+  assert.equal(servedCount, diskCount);
+  assert.ok(diskCount >= 15, `expected many ops, got ${diskCount}`);
+});
+
+test("S428 webhook paths all document 401", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const posts = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post)
+    .sort();
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    const d401 = served.paths[p]?.post?.responses?.["401"]?.description ?? "";
+    assert.ok(d401.length > 0, `${p} missing 401`);
+    assert.ok(
+      /signature|hmac|verify/i.test(d401),
+      `${p} 401 must cite signature/HMAC`,
+    );
+  }
+});
+
+test("S429 admin paths all document 503", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      Record<
+        string,
+        { responses?: Record<string, { description?: string }> } | undefined
+      >
+    >;
+  };
+  const adminPaths = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  assert.ok(adminPaths.length >= 3);
+  const canonical = "INTERNAL_API_SECRET unset — fail closed";
+  let count = 0;
+  for (const p of adminPaths) {
+    const item = served.paths[p];
+    assert.ok(item, `missing path ${p}`);
+    for (const method of ["get", "post", "put", "patch", "delete"] as const) {
+      const op:
+        | { responses?: Record<string, { description?: string }> }
+        | undefined = item[method];
+      if (!op) continue;
+      assert.equal(
+        op.responses?.["503"]?.description,
+        canonical,
+        `${p} ${method} 503`,
+      );
+      count += 1;
+    }
+  }
+  assert.ok(count >= 6, `expected admin ops with 503, got ${count}`);
+});
+
+test("S430 x-dial-sor key count locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: Record<string, string> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const diskKeys = Object.keys(disk.info?.["x-dial-sor"] ?? {});
+  const servedKeys = Object.keys(served.info?.["x-dial-sor"] ?? {});
+  assert.equal(servedKeys.length, diskKeys.length);
+  assert.ok(diskKeys.length >= 10, `expected many x-dial-sor keys, got ${diskKeys.length}`);
+});
+
+test("S431 x-dial-sor keys sorted match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { info?: { "x-dial-sor"?: Record<string, string> } };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    Object.keys(served.info?.["x-dial-sor"] ?? {}).sort(),
+    Object.keys(disk.info?.["x-dial-sor"] ?? {}).sort(),
+  );
+});
+
+test("S432 webhook POST paths all document 200", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { responses?: Record<string, { description?: string }> } }
+    >;
+  };
+  const posts = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post)
+    .sort();
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    const d200 = served.paths[p]?.post?.responses?.["200"]?.description ?? "";
+    assert.ok(d200.length > 0, `${p} missing 200`);
+    assert.ok(/idempotent/i.test(d200), `${p} 200 must mention idempotent`);
+  }
+});
+
+test("S433 path keys sorted match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as { paths?: Record<string, unknown> };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    Object.keys(served.paths ?? {}).sort(),
+    Object.keys(disk.paths ?? {}).sort(),
+  );
+});
+
+test("S434 admin paths all document 401", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      Record<
+        string,
+        { responses?: Record<string, { description?: string }> } | undefined
+      >
+    >;
+  };
+  const adminPaths = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  assert.ok(adminPaths.length >= 3);
+  for (const p of adminPaths) {
+    const item = served.paths[p];
+    assert.ok(item, `missing path ${p}`);
+    for (const method of ["get", "post"] as const) {
+      const op:
+        | { responses?: Record<string, { description?: string }> }
+        | undefined = item[method];
+      if (!op) continue;
+      const d401 = op.responses?.["401"]?.description ?? "";
+      assert.ok(d401.length > 0, `${p} ${method} missing 401`);
+      assert.ok(
+        /internal secret/i.test(d401),
+        `${p} ${method} 401 must cite internal secret`,
+      );
+    }
+  }
+});
+
+test("S435 response status codes per path match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<
+      string,
+      Record<string, { responses?: Record<string, unknown> } | undefined>
+    >;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const methods = ["get", "post", "put", "patch", "delete"] as const;
+  for (const p of Object.keys(disk.paths).sort()) {
+    for (const method of methods) {
+      const diskCodes = Object.keys(
+        disk.paths[p]?.[method]?.responses ?? {},
+      ).sort();
+      const servedCodes = Object.keys(
+        served.paths[p]?.[method]?.responses ?? {},
+      ).sort();
+      assert.deepEqual(servedCodes, diskCodes, `${p} ${method} status codes`);
+    }
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
