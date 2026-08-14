@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S268** — fixture FDMS accepts without FDMS_ACTIVATION_KEY — **green** |
+| `current_stage` | **S269** — served InternalApiSecret security scheme locked — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S267** — green |
-| `next_stage` | **S269 served InternalApiSecret security scheme locked** |
+| `prior_stage` | **S268** — green |
+| `next_stage` | **S270 admin money outbox uses InternalApiSecret** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S267 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S268 | 2026-08-14 | fixture FDMS accepts without activation key |
+| S91–S268 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S269 | 2026-08-14 | InternalApiSecret security scheme |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S269 | served InternalApiSecret security scheme locked |
 | S270 | admin money outbox uses InternalApiSecret |
 | S271 | served ContiPay webhook path+operationId locked |
 | S272 | served FDMS webhook path+operationId locked |
 | S273 | served PSP webhook path+operationId locked |
+| S274 | served WhatsApp webhook path+operationId locked |
 
 ## Note
 
