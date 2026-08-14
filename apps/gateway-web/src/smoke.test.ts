@@ -790,6 +790,16 @@ test("S167 root README cites buildIntegrationsHealthNote", async () => {
   assert.ok(readme.includes("integrationsReadiness.ts"));
 });
 
+test("S174 root README cites admin note-builder-sor-hint cross-link", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const readme = readFileSync(join(process.cwd(), "../../README.md"), "utf8");
+  assert.ok(readme.includes("note-builder-sor-hint"));
+  assert.ok(readme.includes("buildIntegrationsHealthNote"));
+  assert.ok(readme.includes("/admin/integrations"));
+  assert.ok(readme.includes("/admin/cost-health"));
+});
+
 test("S159 admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
