@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S232** — WebhookOpaqueBody served==disk — **green** |
+| `current_stage` | **S233** — Integrations README cites S211 zero-configured — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S231** info.description served==disk — **green** |
-| `next_stage` | **S233** |
+| `prior_stage` | **S232** WebhookOpaqueBody served==disk — **green** |
+| `next_stage` | **S234** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S231 | 2026-08-13/14 | through prior |
-| S232 | 2026-08-14 | WebhookOpaqueBody served==disk |
+| S91–S232 | 2026-08-13/14 | through prior |
+| S233 | 2026-08-14 | Integrations README cites S211 zero-configured |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S233 | Integrations README cites S211 zero-configured |
 | S234 | tags.webhooks served==disk |
 | S235 | healthNote served==disk |
 | S236 | Served webhook POSTs document 503 fail-closed |
 | S237 | Served mode enum fixture|sandbox|live |
+| S238 | Sandbox note differs from fixture under empty env |
 
 ## Note
 
