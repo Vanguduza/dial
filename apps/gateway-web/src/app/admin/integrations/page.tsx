@@ -84,7 +84,8 @@ export default function IntegrationsReadinessPage() {
           Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> +{" "}
           <code>INTEGRATION_ENV_GROUP_LABELS</code> in{" "}
           <code>integrationsReadiness.ts</code> (OpenAPI{" "}
-          <code>info.x-dial-sor</code>).
+          <code>info.x-dial-sor</code>). Health note UI max:{" "}
+          <code>INTEGRATIONS_HEALTH_NOTE_UI_MAX</code>.
         </p>
 
         <div

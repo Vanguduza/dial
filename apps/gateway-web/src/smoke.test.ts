@@ -744,12 +744,14 @@ test("S135 admin cost-health + integrations pages link OpenAPI and readiness", a
   assert.ok(cost.includes("/api/health/integrations"));
   assert.ok(cost.includes("INTEGRATION_ENV_GROUPS"));
   assert.ok(cost.includes("INTEGRATION_ENV_GROUP_LABELS"));
+  assert.ok(cost.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
   assert.ok(cost.includes("openapi-primary-link"));
   assert.ok(cost.includes("env-groups-sor-hint"));
   assert.ok(integ.includes("/api/openapi"));
   assert.ok(integ.includes("/api/health/integrations"));
   assert.ok(integ.includes("INTEGRATION_ENV_GROUPS"));
   assert.ok(integ.includes("INTEGRATION_ENV_GROUP_LABELS"));
+  assert.ok(integ.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
   assert.ok(integ.includes("openapi-primary-link"));
   assert.ok(integ.includes("env-groups-sor-hint"));
   assert.ok(readme.includes("/api/openapi"));
@@ -777,6 +779,23 @@ test("S158 root README documents admin health note truncation", async () => {
   assert.ok(readme.includes("truncateIntegrationsHealthNote"));
   assert.ok(readme.includes("healthNoteUiMax"));
   assert.ok(readme.includes("/admin/cost-health"));
+});
+
+test("S159 admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const cost = readFileSync(
+    join(process.cwd(), "src/app/admin/cost-health/page.tsx"),
+    "utf8",
+  );
+  const integ = readFileSync(
+    join(process.cwd(), "src/app/admin/integrations/page.tsx"),
+    "utf8",
+  );
+  assert.ok(cost.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
+  assert.ok(integ.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
+  assert.ok(cost.includes("env-groups-sor-hint"));
+  assert.ok(integ.includes("env-groups-sor-hint"));
 });
 
 test("S136 integrations README package table matches workspace package names", async () => {

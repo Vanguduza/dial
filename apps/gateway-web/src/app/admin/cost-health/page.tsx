@@ -53,6 +53,7 @@ export default function CostHealthStubPage() {
         Env-group SoR: <code>INTEGRATION_ENV_GROUPS</code> +{" "}
         <code>INTEGRATION_ENV_GROUP_LABELS</code> (OpenAPI{" "}
         <code>info.x-dial-sor</code>) — see readiness UI for live probes.
+        Health note UI max: <code>INTEGRATIONS_HEALTH_NOTE_UI_MAX</code>.
       </p>
       {note ? (
         <p
