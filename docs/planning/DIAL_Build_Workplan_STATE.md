@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S370** — all admin POST summaries match disk — **green** |
+| `current_stage` | **S362** — getIntegrationsHealth summary matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S369** — green |
-| `next_stage` | **S371 all path operationIds match disk** |
+| `prior_stage` | **S361** — green |
+| `next_stage` | **S363 getOpenApiSkeleton summary matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S369 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S370 | 2026-08-14 | all admin POST summaries served==disk |
+| S91–S361 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S362 | 2026-08-14 | getIntegrationsHealth summary + operationId |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S371 | all path operationIds match disk |
-| S372 | ContiPay operationId matches disk |
-| S373 | WhatsApp POST operationId matches disk |
-| S374 | info.x-dial-sor keys match disk |
-| S375 | openapi top-level keys match disk |
+| S363 | getOpenApiSkeleton summary matches disk |
+| S364 | all webhook POST summaries match disk |
+| S365 | admin money outbox GET summary matches disk |
+| S366 | admin money outbox POST summary matches disk |
+| S367 | admin FDMS day GET summary matches disk |
 
 ## Note
 
