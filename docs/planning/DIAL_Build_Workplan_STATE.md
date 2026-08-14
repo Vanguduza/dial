@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S427** — path operation count locked — **green** |
+| `current_stage` | **S428** — webhook paths all document 401 — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S426** paths deepEqual disk — **green** |
-| `next_stage` | **S428** webhook paths all document 401 |
+| `prior_stage` | **S427** path operation count locked — **green** |
+| `next_stage` | **S429** admin paths all document 503 |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S426 | 2026-08-13/14 | through prior |
-| S427 | 2026-08-14 | path operation count served equals disk |
+| S91–S427 | 2026-08-13/14 | through prior |
+| S428 | 2026-08-14 | all webhook POSTs document 401 signature/HMAC |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S428 | webhook paths all document 401 |
 | S429 | admin paths all document 503 |
 | S430 | x-dial-sor key count locked |
 | S431 | x-dial-sor keys sorted match disk |
 | S432 | webhook POST paths all document 200 |
+| S433 | path keys sorted match disk |
 
 ## Note
 
