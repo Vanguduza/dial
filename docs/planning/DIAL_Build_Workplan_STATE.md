@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S159** — Admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX — **green** |
+| `current_stage` | **S160** — Integrations README cites OpenAPI healthNoteUiMax — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S158** Root README documents admin note truncation — **green** |
-| `next_stage` | **S160** Integrations README cites OpenAPI healthNoteUiMax |
+| `prior_stage` | **S159** Admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX — **green** |
+| `next_stage` | **S161** `.env.example` header → health-note UI max SoR |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S158 | 2026-08-13/14 | through root README note truncation |
-| S159 | 2026-08-14 | admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX |
+| S91–S159 | 2026-08-13/14 | through admin SoR HEALTH_NOTE_UI_MAX hints |
+| S160 | 2026-08-14 | README cites x-dial-sor.healthNoteUiMax |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S160 | Integrations README cites OpenAPI `x-dial-sor.healthNoteUiMax` |
 | S161 | `.env.example` header points at health-note UI max SoR |
 | S162 | Smoke: served OpenAPI `healthNoteUiMax` matches constant export |
 | S163 | Export `buildIntegrationsHealthNote` helper (mode + labels) as SoR |
 | S164 | Health route uses `buildIntegrationsHealthNote` (single note SoR) |
+| S165 | OpenAPI + README document `buildIntegrationsHealthNote` |
 
 ## Note
 

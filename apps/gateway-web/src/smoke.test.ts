@@ -798,6 +798,18 @@ test("S159 admin SoR hints cite INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () => {
   assert.ok(integ.includes("env-groups-sor-hint"));
 });
 
+test("S160 integrations README cites OpenAPI healthNoteUiMax", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const integ = readFileSync(
+    join(process.cwd(), "../../docs/integrations/README.md"),
+    "utf8",
+  );
+  assert.ok(integ.includes("healthNoteUiMax"));
+  assert.ok(integ.includes("x-dial-sor"));
+  assert.ok(integ.includes("INTEGRATIONS_HEALTH_NOTE_UI_MAX"));
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");

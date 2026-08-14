@@ -82,6 +82,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-095 | **OpenAPI healthNoteUiMax SoR** | `done` | S157 — x-dial-sor + note description |
 | ENH-096 | **Root README note truncation** | `done` | S158 — INTEGRATIONS_HEALTH_NOTE_UI_MAX |
 | ENH-097 | **Admin hint: HEALTH_NOTE_UI_MAX** | `done` | S159 — integrations + cost-health |
+| ENH-098 | **README cites healthNoteUiMax** | `done` | S160 — x-dial-sor.healthNoteUiMax |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint §8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` — §8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** — capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
