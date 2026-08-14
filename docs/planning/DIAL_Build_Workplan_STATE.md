@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S391** — adminFdmsDayGet operationId locked — **green** |
+| `current_stage` | **S392** — adminMoneyOutboxGet operationId locked — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S390** all path operationIds non-empty — **green** |
-| `next_stage` | **S392** adminMoneyOutboxGet operationId locked |
+| `prior_stage` | **S391** adminFdmsDayGet operationId locked — **green** |
+| `next_stage` | **S393** adminFxDailyZigGet operationId locked |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S390 | 2026-08-13/14 | through all path operationIds non-empty |
-| S391 | 2026-08-14 | adminFdmsDayGet operationId locked |
+| S91–S391 | 2026-08-13/14 | through adminFdmsDayGet |
+| S392 | 2026-08-14 | adminMoneyOutboxGet operationId locked |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S392 | adminMoneyOutboxGet operationId locked |
 | S393 | adminFxDailyZigGet operationId locked |
 | S394 | adminFdmsDayPost operationId locked |
 | S395 | adminMoneyOutboxDrain operationId locked |
 | S396 | adminFxDailyZigPost operationId locked |
+| S397 | all admin operationIds match disk |
 
 ## Note
 
