@@ -6989,6 +6989,214 @@ test("S455 WhatsApp POST parameters match disk", async () => {
   );
 });
 
+test("S456 Paynow parameters match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { parameters?: unknown[] } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.deepEqual(
+    served.paths["/api/webhooks/paynow"]?.post?.parameters,
+    disk.paths["/api/webhooks/paynow"]?.post?.parameters,
+  );
+});
+
+test("S457 all webhook POST parameters match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { parameters?: unknown[] } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const posts = Object.keys(disk.paths)
+    .filter((p) => p.startsWith("/api/webhooks/") && disk.paths[p]?.post)
+    .sort();
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    assert.deepEqual(
+      served.paths[p]?.post?.parameters,
+      disk.paths[p]?.post?.parameters,
+      `${p} parameters`,
+    );
+  }
+});
+
+test("S458 requestBody refs WebhookOpaqueBody", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      {
+        post?: {
+          requestBody?: {
+            content?: Record<string, { schema?: { $ref?: string } }>;
+          };
+        };
+      }
+    >;
+  };
+  const posts = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post)
+    .sort();
+  assert.ok(posts.length >= 8);
+  const ref = "#/components/schemas/WebhookOpaqueBody";
+  for (const p of posts) {
+    const content = served.paths[p]?.post?.requestBody?.content ?? {};
+    const schemas = Object.values(content).map((c) => c.schema?.$ref);
+    assert.ok(schemas.length > 0, `${p} missing requestBody content`);
+    for (const s of schemas) {
+      assert.equal(s, ref, `${p} requestBody $ref`);
+    }
+  }
+});
+
+test("S459 admin security InternalApiSecret only", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      Record<
+        string,
+        { security?: Array<Record<string, unknown>> } | undefined
+      >
+    >;
+  };
+  const adminPaths = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  assert.ok(adminPaths.length >= 3);
+  for (const p of adminPaths) {
+    const item = served.paths[p];
+    assert.ok(item, `missing path ${p}`);
+    for (const method of ["get", "post"] as const) {
+      const op:
+        | { security?: Array<Record<string, unknown>> }
+        | undefined = item[method];
+      if (!op) continue;
+      assert.ok(op.security && op.security.length > 0, `${p} ${method} security`);
+      for (const entry of op.security ?? []) {
+        const keys: string[] = Object.keys(entry);
+        assert.deepEqual(keys, ["InternalApiSecret"], `${p} ${method} schemes`);
+      }
+    }
+  }
+});
+
+test("S460 tags include webhooks health admin", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    tags?: Array<{ name?: string }>;
+  };
+  const names = (served.tags ?? []).map((t) => t.name).sort();
+  for (const required of ["admin", "health", "webhooks"]) {
+    assert.ok(names.includes(required), `missing tag ${required}`);
+  }
+  assert.deepEqual(names, ["admin", "health", "webhooks"]);
+});
+
+test("S461 Paynow Hash parameter locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { parameters?: Array<{ name?: string; in?: string }> } }
+    >;
+  };
+  const params = served.paths["/api/webhooks/paynow"]?.post?.parameters ?? [];
+  const hash = params.find((p) => p.name === "Hash");
+  assert.ok(hash, "missing Hash parameter");
+  assert.equal(hash?.in, "header");
+});
+
+test("S462 ContiPay signature header locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { parameters?: Array<{ name?: string; in?: string }> } }
+    >;
+  };
+  const params = served.paths["/api/webhooks/contipay"]?.post?.parameters ?? [];
+  const sig = params.find((p) => p.name === "x-contipay-signature");
+  assert.ok(sig, "missing x-contipay-signature");
+  assert.equal(sig?.in, "header");
+});
+
+test("S463 WhatsApp hub signature header locked", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      { post?: { parameters?: Array<{ name?: string }> } }
+    >;
+  };
+  const params = served.paths["/api/webhooks/whatsapp"]?.post?.parameters ?? [];
+  assert.ok(
+    params.some((p) => p.name === "x-hub-signature-256"),
+    "missing x-hub-signature-256",
+  );
+});
+
+test("S464 webhook POST tags webhooks only", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<string, { post?: { tags?: string[] } }>;
+  };
+  const posts = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/webhooks/") && served.paths[p]?.post)
+    .sort();
+  for (const p of posts) {
+    assert.deepEqual(
+      served.paths[p]?.post?.tags,
+      ["webhooks"],
+      `${p} tags`,
+    );
+  }
+});
+
+test("S465 admin path tags admin only", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as {
+    paths: Record<
+      string,
+      Record<string, { tags?: string[] } | undefined>
+    >;
+  };
+  const adminPaths = Object.keys(served.paths)
+    .filter((p) => p.startsWith("/api/admin/"))
+    .sort();
+  for (const p of adminPaths) {
+    for (const method of ["get", "post"] as const) {
+      const op: { tags?: string[] } | undefined = served.paths[p]?.[method];
+      if (!op) continue;
+      assert.deepEqual(op.tags, ["admin"], `${p} ${method} tags`);
+    }
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
