@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S278** — PayPal path+operationId — **green** |
+| `current_stage` | **S279** — Escrow path+operationId — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S277** — green |
-| `next_stage` | **S279 Escrow path+operationId** |
+| `prior_stage` | **S278** — green |
+| `next_stage` | **S280 admin FDMS day InternalApiSecret** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S277 | 2026-08-13/14 | through prior OpenAPI / webhook locks |
-| S278 | 2026-08-14 | PayPal webhookPaypal path+operationId |
+| S91–S278 | 2026-08-13/14 | through prior OpenAPI / webhook locks |
+| S279 | 2026-08-14 | Escrow webhookEscrow path+operationId |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S279 | Escrow path+operationId |
 | S280 | admin FDMS day InternalApiSecret |
 | S281 | admin fx daily-zig GET 503 without INTERNAL_API_SECRET |
 | S282 | ContiPay signature header documented |
 | S283 | WhatsApp hub signature header documented |
+| S284 | served WebhookOpaqueBody schema locked |
 
 ## Note
 
