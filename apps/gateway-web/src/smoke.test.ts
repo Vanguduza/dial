@@ -831,6 +831,18 @@ test("S161 .env.example header cites INTEGRATIONS_HEALTH_NOTE_UI_MAX", async () 
   assert.ok(envExample.includes("integrationsReadiness.ts"));
 });
 
+test("S168 .env.example cites buildIntegrationsHealthNote SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  assert.ok(envExample.includes("buildIntegrationsHealthNote"));
+  assert.ok(envExample.includes("healthNote"));
+  assert.ok(envExample.includes("integrationsReadiness.ts"));
+});
+
 test("S162 served OpenAPI healthNoteUiMax matches INTEGRATIONS_HEALTH_NOTE_UI_MAX export", async () => {
   const { INTEGRATIONS_HEALTH_NOTE_UI_MAX } = await import(
     "./lib/integrationsReadiness.js"
