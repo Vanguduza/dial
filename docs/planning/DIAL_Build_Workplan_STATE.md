@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S383** — Escrow operationId matches disk — **green** |
+| `current_stage` | **S384** — PSP operationId matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S382** PayPal operationId matches disk — **green** |
-| `next_stage` | **S384** PSP operationId matches disk |
+| `prior_stage` | **S383** Escrow operationId matches disk — **green** |
+| `next_stage` | **S385** all webhook POST operationIds match disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S382 | 2026-08-13/14 | through PayPal operationId webhookPaypal |
-| S383 | 2026-08-14 | Escrow operationId webhookEscrow served==disk |
+| S91–S383 | 2026-08-13/14 | through Escrow operationId webhookEscrow |
+| S384 | 2026-08-14 | PSP operationId webhookPspLegacy served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S384 | PSP operationId matches disk |
 | S385 | all webhook POST operationIds match disk |
 | S386 | admin GET operationIds match disk |
 | S387 | admin POST operationIds match disk |
 | S388 | getIntegrationsHealth operationId matches disk |
+| S389 | getOpenApiSkeleton operationId matches disk |
 
 ## Note
 
