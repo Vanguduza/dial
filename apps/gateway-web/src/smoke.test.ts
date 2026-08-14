@@ -4757,6 +4757,264 @@ test("S360 openapi info.title+version match disk pair", async () => {
   );
 });
 
+test("S361 PSP summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/webhooks/psp"]?.post?.summary,
+    disk.paths["/api/webhooks/psp"]?.post?.summary,
+  );
+  assert.equal(
+    served.paths["/api/webhooks/psp"]?.post?.summary,
+    "Legacy generic PSP/escrow shim",
+  );
+});
+
+test("S362 getIntegrationsHealth summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { summary?: string; operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/health/integrations"]?.get?.summary,
+    disk.paths["/api/health/integrations"]?.get?.summary,
+  );
+  assert.equal(
+    served.paths["/api/health/integrations"]?.get?.operationId,
+    "getIntegrationsHealth",
+  );
+  assert.equal(
+    served.paths["/api/health/integrations"]?.get?.summary,
+    "Integration readiness (mode, ready, probes, groups)",
+  );
+});
+
+test("S363 getOpenApiSkeleton summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { summary?: string; operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/openapi"]?.get?.summary,
+    disk.paths["/api/openapi"]?.get?.summary,
+  );
+  assert.equal(
+    served.paths["/api/openapi"]?.get?.operationId,
+    "getOpenApiSkeleton",
+  );
+  assert.equal(
+    served.paths["/api/openapi"]?.get?.summary,
+    "Serve this OpenAPI skeleton document",
+  );
+});
+
+test("S364 all webhook POST summaries match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const posts = Object.keys(disk.paths).filter(
+    (p) => p.startsWith("/api/webhooks/") && disk.paths[p]?.post,
+  );
+  assert.ok(posts.length >= 8);
+  for (const p of posts) {
+    assert.equal(
+      served.paths[p]?.post?.summary,
+      disk.paths[p]?.post?.summary,
+      `${p} summary`,
+    );
+    assert.ok(
+      (served.paths[p]?.post?.summary ?? "").length > 0,
+      `${p} summary non-empty`,
+    );
+  }
+});
+
+test("S365 admin money outbox GET summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.get?.summary,
+    disk.paths["/api/admin/money/outbox"]?.get?.summary,
+  );
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.get?.summary,
+    "Money outbox depth",
+  );
+});
+
+test("S366 admin money outbox POST summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.post?.summary,
+    disk.paths["/api/admin/money/outbox"]?.post?.summary,
+  );
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.post?.summary,
+    "Drain money outbox",
+  );
+});
+
+test("S367 admin FDMS day GET summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/fdms/day"]?.get?.summary,
+    disk.paths["/api/admin/fdms/day"]?.get?.summary,
+  );
+});
+
+test("S368 admin daily-zig GET summary matches disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/fx/daily-zig"]?.get?.summary,
+    disk.paths["/api/admin/fx/daily-zig"]?.get?.summary,
+  );
+  assert.ok(
+    (served.paths["/api/admin/fx/daily-zig"]?.get?.summary ?? "").includes(
+      "Daily ZiG",
+    ),
+  );
+});
+
+test("S369 all admin GET summaries match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const adminGets = Object.keys(disk.paths).filter(
+    (p) => p.startsWith("/api/admin/") && disk.paths[p]?.get,
+  );
+  assert.ok(adminGets.length >= 3);
+  for (const p of adminGets) {
+    assert.equal(
+      served.paths[p]?.get?.summary,
+      disk.paths[p]?.get?.summary,
+      `${p} GET summary`,
+    );
+  }
+});
+
+test("S370 all admin POST summaries match disk", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { summary?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  const adminPosts = Object.keys(disk.paths).filter(
+    (p) => p.startsWith("/api/admin/") && disk.paths[p]?.post,
+  );
+  assert.ok(adminPosts.length >= 3);
+  for (const p of adminPosts) {
+    assert.equal(
+      served.paths[p]?.post?.summary,
+      disk.paths[p]?.post?.summary,
+      `${p} POST summary`,
+    );
+  }
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
