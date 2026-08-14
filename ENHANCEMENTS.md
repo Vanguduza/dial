@@ -206,6 +206,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-222 | **WebhookOpaqueBody schema lock** | `done` | S284 — object + processed_events |
 | ENH-223 | **All admin paths InternalApiSecret** | `done` | S285 — OpenAPI security sweep |
 | ENH-224 | **Daily ZiG POST fail-closed** | `done` | S286 — no INTERNAL_API_SECRET |
+| ENH-225 | **ContiPay 401 signature SoR** | `done` | S287 — OpenAPI response |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
