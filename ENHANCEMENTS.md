@@ -187,6 +187,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-203 | **OpenAPI tags SoR** | `done` | S265 — health/webhooks/admin |
 | ENH-204 | **OpenAPI skeleton operationId** | `done` | S266 — getOpenApiSkeleton |
 | ENH-205 | **Sandbox PSP webhook fail-closed** | `done` | S267 — no PSP_WEBHOOK_SECRET |
+| ENH-206 | **Fixture FDMS accept without key** | `done` | S268 — mode contrast |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
