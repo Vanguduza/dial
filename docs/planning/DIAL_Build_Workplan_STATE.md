@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S419** — securitySchemes deepEqual disk — **green** |
+| `current_stage` | **S420** — info object keys match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S418** all schemas deepEqual disk — **green** |
-| `next_stage` | **S420** info object keys match disk |
+| `prior_stage` | **S419** securitySchemes deepEqual disk — **green** |
+| `next_stage` | **S421** info deepEqual disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S418 | 2026-08-13/14 | through prior |
-| S419 | 2026-08-14 | securitySchemes deepEqual disk |
+| S91–S419 | 2026-08-13/14 | through prior |
+| S420 | 2026-08-14 | info keys title|version|description|x-dial-sor |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S420 | info object keys match disk |
 | S421 | info deepEqual disk |
 | S422 | components deepEqual disk |
 | S423 | servers deepEqual disk |
 | S424 | tags deepEqual disk |
+| S425 | openapi document deepEqual disk |
 
 ## Note
 
