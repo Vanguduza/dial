@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S381** — EcoCash operationId matches disk — **green** |
+| `current_stage` | **S382** — PayPal operationId matches disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S380** openapi top-level keys exact set — **green** |
-| `next_stage` | **S382** PayPal operationId matches disk |
+| `prior_stage` | **S381** EcoCash operationId matches disk — **green** |
+| `next_stage` | **S383** Escrow operationId matches disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S380 | 2026-08-13/14 | through openapi top-level exact key set |
-| S381 | 2026-08-14 | EcoCash operationId webhookEcocash served==disk |
+| S91–S381 | 2026-08-13/14 | through EcoCash operationId webhookEcocash |
+| S382 | 2026-08-14 | PayPal operationId webhookPaypal served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S382 | PayPal operationId matches disk |
 | S383 | Escrow operationId matches disk |
 | S384 | PSP operationId matches disk |
 | S385 | all webhook POST operationIds match disk |
 | S386 | admin GET operationIds match disk |
+| S387 | admin POST operationIds match disk |
 
 ## Note
 
