@@ -5529,6 +5529,126 @@ test("S390 all path operationIds non-empty", async () => {
   assert.ok(count >= 15, `expected many operationIds, got ${count}`);
 });
 
+test("S391 adminFdmsDayGet operationId locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/fdms/day"]?.get?.operationId,
+    disk.paths["/api/admin/fdms/day"]?.get?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/admin/fdms/day"]?.get?.operationId,
+    "adminFdmsDayGet",
+  );
+});
+
+test("S392 adminMoneyOutboxGet operationId locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.get?.operationId,
+    disk.paths["/api/admin/money/outbox"]?.get?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.get?.operationId,
+    "adminMoneyOutboxGet",
+  );
+});
+
+test("S393 adminFxDailyZigGet operationId locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { get?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/fx/daily-zig"]?.get?.operationId,
+    disk.paths["/api/admin/fx/daily-zig"]?.get?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/admin/fx/daily-zig"]?.get?.operationId,
+    "adminFxDailyZigGet",
+  );
+});
+
+test("S394 adminFdmsDayPost operationId locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/fdms/day"]?.post?.operationId,
+    disk.paths["/api/admin/fdms/day"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/admin/fdms/day"]?.post?.operationId,
+    "adminFdmsDayPost",
+  );
+});
+
+test("S395 adminMoneyOutboxDrain operationId locked", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const disk = JSON.parse(
+    readFileSync(
+      join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+      "utf8",
+    ),
+  ) as {
+    paths: Record<string, { post?: { operationId?: string } }>;
+  };
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  const served = (await res.json()) as typeof disk;
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.post?.operationId,
+    disk.paths["/api/admin/money/outbox"]?.post?.operationId,
+  );
+  assert.equal(
+    served.paths["/api/admin/money/outbox"]?.post?.operationId,
+    "adminMoneyOutboxDrain",
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
