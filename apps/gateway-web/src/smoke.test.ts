@@ -1028,6 +1028,27 @@ test("S172 integrations README documents note-builder-sor-hint cross-link", asyn
   assert.ok(integ.includes("/admin/cost-health"));
 });
 
+test("S173 OpenAPI info.description mentions note builder SoR", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const raw = readFileSync(
+    join(process.cwd(), "../../docs/integrations/openapi-gateway.json"),
+    "utf8",
+  );
+  const spec = JSON.parse(raw) as {
+    info?: { description?: string };
+  };
+  assert.ok(spec.info?.description?.includes("buildIntegrationsHealthNote"));
+  assert.ok(spec.info?.description?.includes("x-dial-sor.healthNote"));
+
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as { info?: { description?: string } };
+  assert.ok(served.info?.description?.includes("buildIntegrationsHealthNote"));
+  assert.ok(served.info?.description?.includes("x-dial-sor.healthNote"));
+});
+
 test("S136 integrations README package table matches workspace package names", async () => {
   const { readFileSync, readdirSync } = await import("node:fs");
   const { join } = await import("node:path");
