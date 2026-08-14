@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S363** — getOpenApiSkeleton summary matches disk — **green** |
+| `current_stage` | **S364** — all webhook POST summaries match disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S362** — green |
-| `next_stage` | **S364 all webhook POST summaries match disk** |
+| `prior_stage` | **S363** — green |
+| `next_stage` | **S365 admin money outbox GET summary matches disk** |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S362 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
-| S363 | 2026-08-14 | getOpenApiSkeleton summary + operationId |
+| S91–S363 | 2026-08-13/14 | through prior plug-in / OpenAPI locks |
+| S364 | 2026-08-14 | all webhook POST summaries served==disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S364 | all webhook POST summaries match disk |
 | S365 | admin money outbox GET summary matches disk |
 | S366 | admin money outbox POST summary matches disk |
 | S367 | admin FDMS day GET summary matches disk |
 | S368 | admin daily-zig GET summary matches disk |
+| S369 | all admin GET summaries match disk |
 
 ## Note
 
