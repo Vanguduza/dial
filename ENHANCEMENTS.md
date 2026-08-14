@@ -342,6 +342,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-358 | **info object keys served==disk** | `done` | S420 — lock |
 | ENH-359 | **info deepEqual disk** | `done` | S421 — lock |
 | ENH-360 | **components deepEqual disk** | `done` | S422 — lock |
+| ENH-361 | **servers deepEqual disk** | `done` | S423 — lock |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |

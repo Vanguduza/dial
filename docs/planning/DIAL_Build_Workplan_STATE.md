@@ -6,29 +6,29 @@
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **S422** — components deepEqual disk — **green** |
+| `current_stage` | **S423** — servers deepEqual disk — **green** |
 | `current_issue` | _(auto)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **S421** info deepEqual disk — **green** |
-| `next_stage` | **S423** servers deepEqual disk |
+| `prior_stage` | **S422** components deepEqual disk — **green** |
+| `next_stage` | **S424** tags deepEqual disk |
 | `blocked_on_human` | none |
 
 ## Completed
 
 | Stage | When | Evidence |
 | --- | --- | --- |
-| S91–S421 | 2026-08-13/14 | through prior |
-| S422 | 2026-08-14 | components deepEqual disk |
+| S91–S422 | 2026-08-13/14 | through prior |
+| S423 | 2026-08-14 | servers deepEqual disk |
 
 ## Planned (next)
 
 | Stage | Intent |
 | --- | --- |
-| S423 | servers deepEqual disk |
 | S424 | tags deepEqual disk |
 | S425 | openapi document deepEqual disk |
 | S426 | paths deepEqual disk |
 | S427 | path operation count locked |
+| S428 | webhook paths all document 401 |
 
 ## Note
 
