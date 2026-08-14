@@ -909,6 +909,88 @@ test("S189 OpenAPI info.description mentions noteBuilderDocs", async () => {
   );
 });
 
+test("S190 sandbox health ready is false when probes incomplete", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevRedis = process.env.REDIS_URL;
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.REDIS_URL;
+  try {
+    const { integrationsReady } = await import(
+      "./lib/integrationsReadiness.js"
+    );
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+    };
+    assert.equal(body.mode, "sandbox");
+    assert.equal(body.probes?.queues, false);
+    assert.equal(body.ready, false);
+    assert.equal(body.ready, integrationsReady(body.probes ?? {}));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevRedis === undefined) delete process.env.REDIS_URL;
+    else process.env.REDIS_URL = prevRedis;
+  }
+});
+
+test("S191 live health ready is false when probes incomplete", async () => {
+  const prevMode = process.env.DIAL_INTEGRATION_MODE;
+  const prevRedis = process.env.REDIS_URL;
+  process.env.DIAL_INTEGRATION_MODE = "live";
+  delete process.env.REDIS_URL;
+  try {
+    const { integrationsReady } = await import(
+      "./lib/integrationsReadiness.js"
+    );
+    const { GET } = await import("./app/api/health/integrations/route.js");
+    const res = await GET();
+    assert.equal(res.status, 200);
+    const body = (await res.json()) as {
+      mode?: string;
+      ready?: boolean;
+      probes?: Record<string, boolean>;
+    };
+    assert.equal(body.mode, "live");
+    assert.equal(body.probes?.queues, false);
+    assert.equal(body.ready, false);
+    assert.equal(body.ready, integrationsReady(body.probes ?? {}));
+  } finally {
+    if (prevMode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prevMode;
+    if (prevRedis === undefined) delete process.env.REDIS_URL;
+    else process.env.REDIS_URL = prevRedis;
+  }
+});
+
+test("S192 OpenAPI x-dial-sor includes noteBuilderHint and noteBuilderDocs", async () => {
+  const { GET } = await import("./app/api/openapi/route.js");
+  const res = await GET();
+  assert.equal(res.status, 200);
+  const served = (await res.json()) as {
+    info?: {
+      "x-dial-sor"?: {
+        noteBuilderHint?: string;
+        noteBuilderDocs?: string;
+      };
+    };
+  };
+  assert.ok(
+    served.info?.["x-dial-sor"]?.noteBuilderHint?.includes(
+      "INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID",
+    ),
+  );
+  assert.ok(
+    served.info?.["x-dial-sor"]?.noteBuilderDocs?.includes(
+      "INTEGRATIONS_NOTE_BUILDER_SOR_DOCS",
+    ),
+  );
+});
+
 test("S149 root README documents INTEGRATION_ENV_GROUP_LABELS SoR", async () => {
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
