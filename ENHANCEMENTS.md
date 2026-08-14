@@ -227,6 +227,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-243 | **PSP webhook 503 served==disk** | `done` | S305 — OpenAPI lock |
 | ENH-244 | **Escrow 503 served==disk** | `done` | S306 — OpenAPI lock |
 | ENH-245 | **PayPal 503 served==disk** | `done` | S307 — OpenAPI lock |
+| ENH-246 | **Money outbox OpenAPI 401** | `done` | S308 — missing/invalid secret |
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
 | ENH-004 | **Production AI multi-step** via `packages/ai` capabilities + LiteLLMâ†’Gemini + Temporal/BullMQ (no prod agent host/adapter) | `accepted` | **D-61** â€” capability pipeline only; grill + `dial-ai-capability-review` before scaffold; no peer AI kernel |
