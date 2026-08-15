@@ -11,6 +11,7 @@ import {
   postHeartbeat,
   runPd6SupplierThinVertical,
   runPd38HeartbeatSlaThinVertical,
+  runPd65SupplierBondThinVertical,
   uploadSupplierCosts,
 } from "./index.js";
 
@@ -27,6 +28,14 @@ test("PD6 thin vertical: onboard → upload → heartbeat → confirm → statem
   assert.equal(result.statementLineIds.length, 2);
   assert.ok(listHeartbeats(result.profile.supplierId).length >= 1);
   assert.ok(listStatements(result.profile.supplierId).some((l) => l.kind === "coop_spend"));
+});
+
+test("PD65 supplier bond hold → release", () => {
+  const out = runPd65SupplierBondThinVertical();
+  assert.equal(out.bondHeldThenReleased, true);
+  assert.ok(out.bondStatementLines >= 2);
+  assert.equal(out.currency, "USD");
+  assert.equal(out.payableFromAi, false);
 });
 
 test("PD6 cost upload rejects float-like non-bigint", () => {

@@ -82,9 +82,12 @@ export type CatalogueReviewItem = {
   reviewId: string;
   batchId: string;
   offerId: string;
-  status: "queued" | "approved" | "rejected";
+  status: "queued" | "claimed" | "approved" | "rejected";
   vertical: "spare" | "grocery";
   draft?: CatalogueDraftOffer;
+  /** PD64 — ops claim before resolve (Pack §10 admin queues). */
+  claimedBy?: string;
+  claimedAt?: string;
 };
 
 export type SearchNoResultEvent = {
@@ -488,7 +491,7 @@ export function getDemandGapSnapshot(filter?: {
     informalB2bLeaks: countInformalB2bLeaks() /* spare; grocery checked in PD15 runner */,
     pendingReview: reviewQueue.filter(
       (r) =>
-        r.status === "queued" &&
+        (r.status === "queued" || r.status === "claimed") &&
         (filter?.vertical ? r.vertical === filter.vertical : true),
     ).length,
     approvedAwaitingPublish: reviewQueue.filter(
@@ -548,8 +551,62 @@ export function runPd54GroceryDemandGapThinVertical(): {
   };
 }
 
+function cloneReviewItem(r: CatalogueReviewItem): CatalogueReviewItem {
+  return {
+    reviewId: r.reviewId,
+    batchId: r.batchId,
+    offerId: r.offerId,
+    status: r.status,
+    vertical: r.vertical,
+    ...(r.draft ? { draft: { ...r.draft } } : {}),
+    ...(r.claimedBy ? { claimedBy: r.claimedBy } : {}),
+    ...(r.claimedAt ? { claimedAt: r.claimedAt } : {}),
+  };
+}
+
 export function listCatalogueReviewQueue(): CatalogueReviewItem[] {
-  return reviewQueue.map((r) => ({ ...r }));
+  return reviewQueue.map(cloneReviewItem);
+}
+
+/** PD66 — pending_review items only (queued|claimed) for admin claim queue. */
+export function listPendingReviewItems(): CatalogueReviewItem[] {
+  return listCatalogueReviewQueue().filter(
+    (r) => r.status === "queued" || r.status === "claimed",
+  );
+}
+
+/**
+ * PD66 thin vertical: multi-item pending queue → claim one → pending still lists claimed.
+ */
+export function runPd66PendingReviewQueueThinVertical(): {
+  pendingCount: number;
+  claimedVisible: true;
+  resolvedClearsPending: true;
+  payableFromAi: false;
+} {
+  __resetCatalogueForTests();
+  enqueueCatalogueIngest(1);
+  enqueueCatalogueIngest(1);
+  const pending = listPendingReviewItems();
+  if (pending.length < 2) throw new Error("PD66 expected 2+ pending");
+  const first = pending[0]!;
+  claimCatalogueReview({ reviewId: first.reviewId, claimedBy: "ops_pd66" });
+  const afterClaim = listPendingReviewItems();
+  if (!afterClaim.some((r) => r.reviewId === first.reviewId && r.status === "claimed")) {
+    throw new Error("PD66 claimed item must remain on pending queue");
+  }
+  for (const item of afterClaim) {
+    approveCatalogueReview(item.reviewId);
+  }
+  if (listPendingReviewItems().length !== 0) {
+    throw new Error("PD66 pending must clear after resolve");
+  }
+  return {
+    pendingCount: pending.length,
+    claimedVisible: true,
+    resolvedClearsPending: true,
+    payableFromAi: false,
+  };
 }
 
 export function getCatalogueIngestBatch(
@@ -560,31 +617,85 @@ export function getCatalogueIngestBatch(
 }
 
 /**
+ * PD64 — claim a pending_review item (Pack §10 list/claim/resolve).
+ */
+export function claimCatalogueReview(input: {
+  reviewId: string;
+  claimedBy: string;
+}): CatalogueReviewItem {
+  if (!input.claimedBy.trim()) throw new Error("claimedBy required");
+  const item = reviewQueue.find((r) => r.reviewId === input.reviewId);
+  if (!item) throw new Error(`Unknown review ${input.reviewId}`);
+  if (item.status !== "queued") {
+    throw new Error(`Review ${input.reviewId} is already ${item.status}`);
+  }
+  item.status = "claimed";
+  item.claimedBy = input.claimedBy.trim();
+  item.claimedAt = new Date().toISOString();
+  return cloneReviewItem(item);
+}
+
+/**
  * Human approve only (D-53 / D-54) — never auto-publish from AI.
  * Marks review + batch approved; publish to Meili stub is a separate step.
+ * Accepts queued (legacy PD15) or claimed (PD64).
  */
 export function approveCatalogueReview(reviewId: string): CatalogueReviewItem {
   const item = reviewQueue.find((r) => r.reviewId === reviewId);
   if (!item) throw new Error(`Unknown review ${reviewId}`);
-  if (item.status !== "queued") {
+  if (item.status !== "queued" && item.status !== "claimed") {
     throw new Error(`Review ${reviewId} is already ${item.status}`);
   }
   item.status = "approved";
   const batch = ingestBatches.get(item.batchId);
   if (batch) batch.status = "approved";
-  return { ...item };
+  return cloneReviewItem(item);
 }
 
 export function rejectCatalogueReview(reviewId: string): CatalogueReviewItem {
   const item = reviewQueue.find((r) => r.reviewId === reviewId);
   if (!item) throw new Error(`Unknown review ${reviewId}`);
-  if (item.status !== "queued") {
+  if (item.status !== "queued" && item.status !== "claimed") {
     throw new Error(`Review ${reviewId} is already ${item.status}`);
   }
   item.status = "rejected";
   const batch = ingestBatches.get(item.batchId);
   if (batch) batch.status = "rejected";
-  return { ...item };
+  return cloneReviewItem(item);
+}
+
+/**
+ * PD64 thin vertical: enqueue → claim → approve (resolve).
+ */
+export function runPd64CatalogueClaimResolveThinVertical(): {
+  claimedThenApproved: true;
+  claimedBy: string;
+  payableFromAi: false;
+  liquorAllowed: false;
+} {
+  __resetCatalogueForTests();
+  const batch = enqueueCatalogueIngest(1);
+  const queued = listCatalogueReviewQueue().find((r) => r.batchId === batch.batchId);
+  if (!queued || queued.status !== "queued") {
+    throw new Error("PD64 expected queued review");
+  }
+  const claimed = claimCatalogueReview({
+    reviewId: queued.reviewId,
+    claimedBy: "ops_pd64",
+  });
+  if (claimed.status !== "claimed" || claimed.claimedBy !== "ops_pd64") {
+    throw new Error("PD64 claim failed");
+  }
+  const approved = approveCatalogueReview(claimed.reviewId);
+  if (approved.status !== "approved") {
+    throw new Error("PD64 resolve approve failed");
+  }
+  return {
+    claimedThenApproved: true,
+    claimedBy: "ops_pd64",
+    payableFromAi: false,
+    liquorAllowed: false,
+  };
 }
 
 /**

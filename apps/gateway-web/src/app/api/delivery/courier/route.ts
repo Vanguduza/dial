@@ -359,14 +359,28 @@ export async function POST(req: Request) {
       case "capture_pod": {
         const photoRef =
           body.photoRef != null ? String(body.photoRef) : undefined;
+        const signatureRef =
+          body.signatureRef != null ? String(body.signatureRef) : undefined;
+        const gpsLat =
+          body.gpsLat != null ? Number(body.gpsLat) : undefined;
+        const gpsLng =
+          body.gpsLng != null ? Number(body.gpsLng) : undefined;
         const job = capturePod(String(body.jobId ?? ""), {
           ...(photoRef ? { photoRef } : {}),
+          ...(signatureRef ? { signatureRef } : {}),
+          ...(gpsLat != null && Number.isFinite(gpsLat) ? { gpsLat } : {}),
+          ...(gpsLng != null && Number.isFinite(gpsLng) ? { gpsLng } : {}),
         });
         return NextResponse.json({
           ok: true,
           job: serializeJob(job),
           podPhotoRef: job.podPhotoRef ?? null,
+          podSignatureRef: job.podSignatureRef ?? null,
+          podGps: job.podGps ?? null,
+          podMediaId: job.podMediaId ?? null,
+          mapSor: "maplibre",
           payableFromAi: false,
+          note: "PD63 — photo/signature + GPS → pod_media",
         });
       }
       case "reconcile_cod": {

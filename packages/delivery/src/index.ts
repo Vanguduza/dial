@@ -115,11 +115,29 @@ export type DeliveryJob = {
   podAt?: string;
   /** PD51 — optional POD photo evidence stub (not ZIMRA fiscal). */
   podPhotoRef?: string;
+  /** PD63 — signature stroke ref (not fiscal). */
+  podSignatureRef?: string;
+  /** PD63 — GPS at capture (MapLibre SoR). */
+  podGps?: { lat: number; lng: number };
+  /** PD63 — pod_media row id. */
+  podMediaId?: string;
   etaMinutes?: number;
   distanceMeters?: number;
   /** COD settle USD hook — amountMinor only; no float. */
   codAmountUsd?: Money;
   createdAt: string;
+};
+
+export type PodMedia = {
+  mediaId: string;
+  jobId: string;
+  photoRef: string | null;
+  signatureRef: string | null;
+  gpsLat: number;
+  gpsLng: number;
+  capturedAt: string;
+  mapSor: "maplibre";
+  payableFromAi: false;
 };
 
 export type DeliveryOffer = {
@@ -145,6 +163,7 @@ export type DeliveryDispatchWorkflowState = {
 
 const jobs = new Map<string, DeliveryJob>();
 const offers = new Map<string, DeliveryOffer>();
+const podMediaStore = new Map<string, PodMedia>();
 const workflows = new Map<string, DeliveryDispatchWorkflowState>();
 /** Couriers currently available for offers. */
 const availableCouriers = new Set<CourierId>();
@@ -530,7 +549,12 @@ export function startTransit(jobId: string): DeliveryJob {
 
 export function capturePod(
   jobId: string,
-  opts?: { photoRef?: string },
+  opts?: {
+    photoRef?: string;
+    signatureRef?: string;
+    gpsLat?: number;
+    gpsLng?: number;
+  },
 ): DeliveryJob {
   const job = jobs.get(jobId);
   if (!job) throw new Error("Unknown job");
@@ -542,12 +566,49 @@ export function capturePod(
   if (opts?.photoRef?.trim()) {
     job.podPhotoRef = opts.photoRef.trim();
   }
+  if (opts?.signatureRef?.trim()) {
+    job.podSignatureRef = opts.signatureRef.trim();
+  }
+  const hasGps =
+    typeof opts?.gpsLat === "number" &&
+    typeof opts?.gpsLng === "number" &&
+    Number.isFinite(opts.gpsLat) &&
+    Number.isFinite(opts.gpsLng);
+  if (hasGps) {
+    job.podGps = { lat: opts!.gpsLat!, lng: opts!.gpsLng! };
+  }
+  if (job.podPhotoRef || job.podSignatureRef || job.podGps) {
+    const media: PodMedia = {
+      mediaId: id("podm"),
+      jobId,
+      photoRef: job.podPhotoRef ?? null,
+      signatureRef: job.podSignatureRef ?? null,
+      gpsLat: job.podGps?.lat ?? 0,
+      gpsLng: job.podGps?.lng ?? 0,
+      capturedAt: job.podAt,
+      mapSor: "maplibre",
+      payableFromAi: false,
+    };
+    podMediaStore.set(media.mediaId, media);
+    job.podMediaId = media.mediaId;
+  }
   const wf = [...workflows.values()].find((w) => w.jobId === jobId);
   if (wf) {
     wf.phase = "pod";
     wf.phase = "complete";
   }
   return { ...job };
+}
+
+export function getPodMedia(mediaId: string): PodMedia | undefined {
+  const m = podMediaStore.get(mediaId);
+  return m ? { ...m } : undefined;
+}
+
+export function listPodMediaForJob(jobId: string): PodMedia[] {
+  return [...podMediaStore.values()]
+    .filter((m) => m.jobId === jobId)
+    .map((m) => ({ ...m }));
 }
 
 /** COD reconcile hook after POD — returns USD settle amount if COD job. */
@@ -1194,6 +1255,54 @@ export function runPd61CodFailureReasonThinVertical(): {
 }
 
 /**
+ * PD63 thin vertical: POD photo + signature + GPS → pod_media (Pack §9.8).
+ */
+export function runPd63PodSignatureGpsThinVertical(): {
+  hasPhoto: true;
+  hasSignature: true;
+  hasGps: true;
+  podMediaId: string;
+  mapSor: "maplibre";
+  payableFromAi: false;
+} {
+  __resetDeliveryForTests();
+  const courierId = "cour_pd63";
+  setCourierAvailabilityStatus(courierId, "available");
+  const job = createDeliveryJob({
+    orderId: "ord_pd63",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 10_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD63 expected offer");
+  acceptOffer(offered.offerId, courierId);
+  startTransit(job.id);
+  const pod = capturePod(job.id, {
+    photoRef: `fixture://pod/${job.id}.jpg`,
+    signatureRef: `fixture://sig/${job.id}.png`,
+    gpsLat: -17.8292,
+    gpsLng: 31.0522,
+  });
+  if (!pod.podPhotoRef || !pod.podSignatureRef || !pod.podGps || !pod.podMediaId) {
+    throw new Error("PD63 POD must store photo, signature, GPS, and media id");
+  }
+  const media = getPodMedia(pod.podMediaId);
+  if (!media || media.mapSor !== "maplibre" || media.payableFromAi !== false) {
+    throw new Error("PD63 pod_media row missing or wrong SoR");
+  }
+  return {
+    hasPhoto: true,
+    hasSignature: true,
+    hasGps: true,
+    podMediaId: pod.podMediaId,
+    mapSor: "maplibre",
+    payableFromAi: false,
+  };
+}
+
+/**
  * PD58 thin vertical: assign job for order → post location → customer read-only track.
  */
 export function runPd58CustomerDeliveryTrackThinVertical(input?: {
@@ -1403,4 +1512,5 @@ export function __resetDeliveryForTests(): void {
   __resetNavigateStopsForTests();
   __resetCodFloatForTests();
   __resetAssignmentEventsForTests();
+  podMediaStore.clear();
 }

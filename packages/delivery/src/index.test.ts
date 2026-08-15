@@ -229,6 +229,17 @@ test("PD61 COD failure reason on attempt", async () => {
   assert.equal(out.currency, "USD");
 });
 
+test("PD63 POD signature + GPS → pod_media", async () => {
+  const { runPd63PodSignatureGpsThinVertical } = await import("./index.js");
+  const out = runPd63PodSignatureGpsThinVertical();
+  assert.equal(out.hasPhoto, true);
+  assert.equal(out.hasSignature, true);
+  assert.equal(out.hasGps, true);
+  assert.ok(out.podMediaId);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

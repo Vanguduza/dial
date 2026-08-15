@@ -834,6 +834,50 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| POD signature + GPS → pod_media | **PD63** |
+| Catalogue pending_review claim/resolve | **PD64** |
+| Supplier bonds hold/release | **PD65** |
+| Admin pending_review queue UI | **PD66** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD63 — POD signature + GPS (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | photo + signature + GPS → `pod_media` (MapLibre SoR) |
+| Evidence | `runPd63PodSignatureGpsThinVertical`; `pd63Pd66Ops.test.ts` |
+| Green → | **PD64** catalogue claim |
+
+### PD64 — Catalogue claim → resolve (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | enqueue → claim → approve; no AI auto-publish |
+| Evidence | `runPd64CatalogueClaimResolveThinVertical`; `pd63Pd66Ops.test.ts` |
+| Green → | **PD65** supplier bonds |
+
+### PD65 — Supplier bonds (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | hold → release → bond statement lines (USD minor) |
+| Evidence | `runPd65SupplierBondThinVertical`; `pd63Pd66Ops.test.ts` |
+| Green → | **PD66** pending-review UI |
+
+### PD66 — Admin pending_review queue (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | list pending → claim remains visible → resolve clears `/admin/pending-review` |
+| Evidence | `runPd66PendingReviewQueueThinVertical`; `pd63Pd66Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD66)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 | Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |

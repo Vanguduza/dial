@@ -6,10 +6,12 @@
 import { NextResponse } from "next/server";
 import {
   approveCatalogueReview,
+  claimCatalogueReview,
   enqueueCatalogueIngest,
   getDemandGapSnapshot,
   ingestCatalogueCsv,
   listCatalogueReviewQueue,
+  listPendingReviewItems,
   publishApprovedBatchToMeili,
   publishApprovedGroceryToMeili,
   rejectCatalogueReview,
@@ -54,6 +56,7 @@ export async function GET(req: Request) {
   }
   return NextResponse.json({
     queue: listCatalogueReviewQueue().map(serializeQueueItem),
+    pending: listPendingReviewItems().map(serializeQueueItem),
     demandGap: getDemandGapSnapshot(),
   });
 }
@@ -66,6 +69,7 @@ export async function POST(req: Request) {
     action?:
       | "enqueue"
       | "ingest_csv"
+      | "claim"
       | "approve"
       | "reject"
       | "publish"
@@ -74,6 +78,7 @@ export async function POST(req: Request) {
     rowCount?: number;
     csvText?: string;
     reviewId?: string;
+    claimedBy?: string;
     batchId?: string;
     offer?: StubOffer & { unitPriceUsdMinor?: string | number | bigint };
   };
@@ -88,6 +93,7 @@ export async function POST(req: Request) {
         ok: true,
         batch,
         queue: listCatalogueReviewQueue().map(serializeQueueItem),
+        pending: listPendingReviewItems().map(serializeQueueItem),
         demandGap: getDemandGapSnapshot(),
       });
     }
@@ -102,7 +108,24 @@ export async function POST(req: Request) {
         reviews: ingested.reviews.map(serializeQueueItem),
         rejectedRows: ingested.rejectedRows,
         queue: listCatalogueReviewQueue().map(serializeQueueItem),
+        pending: listPendingReviewItems().map(serializeQueueItem),
         demandGap: getDemandGapSnapshot(),
+      });
+    }
+    if (body.action === "claim") {
+      if (!body.reviewId) {
+        return NextResponse.json({ error: "reviewId required" }, { status: 400 });
+      }
+      const item = claimCatalogueReview({
+        reviewId: body.reviewId,
+        claimedBy: String(body.claimedBy ?? "ops_review"),
+      });
+      return NextResponse.json({
+        ok: true,
+        item: serializeQueueItem(item),
+        pending: listPendingReviewItems().map(serializeQueueItem),
+        demandGap: getDemandGapSnapshot(),
+        note: "PD64 — claim pending_review",
       });
     }
     if (body.action === "approve") {
@@ -113,6 +136,7 @@ export async function POST(req: Request) {
       return NextResponse.json({
         ok: true,
         item: serializeQueueItem(item),
+        pending: listPendingReviewItems().map(serializeQueueItem),
         demandGap: getDemandGapSnapshot(),
       });
     }
@@ -121,7 +145,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "reviewId required" }, { status: 400 });
       }
       const item = rejectCatalogueReview(body.reviewId);
-      return NextResponse.json({ ok: true, item: serializeQueueItem(item) });
+      return NextResponse.json({
+        ok: true,
+        item: serializeQueueItem(item),
+        pending: listPendingReviewItems().map(serializeQueueItem),
+      });
     }
     if (body.action === "publish_grocery") {
       if (!body.batchId) {
@@ -181,7 +209,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "action must be enqueue | ingest_csv | approve | reject | publish | publish_grocery | demand_gap",
+          "action must be enqueue | ingest_csv | claim | approve | reject | publish | publish_grocery | demand_gap",
       },
       { status: 400 },
     );

@@ -88,6 +88,20 @@ export type StatementLine = {
   createdAt: string;
 };
 
+/** PD65 — supplier performance/security bond (Pack §9.4 statements/bonds). */
+export type SupplierBond = {
+  bondId: string;
+  supplierId: string;
+  amountUsdMinor: string;
+  currency: "USD";
+  status: "held" | "released" | "forfeited";
+  statementLineId: string | null;
+  heldAt: string;
+  releasedAt: string | null;
+  note: string;
+  payableFromAi: false;
+};
+
 type Store = {
   profiles: Map<string, SupplierProfile>;
   uploads: Map<string, CostUploadBatch>;
@@ -95,6 +109,7 @@ type Store = {
   confirms: Map<string, ConfirmOrder>;
   statements: StatementLine[];
   escalations: SlaEscalation[];
+  bonds: Map<string, SupplierBond>;
 };
 
 function store(): Store {
@@ -107,10 +122,14 @@ function store(): Store {
       confirms: new Map(),
       statements: [],
       escalations: [],
+      bonds: new Map(),
     };
   }
   if (!g.__dialSupplierStore.escalations) {
     g.__dialSupplierStore.escalations = [];
+  }
+  if (!g.__dialSupplierStore.bonds) {
+    g.__dialSupplierStore.bonds = new Map();
   }
   return g.__dialSupplierStore;
 }
@@ -123,6 +142,7 @@ export function __resetSuppliersForTests(): void {
   s.confirms.clear();
   s.statements.length = 0;
   s.escalations.length = 0;
+  s.bonds.clear();
 }
 
 function id(prefix: string): string {
@@ -444,6 +464,109 @@ export function listStatements(supplierId: string): StatementLine[] {
   return store()
     .statements.filter((l) => l.supplierId === supplierId)
     .map((l) => ({ ...l, amount: { ...l.amount } }));
+}
+
+/** PD65 — hold supplier bond (USD minor) + statement bond line. */
+export function holdSupplierBond(input: {
+  supplierId: string;
+  amountUsdMinor: bigint;
+  note?: string;
+}): SupplierBond {
+  if (!store().profiles.has(input.supplierId)) {
+    throw new Error(`Unknown supplier ${input.supplierId}`);
+  }
+  if (typeof input.amountUsdMinor !== "bigint" || input.amountUsdMinor <= 0n) {
+    throw new TypeError("amountUsdMinor must be positive bigint");
+  }
+  const line = addStatementLine({
+    supplierId: input.supplierId,
+    kind: "bond",
+    amountUsdMinor: input.amountUsdMinor,
+    label: input.note?.trim() || "Supplier bond hold",
+  });
+  const bond: SupplierBond = {
+    bondId: id("bond"),
+    supplierId: input.supplierId,
+    amountUsdMinor: input.amountUsdMinor.toString(),
+    currency: "USD",
+    status: "held",
+    statementLineId: line.lineId,
+    heldAt: new Date().toISOString(),
+    releasedAt: null,
+    note: input.note?.trim() || "Supplier bond hold",
+    payableFromAi: false,
+  };
+  store().bonds.set(bond.bondId, bond);
+  return { ...bond };
+}
+
+export function releaseSupplierBond(input: {
+  bondId: string;
+  releasedBy: string;
+}): SupplierBond {
+  if (!input.releasedBy.trim()) throw new Error("releasedBy required");
+  const bond = store().bonds.get(input.bondId);
+  if (!bond) throw new Error(`Unknown bond ${input.bondId}`);
+  if (bond.status !== "held") throw new Error(`Bond already ${bond.status}`);
+  bond.status = "released";
+  bond.releasedAt = new Date().toISOString();
+  addStatementLine({
+    supplierId: bond.supplierId,
+    kind: "bond",
+    amountUsdMinor: 0n - BigInt(bond.amountUsdMinor),
+    label: `Bond release ${bond.bondId} by ${input.releasedBy.trim()}`,
+  });
+  return { ...bond };
+}
+
+export function listSupplierBonds(supplierId: string): SupplierBond[] {
+  return [...store().bonds.values()]
+    .filter((b) => b.supplierId === supplierId)
+    .map((b) => ({ ...b }));
+}
+
+/**
+ * PD65 thin vertical: onboard → hold bond → release → statement bond lines.
+ */
+export function runPd65SupplierBondThinVertical(): {
+  bondHeldThenReleased: true;
+  bondStatementLines: number;
+  currency: "USD";
+  payableFromAi: false;
+} {
+  __resetSuppliersForTests();
+  const supplierId = "sup_pd65";
+  onboardSupplier({
+    supplierId,
+    displayName: "PD65 Bond Agency",
+    formality: "formal",
+    tier: "bronze",
+  });
+  const held = holdSupplierBond({
+    supplierId,
+    amountUsdMinor: 100_00n,
+    note: "Launch performance bond",
+  });
+  if (held.status !== "held" || held.payableFromAi !== false) {
+    throw new Error("PD65 hold failed");
+  }
+  const released = releaseSupplierBond({
+    bondId: held.bondId,
+    releasedBy: "ops_pd65",
+  });
+  if (released.status !== "released") {
+    throw new Error("PD65 release failed");
+  }
+  const bondLines = listStatements(supplierId).filter((l) => l.kind === "bond");
+  if (bondLines.length < 2) {
+    throw new Error("PD65 expected hold + release bond statement lines");
+  }
+  return {
+    bondHeldThenReleased: true,
+    bondStatementLines: bondLines.length,
+    currency: "USD",
+    payableFromAi: false,
+  };
 }
 
 export type Pd6ThinResult = {

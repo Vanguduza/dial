@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD66 Admin pending_review queue** — `/admin/pending-review` list/claim/approve|reject (Pack §10).
+- **PD65 Supplier bonds** — hold/release USD amountMinor bonds + statement lines; `/admin/suppliers/bonds` (Pack §9.4).
+- **PD64 Catalogue claim → resolve** — `claimCatalogueReview` before approve/reject; no AI auto-publish.
+- **PD63 POD signature + GPS** — photo/signature + GPS → `pod_media` (MapLibre SoR; Pack §9.8).
 - **PD62 Unified four-eyes queue** — pending Daily ZiG proposals on `/admin/four-eyes`; approve/reject via SoR (same-actor blocked).
 - **PD61 COD failure reasons** — `recordCodCollectFailure` → `cod_attempts` with reason codes; float warn unchanged (Pack §9.8).
 - **PD60 Domain module registry** — certification SoR in `@dial/shared` + `/admin/platform/modules`; not Unleash; CERTIFIED–DORMANT ≠ public MVP ladder (D-53).

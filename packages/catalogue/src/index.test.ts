@@ -19,6 +19,8 @@ import {
   runPd27SpareDualEntryThinVertical,
   runPd54GroceryDemandGapThinVertical,
   runPd55AdminOrdersThinVertical,
+  runPd64CatalogueClaimResolveThinVertical,
+  runPd66PendingReviewQueueThinVertical,
 } from "./index.js";
 
 describe("catalogue", { concurrency: false }, () => {
@@ -312,6 +314,22 @@ test("PD55 admin orders thin vertical", () => {
   assert.equal(out.payableFromAi, false);
   assert.equal(out.liquorAllowed, false);
   assert.ok(out.queueCount >= 2);
+});
+
+test("PD64 catalogue claim → resolve", () => {
+  const out = runPd64CatalogueClaimResolveThinVertical();
+  assert.equal(out.claimedThenApproved, true);
+  assert.equal(out.claimedBy, "ops_pd64");
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.liquorAllowed, false);
+});
+
+test("PD66 pending review queue", () => {
+  const out = runPd66PendingReviewQueueThinVertical();
+  assert.equal(out.claimedVisible, true);
+  assert.equal(out.resolvedClearsPending, true);
+  assert.ok(out.pendingCount >= 2);
+  assert.equal(out.payableFromAi, false);
 });
 
 test("PD27 dual entry Select Vehicle + Browse EPC join on chassis; USD; B2B hide informal", () => {
