@@ -2,6 +2,7 @@
  * PD9 technician API — wraps @dial/jobs SoR (Cal.com slots, checklist, evidence).
  * PD25: Value Score factors + ITF263 upload/status + Take-Home breakdown (D-50/D-53).
  * PD30: mock-location check-in + camera evidence queue (Pack §9.7 / 2B-29).
+ * PD31: Bluetooth ESC/POS thermal print hooks — ops ticket, not ZIMRA SoR (D-40a).
  * Session SoR; never body userId/role (D-47).
  */
 import { NextResponse } from "next/server";
@@ -23,6 +24,10 @@ import {
   listChecklists,
   listEvidenceForJob,
   listJobsForTechnician,
+  listThermalPrinters,
+  listThermalPrintJobs,
+  pairThermalPrinter,
+  printJobTicket,
   setJobSitePin,
   setValueScoreSnapshot,
   startChecklistRun,
@@ -160,6 +165,9 @@ export async function GET(req: Request) {
     checklists: listChecklists(),
     valueScore: getValueScoreSnapshot(technicianId) ?? null,
     itf263: getItf263Record(technicianId, new Date().getFullYear()) ?? null,
+    thermalPrinters: listThermalPrinters(technicianId),
+    thermalPrintJobs: listThermalPrintJobs(technicianId),
+    printNote: "ESC/POS Bluetooth ops — FDMS virtual API only (D-40a); not ZIMRA printer SoR",
   });
 }
 
@@ -334,6 +342,54 @@ export async function POST(req: Request) {
           cameraEvidence: listCameraEvidenceForJob(jobId),
           checkIns: listCheckInsForJob(jobId),
           payableFromAi: false,
+        });
+      }
+      case "pair_thermal_printer": {
+        const printer = pairThermalPrinter({
+          technicianId,
+          ...(body.label != null ? { label: String(body.label) } : {}),
+          ...(body.bluetoothAddress != null
+            ? { bluetoothAddress: String(body.bluetoothAddress) }
+            : {}),
+        });
+        return NextResponse.json({
+          ok: true,
+          printer,
+          zimraFiscalSor: false,
+          fdmsVirtualOnly: true,
+          note: "D-46 ESC/POS pattern — not agency FDMS / ZIMRA printer (D-40a)",
+          payableFromAi: false,
+        });
+      }
+      case "print_job_ticket": {
+        const jobId = String(body.jobId ?? "");
+        const job = getTechJob(jobId);
+        if (!job || job.technicianId !== technicianId) {
+          return NextResponse.json({ error: "Job not assigned to technician" }, { status: 403 });
+        }
+        const printerId = String(body.printerId ?? "");
+        const ticket = printJobTicket({
+          technicianId,
+          printerId,
+          jobId,
+          jobClassId: job.jobClassId,
+          draftAmountUsdMinor: job.draftAmountUsdMinor,
+        });
+        return NextResponse.json({
+          ok: true,
+          printJob: ticket,
+          zimraFiscalSor: false,
+          payableFromAi: false,
+          note: "Job ticket ESC/POS — draft amount echo only; not fiscal receipt",
+        });
+      }
+      case "list_thermal_printers": {
+        return NextResponse.json({
+          ok: true,
+          printers: listThermalPrinters(technicianId),
+          printJobs: listThermalPrintJobs(technicianId),
+          zimraFiscalSor: false,
+          fdmsVirtualOnly: true,
         });
       }
       case "list_evidence": {

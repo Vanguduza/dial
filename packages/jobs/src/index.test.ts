@@ -169,3 +169,16 @@ test("PD30 mock-location blocked + camera overlay queue", async () => {
   assert.equal(out.punctualityNotFromMock, true);
   assert.equal(out.payableFromAi, false);
 });
+
+test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
+  const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
+  const out = await runPd31BluetoothPrintThinVertical({
+    technicianId: "tech_pd31_t",
+  });
+  assert.equal(out.paired, true);
+  assert.equal(out.ticketSent, true);
+  assert.equal(out.escpos, true);
+  assert.equal(out.zimraFiscalSor, false);
+  assert.equal(out.fdmsVirtualOnly, true);
+  assert.equal(out.payableFromAi, false);
+});

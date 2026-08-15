@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD31 Technician Bluetooth ESC/POS print hooks** — pair thermal printer + print job ticket (D-46 pattern); ops hook only — not ZIMRA fiscal SoR (D-40a virtual FDMS); Compose + `/api/tech/technician`; eng next **PD32**.
 - **PD30 Technician mock-location + camera evidence** — mock GPS check-in blocked for punctuality (2B-29); genuine geofence accept; device camera + checklist overlay; offline evidence queue flush; Compose + `/api/tech/technician`; Pack §9 audit authored **PD31–PD32**.
 - **PD29 Delivery ETA + navigate stops / VROOM** — OSRM ETA banner; multi-stop navigate list; courier request re-optimise remaining via VROOM (D-44 MapLibre/OSRM/VROOM SoR); Compose + `/api/delivery/courier` actions; eng next **PD30**.
 - **PD28 Delivery availability + offline packs** — `available`/`busy`/`offline` eligibility for offers; Harare + Bulawayo MapLibre offline tile packs (D-44); Compose UI + `/api/delivery/courier` actions; Pack §9 audit authored **PD29–PD30**.

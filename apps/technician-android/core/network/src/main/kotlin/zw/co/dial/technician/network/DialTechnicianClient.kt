@@ -73,6 +73,23 @@ data class CameraEvidenceDto(
     val payableFromAi: Boolean,
 )
 
+data class ThermalPrinterDto(
+    val printerId: String,
+    val label: String,
+    val bluetoothAddress: String,
+    val protocol: String,
+    val zimraFiscalSor: Boolean,
+    val fdmsVirtualOnly: Boolean,
+)
+
+data class ThermalPrintJobDto(
+    val printJobId: String,
+    val jobId: String,
+    val status: String,
+    val zimraFiscalSor: Boolean,
+    val payableFromAi: Boolean,
+)
+
 class DialTechnicianException(message: String, val statusCode: Int = 0) : Exception(message)
 
 interface CookieStore {
@@ -297,6 +314,28 @@ class DialTechnicianClient(
             ?.groupValues
             ?.get(1)
             ?.toIntOrNull() ?: 0
+    }
+
+    /** PD31 — pair ESC/POS Bluetooth thermal (ops hook, not ZIMRA SoR). */
+    fun pairThermalPrinter(
+        label: String = "DIAL pocket thermal",
+        bluetoothAddress: String = "AA:BB:CC:31:00:01",
+    ): ThermalPrinterDto {
+        val body =
+            postAction(
+                """{"action":"pair_thermal_printer","label":${jsonString(label)},"bluetoothAddress":${jsonString(bluetoothAddress)}}""",
+            )
+        return parseThermalPrinter(body)
+            ?: throw DialTechnicianException("pair_thermal_printer missing")
+    }
+
+    fun printJobTicket(jobId: String, printerId: String): ThermalPrintJobDto {
+        val body =
+            postAction(
+                """{"action":"print_job_ticket","jobId":${jsonString(jobId)},"printerId":${jsonString(printerId)}}""",
+            )
+        return parseThermalPrintJob(body)
+            ?: throw DialTechnicianException("print_job_ticket missing")
     }
 
     private fun get(path: String): HttpResponse {
@@ -546,6 +585,51 @@ internal fun parseCameraEvidence(body: String): CameraEvidenceDto? {
         overlayChecklistStep = s("overlayChecklistStep"),
         cameraSource = s("cameraSource"),
         flushStatus = s("flushStatus"),
+        payableFromAi = b("payableFromAi"),
+    )
+}
+
+internal fun parseThermalPrinter(body: String): ThermalPrinterDto? {
+    val chunk =
+        Regex(""""printer"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun s(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    fun b(n: String) =
+        Regex(""""$n"\s*:\s*(true|false)""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1) == "true"
+    return ThermalPrinterDto(
+        printerId = s("printerId"),
+        label = s("label"),
+        bluetoothAddress = s("bluetoothAddress"),
+        protocol = s("protocol"),
+        zimraFiscalSor = b("zimraFiscalSor"),
+        fdmsVirtualOnly = b("fdmsVirtualOnly"),
+    )
+}
+
+internal fun parseThermalPrintJob(body: String): ThermalPrintJobDto? {
+    val chunk =
+        Regex(""""printJob"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun s(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    fun b(n: String) =
+        Regex(""""$n"\s*:\s*(true|false)""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1) == "true"
+    return ThermalPrintJobDto(
+        printJobId = s("printJobId"),
+        jobId = s("jobId"),
+        status = s("status"),
+        zimraFiscalSor = b("zimraFiscalSor"),
         payableFromAi = b("payableFromAi"),
     )
 }

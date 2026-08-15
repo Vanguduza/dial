@@ -13,6 +13,13 @@ import {
   getCameraEvidence,
   setJobSitePin,
 } from "./mockLocationEvidence.js";
+import {
+  __resetBluetoothPrintForTests,
+  listThermalPrinters,
+  listThermalPrintJobs,
+  pairThermalPrinter,
+  printJobTicket,
+} from "./bluetoothPrint.js";
 
 export type JobClassDefinition = {
   id: string;
@@ -960,6 +967,16 @@ export {
   type JobSitePin,
 } from "./mockLocationEvidence.js";
 
+export {
+  getThermalPrinter,
+  listThermalPrinters,
+  listThermalPrintJobs,
+  pairThermalPrinter,
+  printJobTicket,
+  type ThermalPrinterBond,
+  type ThermalPrintJob,
+} from "./bluetoothPrint.js";
+
 /**
  * PD25 thin vertical: Value Score factors on device (explainability, no money).
  */
@@ -1092,6 +1109,77 @@ export async function runPd30MockLocationCameraThinVertical(input?: {
   };
 }
 
+/**
+ * PD31 thin vertical: pair ESC/POS Bluetooth printer → print job ticket.
+ * Ops hook only — zimraFiscalSor=false; FDMS remains virtual API (D-40a).
+ */
+export async function runPd31BluetoothPrintThinVertical(input?: {
+  technicianId?: string;
+  customerId?: string;
+}): Promise<{
+  paired: true;
+  ticketSent: true;
+  escpos: true;
+  zimraFiscalSor: false;
+  fdmsVirtualOnly: true;
+  payableFromAi: false;
+  printerId: string;
+  printJobId: string;
+}> {
+  __resetJobsForTests();
+  const technicianId = input?.technicianId ?? "tech_pd31";
+  const customerId = input?.customerId ?? "cust_pd31";
+  const slots = await listBookingSlots();
+  const slot = slots[0];
+  if (!slot) throw new Error("PD31 needs Cal.com fixture slot");
+  const job = bookTechJob({
+    customerId,
+    technicianId,
+    jobClass: "diagnostics",
+    slotId: slot.slotId,
+    emergency: false,
+  });
+  const printer = pairThermalPrinter({
+    technicianId,
+    label: "DIAL pocket thermal",
+    bluetoothAddress: "AA:BB:CC:31:00:01",
+  });
+  if (printer.zimraFiscalSor || !printer.fdmsVirtualOnly || printer.protocol !== "escpos") {
+    throw new Error("PD31 printer must be ESC/POS ops hook, not ZIMRA SoR");
+  }
+  const ticket = printJobTicket({
+    technicianId,
+    printerId: printer.printerId,
+    jobId: job.id,
+    jobClassId: job.jobClassId,
+    draftAmountUsdMinor: job.draftAmountUsdMinor,
+  });
+  if (
+    ticket.status !== "sent" ||
+    ticket.zimraFiscalSor ||
+    ticket.payableFromAi ||
+    !ticket.escposText.includes("NOT a fiscal receipt")
+  ) {
+    throw new Error("PD31 ticket must send ESC/POS ops copy without fiscal SoR");
+  }
+  if (listThermalPrinters(technicianId).length < 1) {
+    throw new Error("PD31 expected paired printer");
+  }
+  if (listThermalPrintJobs(technicianId).length < 1) {
+    throw new Error("PD31 expected print job record");
+  }
+  return {
+    paired: true,
+    ticketSent: true,
+    escpos: true,
+    zimraFiscalSor: false,
+    fdmsVirtualOnly: true,
+    payableFromAi: false,
+    printerId: printer.printerId,
+    printJobId: ticket.printJobId,
+  };
+}
+
 export function __resetJobsForTests(): void {
   valueScores.clear();
   scoreDisputes.clear();
@@ -1106,4 +1194,5 @@ export function __resetJobsForTests(): void {
   jobClasses.push(...JOB_CLASS_SEED.map((j) => ({ ...j })));
   __resetProjectsAndLegalForTests();
   __resetMockLocationEvidenceForTests();
+  __resetBluetoothPrintForTests();
 }

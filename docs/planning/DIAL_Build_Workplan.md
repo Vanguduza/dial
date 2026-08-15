@@ -100,7 +100,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 137 | `PD31` | **Technician Bluetooth print hooks** — Pack §9.7 residual | workplan | Thermal print receipt/job ticket | `PD32` |
 | 138 | `PD32` | **Delivery COD float-limit warning** — Pack §9.8 residual | workplan | optional COD float warn | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD30 is **PD31**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD31 is **PD32**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -448,23 +448,27 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd30MockLocationCameraThinVertical`; `pd30MockLocationCamera.test.ts`; Compose check-in/camera |
 | Green → | **PD31** Technician Bluetooth print hooks |
 
-### Pack §9 gap audit (after PD30)
+### PD31 — Technician Bluetooth print hooks (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | pair ESC/POS Bluetooth printer → print job ticket (ops) — zimraFiscalSor=false; FDMS virtual only (D-40a) |
+| Evidence | `runPd31BluetoothPrintThinVertical`; `pd31BluetoothPrint.test.ts`; Compose pair/print |
+| Green → | **PD32** Delivery COD float-limit warning |
+
+### Pack §9 gap audit (after PD31)
 
 | § | Gap remaining | Stage |
 | --- | --- | --- |
-| 9.7 | Bluetooth thermal print hooks | **PD31** |
-| 9.8 | COD float-limit warning on collect | **PD32** (optional) |
-| 9.1–9.6 | Primary surfaces covered PD1–PD27 | defer polish — founder may prioritize |
+| 9.8 | COD float-limit warning on collect | **PD32** |
+| 9.1–9.7 | Primary covered PD1–PD31 | defer polish — founder may prioritize |
 
 Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
 
-### PD31 — Technician Bluetooth print hooks (NEXT)
+### PD32 — Delivery COD float-limit warning (NEXT)
 
-Pack §9.7 residual — Bluetooth thermal print hooks (receipt/job ticket pattern).
-
-### PD32 — Delivery COD float-limit warning
-
-Pack §9.8 residual — optional COD float-limit warning deepen.
+Pack §9.8 residual — COD float-limit warning on collect.
 
 ### S10 — E2a (historical)
 

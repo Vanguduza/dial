@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD30** green → **PD31** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD31** green → **PD32** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD31** — Technician Bluetooth print hooks (next eng) |
-| `current_issue` | _(open when starting PD31)_ |
+| `current_stage` | **PD32** — Delivery COD float-limit warning (next eng) |
+| `current_issue` | _(open when starting PD32)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD30** Technician mock-location / evidence-camera — **green** |
-| `next_stage` | **PD31** Technician Bluetooth thermal print hooks |
+| `prior_stage` | **PD31** Technician Bluetooth thermal print hooks — **green** |
+| `next_stage` | **PD32** Delivery COD float-limit warning |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -50,17 +50,17 @@
 | **PD28** | 2026-08-15 | Delivery available\|busy\|offline eligibility + Harare/Bulawayo MapLibre offline packs |
 | **PD29** | 2026-08-15 | Delivery OSRM ETA banner + navigate stops + VROOM re-optimise |
 | **PD30** | 2026-08-15 | Tech mock-location check-in + camera evidence overlay/queue |
+| **PD31** | 2026-08-15 | Tech Bluetooth ESC/POS print hooks — ops ticket not ZIMRA SoR |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD31** | Technician Bluetooth thermal print hooks — Pack §9.7 residual |
 | **PD32** | Delivery COD float-limit warning — Pack §9.8 residual (optional) |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note
 
-Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Pack §9 audit after PD30 authored **PD31–PD32**. Eng next after PD30 is **PD31**, not S99. Product is **not** finished at S99.
+Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Eng next after PD31 is **PD32**, not S99. Product is **not** finished at S99.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

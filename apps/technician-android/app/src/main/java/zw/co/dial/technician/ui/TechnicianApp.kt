@@ -39,6 +39,7 @@ fun TechnicianApp(baseUrl: String) {
     var password by remember { mutableStateOf("") }
     var jobId by remember { mutableStateOf<String?>(null) }
     var runId by remember { mutableStateOf<String?>(null) }
+    var printerId by remember { mutableStateOf<String?>(null) }
     var status by remember { mutableStateOf("Sign in to run jobs / checklist / evidence.") }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
@@ -73,7 +74,7 @@ fun TechnicianApp(baseUrl: String) {
             fontWeight = FontWeight.Bold,
         )
         Text(
-            "Compose · mock GPS · camera overlay · Value Score · ITF263 · Take-Home",
+            "Compose · ESC/POS Bluetooth · mock GPS · camera · Take-Home",
             style = MaterialTheme.typography.bodySmall,
         )
 
@@ -183,6 +184,30 @@ fun TechnicianApp(baseUrl: String) {
                 enabled = jobId != null,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Camera evidence + queue flush") }
+            Button(
+                onClick = {
+                    run {
+                        val p = client.pairThermalPrinter()
+                        printerId = p.printerId
+                        status =
+                            "Paired ${p.label} ${p.bluetoothAddress} · ${p.protocol} · zimraFiscal=${p.zimraFiscalSor} · FDMS virtual=${p.fdmsVirtualOnly}"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Pair Bluetooth thermal printer") }
+            Button(
+                onClick = {
+                    val jid = jobId ?: return@Button
+                    val pid = printerId ?: return@Button
+                    run {
+                        val ticket = client.printJobTicket(jid, pid)
+                        status =
+                            "Printed ticket ${ticket.printJobId} status=${ticket.status} · zimraFiscal=${ticket.zimraFiscalSor} · payableFromAi=${ticket.payableFromAi} (ops hook, not FDMS)"
+                    }
+                },
+                enabled = jobId != null && printerId != null,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Print job ticket (ESC/POS)") }
             Button(
                 onClick = {
                     run {

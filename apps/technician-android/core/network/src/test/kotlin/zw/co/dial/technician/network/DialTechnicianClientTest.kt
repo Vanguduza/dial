@@ -155,4 +155,42 @@ class DialTechnicianClientTest {
         assertEquals(1, client.flushEvidenceQueue())
         assertTrue(bodies.all { !it.contains("userId") })
     }
+
+    @Test
+    fun pd31_thermal_print_never_sends_identity() {
+        val bodies = mutableListOf<String>()
+        val transport =
+            HttpTransport { method, url, _, body, _ ->
+                if (method == "POST" && url.contains("/api/tech/technician") && body != null) {
+                    bodies.add(body)
+                    assertTrue(!body.contains("userId"))
+                    assertTrue(!body.contains("\"role\""))
+                }
+                when {
+                    body?.contains("pair_thermal_printer") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"printer":{"printerId":"btp_1","label":"DIAL pocket thermal","bluetoothAddress":"AA:BB:CC:31:00:01","protocol":"escpos","zimraFiscalSor":false,"fdmsVirtualOnly":true},"payableFromAi":false}""",
+                            emptyList(),
+                        )
+                    body?.contains("print_job_ticket") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"printJob":{"printJobId":"prj_1","jobId":"job_1","status":"sent","zimraFiscalSor":false,"payableFromAi":false}}""",
+                            emptyList(),
+                        )
+                    else -> HttpResponse(200, """{"ok":true}""", emptyList())
+                }
+            }
+        val client = DialTechnicianClient("http://localhost:3000", MemoryCookieStore(), transport)
+        val printer = client.pairThermalPrinter()
+        assertEquals("escpos", printer.protocol)
+        assertEquals(false, printer.zimraFiscalSor)
+        assertEquals(true, printer.fdmsVirtualOnly)
+        val ticket = client.printJobTicket("job_1", printer.printerId)
+        assertEquals("sent", ticket.status)
+        assertEquals(false, ticket.zimraFiscalSor)
+        assertEquals(false, ticket.payableFromAi)
+        assertTrue(bodies.all { !it.contains("userId") })
+    }
 }

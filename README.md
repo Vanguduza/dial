@@ -99,7 +99,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/search-indexer` | Meili reindex jobs |
 | `packages/ai` | guidedIntake + LiteLLM + Intelligence stubs (D-61) |
 
-**Build status:** eng spine **S90** green; product-depth through **PD30** technician mock-location/camera green → next **PD31** Bluetooth print hooks. **S99** remains human launch-only (not product-finished). OpenAPI invent paused. No liquor Build.
+**Build status:** eng spine **S90** green; product-depth through **PD31** technician Bluetooth ESC/POS print green → next **PD32** delivery COD float-limit. **S99** remains human launch-only (not product-finished). OpenAPI invent paused. No liquor Build.
 
 ### Gateway integration surface (plug-in)
 
