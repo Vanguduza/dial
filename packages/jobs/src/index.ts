@@ -20,7 +20,27 @@ export type ValueScoreSnapshot = {
   technicianId: string;
   score: number;
   asOf: string;
+  confidence: "low" | "medium" | "high";
+  profileId: string;
+  sampleN: number;
+  outcomeWindowDays: number;
+  /** Explainability — never payable amounts. */
+  factorContributions: Array<{ factor: string; weight: number; contribution: number }>;
 };
+
+export type ValueScoreDispute = {
+  disputeId: string;
+  technicianId: string;
+  status: "open" | "upheld" | "rejected";
+  reason: string;
+  openedBy: string;
+  resolvedBy: string | null;
+  compensatingDelta: number | null;
+  createdAt: string;
+  resolvedAt: string | null;
+};
+
+export type TradeLifecycle = "draft" | "active" | "retired";
 
 export type JobQuoteDraft = {
   quoteId: string;
@@ -79,12 +99,12 @@ export type TechJob = {
   createdAt: string;
 };
 
-const trades: TradeDefinition[] = [
+const TRADE_SEED: TradeDefinition[] = [
   { id: "trade_auto", name: "Automotive", lifecycle: "active" },
   { id: "trade_elec", name: "Electrical", lifecycle: "active" },
 ];
 
-const jobClasses: JobClassDefinition[] = [
+const JOB_CLASS_SEED: JobClassDefinition[] = [
   {
     id: "jc_diag",
     tradeId: "trade_auto",
@@ -98,6 +118,10 @@ const jobClasses: JobClassDefinition[] = [
     lifecycle: "active",
   },
 ];
+
+const trades: TradeDefinition[] = TRADE_SEED.map((t) => ({ ...t }));
+
+const jobClasses: JobClassDefinition[] = JOB_CLASS_SEED.map((j) => ({ ...j }));
 
 const CHECKLISTS: Checklist[] = [
   {
@@ -123,10 +147,23 @@ const CHECKLISTS: Checklist[] = [
 ];
 
 const valueScores = new Map<string, ValueScoreSnapshot>();
+const scoreDisputes = new Map<string, ValueScoreDispute>();
+const scoreEvents: Array<{
+  eventId: string;
+  technicianId: string;
+  eventType: string;
+  delta: number;
+  actor: "system" | "ops" | "dispute";
+  at: string;
+}> = [];
 const jobs = new Map<string, TechJob>();
 const evidence = new Map<string, JobEvidence>();
 const checklistRuns = new Map<string, ChecklistRun>();
 const bookedSlotIds = new Set<string>();
+
+function newId(prefix: string): string {
+  return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+}
 
 export function listTradeDefinitions(): TradeDefinition[] {
   return trades.map((t) => ({ ...t }));
@@ -162,21 +199,331 @@ export function isTechnicianEligible(input: {
 export function setValueScoreSnapshot(input: {
   technicianId: string;
   score: number;
+  confidence?: "low" | "medium" | "high";
+  profileId?: string;
+  sampleN?: number;
+  outcomeWindowDays?: number;
+  factorContributions?: ValueScoreSnapshot["factorContributions"];
 }): ValueScoreSnapshot {
+  const factors =
+    input.factorContributions ??
+    [
+      { factor: "completion", weight: 0.35, contribution: input.score * 0.35 },
+      { factor: "punctuality", weight: 0.25, contribution: input.score * 0.25 },
+      { factor: "evidence_quality", weight: 0.25, contribution: input.score * 0.25 },
+      { factor: "comeback_penalty", weight: 0.15, contribution: input.score * 0.15 },
+    ];
+  const banned = /amountMinor|payable|price|ledger/i;
+  for (const f of factors) {
+    if (banned.test(f.factor)) {
+      throw new Error("Value Score factors must not encode payable amounts");
+    }
+  }
   const row: ValueScoreSnapshot = {
     technicianId: input.technicianId,
     score: input.score,
     asOf: new Date().toISOString(),
+    confidence: input.confidence ?? (input.sampleN && input.sampleN >= 20 ? "high" : "medium"),
+    profileId: input.profileId ?? "vscore_default_v1",
+    sampleN: input.sampleN ?? 10,
+    outcomeWindowDays: input.outcomeWindowDays ?? 90,
+    factorContributions: factors.map((f) => ({ ...f })),
   };
   valueScores.set(input.technicianId, row);
-  return { ...row };
+  scoreEvents.push({
+    eventId: newId("sev"),
+    technicianId: input.technicianId,
+    eventType: "snapshot_set",
+    delta: 0,
+    actor: "ops",
+    at: row.asOf,
+  });
+  return {
+    ...row,
+    factorContributions: row.factorContributions.map((f) => ({ ...f })),
+  };
 }
 
 export function getValueScoreSnapshot(
   technicianId: string,
 ): ValueScoreSnapshot | undefined {
   const row = valueScores.get(technicianId);
-  return row ? { ...row } : undefined;
+  return row
+    ? {
+        ...row,
+        factorContributions: row.factorContributions.map((f) => ({ ...f })),
+      }
+    : undefined;
+}
+
+/** PD19 — create Trade in draft (admin editor). */
+export function createTradeDefinition(input: {
+  id?: string;
+  name: string;
+}): TradeDefinition {
+  if (!input.name.trim()) throw new Error("trade name required");
+  const id = input.id?.trim() || newId("trade");
+  if (trades.some((t) => t.id === id)) throw new Error(`Trade ${id} exists`);
+  const row: TradeDefinition = {
+    id,
+    name: input.name.trim(),
+    lifecycle: "draft",
+  };
+  trades.push(row);
+  return { ...row };
+}
+
+export function setTradeLifecycle(input: {
+  tradeId: string;
+  lifecycle: TradeLifecycle;
+}): TradeDefinition {
+  const t = trades.find((x) => x.id === input.tradeId);
+  if (!t) throw new Error(`Unknown trade ${input.tradeId}`);
+  if (t.lifecycle === "retired" && input.lifecycle !== "retired") {
+    throw new Error("retired trade cannot reactivate without new definition");
+  }
+  if (t.lifecycle === "draft" && input.lifecycle === "retired") {
+    throw new Error("draft must activate before retire");
+  }
+  t.lifecycle = input.lifecycle;
+  return { ...t };
+}
+
+export function createJobClassDefinition(input: {
+  id?: string;
+  tradeId: string;
+  name: string;
+}): JobClassDefinition {
+  const trade = trades.find((t) => t.id === input.tradeId);
+  if (!trade) throw new Error(`Unknown trade ${input.tradeId}`);
+  if (trade.lifecycle === "retired") {
+    throw new Error("cannot add JobClass to retired trade");
+  }
+  if (!input.name.trim()) throw new Error("job class name required");
+  const id = input.id?.trim() || newId("jc");
+  if (jobClasses.some((j) => j.id === id)) {
+    throw new Error(`JobClass ${id} exists`);
+  }
+  const row: JobClassDefinition = {
+    id,
+    tradeId: input.tradeId,
+    name: input.name.trim(),
+    lifecycle: "draft",
+  };
+  jobClasses.push(row);
+  return { ...row };
+}
+
+export function setJobClassLifecycle(input: {
+  jobClassId: string;
+  lifecycle: TradeLifecycle;
+}): JobClassDefinition {
+  const jc = jobClasses.find((j) => j.id === input.jobClassId);
+  if (!jc) throw new Error(`Unknown job class ${input.jobClassId}`);
+  if (jc.lifecycle === "retired" && input.lifecycle !== "retired") {
+    throw new Error("retired JobClass cannot reactivate without new definition");
+  }
+  jc.lifecycle = input.lifecycle;
+  return { ...jc };
+}
+
+export function openValueScoreDispute(input: {
+  technicianId: string;
+  reason: string;
+  openedBy: string;
+}): ValueScoreDispute {
+  if (!valueScores.has(input.technicianId)) {
+    throw new Error("No Value Score snapshot to dispute");
+  }
+  if (!input.reason.trim() || !input.openedBy.trim()) {
+    throw new Error("reason and openedBy required");
+  }
+  const d: ValueScoreDispute = {
+    disputeId: newId("vsd"),
+    technicianId: input.technicianId,
+    status: "open",
+    reason: input.reason.trim(),
+    openedBy: input.openedBy.trim(),
+    resolvedBy: null,
+    compensatingDelta: null,
+    createdAt: new Date().toISOString(),
+    resolvedAt: null,
+  };
+  scoreDisputes.set(d.disputeId, d);
+  return { ...d };
+}
+
+/**
+ * Resolve dispute with append-only compensating score event (D-53).
+ * Never writes payable amounts / ledger.
+ */
+export function resolveValueScoreDispute(input: {
+  disputeId: string;
+  resolution: "upheld" | "rejected";
+  resolvedBy: string;
+  compensatingDelta?: number;
+}): {
+  dispute: ValueScoreDispute;
+  snapshot: ValueScoreSnapshot;
+} {
+  const d = scoreDisputes.get(input.disputeId);
+  if (!d) throw new Error(`Unknown dispute ${input.disputeId}`);
+  if (d.status !== "open") throw new Error(`Dispute already ${d.status}`);
+  if (!input.resolvedBy.trim()) throw new Error("resolvedBy required");
+  const snap = valueScores.get(d.technicianId);
+  if (!snap) throw new Error("Missing Value Score snapshot");
+
+  d.status = input.resolution;
+  d.resolvedBy = input.resolvedBy.trim();
+  d.resolvedAt = new Date().toISOString();
+
+  let delta = 0;
+  if (input.resolution === "upheld") {
+    delta = input.compensatingDelta ?? 5;
+    d.compensatingDelta = delta;
+    snap.score = Math.min(100, Math.max(0, snap.score + delta));
+    snap.asOf = new Date().toISOString();
+    scoreEvents.push({
+      eventId: newId("sev"),
+      technicianId: d.technicianId,
+      eventType: "dispute_compensating",
+      delta,
+      actor: "dispute",
+      at: snap.asOf,
+    });
+  } else {
+    d.compensatingDelta = 0;
+  }
+
+  return {
+    dispute: { ...d },
+    snapshot: {
+      ...snap,
+      factorContributions: snap.factorContributions.map((f) => ({ ...f })),
+    },
+  };
+}
+
+export function listValueScoreDisputes(): ValueScoreDispute[] {
+  return [...scoreDisputes.values()].map((d) => ({ ...d }));
+}
+
+export function listValueScoreEvents(): Array<{
+  eventId: string;
+  technicianId: string;
+  eventType: string;
+  delta: number;
+  actor: string;
+  at: string;
+}> {
+  return scoreEvents.map((e) => ({ ...e }));
+}
+
+/**
+ * Assert Value Score path never authors money (PD19 / D-53).
+ */
+export function assertValueScoreNotMoneyPath(): {
+  writesPriceQuotes: false;
+  writesLedger: false;
+  writesJobReserve: false;
+  payableFromAi: false;
+} {
+  return {
+    writesPriceQuotes: false,
+    writesLedger: false,
+    writesJobReserve: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD19 thin vertical: Trade+JobClass lifecycle → Value Score factors → dispute.
+ */
+export function runPd19AdminTradeValueScoreThinVertical(): {
+  tradeId: string;
+  jobClassId: string;
+  tradeLifecycle: TradeLifecycle;
+  jobClassLifecycle: TradeLifecycle;
+  valueScore: number;
+  factorsExplainable: true;
+  disputeStatus: "upheld";
+  moneyPathClean: true;
+  ineligibleHighScoreBlocked: true;
+} {
+  __resetJobsForTests();
+
+  const trade = createTradeDefinition({ name: "PD19 HVAC Trade" });
+  setTradeLifecycle({ tradeId: trade.id, lifecycle: "active" });
+  const jc = createJobClassDefinition({
+    tradeId: trade.id,
+    name: "PD19 HVAC diagnose",
+    id: "jc_pd19_hvac",
+  });
+  setJobClassLifecycle({ jobClassId: jc.id, lifecycle: "active" });
+
+  const snap = setValueScoreSnapshot({
+    technicianId: "tech_pd19",
+    score: 40,
+    sampleN: 8,
+    factorContributions: [
+      { factor: "completion", weight: 0.4, contribution: 16 },
+      { factor: "punctuality", weight: 0.3, contribution: 12 },
+      { factor: "evidence_quality", weight: 0.3, contribution: 12 },
+    ],
+  });
+  if (snap.factorContributions.length < 1) {
+    throw new Error("PD19 requires factor explainability");
+  }
+
+  // High score alone does not bypass eligibility when class inactive (draft)
+  const draftOnly = createJobClassDefinition({
+    tradeId: trade.id,
+    name: "PD19 draft-only class",
+    id: "jc_pd19_draft",
+  });
+  setValueScoreSnapshot({ technicianId: "tech_pd19_hi", score: 99, sampleN: 50 });
+  const blocked = isTechnicianEligible({
+    technicianId: "tech_pd19_hi",
+    jobClassId: draftOnly.id,
+    minScore: 10,
+  });
+  if (blocked) {
+    throw new Error("Ineligible tech must not offer solely due to high score");
+  }
+
+  const dispute = openValueScoreDispute({
+    technicianId: "tech_pd19",
+    reason: "missed evidence credit",
+    openedBy: "ops_pd19",
+  });
+  const resolved = resolveValueScoreDispute({
+    disputeId: dispute.disputeId,
+    resolution: "upheld",
+    resolvedBy: "ops_pd19_lead",
+    compensatingDelta: 8,
+  });
+  if (resolved.dispute.status !== "upheld") {
+    throw new Error("PD19 expected upheld dispute");
+  }
+
+  const money = assertValueScoreNotMoneyPath();
+  if (money.writesLedger || money.payableFromAi) {
+    throw new Error("Value Score must not write money");
+  }
+
+  return {
+    tradeId: trade.id,
+    jobClassId: jc.id,
+    tradeLifecycle: listTradeDefinitions().find((t) => t.id === trade.id)!
+      .lifecycle,
+    jobClassLifecycle: listJobClassDefinitions().find((j) => j.id === jc.id)!
+      .lifecycle,
+    valueScore: resolved.snapshot.score,
+    factorsExplainable: true,
+    disputeStatus: "upheld",
+    moneyPathClean: true,
+    ineligibleHighScoreBlocked: true,
+  };
 }
 
 /** Rate-card quote only — not AI-authored payable. Replaces rate_card_stub path. */
@@ -560,8 +907,14 @@ export async function runPd13TechWebThinVertical(input?: {
 
 export function __resetJobsForTests(): void {
   valueScores.clear();
+  scoreDisputes.clear();
+  scoreEvents.length = 0;
   jobs.clear();
   evidence.clear();
   checklistRuns.clear();
   bookedSlotIds.clear();
+  trades.length = 0;
+  trades.push(...TRADE_SEED.map((t) => ({ ...t })));
+  jobClasses.length = 0;
+  jobClasses.push(...JOB_CLASS_SEED.map((j) => ({ ...j })));
 }

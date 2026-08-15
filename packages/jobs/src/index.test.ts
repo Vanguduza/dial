@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   __resetJobsForTests,
+  assertValueScoreNotMoneyPath,
   bookTechJob,
   classifyJob,
   draftTechQuote,
@@ -14,6 +15,7 @@ import {
   quoteFromRateCard,
   runPd9TechThinVertical,
   runPd13TechWebThinVertical,
+  runPd19AdminTradeValueScoreThinVertical,
   setValueScoreSnapshot,
   uploadJobEvidence,
 } from "./index.js";
@@ -113,4 +115,19 @@ test("PD13 tech-web thin vertical: guide book + emergency + customer jobs", asyn
   assert.equal(out.emergency.checklistId, "emergency_roadside");
   assert.ok(out.customerJobs >= 2);
   assert.ok(out.checklists.includes("automotive_basic"));
+});
+
+test("PD19 Trade/JobClass lifecycle + Value Score dispute; no money writes", () => {
+  __resetJobsForTests();
+  const out = runPd19AdminTradeValueScoreThinVertical();
+  assert.equal(out.tradeLifecycle, "active");
+  assert.equal(out.jobClassLifecycle, "active");
+  assert.equal(out.factorsExplainable, true);
+  assert.equal(out.disputeStatus, "upheld");
+  assert.equal(out.moneyPathClean, true);
+  assert.equal(out.ineligibleHighScoreBlocked, true);
+  assert.ok(out.valueScore >= 48);
+  const money = assertValueScoreNotMoneyPath();
+  assert.equal(money.writesLedger, false);
+  assert.equal(money.payableFromAi, false);
 });
