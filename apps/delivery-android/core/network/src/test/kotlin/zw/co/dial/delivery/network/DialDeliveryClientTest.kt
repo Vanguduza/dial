@@ -119,6 +119,43 @@ class DialDeliveryClientTest {
     }
 
     @Test
+    fun pd32_cod_float_never_sends_identity() {
+        val bodies = mutableListOf<String>()
+        val transport =
+            HttpTransport { method, url, _, body, _ ->
+                if (method == "POST" && url.contains("/api/delivery/courier") && body != null) {
+                    bodies.add(body)
+                    assertTrue(!body.contains("userId"))
+                    assertTrue(!body.contains("\"role\""))
+                }
+                when {
+                    body?.contains("set_cod_float_limit") == true ->
+                        HttpResponse(200, """{"ok":true,"float":{"floatLimitUsdMinor":"5000","heldUsdMinor":"0"},"payableFromAi":false}""", emptyList())
+                    body?.contains("evaluate_cod_float") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"evaluation":{"floatLimitWarning":true,"message":"COD float limit warning","projectedHeldUsdMinor":"6500","floatLimitUsdMinor":"5000"},"payableFromAi":false}""",
+                            emptyList(),
+                        )
+                    body?.contains("cod_collect_attempt") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"attempt":{"status":"recorded","floatLimitWarning":true,"acknowledgedWarning":true},"payableFromAi":false}""",
+                            emptyList(),
+                        )
+                    else -> HttpResponse(200, """{"ok":true}""", emptyList())
+                }
+            }
+        val client = DialDeliveryClient("http://localhost:3000", MemoryCookieStore(), transport)
+        client.setCodFloatLimit(5000)
+        val eval = client.evaluateCodFloat(6500)
+        assertTrue(eval.floatLimitWarning)
+        val attempt = client.codCollectAttempt("dj_1", 6500, acknowledgedWarning = true)
+        assertEquals("recorded", attempt.status)
+        assertTrue(bodies.all { !it.contains("userId") })
+    }
+
+    @Test
     fun reject_invalid_availability() {
         val client = DialDeliveryClient("http://localhost:3000")
         assertFailsWith<IllegalArgumentException> {

@@ -429,6 +429,8 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-445 | **PD30 Technician mock-location + camera** — geofence check-in; overlay queue | `done` | Pack §9.7 / 2B-29; Compose |
 | ENH-446 | **Product-depth band PD31–PD32** authored (BT print → COD float) | `done` | Pack §9 gap audit after PD30; eng next ≠ S99 |
 | ENH-447 | **PD31 Technician Bluetooth ESC/POS print** — ops ticket; not ZIMRA SoR | `done` | Pack §9.7 / D-46 / D-40a; Compose |
+| ENH-448 | **PD32 Delivery COD float-limit warning** — warn + ack gate; USD minor | `done` | Pack §9.8 / D-7; Compose |
+| ENH-449 | **Pack §9 residual band closed** after PD32 — polish/expand next | `done` | eng next ≠ S99; no OpenAPI invent |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

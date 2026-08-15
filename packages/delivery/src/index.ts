@@ -18,6 +18,12 @@ import {
   reoptimiseRemainingStops,
   refreshEtaBanner,
 } from "./navigateStops.js";
+import {
+  __resetCodFloatForTests,
+  evaluateCodCollect,
+  recordCodCollectAttempt,
+  setCourierCodFloatLimit,
+} from "./codFloat.js";
 
 export {
   activateOfflinePack,
@@ -42,6 +48,18 @@ export {
   type DeliveryNavigateStop,
   type EtaBanner,
 } from "./navigateStops.js";
+
+export {
+  DEFAULT_COD_FLOAT_LIMIT_USD_MINOR,
+  evaluateCodCollect,
+  getCourierCodFloat,
+  listCodCollectAttempts,
+  recordCodCollectAttempt,
+  setCourierCodFloatLimit,
+  type CodCollectAttempt,
+  type CodCollectEvaluation,
+  type CourierCodFloatState,
+} from "./codFloat.js";
 
 export type CourierId = string;
 
@@ -736,6 +754,76 @@ export async function runPd29EtaStopsVroomThinVertical(input?: {
   };
 }
 
+/**
+ * PD32 thin vertical: COD within float → no warn; over float → warn blocked until ack.
+ */
+export function runPd32CodFloatLimitThinVertical(input?: {
+  courierId?: string;
+}): {
+  withinLimitNoWarn: true;
+  overLimitWarned: true;
+  blockedWithoutAck: true;
+  recordedWithAck: true;
+  payableFromAi: false;
+  currency: "USD";
+} {
+  const courierId = input?.courierId ?? "cour_pd32";
+  __resetDeliveryForTests();
+  setCourierCodFloatLimit(courierId, 50_00n);
+
+  const within = evaluateCodCollect({
+    courierId,
+    collectUsdMinor: 25_00n,
+  });
+  if (within.floatLimitWarning || within.payableFromAi) {
+    throw new Error("PD32 $25 collect under $50 float must not warn");
+  }
+  const ok = recordCodCollectAttempt({
+    jobId: "dj_pd32_ok",
+    courierId,
+    collectUsdMinor: 25_00n,
+  });
+  if (ok.status !== "recorded") {
+    throw new Error("PD32 within-limit collect must record");
+  }
+
+  const over = evaluateCodCollect({
+    courierId,
+    collectUsdMinor: 40_00n,
+  });
+  // held 25 + 40 = 65 > 50
+  if (!over.floatLimitWarning) {
+    throw new Error("PD32 over-float collect must warn");
+  }
+  const blocked = recordCodCollectAttempt({
+    jobId: "dj_pd32_block",
+    courierId,
+    collectUsdMinor: 40_00n,
+    acknowledgedWarning: false,
+  });
+  if (blocked.status !== "blocked_unacked_warning") {
+    throw new Error("PD32 unacked warning must block");
+  }
+  const acked = recordCodCollectAttempt({
+    jobId: "dj_pd32_ack",
+    courierId,
+    collectUsdMinor: 40_00n,
+    acknowledgedWarning: true,
+  });
+  if (acked.status !== "recorded" || !acked.floatLimitWarning) {
+    throw new Error("PD32 acked warning must record with warn flag");
+  }
+
+  return {
+    withinLimitNoWarn: true,
+    overLimitWarned: true,
+    blockedWithoutAck: true,
+    recordedWithAck: true,
+    payableFromAi: false,
+    currency: "USD",
+  };
+}
+
 export function __resetDeliveryForTests(): void {
   jobs.clear();
   offers.clear();
@@ -747,4 +835,5 @@ export function __resetDeliveryForTests(): void {
   courierLocations.clear();
   __resetOfflinePacksForTests();
   __resetNavigateStopsForTests();
+  __resetCodFloatForTests();
 }

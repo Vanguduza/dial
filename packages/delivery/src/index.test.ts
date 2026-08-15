@@ -168,3 +168,14 @@ test("PD29 ETA banner + navigate stops + VROOM re-optimise", async () => {
   assert.equal(out.googleMapsSor, false);
   assert.equal(out.payableFromAi, false);
 });
+
+test("PD32 COD float-limit warning + ack gate", async () => {
+  const { runPd32CodFloatLimitThinVertical } = await import("./index.js");
+  const out = runPd32CodFloatLimitThinVertical({ courierId: "cour_pd32_t" });
+  assert.equal(out.withinLimitNoWarn, true);
+  assert.equal(out.overLimitWarned, true);
+  assert.equal(out.blockedWithoutAck, true);
+  assert.equal(out.recordedWithAck, true);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.currency, "USD");
+});

@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD32 Delivery COD float-limit warning** — USD `amountMinor` float gate; warn when projected held exceeds limit; block until courier ack; Compose + `/api/delivery/courier`; Pack §9 residual band closed (eng next ≠ S99).
 - **PD31 Technician Bluetooth ESC/POS print hooks** — pair thermal printer + print job ticket (D-46 pattern); ops hook only — not ZIMRA fiscal SoR (D-40a virtual FDMS); Compose + `/api/tech/technician`; eng next **PD32**.
 - **PD30 Technician mock-location + camera evidence** — mock GPS check-in blocked for punctuality (2B-29); genuine geofence accept; device camera + checklist overlay; offline evidence queue flush; Compose + `/api/tech/technician`; Pack §9 audit authored **PD31–PD32**.
 - **PD29 Delivery ETA + navigate stops / VROOM** — OSRM ETA banner; multi-stop navigate list; courier request re-optimise remaining via VROOM (D-44 MapLibre/OSRM/VROOM SoR); Compose + `/api/delivery/courier` actions; eng next **PD30**.

@@ -29,6 +29,21 @@ data class CourierSnapshot(
 data class CodResult(
     val reconciled: Boolean,
     val amountUsdMinor: Long?,
+    val floatLimitWarning: Boolean = false,
+    val floatMessage: String? = null,
+)
+
+data class CodFloatEvalDto(
+    val floatLimitWarning: Boolean,
+    val message: String,
+    val projectedHeldUsdMinor: Long,
+    val floatLimitUsdMinor: Long,
+)
+
+data class CodCollectAttemptDto(
+    val status: String,
+    val floatLimitWarning: Boolean,
+    val acknowledgedWarning: Boolean,
 )
 
 data class OfflinePackDto(
@@ -220,7 +235,40 @@ class DialDeliveryClient(
                 ?.groupValues
                 ?.get(1)
                 ?.toLongOrNull()
-        return CodResult(reconciled, amount)
+        val warn =
+            body.contains("\"floatLimitWarning\":true") ||
+                body.contains("\"floatLimitWarning\": true")
+        val msg =
+            Regex(""""message"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1)
+        return CodResult(reconciled, amount, warn, msg)
+    }
+
+    fun setCodFloatLimit(floatLimitUsdMinor: Long) {
+        postAction(
+            """{"action":"set_cod_float_limit","floatLimitUsdMinor":${jsonString(floatLimitUsdMinor.toString())}}""",
+        )
+    }
+
+    fun evaluateCodFloat(collectUsdMinor: Long): CodFloatEvalDto {
+        val body =
+            postAction(
+                """{"action":"evaluate_cod_float","collectUsdMinor":${jsonString(collectUsdMinor.toString())}}""",
+            )
+        return parseCodFloatEval(body)
+            ?: throw DialDeliveryException("evaluate_cod_float missing")
+    }
+
+    fun codCollectAttempt(
+        jobId: String,
+        collectUsdMinor: Long,
+        acknowledgedWarning: Boolean,
+    ): CodCollectAttemptDto {
+        val body =
+            postAction(
+                """{"action":"cod_collect_attempt","jobId":${jsonString(jobId)},"collectUsdMinor":${jsonString(collectUsdMinor.toString())},"acknowledgedWarning":$acknowledgedWarning}""",
+            )
+        return parseCodAttempt(body)
+            ?: throw DialDeliveryException("cod_collect_attempt missing")
     }
 
     /** PD28 — list MapLibre offline tile packs (Harare/Bulawayo). */
@@ -437,5 +485,52 @@ internal fun parseReoptimise(body: String): ReoptimiseResultDto? {
         mapSor =
             Regex(""""mapSor"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1)
                 ?: "maplibre",
+    )
+}
+
+internal fun parseCodFloatEval(body: String): CodFloatEvalDto? {
+    val chunk =
+        Regex(""""evaluation"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun s(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    fun b(n: String) =
+        Regex(""""$n"\s*:\s*(true|false)""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1) == "true"
+    fun l(n: String) =
+        Regex(""""$n"\s*:\s*"?(\d+)"?""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1)
+            ?.toLongOrNull() ?: 0L
+    return CodFloatEvalDto(
+        floatLimitWarning = b("floatLimitWarning"),
+        message = s("message"),
+        projectedHeldUsdMinor = l("projectedHeldUsdMinor"),
+        floatLimitUsdMinor = l("floatLimitUsdMinor"),
+    )
+}
+
+internal fun parseCodAttempt(body: String): CodCollectAttemptDto? {
+    val chunk =
+        Regex(""""attempt"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun s(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    fun b(n: String) =
+        Regex(""""$n"\s*:\s*(true|false)""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1) == "true"
+    return CodCollectAttemptDto(
+        status = s("status"),
+        floatLimitWarning = b("floatLimitWarning"),
+        acknowledgedWarning = b("acknowledgedWarning"),
     )
 }

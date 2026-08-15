@@ -1,5 +1,6 @@
 /**
  * PD7 courier delivery API — wraps @dial/delivery SoR (D-45).
+ * PD32: COD float-limit warning on collect (Pack §9.8).
  * Session SoR; never body userId/role (D-47). MapLibre locations via postCourierLocation.
  */
 import { NextResponse } from "next/server";
@@ -8,7 +9,9 @@ import {
   activateOfflinePack,
   capturePod,
   createDeliveryJob,
+  evaluateCodCollect,
   getCourierAvailability,
+  getCourierCodFloat,
   getDeliveryJob,
   getEtaBanner,
   getNavigateRun,
@@ -22,10 +25,12 @@ import {
   openNavigateRun,
   postCourierLocation,
   reconcileCodAfterPod,
+  recordCodCollectAttempt,
   refreshEtaBanner,
   rejectOffer,
   reoptimiseRemainingStops,
   setCourierAvailabilityStatus,
+  setCourierCodFloatLimit,
   startDeliveryDispatchWorkflow,
   startTransit,
   timeoutOffer,
@@ -293,12 +298,76 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, job: serializeJob(job) });
       }
       case "reconcile_cod": {
-        const cod = reconcileCodAfterPod(String(body.jobId ?? ""));
+        const jobId = String(body.jobId ?? "");
+        const job = getDeliveryJob(jobId);
+        if (!job || job.assignedCourierId !== courierId) {
+          return NextResponse.json({ error: "Job not assigned to courier" }, { status: 403 });
+        }
+        const cod = reconcileCodAfterPod(jobId);
+        const collectMinor = cod.amountUsd?.amountMinor ?? 0n;
+        const floatEval =
+          collectMinor > 0n
+            ? evaluateCodCollect({
+                courierId,
+                collectUsdMinor: collectMinor,
+              })
+            : null;
         return NextResponse.json({
           ok: true,
           reconciled: cod.reconciled,
           amountUsdMinor: cod.amountUsd?.amountMinor.toString(),
           currency: cod.amountUsd?.currency ?? "USD",
+          float: floatEval,
+          note: "COD USD minor — float warning is Pack §9.8 ops gate",
+        });
+      }
+      case "set_cod_float_limit": {
+        const limit = BigInt(String(body.floatLimitUsdMinor ?? "5000"));
+        const state = setCourierCodFloatLimit(courierId, limit);
+        return NextResponse.json({
+          ok: true,
+          float: {
+            courierId: state.courierId,
+            floatLimitUsdMinor: state.floatLimitUsdMinor.toString(),
+            heldUsdMinor: state.heldUsdMinor.toString(),
+          },
+          payableFromAi: false,
+        });
+      }
+      case "evaluate_cod_float": {
+        const collect = BigInt(String(body.collectUsdMinor ?? "0"));
+        const evaluation = evaluateCodCollect({
+          courierId,
+          collectUsdMinor: collect,
+        });
+        return NextResponse.json({ ok: true, evaluation, payableFromAi: false });
+      }
+      case "cod_collect_attempt": {
+        const jobId = String(body.jobId ?? "");
+        const job = getDeliveryJob(jobId);
+        if (!job || job.assignedCourierId !== courierId) {
+          return NextResponse.json({ error: "Job not assigned to courier" }, { status: 403 });
+        }
+        const collect =
+          body.collectUsdMinor != null
+            ? BigInt(String(body.collectUsdMinor))
+            : (job.codAmountUsd?.amountMinor ?? 0n);
+        const attempt = recordCodCollectAttempt({
+          jobId,
+          courierId,
+          collectUsdMinor: collect,
+          acknowledgedWarning: Boolean(body.acknowledgedWarning),
+        });
+        const float = getCourierCodFloat(courierId);
+        return NextResponse.json({
+          ok: attempt.status === "recorded",
+          attempt,
+          float: {
+            courierId: float.courierId,
+            floatLimitUsdMinor: float.floatLimitUsdMinor.toString(),
+            heldUsdMinor: float.heldUsdMinor.toString(),
+          },
+          payableFromAi: false,
         });
       }
       default:

@@ -100,7 +100,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 137 | `PD31` | **Technician Bluetooth print hooks** — Pack §9.7 residual | workplan | Thermal print receipt/job ticket | `PD32` |
 | 138 | `PD32` | **Delivery COD float-limit warning** — Pack §9.8 residual | workplan | optional COD float warn | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD31 is **PD32**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD32 = expand/polish (Pack §9 closed) — **not S99**. Product ≠ finished at S99.
 
 
 ---
@@ -457,18 +457,23 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd31BluetoothPrintThinVertical`; `pd31BluetoothPrint.test.ts`; Compose pair/print |
 | Green → | **PD32** Delivery COD float-limit warning |
 
-### Pack §9 gap audit (after PD31)
+### PD32 — Delivery COD float-limit warning (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | set float limit → under-limit collect OK → over-limit warn blocks until ack → recorded with warn flag |
+| Evidence | `runPd32CodFloatLimitThinVertical`; `pd32CodFloatLimit.test.ts`; Compose COD float check |
+| Green → | Pack §9 residual band closed — expand/polish (not S99) |
+
+### Pack §9 gap audit (after PD32)
 
 | § | Gap remaining | Stage |
 | --- | --- | --- |
-| 9.8 | COD float-limit warning on collect | **PD32** |
-| 9.1–9.7 | Primary covered PD1–PD31 | defer polish — founder may prioritize |
+| 9.1–9.8 | Primary residuals covered PD1–PD32 | **closed** — polish/expand by founder priority |
+| — | Do not invent OpenAPI; S99 remains human launch-only | — |
 
 Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
-
-### PD32 — Delivery COD float-limit warning (NEXT)
-
-Pack §9.8 residual — COD float-limit warning on collect.
 
 ### S10 — E2a (historical)
 

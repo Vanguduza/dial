@@ -238,13 +238,21 @@ fun DeliveryApp(baseUrl: String) {
                     run {
                         client.capturePod(jid)
                         val cod = client.reconcileCod(jid)
+                        client.setCodFloatLimit(5000)
+                        val eval = client.evaluateCodFloat(cod.amountUsdMinor ?: 2500)
+                        val attempt =
+                            client.codCollectAttempt(
+                                jid,
+                                cod.amountUsdMinor ?: 2500,
+                                acknowledgedWarning = eval.floatLimitWarning,
+                            )
                         status =
-                            "POD captured · COD USD ${(cod.amountUsdMinor ?: 0) / 100.0} reconciled=${cod.reconciled}"
+                            "POD+COD ${(cod.amountUsdMinor ?: 0) / 100.0} · floatWarn=${eval.floatLimitWarning} · attempt=${attempt.status}"
                     }
                 },
                 enabled = jobId != null,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Capture POD + COD") }
+            ) { Text("Capture POD + COD (float check)") }
         }
 
         if (loading) {
@@ -253,7 +261,7 @@ fun DeliveryApp(baseUrl: String) {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         Spacer(Modifier.height(8.dp))
         Text(
-            "PD29 · OSRM ETA · navigate stops · VROOM re-optimise · not Google",
+            "PD32 · COD float-limit warn · OSRM/VROOM · MapLibre · not Google",
             style = MaterialTheme.typography.labelSmall,
         )
     }
