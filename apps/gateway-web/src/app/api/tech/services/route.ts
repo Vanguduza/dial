@@ -5,11 +5,12 @@
 import { NextResponse } from "next/server";
 import {
   bookTechJob,
+  createJobIntake,
   draftTechQuote,
+  getCustomerJobStatusDetail,
   getTechJob,
   listBookingSlots,
   listChecklists,
-  listEvidenceForJob,
   listJobsForCustomer,
 } from "@dial/jobs";
 import {
@@ -40,6 +41,8 @@ function serializeJob(j: NonNullable<ReturnType<typeof getTechJob>>) {
     draftAmountUsdMinor: j.draftAmountUsdMinor.toString(),
     currency: j.currency,
     createdAt: j.createdAt,
+    ...(j.intakeSummary != null ? { intakeSummary: j.intakeSummary } : {}),
+    ...(j.intakeUrgency != null ? { intakeUrgency: j.intakeUrgency } : {}),
     draftOnly: true,
     payableFromAi: false as const,
   };
@@ -96,13 +99,19 @@ export async function GET(req: Request) {
     if (job.customerId !== customerId) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
+    const detail = getCustomerJobStatusDetail(jobId);
     return NextResponse.json({
-      job: serializeJob(job),
-      evidence: listEvidenceForJob(jobId).map((e) => ({
+      job: serializeJob(detail.job),
+      statusLabel: detail.statusLabel,
+      evidenceCount: detail.evidenceCount,
+      evidence: detail.evidence.map((e) => ({
         evidenceId: e.evidenceId,
         kind: e.kind,
         createdAt: e.createdAt,
       })),
+      timeline: detail.timeline,
+      payableFromAi: false,
+      note: "PD101 — customer job status + evidence deepen (Pack §9.3)",
     });
   }
 
@@ -135,6 +144,24 @@ export async function POST(req: Request) {
   const action = String(body.action ?? "");
 
   try {
+    if (action === "create_intake") {
+      const job = createJobIntake({
+        customerId,
+        customerText: String(body.customerText ?? body.text ?? ""),
+        ...(body.summary != null ? { summary: String(body.summary) } : {}),
+        ...(body.urgency === "normal" || body.urgency === "emergency"
+          ? { urgency: body.urgency }
+          : {}),
+      });
+      return NextResponse.json({
+        ok: true,
+        job: serializeJob(job),
+        needsHumanQuote: true,
+        payableFromAi: false,
+        note: "PD100 — Pack §10 create intake (pre-book); draft quote only",
+      });
+    }
+
     if (action === "book") {
       const emergency = Boolean(body.emergency);
       const slotId = body.slotId != null ? String(body.slotId) : null;

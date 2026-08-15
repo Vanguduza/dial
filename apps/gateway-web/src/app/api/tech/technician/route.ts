@@ -26,6 +26,8 @@ import {
   listJobsForTechnician,
   listThermalPrinters,
   listThermalPrintJobs,
+  listValueScoreDisputes,
+  openValueScoreDispute,
   pairThermalPrinter,
   printJobTicket,
   resolveChecklistBySymptom,
@@ -119,10 +121,14 @@ export async function GET(req: Request) {
         sampleN: 12,
       });
     }
+    const disputes = listValueScoreDisputes().filter(
+      (d) => d.technicianId === technicianId,
+    );
     return NextResponse.json({
       technicianId,
       valueScore: snap,
-      note: "D-53 Value Score explainability — never payable amounts",
+      disputes,
+      note: "D-53 Value Score explainability — never payable amounts; PD102 self-serve dispute",
       payableFromAi: false,
     });
   }
@@ -555,6 +561,29 @@ export async function POST(req: Request) {
           credentials: listTechnicianCredentials(technicianId),
           payableFromAi: false,
           note: "PD98 — credential gates matching eligibility",
+        });
+      }
+      case "dispute_value_score": {
+        if (!getValueScoreSnapshot(technicianId)) {
+          setValueScoreSnapshot({
+            technicianId,
+            score: 70,
+            sampleN: 12,
+          });
+        }
+        const dispute = openValueScoreDispute({
+          technicianId,
+          reason: String(body.reason ?? ""),
+          openedBy: technicianId,
+        });
+        return NextResponse.json({
+          ok: true,
+          dispute,
+          disputes: listValueScoreDisputes().filter(
+            (d) => d.technicianId === technicianId,
+          ),
+          payableFromAi: false,
+          note: "PD102 — tech self-serve Value Score dispute (not money path)",
         });
       }
       default:

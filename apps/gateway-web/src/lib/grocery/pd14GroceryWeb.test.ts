@@ -105,7 +105,11 @@ test("PD14 APIs: cart → slot → checkout → track; B2B informal reject", asy
   const pay = await checkoutPost(
     new Request("http://localhost/api/grocery/checkout", {
       method: "POST",
-      headers: { "content-type": "application/json", cookie },
+      headers: {
+        "content-type": "application/json",
+        cookie,
+        "Idempotency-Key": "pd14-grocery-cod-1",
+      },
       body: JSON.stringify({ cartId: addJson.cartId, choice: "cod" }),
     }),
   );
@@ -137,7 +141,10 @@ test("PD14 APIs: cart → slot → checkout → track; B2B informal reject", asy
   const noSlot = await checkoutPost(
     new Request("http://localhost/api/grocery/checkout", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "Idempotency-Key": "pd14-grocery-noslot-1",
+      },
       body: JSON.stringify({ cartId: c.id, choice: "ecocash" }),
     }),
   );

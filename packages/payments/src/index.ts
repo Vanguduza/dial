@@ -1349,6 +1349,44 @@ export async function runPd97IdempotencyKeyThinVertical(): Promise<{
 }
 
 /**
+ * PD99 thin vertical: grocery pay requires Idempotency-Key (parity with PD97 spare).
+ */
+export async function runPd99GroceryIdempotencyKeyThinVertical(): Promise<{
+  missingRejected: true;
+  groceryKeyAccepted: true;
+  payableFromAi: false;
+}> {
+  __resetPaymentsForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "pd99" });
+  let missingRejected = false;
+  try {
+    requireIdempotencyKey(new Headers());
+  } catch (e) {
+    missingRejected =
+      e instanceof Error && e.message.includes("Idempotency-Key");
+  }
+  if (!missingRejected) throw new Error("PD99 expected missing key reject");
+
+  const key = requireIdempotencyKey(
+    new Headers({ "Idempotency-Key": "pd99-grocery-1" }),
+  );
+  const pay = await createCheckoutPayment({
+    choice: "cod",
+    orderId: "gord_pd99",
+    amountUsdMinor: 4_50n,
+    idempotencyKey: key,
+  });
+  if (!pay.intent && !pay.codOrder) {
+    throw new Error("PD99 expected checkout with grocery idempotency key");
+  }
+  return {
+    missingRejected: true,
+    groceryKeyAccepted: true,
+    payableFromAi: false,
+  };
+}
+
+/**
  * FLOW_SPARE_CHECKOUT pay step — required EcoCash | COD buttons only (D-57).
  * Not free-text method selection.
  */

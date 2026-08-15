@@ -21,7 +21,10 @@ export function GroceryCheckoutForm({ cartId }: { cartId: string }) {
     try {
       const res = await fetch("/api/grocery/checkout", {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+          "Idempotency-Key": `web-grocery-${choice}-${cartId}-${Date.now()}`,
+        },
         body: JSON.stringify({ cartId, choice }),
       });
       const json = (await res.json()) as {

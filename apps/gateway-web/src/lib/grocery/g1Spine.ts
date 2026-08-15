@@ -54,6 +54,8 @@ export async function runG1GroceryThinVertical(input: {
   buyerSegment?: SearchSessionRole;
   payChoice: CheckoutPayChoice;
   deliveryTo?: string;
+  /** PD99 — Pack §10 Idempotency-Key (required from HTTP; spine allows fixture default). */
+  idempotencyKey?: string;
 }): Promise<G1ThinResult> {
   const buyerSegment = input.buyerSegment ?? "b2c";
   let cartId = input.cartId;
@@ -106,7 +108,8 @@ export async function runG1GroceryThinVertical(input: {
     choice: input.payChoice,
     orderId,
     amountUsdMinor: cart.total.amountMinor,
-    idempotencyKey: `g1-${input.payChoice}-${cart.id}`,
+    idempotencyKey:
+      input.idempotencyKey ?? `g1-${input.payChoice}-${cart.id}`,
   });
 
   let journalId: string | undefined;

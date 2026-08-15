@@ -7,7 +7,7 @@ import {
   getGroceryCart,
   placeGroceryOrder,
 } from "@dial/catalogue";
-import { getActiveFxRate, setDailyZigRate, usdToZig } from "@dial/payments";
+import { getActiveFxRate, requireIdempotencyKey, setDailyZigRate, usdToZig } from "@dial/payments";
 import { runG1GroceryThinVertical } from "../../../../lib/grocery/g1Spine";
 import {
   getSessionFromToken,
@@ -55,6 +55,16 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  let idempotencyKey: string;
+  try {
+    idempotencyKey = requireIdempotencyKey(req.headers);
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Idempotency-Key required" },
+      { status: 400 },
+    );
+  }
+
   const contentType = req.headers.get("content-type") ?? "";
   let cartId = cartIdFromCookie(req);
   let choice: "ecocash" | "cod" = "ecocash";
@@ -114,6 +124,7 @@ export async function POST(req: Request) {
       ...(offerId && !cartId ? { offerId } : {}),
       payChoice: choice,
       buyerSegment,
+      idempotencyKey,
     });
 
     // Legacy G1 form buy without cart slot — allow for G1 compat when only offerId.
@@ -148,7 +159,9 @@ export async function POST(req: Request) {
         slotId: cart.slotId,
         zigOnlyAtCheckout: true,
         imttOnCheckoutLines: false,
-        note: "IMTT not on checkout lines (D-60); liquor blocked; PD14 slot+track",
+        idempotencyKey,
+        payableFromAi: false,
+        note: "IMTT not on checkout lines (D-60); liquor blocked; PD14 slot+track; PD99 Idempotency-Key",
       });
     }
 
@@ -168,7 +181,9 @@ export async function POST(req: Request) {
       currency: "USD",
       cartTotalUsdMinor: result.cart.total.amountMinor.toString(),
       imttOnCheckoutLines: false,
-      note: "IMTT not on checkout lines (D-60); liquor blocked",
+      idempotencyKey,
+      payableFromAi: false,
+      note: "IMTT not on checkout lines (D-60); liquor blocked; PD99 Idempotency-Key",
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "grocery checkout failed";

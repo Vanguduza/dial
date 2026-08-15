@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD102 Tech Value Score dispute** — technician self-serve `dispute_value_score`; not money path (Pack §9.5 / D-53).
+- **PD101 Customer job status deepen** — timeline + evidence on `view=job` / TechJobDetail (Pack §9.3).
+- **PD100 Job create intake** — `createJobIntake` pre-book; `action=create_intake` (Pack §10).
+- **PD99 Grocery Idempotency-Key** — required on grocery checkout (parity PD97 spare); **PD99 ≠ S99**.
 - **PD98 Technician credentials** — verified trade_licence gates matching eligibility (Pack technicians.credentials).
 - **PD97 Idempotency-Key on pay** — required header on spare checkout; same key replays intent (Pack §10).
 - **PD96 Promo draft → checkout** — validate/apply draft echoed at pay; not payable (D-42).

@@ -1224,15 +1224,52 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | --- | --- |
 | Thin path | trade_licence verified gates `isTechnicianEligible` |
 | Evidence | `runPd98TechnicianCredentialsThinVertical`; tech API |
-| Green → | eng-safe Pack gap ≠ S99 |
+| Green → | **PD99** grocery Idempotency-Key |
 
-### Pack / product gap audit (after PD98)
+### Pack / product gap audit (after PD98 → PD99–PD102)
 
 | Gap | Stage |
 | --- | --- |
+| Grocery pay Idempotency-Key parity | **PD99** |
+| Job create intake (Pack §10) | **PD100** |
+| Customer job status + evidence | **PD101** |
+| Tech self-serve Value Score dispute | **PD102** |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 | Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD99 — Grocery Idempotency-Key (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `requireIdempotencyKey` on `/api/grocery/checkout`; form sends header |
+| Evidence | `runPd99GroceryIdempotencyKeyThinVertical`; `pd99Pd102Ops` |
+| Note | **PD99 ≠ S99** — product-depth only |
+| Green → | **PD100** create intake |
+
+### PD100 — Job create intake (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `createJobIntake` → status `intake`; `action=create_intake` |
+| Evidence | `runPd100JobCreateIntakeThinVertical`; tech services API |
+| Green → | **PD101** job status deepen |
+
+### PD101 — Customer job status deepen (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `getCustomerJobStatusDetail` + timeline/evidence on `view=job` |
+| Evidence | `runPd101CustomerJobStatusThinVertical`; TechJobDetail UI |
+| Green → | **PD102** tech VS dispute |
+
+### PD102 — Tech Value Score dispute (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `dispute_value_score` on tech API; openedBy = session tech |
+| Evidence | `runPd102TechValueScoreDisputeThinVertical`; not money path |
+| Green → | eng-safe Pack gap ≠ S99 (**PD103+**) |
 
 ### S10 — E2a (historical)
 

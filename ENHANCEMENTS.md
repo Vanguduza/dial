@@ -490,6 +490,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-506 | **PD96 Promo draft → checkout** | `done` | Pack §10; D-42 |
 | ENH-507 | **PD97 Idempotency-Key on pay** | `done` | Pack §10 |
 | ENH-508 | **PD98 Technician credentials** | `done` | Pack technicians.credentials |
+| ENH-509 | **PD99 Grocery Idempotency-Key** | `done` | Pack §10; PD99 ≠ S99 |
+| ENH-510 | **PD100 Job create intake** | `done` | Pack §10 pre-book |
+| ENH-511 | **PD101 Customer job status deepen** | `done` | Pack §9.3 |
+| ENH-512 | **PD102 Tech Value Score dispute** | `done` | Pack §9.5 / D-53 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

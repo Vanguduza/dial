@@ -237,6 +237,34 @@ test("PD98 technician credentials thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD100 job create intake thin vertical", async () => {
+  const { runPd100JobCreateIntakeThinVertical } = await import("./index.js");
+  const out = runPd100JobCreateIntakeThinVertical();
+  assert.equal(out.status, "intake");
+  assert.equal(out.needsHumanQuote, true);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.jobId);
+});
+
+test("PD101 customer job status thin vertical", async () => {
+  const { runPd101CustomerJobStatusThinVertical } = await import("./index.js");
+  const out = runPd101CustomerJobStatusThinVertical();
+  assert.ok(out.statusLabel);
+  assert.ok(out.evidenceCount >= 1);
+  assert.ok(out.timelineLen >= 2);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD102 tech Value Score dispute thin vertical", async () => {
+  const { runPd102TechValueScoreDisputeThinVertical } = await import("./index.js");
+  const out = runPd102TechValueScoreDisputeThinVertical();
+  assert.equal(out.disputeOpened, true);
+  assert.equal(out.openedBySelf, true);
+  assert.equal(out.moneyPathClean, true);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.disputeId);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

@@ -276,6 +276,14 @@ test("PD97 Idempotency-Key thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD99 grocery Idempotency-Key thin vertical", async () => {
+  const { runPd99GroceryIdempotencyKeyThinVertical } = await import("./index.js");
+  const out = await runPd99GroceryIdempotencyKeyThinVertical();
+  assert.equal(out.missingRejected, true);
+  assert.equal(out.groceryKeyAccepted, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD57 Daily ZiG four-eyes thin vertical", () => {
   const out = runPd57DailyZigFourEyesThinVertical();
   assert.equal(out.fourEyesEnforced, true);

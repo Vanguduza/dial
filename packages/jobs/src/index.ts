@@ -136,13 +136,16 @@ export type TechJob = {
   customerId: string;
   technicianId: string | null;
   jobClassId: string;
-  status: "booked" | "assigned" | "in_progress" | "completed";
+  status: "intake" | "booked" | "assigned" | "in_progress" | "completed";
   slotId: string | null;
   emergency: boolean;
   quoteId: string;
   draftAmountUsdMinor: bigint;
   currency: "USD";
   createdAt: string;
+  /** PD100 — intake summary (assessment text; never payable). */
+  intakeSummary?: string;
+  intakeUrgency?: "normal" | "emergency";
 };
 
 /** PD90 — Pack technicians.availability (not delivery courier availability). */
@@ -1016,6 +1019,197 @@ export function bookTechJob(input: {
   };
   jobs.set(job.id, job);
   return { ...job };
+}
+
+/**
+ * PD100 — Pack §10 create intake (pre-book). Assessment fields only; AI never writes payable.
+ */
+export function createJobIntake(input: {
+  customerId: string;
+  customerText: string;
+  summary?: string;
+  urgency?: "normal" | "emergency";
+}): TechJob {
+  if (!input.customerId.trim()) throw new Error("customerId required");
+  const text = input.customerText.trim();
+  if (!text) throw new Error("customerText required");
+  const classified = classifyJob({ text });
+  const urgency =
+    input.urgency ??
+    (classified.jobClassId === "jc_roadside" ||
+    /battery|stranded|emergency|tow|highway/i.test(text)
+      ? "emergency"
+      : "normal");
+  const emergency = urgency === "emergency";
+  const quote = quoteFromRateCard(classified.jobClassId, { emergency });
+  const job: TechJob = {
+    id: `job_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    customerId: input.customerId.trim(),
+    technicianId: null,
+    jobClassId: classified.jobClassId,
+    status: "intake",
+    slotId: null,
+    emergency,
+    quoteId: quote.quoteId,
+    draftAmountUsdMinor: quote.draftAmountUsdMinor,
+    currency: "USD",
+    createdAt: new Date().toISOString(),
+    intakeSummary: (input.summary ?? text).slice(0, 500),
+    intakeUrgency: urgency,
+  };
+  jobs.set(job.id, job);
+  return { ...job };
+}
+
+/**
+ * PD100 thin vertical: create intake → status intake; no payable from AI.
+ */
+export function runPd100JobCreateIntakeThinVertical(): {
+  status: "intake";
+  needsHumanQuote: true;
+  payableFromAi: false;
+  jobId: string;
+} {
+  __resetJobsForTests();
+  const job = createJobIntake({
+    customerId: "cust_pd100",
+    customerText: "engine rattles on cold start",
+  });
+  if (job.status !== "intake") throw new Error("PD100 expected intake status");
+  if (!job.intakeSummary) throw new Error("PD100 expected intake summary");
+  return {
+    status: "intake",
+    needsHumanQuote: true,
+    payableFromAi: false,
+    jobId: job.id,
+  };
+}
+
+/**
+ * PD101 — customer job status + evidence deepen (Pack §9.3).
+ */
+export function getCustomerJobStatusDetail(jobId: string): {
+  job: TechJob;
+  evidenceCount: number;
+  evidence: JobEvidence[];
+  timeline: Array<{ at: string; event: string }>;
+  statusLabel: string;
+  payableFromAi: false;
+} {
+  const job = getTechJob(jobId);
+  if (!job) throw new Error(`Unknown job ${jobId}`);
+  const evidenceList = listEvidenceForJob(jobId);
+  const timeline: Array<{ at: string; event: string }> = [
+    { at: job.createdAt, event: job.status === "intake" ? "intake_created" : "job_created" },
+  ];
+  if (job.status !== "intake") {
+    timeline.push({ at: job.createdAt, event: `status_${job.status}` });
+  }
+  for (const e of evidenceList) {
+    timeline.push({ at: e.createdAt, event: `evidence_${e.kind}` });
+  }
+  const statusLabel =
+    job.status === "intake"
+      ? "Intake — awaiting book"
+      : job.status === "booked"
+        ? "Booked — awaiting assign"
+        : job.status === "assigned"
+          ? "Assigned"
+          : job.status === "in_progress"
+            ? "In progress"
+            : "Completed";
+  return {
+    job: { ...job },
+    evidenceCount: evidenceList.length,
+    evidence: evidenceList.map((e) => ({ ...e })),
+    timeline,
+    statusLabel,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD101 thin vertical: intake → book → evidence → status detail.
+ */
+export function runPd101CustomerJobStatusThinVertical(): {
+  statusLabel: string;
+  evidenceCount: number;
+  timelineLen: number;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  const intake = createJobIntake({
+    customerId: "cust_pd101",
+    customerText: "battery dead stranded",
+    urgency: "emergency",
+  });
+  const booked = bookTechJob({
+    customerId: "cust_pd101",
+    technicianId: "tech_pd101",
+    jobClass: "roadside",
+    emergency: true,
+  });
+  uploadJobEvidence({
+    jobId: booked.id,
+    technicianId: "tech_pd101",
+    kind: "photo",
+    payloadRef: "fixture://pd101.jpg",
+  });
+  const detail = getCustomerJobStatusDetail(booked.id);
+  if (detail.evidenceCount < 1) throw new Error("PD101 expected evidence");
+  if (detail.timeline.length < 2) throw new Error("PD101 expected timeline");
+  void intake;
+  return {
+    statusLabel: detail.statusLabel,
+    evidenceCount: detail.evidenceCount,
+    timelineLen: detail.timeline.length,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD102 — technician self-serve Value Score dispute (Pack §9.5 / D-53).
+ * Session tech opens dispute on own snapshot; not money path.
+ */
+export function runPd102TechValueScoreDisputeThinVertical(): {
+  disputeOpened: true;
+  openedBySelf: true;
+  moneyPathClean: true;
+  payableFromAi: false;
+  disputeId: string;
+} {
+  __resetJobsForTests();
+  setValueScoreSnapshot({
+    technicianId: "tech_pd102",
+    score: 65,
+    sampleN: 10,
+  });
+  const dispute = openValueScoreDispute({
+    technicianId: "tech_pd102",
+    reason: "completion factor miscounted after evidence upload",
+    openedBy: "tech_pd102",
+  });
+  if (dispute.status !== "open") {
+    throw new Error("PD102 expected open dispute");
+  }
+  if (dispute.openedBy !== "tech_pd102") {
+    throw new Error("PD102 expected self-opened dispute");
+  }
+  const mine = listValueScoreDisputes().filter(
+    (d) => d.technicianId === "tech_pd102" && d.status === "open",
+  );
+  if (mine.length < 1) throw new Error("PD102 expected dispute in queue");
+  const money = assertValueScoreNotMoneyPath();
+  if (money.payableFromAi) {
+    throw new Error("PD102 Value Score dispute must keep payableFromAi false");
+  }
+  return {
+    disputeOpened: true,
+    openedBySelf: true,
+    moneyPathClean: true,
+    payableFromAi: false,
+    disputeId: dispute.disputeId,
+  };
 }
 
 /** Dev/fixture: assign open job to technician. */
