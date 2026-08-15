@@ -72,7 +72,7 @@ export default async function SparePdpPage({
           USD {(Number(offer.unitPriceUsdMinor) / 100).toFixed(2)}
         </p>
         <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Sold by an agency supplier on DIAL (marketplace agency — D-58). Price shown in USD
+          Sold by {offer.brand} Agency (marketplace agency — D-58). Price shown in USD
           (D-57). ZiG only at checkout pay step.
         </p>
         <form action={addToCartAction}>

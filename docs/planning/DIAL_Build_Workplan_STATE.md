@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD17** green → **PD18** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD18** green → **PD19** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD18** — Spare-web deepen (next eng) |
-| `current_issue` | _(open when starting PD18)_ |
+| `current_stage` | **PD19** — Admin Trade/JobClass + Value Score (next eng) |
+| `current_issue` | _(open when starting PD19)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD17** Intelligence Factory shadow/promote — **green** |
-| `next_stage` | **PD18** Spare-web deepen |
+| `prior_stage` | **PD18** Spare-web deepen — **green** |
+| `next_stage` | **PD19** Admin Trade/JobClass + Value Score |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -37,16 +37,18 @@
 | **PD15** | 2026-08-15 | Catalogue Factory admin CSV→approve→Meili spare+grocery + demand-gap; [#36](https://github.com/Vanguduza/dial/issues/36) |
 | **PD16** | 2026-08-15 | Promotions & referrals admin PLATFORM/FLASH/REFERRAL + SUPPLIER_COOP; no cash-out |
 | **PD17** | 2026-08-15 | Intelligence Factory shadow→Promptfoo→human promote; Simulated never pays |
+| **PD18** | 2026-08-15 | Spare-web orders/track/returns/garage + Sold by; D-57/D-58 |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD18** | Spare-web deepen — Pack §9.2 orders/returns/garage |
+| **PD19** | Admin Trade/JobClass + Value Score — Pack §9.5 / D-53 |
+| **PD20** | Customer mobile deepen — Pack §9.6 orders/returns/garage parity |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note
 
-Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope.
+Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Pack §9 audit after PD18 authored **PD19–PD20**.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

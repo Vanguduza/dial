@@ -254,4 +254,12 @@ test("PD15 CSV Factory → Meili spare+grocery + demand-gap", async () => {
   assert.equal(out.spareOfferId, "off_pd15_formal");
   assert.equal(out.groceryOfferId, "groc_pd15_oats");
 });
+
+test("PD18 spare customer: Sold by on cart → order → return → garage", async () => {
+  const { runPd18SpareWebThinVertical } = await import("./spareCustomer.js");
+  const out = await runPd18SpareWebThinVertical();
+  assert.equal(out.currency, "USD");
+  assert.ok(out.soldBy.includes("Agency"));
+  assert.equal(out.returnPayableFromAi, false);
+});
 });

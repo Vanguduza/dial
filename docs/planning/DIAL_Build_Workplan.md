@@ -84,9 +84,12 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | [#36](https://github.com/Vanguduza/dial/issues/36) | CSV→approve→Meili spare+grocery; B2B leak=0 | `PD16` |
 | 122 | `PD16` | **Promotions & referrals admin** — Pack §9.5 | workplan | REFERRAL/PLATFORM/FLASH create; SUPPLIER_COOP approve; budgets; fraud holds; no cash-out | `PD17` |
 | 123 | `PD17` | **Intelligence Factory shadow/promote** — D-54 | workplan | Shadow eval → human+Promptfoo promote; AI drafts only; never payable | `PD18` |
-| 124 | `PD18` | **Spare-web deepen** — Pack §9.2 orders/returns/garage | new issue | Beyond PD3 browse; returns claim; garage vehicles; USD; EcoCash\|COD | expand / next band |
+| 124 | `PD18` | **Spare-web deepen** — Pack §9.2 orders/returns/garage | workplan | Beyond PD3 browse; returns claim; garage vehicles; USD; EcoCash\|COD | `PD19` |
+| 125 | `PD19` | **Admin Trade/JobClass + Value Score** — Pack §9.5 / D-53 | new issue | TradeDefinition editor + lifecycle; technician Value Score profiles/disputes | `PD20` |
+| 126 | `PD20` | **Customer mobile deepen** — Pack §9.6 | new issue | Android/iOS orders/returns/garage parity vs PD18 web; USD; EcoCash\|COD | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD15 is **PD16**, not S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD18 is **PD19**, not S99.
+
 
 ---
 
@@ -266,9 +269,22 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd17IntelligenceFactoryThinVertical`; `pd17IntelligenceFactory.test.ts`; capability audit PD17; `/admin/intelligence/factory` |
 | Green → | **PD18** Spare-web deepen |
 
-### PD18 — Spare-web deepen (NEXT)
+### PD18 — Spare-web deepen (**GREEN** 2026-08-15)
 
-Orders / returns / garage beyond PD3 browse; USD; EcoCash\|COD; returns ERP stub (Pack §9.2).
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | USD cart Sold by → EcoCash\|COD → ERP order/track → return claim → garage (+consent) |
+| Evidence | `runPd18SpareWebThinVertical`; `pd18SpareWeb.test.ts`; `/spare/orders|returns|garage` |
+| Green → | **PD19** Admin Trade/JobClass + Value Score |
+
+### PD19 — Admin Trade/JobClass + Value Score (NEXT)
+
+Pack §9.5 / D-53 — TradeDefinition editor + lifecycle; technician Value Score profiles/disputes (not money SoR).
+
+### PD20 — Customer mobile deepen (Pack §9.6)
+
+Android/iOS orders/returns/garage parity vs PD18 web; USD; EcoCash\|COD.
 
 ### S10 — E2a (historical)
 

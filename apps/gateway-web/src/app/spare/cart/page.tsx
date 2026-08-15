@@ -26,6 +26,10 @@ export default async function SpareCartPage({
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <nav style={{ marginBottom: dialTokens.space.lg }}>
           <Link href="/spare">Continue shopping</Link>
+          {" · "}
+          <Link href="/spare/orders">Orders</Link>
+          {" · "}
+          <Link href="/spare/garage">Garage</Link>
         </nav>
         <h1
           style={{
@@ -55,8 +59,9 @@ export default async function SpareCartPage({
                     qty {line.qty} · USD{" "}
                     {(Number(line.lineTotal.amountMinor) / 100).toFixed(2)}
                   </div>
-                  <div style={{ fontSize: 12, opacity: 0.6 }}>
-                    Agency supplier · currency {cart.currency}
+                  <div style={{ fontSize: 12, opacity: 0.75 }}>
+                    Sold by {line.soldBy} · {line.supplierFormality} · currency{" "}
+                    {cart.currency}
                   </div>
                 </li>
               ))}

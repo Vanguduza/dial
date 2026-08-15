@@ -37,6 +37,9 @@ export type CartLine = {
   qty: number;
   unitPrice: Money;
   lineTotal: Money;
+  /** Agency disclosure — Sold by {Supplier} (D-58). */
+  soldBy: string;
+  supplierFormality: SupplierFormality;
 };
 
 export type Cart = {
@@ -752,6 +755,7 @@ export function addToCart(cartId: string, offerId: string, qty = 1): Cart {
   }
 
   const existing = cart.lines.find((l) => l.offerId === offerId);
+  const soldBy = `${offer.brand} Agency`;
   if (existing) {
     existing.qty += qty;
     existing.lineTotal = money(
@@ -766,6 +770,8 @@ export function addToCart(cartId: string, offerId: string, qty = 1): Cart {
       qty,
       unitPrice: unit,
       lineTotal: money(offer.unitPriceUsdMinor * BigInt(qty), "USD"),
+      soldBy,
+      supplierFormality: offer.supplierFormality,
     });
   }
 
@@ -827,3 +833,25 @@ export {
   type GroceryOrder,
   type GroceryOrderStatus,
 } from "./grocery.js";
+
+export {
+  __resetSpareCustomerForTests,
+  addGarageVehicle,
+  advanceSpareOrderStatus,
+  getSpareOrder,
+  getSpareReturnClaim,
+  listGarageVehicles,
+  listSpareOrders,
+  openSpareReturnClaim,
+  placeSpareOrder,
+  resolveSpareReturnClaim,
+  runPd18SpareWebThinVertical,
+  trackSpareOrder,
+  type GarageVehicle,
+  type SpareCartSnapshot,
+  type SpareOrder,
+  type SpareOrderLine,
+  type SpareOrderStatus,
+  type SpareReturnClaim,
+  type SpareReturnPath,
+} from "./spareCustomer.js";
