@@ -92,11 +92,11 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 129 | `PD23` | **Admin Compliance/WHT + Commercial Simulation** — Pack §9.5 / D-53 | workplan | WHT remittance centre; Simulated never auto-pays | `PD24` |
 | 130 | `PD24` | **Admin Projects toggle + legal compliance hub** — Pack §9.5 residual | workplan | Projects feature toggle; legal/compliance hub screens | `PD25` |
 | 131 | `PD25` | **Technician Android Value Score + ITF263** — Pack §9.7 / D-53 | workplan | Value Score factors on device; ITF263 status/upload deepen | `PD26` |
-| 132 | `PD26` | **Gateway home Shop\|Services** — Pack §9.1 residual | new issue | Auth home Welcome-back + Shop \| Services | `PD27` |
+| 132 | `PD26` | **Gateway home Shop\|Services** — Pack §9.1 residual | workplan | Auth home Welcome-back + Shop \| Services | `PD27` |
 | 133 | `PD27` | **Spare Select Vehicle / Browse EPC** — Pack §9.2 residual | new issue | Dual entry vehicle + EPC browse | `PD28` |
 | 134 | `PD28` | **Delivery Android availability + offline packs** — Pack §9.8 residual | new issue | available/busy/offline + offline packs deepen | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD25 is **PD26**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD26 is **PD27**, not S99. Product ≠ finished at S99.
 
 
 ---
