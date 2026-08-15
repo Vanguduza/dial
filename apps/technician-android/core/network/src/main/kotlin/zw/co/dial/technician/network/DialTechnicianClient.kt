@@ -57,6 +57,22 @@ data class TakeHomeBreakdownDto(
     val payableFromAi: Boolean,
 )
 
+data class CheckInDto(
+    val accepted: Boolean,
+    val reason: String,
+    val isMockLocation: Boolean,
+    val punctualityEligible: Boolean,
+    val distanceMeters: Int,
+)
+
+data class CameraEvidenceDto(
+    val evidenceId: String,
+    val overlayChecklistStep: String,
+    val cameraSource: String,
+    val flushStatus: String,
+    val payableFromAi: Boolean,
+)
+
 class DialTechnicianException(message: String, val statusCode: Int = 0) : Exception(message)
 
 interface CookieStore {
@@ -242,6 +258,45 @@ class DialTechnicianClient(
             )
         return parseTakeHomeBreakdown(body)
             ?: throw DialTechnicianException("take_home_breakdown missing")
+    }
+
+    /** PD30 — mock-location aware check-in (2B-29). */
+    fun checkIn(
+        jobId: String,
+        lat: Double,
+        lng: Double,
+        isMockLocation: Boolean,
+        accuracyMeters: Int = 15,
+    ): CheckInDto {
+        val body =
+            postAction(
+                """{"action":"check_in","jobId":${jsonString(jobId)},"lat":$lat,"lng":$lng,"isMockLocation":$isMockLocation,"accuracyMeters":$accuracyMeters}""",
+            )
+        return parseCheckIn(body) ?: throw DialTechnicianException("check_in missing")
+    }
+
+    /** PD30 — device camera evidence with checklist overlay + optional offline queue. */
+    fun captureCameraEvidence(
+        jobId: String,
+        payloadRef: String,
+        overlayChecklistStep: String,
+        queuedOffline: Boolean = true,
+    ): CameraEvidenceDto {
+        val body =
+            postAction(
+                """{"action":"capture_camera_evidence","jobId":${jsonString(jobId)},"payloadRef":${jsonString(payloadRef)},"overlayChecklistStep":${jsonString(overlayChecklistStep)},"queuedOffline":$queuedOffline}""",
+            )
+        return parseCameraEvidence(body)
+            ?: throw DialTechnicianException("capture_camera_evidence missing")
+    }
+
+    fun flushEvidenceQueue(): Int {
+        val body = postAction("""{"action":"flush_evidence_queue"}""")
+        return Regex(""""flushed"\s*:\s*(\d+)""")
+            .find(body)
+            ?.groupValues
+            ?.get(1)
+            ?.toIntOrNull() ?: 0
     }
 
     private fun get(path: String): HttpResponse {
@@ -446,5 +501,51 @@ internal fun parseTakeHomeBreakdown(body: String): TakeHomeBreakdownDto? {
         itf263Status = str("itf263Status").orEmpty(),
         certificatePdfRef = str("certificatePdfRef"),
         payableFromAi = bool("payableFromAi"),
+    )
+}
+
+internal fun parseCheckIn(body: String): CheckInDto? {
+    val chunk =
+        Regex(""""checkIn"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun s(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    fun b(n: String) =
+        Regex(""""$n"\s*:\s*(true|false)""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1) == "true"
+    fun i(n: String) =
+        Regex(""""$n"\s*:\s*(\d+)""").find(chunk)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    return CheckInDto(
+        accepted = b("accepted"),
+        reason = s("reason"),
+        isMockLocation = b("isMockLocation"),
+        punctualityEligible = b("punctualityEligible"),
+        distanceMeters = i("distanceMeters"),
+    )
+}
+
+internal fun parseCameraEvidence(body: String): CameraEvidenceDto? {
+    val chunk =
+        Regex(""""camera"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun s(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    fun b(n: String) =
+        Regex(""""$n"\s*:\s*(true|false)""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1) == "true"
+    return CameraEvidenceDto(
+        evidenceId = s("evidenceId"),
+        overlayChecklistStep = s("overlayChecklistStep"),
+        cameraSource = s("cameraSource"),
+        flushStatus = s("flushStatus"),
+        payableFromAi = b("payableFromAi"),
     )
 }

@@ -4,6 +4,15 @@
  * Booking slots = Cal.com (fixture when CALCOM_* unset) — no parallel in-house calendar.
  */
 import { __resetProjectsAndLegalForTests } from "./projectsAndLegal.js";
+import {
+  __resetMockLocationEvidenceForTests,
+  captureCameraEvidence,
+  checkInAtJobSite,
+  DEFAULT_JOB_SITE,
+  flushEvidenceQueue,
+  getCameraEvidence,
+  setJobSitePin,
+} from "./mockLocationEvidence.js";
 
 export type JobClassDefinition = {
   id: string;
@@ -935,6 +944,22 @@ export {
   type TermsVersion,
 } from "./projectsAndLegal.js";
 
+export {
+  captureCameraEvidence,
+  checkInAtJobSite,
+  DEFAULT_JOB_SITE,
+  distanceMeters,
+  flushEvidenceQueue,
+  getCameraEvidence,
+  getJobSitePin,
+  listCameraEvidenceForJob,
+  listCheckInsForJob,
+  setJobSitePin,
+  type CameraEvidenceCapture,
+  type CheckInAttempt,
+  type JobSitePin,
+} from "./mockLocationEvidence.js";
+
 /**
  * PD25 thin vertical: Value Score factors on device (explainability, no money).
  */
@@ -974,6 +999,99 @@ export function runPd25ValueScoreDeviceThinVertical(): {
   };
 }
 
+/**
+ * PD30 thin vertical: mock GPS blocked → genuine geofence check-in →
+ * camera overlay + offline evidence queue flush (Pack §9.7 / 2B-29).
+ */
+export async function runPd30MockLocationCameraThinVertical(input?: {
+  technicianId?: string;
+  customerId?: string;
+}): Promise<{
+  mockBlocked: true;
+  genuineAccepted: true;
+  cameraOverlay: true;
+  queueFlushed: true;
+  punctualityNotFromMock: true;
+  payableFromAi: false;
+  jobId: string;
+}> {
+  __resetJobsForTests();
+  const technicianId = input?.technicianId ?? "tech_pd30";
+  const customerId = input?.customerId ?? "cust_pd30";
+  const slots = await listBookingSlots();
+  const slot = slots[0];
+  if (!slot) throw new Error("PD30 needs Cal.com fixture slot");
+  const job = bookTechJob({
+    customerId,
+    technicianId,
+    jobClass: "diagnostics",
+    slotId: slot.slotId,
+    emergency: false,
+  });
+  setJobSitePin({ jobId: job.id });
+
+  const mock = checkInAtJobSite({
+    jobId: job.id,
+    technicianId,
+    lat: DEFAULT_JOB_SITE.lat,
+    lng: DEFAULT_JOB_SITE.lng,
+    isMockLocation: true,
+    accuracyMeters: 5,
+  });
+  if (mock.accepted || mock.punctualityEligible || mock.reason !== "mock_location_blocked") {
+    throw new Error("PD30 mock location must block check-in / punctuality");
+  }
+
+  const genuine = checkInAtJobSite({
+    jobId: job.id,
+    technicianId,
+    lat: DEFAULT_JOB_SITE.lat + 0.0003,
+    lng: DEFAULT_JOB_SITE.lng,
+    isMockLocation: false,
+    accuracyMeters: 12,
+  });
+  if (!genuine.accepted || !genuine.punctualityEligible) {
+    throw new Error("PD30 genuine in-geofence check-in must accept");
+  }
+
+  const cam = captureCameraEvidence({
+    jobId: job.id,
+    technicianId,
+    payloadRef: "data:image/jpeg;base64,pd30camera",
+    overlayChecklistStep: "Photo of fault area (optional)",
+    queuedOffline: true,
+  });
+  // Also register in classic evidence SoR for job inbox visibility.
+  uploadJobEvidence({
+    jobId: job.id,
+    technicianId,
+    kind: "photo",
+    payloadRef: cam.payloadRef,
+  });
+  if (cam.cameraSource !== "device_camera" || cam.flushStatus !== "queued") {
+    throw new Error("PD30 camera evidence must queue with overlay");
+  }
+
+  const flush = flushEvidenceQueue(technicianId);
+  if (flush.flushed < 1 || flush.payableFromAi) {
+    throw new Error("PD30 evidence queue flush failed");
+  }
+  const after = getCameraEvidence(cam.evidenceId);
+  if (!after || after.flushStatus !== "uploaded") {
+    throw new Error("PD30 flushed evidence must be uploaded");
+  }
+
+  return {
+    mockBlocked: true,
+    genuineAccepted: true,
+    cameraOverlay: true,
+    queueFlushed: true,
+    punctualityNotFromMock: true,
+    payableFromAi: false,
+    jobId: job.id,
+  };
+}
+
 export function __resetJobsForTests(): void {
   valueScores.clear();
   scoreDisputes.clear();
@@ -987,4 +1105,5 @@ export function __resetJobsForTests(): void {
   jobClasses.length = 0;
   jobClasses.push(...JOB_CLASS_SEED.map((j) => ({ ...j })));
   __resetProjectsAndLegalForTests();
+  __resetMockLocationEvidenceForTests();
 }

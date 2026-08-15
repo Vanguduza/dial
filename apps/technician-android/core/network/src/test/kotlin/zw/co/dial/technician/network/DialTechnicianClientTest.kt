@@ -99,4 +99,60 @@ class DialTechnicianClientTest {
         assertEquals(false, bd.payableFromAi)
         assertTrue(bodies.all { !it.contains("userId") })
     }
+
+    @Test
+    fun pd30_check_in_and_camera_never_sends_identity() {
+        val bodies = mutableListOf<String>()
+        val transport =
+            HttpTransport { method, url, _, body, _ ->
+                if (method == "POST" && url.contains("/api/tech/technician") && body != null) {
+                    bodies.add(body)
+                    assertTrue(!body.contains("userId"))
+                    assertTrue(!body.contains("\"role\""))
+                }
+                when {
+                    body?.contains("check_in") == true && body.contains("\"isMockLocation\":true") ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"checkIn":{"accepted":false,"reason":"mock_location_blocked","isMockLocation":true,"punctualityEligible":false,"distanceMeters":0},"payableFromAi":false}""",
+                            emptyList(),
+                        )
+                    body?.contains("check_in") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"checkIn":{"accepted":true,"reason":"ok","isMockLocation":false,"punctualityEligible":true,"distanceMeters":33},"payableFromAi":false}""",
+                            emptyList(),
+                        )
+                    body?.contains("capture_camera_evidence") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"camera":{"evidenceId":"evcam_1","overlayChecklistStep":"Photo of fault area (optional)","cameraSource":"device_camera","flushStatus":"queued","payableFromAi":false}}""",
+                            emptyList(),
+                        )
+                    body?.contains("flush_evidence_queue") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"flushed":1,"evidenceIds":["evcam_1"],"payableFromAi":false}""",
+                            emptyList(),
+                        )
+                    else -> HttpResponse(200, """{"ok":true}""", emptyList())
+                }
+            }
+        val client = DialTechnicianClient("http://localhost:3000", MemoryCookieStore(), transport)
+        val mock = client.checkIn("job_1", -17.8292, 31.0522, isMockLocation = true)
+        assertEquals(false, mock.accepted)
+        assertEquals("mock_location_blocked", mock.reason)
+        val genuine = client.checkIn("job_1", -17.8292, 31.0522, isMockLocation = false)
+        assertEquals(true, genuine.punctualityEligible)
+        val cam =
+            client.captureCameraEvidence(
+                "job_1",
+                "data:image/jpeg;base64,x",
+                "Photo of fault area (optional)",
+            )
+        assertEquals("device_camera", cam.cameraSource)
+        assertEquals(false, cam.payableFromAi)
+        assertEquals(1, client.flushEvidenceQueue())
+        assertTrue(bodies.all { !it.contains("userId") })
+    }
 }

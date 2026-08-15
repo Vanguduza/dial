@@ -156,3 +156,16 @@ test("PD25 Value Score on device factors; no money path", () => {
   assert.equal(out.payableFromAi, false);
   assert.ok(out.score >= 70);
 });
+
+test("PD30 mock-location blocked + camera overlay queue", async () => {
+  const { runPd30MockLocationCameraThinVertical } = await import("./index.js");
+  const out = await runPd30MockLocationCameraThinVertical({
+    technicianId: "tech_pd30_t",
+  });
+  assert.equal(out.mockBlocked, true);
+  assert.equal(out.genuineAccepted, true);
+  assert.equal(out.cameraOverlay, true);
+  assert.equal(out.queueFlushed, true);
+  assert.equal(out.punctualityNotFromMock, true);
+  assert.equal(out.payableFromAi, false);
+});

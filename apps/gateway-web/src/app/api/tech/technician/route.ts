@@ -1,6 +1,7 @@
 /**
  * PD9 technician API — wraps @dial/jobs SoR (Cal.com slots, checklist, evidence).
  * PD25: Value Score factors + ITF263 upload/status + Take-Home breakdown (D-50/D-53).
+ * PD30: mock-location check-in + camera evidence queue (Pack §9.7 / 2B-29).
  * Session SoR; never body userId/role (D-47).
  */
 import { NextResponse } from "next/server";
@@ -8,15 +9,21 @@ import {
   advanceChecklistStep,
   assignJobToTechnician,
   bookTechJob,
+  captureCameraEvidence,
+  checkInAtJobSite,
   draftTechQuote,
+  flushEvidenceQueue,
   getChecklist,
   getChecklistRun,
   getTechJob,
   getValueScoreSnapshot,
   listBookingSlots,
+  listCameraEvidenceForJob,
+  listCheckInsForJob,
   listChecklists,
   listEvidenceForJob,
   listJobsForTechnician,
+  setJobSitePin,
   setValueScoreSnapshot,
   startChecklistRun,
   uploadJobEvidence,
@@ -243,6 +250,91 @@ export async function POST(req: Request) {
           payloadRef: String(body.payloadRef ?? ""),
         });
         return NextResponse.json({ ok: true, evidence: row });
+      }
+      case "set_job_site": {
+        const jobId = String(body.jobId ?? "");
+        const job = getTechJob(jobId);
+        if (!job || job.technicianId !== technicianId) {
+          return NextResponse.json({ error: "Job not assigned to technician" }, { status: 403 });
+        }
+        const pin = setJobSitePin({
+          jobId,
+          ...(body.lat != null ? { lat: Number(body.lat) } : {}),
+          ...(body.lng != null ? { lng: Number(body.lng) } : {}),
+        });
+        return NextResponse.json({
+          ok: true,
+          site: pin,
+          mapSor: "maplibre",
+          note: "Geofence pin — not Google SoR",
+        });
+      }
+      case "check_in": {
+        const jobId = String(body.jobId ?? "");
+        const job = getTechJob(jobId);
+        if (!job || job.technicianId !== technicianId) {
+          return NextResponse.json({ error: "Job not assigned to technician" }, { status: 403 });
+        }
+        setJobSitePin({ jobId });
+        const attempt = checkInAtJobSite({
+          jobId,
+          technicianId,
+          lat: Number(body.lat),
+          lng: Number(body.lng),
+          isMockLocation: Boolean(body.isMockLocation),
+          ...(body.accuracyMeters != null
+            ? { accuracyMeters: Number(body.accuracyMeters) }
+            : {}),
+        });
+        return NextResponse.json({
+          ok: true,
+          checkIn: attempt,
+          note: "2B-29 mock location never earns punctuality",
+          payableFromAi: false,
+        });
+      }
+      case "capture_camera_evidence": {
+        const jobId = String(body.jobId ?? "");
+        const job = getTechJob(jobId);
+        if (!job || job.technicianId !== technicianId) {
+          return NextResponse.json({ error: "Job not assigned to technician" }, { status: 403 });
+        }
+        const capture = captureCameraEvidence({
+          jobId,
+          technicianId,
+          payloadRef: String(body.payloadRef ?? ""),
+          overlayChecklistStep: String(body.overlayChecklistStep ?? ""),
+          queuedOffline: Boolean(body.queuedOffline),
+        });
+        uploadJobEvidence({
+          jobId,
+          technicianId,
+          kind: "photo",
+          payloadRef: capture.payloadRef,
+        });
+        return NextResponse.json({
+          ok: true,
+          camera: capture,
+          payableFromAi: false,
+          note: "Device camera + checklist overlay — gallery not SoR",
+        });
+      }
+      case "flush_evidence_queue": {
+        const result = flushEvidenceQueue(technicianId);
+        return NextResponse.json({
+          ok: true,
+          ...result,
+          note: "Offline evidence queue flush",
+        });
+      }
+      case "list_camera_evidence": {
+        const jobId = String(body.jobId ?? "");
+        return NextResponse.json({
+          ok: true,
+          cameraEvidence: listCameraEvidenceForJob(jobId),
+          checkIns: listCheckInsForJob(jobId),
+          payableFromAi: false,
+        });
       }
       case "list_evidence": {
         const jobId = String(body.jobId ?? "");

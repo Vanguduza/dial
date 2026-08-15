@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD29** green → **PD30** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD30** green → **PD31** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD30** — Technician mock-location / evidence-camera (next eng) |
-| `current_issue` | _(open when starting PD30)_ |
+| `current_stage` | **PD31** — Technician Bluetooth print hooks (next eng) |
+| `current_issue` | _(open when starting PD31)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD29** Delivery ETA + stops / VROOM — **green** |
-| `next_stage` | **PD30** Technician Android mock-location / evidence-camera deepen |
+| `prior_stage` | **PD30** Technician mock-location / evidence-camera — **green** |
+| `next_stage` | **PD31** Technician Bluetooth thermal print hooks |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -49,16 +49,18 @@
 | **PD27** | 2026-08-15 | Spare dual entry Select Vehicle + Browse EPC; chassis join; USD; B2B hide informal |
 | **PD28** | 2026-08-15 | Delivery available\|busy\|offline eligibility + Harare/Bulawayo MapLibre offline packs |
 | **PD29** | 2026-08-15 | Delivery OSRM ETA banner + navigate stops + VROOM re-optimise |
+| **PD30** | 2026-08-15 | Tech mock-location check-in + camera evidence overlay/queue |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD30** | Technician Android mock-location / evidence-camera deepen — Pack §9.7 residual (optional) |
+| **PD31** | Technician Bluetooth thermal print hooks — Pack §9.7 residual |
+| **PD32** | Delivery COD float-limit warning — Pack §9.8 residual (optional) |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note
 
-Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Eng next after PD29 is **PD30**, not S99. Product is **not** finished at S99.
+Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Pack §9 audit after PD30 authored **PD31–PD32**. Eng next after PD30 is **PD31**, not S99. Product is **not** finished at S99.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

@@ -73,7 +73,7 @@ fun TechnicianApp(baseUrl: String) {
             fontWeight = FontWeight.Bold,
         )
         Text(
-            "Compose · Value Score · ITF263 · Take-Home WHT (D-50/D-53)",
+            "Compose · mock GPS · camera overlay · Value Score · ITF263 · Take-Home",
             style = MaterialTheme.typography.bodySmall,
         )
 
@@ -149,6 +149,40 @@ fun TechnicianApp(baseUrl: String) {
                 enabled = jobId != null,
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Upload evidence photo") }
+            Button(
+                onClick = {
+                    val jid = jobId ?: return@Button
+                    run {
+                        val mock =
+                            client.checkIn(jid, -17.8292, 31.0522, isMockLocation = true)
+                        val genuine =
+                            client.checkIn(jid, -17.8292, 31.0522, isMockLocation = false)
+                        status =
+                            "Check-in mock blocked=${!mock.accepted} (${mock.reason}) · genuine ok=${genuine.accepted} punctuality=${genuine.punctualityEligible}"
+                    }
+                },
+                enabled = jobId != null,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Check-in mock vs genuine GPS") }
+            Button(
+                onClick = {
+                    val jid = jobId ?: return@Button
+                    run {
+                        val cam =
+                            client.captureCameraEvidence(
+                                jid,
+                                "data:image/jpeg;base64,pd30camera",
+                                "Photo of fault area (optional)",
+                                queuedOffline = true,
+                            )
+                        val flushed = client.flushEvidenceQueue()
+                        status =
+                            "Camera ${cam.cameraSource} overlay=\"${cam.overlayChecklistStep}\" → ${cam.flushStatus} then flushed=$flushed · payableFromAi=${cam.payableFromAi}"
+                    }
+                },
+                enabled = jobId != null,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Camera evidence + queue flush") }
             Button(
                 onClick = {
                     run {

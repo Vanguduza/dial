@@ -98,7 +98,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 135 | `PD29` | **Delivery ETA + stops / VROOM re-optimise** — Pack §9.8 residual | new issue | ETA banner (OSRM); navigate stop list; request re-optimise | `PD30` |
 | 136 | `PD30` | **Technician mock-location / camera deepen** — Pack §9.7 residual | new issue | Mock-location detection; evidence camera polish | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD29 is **PD30**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD30 is **PD31**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -437,18 +437,32 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd29EtaStopsVroomThinVertical`; `pd29EtaStopsVroom.test.ts`; Compose ETA/stops/VROOM |
 | Green → | **PD30** Technician mock-location / evidence-camera |
 
-### Pack §9 gap audit (after PD29)
+### PD30 — Technician mock-location / camera deepen (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | mock GPS check-in blocked → genuine geofence accept → device camera + checklist overlay → offline queue flush |
+| Evidence | `runPd30MockLocationCameraThinVertical`; `pd30MockLocationCamera.test.ts`; Compose check-in/camera |
+| Green → | **PD31** Technician Bluetooth print hooks |
+
+### Pack §9 gap audit (after PD30)
 
 | § | Gap remaining | Stage |
 | --- | --- | --- |
-| 9.7 | Mock-location / evidence camera deepen | **PD30** (optional) |
-| 9.1–9.6 / 9.8 | Primary covered PD1–PD29 | defer polish — founder may prioritize |
+| 9.7 | Bluetooth thermal print hooks | **PD31** |
+| 9.8 | COD float-limit warning on collect | **PD32** (optional) |
+| 9.1–9.6 | Primary surfaces covered PD1–PD27 | defer polish — founder may prioritize |
 
 Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
 
-### PD30 — Technician mock-location / camera deepen (NEXT)
+### PD31 — Technician Bluetooth print hooks (NEXT)
 
-Pack §9.7 residual — optional deepen after PD29.
+Pack §9.7 residual — Bluetooth thermal print hooks (receipt/job ticket pattern).
+
+### PD32 — Delivery COD float-limit warning
+
+Pack §9.8 residual — optional COD float-limit warning deepen.
 
 ### S10 — E2a (historical)
 
