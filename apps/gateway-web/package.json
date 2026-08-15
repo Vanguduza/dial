@@ -23,6 +23,7 @@
     "@dial/jobs": "workspace:*",
     "@dial/ledger": "workspace:*",
     "@dial/payments": "workspace:*",
+    "@dial/promotions": "workspace:*",
     "@dial/queues": "workspace:*",
     "@dial/shared": "workspace:*",
     "@dial/suppliers": "workspace:*",

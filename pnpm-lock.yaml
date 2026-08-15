@@ -117,6 +117,9 @@ importers:
       '@dial/payments':
         specifier: workspace:*
         version: link:../../packages/payments
+      '@dial/promotions':
+        specifier: workspace:*
+        version: link:../../packages/promotions
       '@dial/queues':
         specifier: workspace:*
         version: link:../../packages/queues

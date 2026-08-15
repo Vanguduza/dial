@@ -82,7 +82,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 119 | `PD13` | **tech-web** — Pack §9.3 FixItNow patterns | [#34](https://github.com/Vanguduza/dial/issues/34) | Guide / emergency / diagnose / book vs `@dial/jobs`; no AI payable | `PD14` |
 | 120 | `PD14` | **Grocery web deepen** — slot + track + checkout (food) | [#35](https://github.com/Vanguduza/dial/issues/35) | Beyond G1 browse; USD; EcoCash\|COD; no liquor | `PD15` |
 | 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | [#36](https://github.com/Vanguduza/dial/issues/36) | CSV→approve→Meili spare+grocery; B2B leak=0 | `PD16` |
-| 122 | `PD16` | **Promotions & referrals admin** — Pack §9.5 | new issue | REFERRAL/PLATFORM/FLASH create; SUPPLIER_COOP approve; budgets; fraud holds; no cash-out | `PD17` |
+| 122 | `PD16` | **Promotions & referrals admin** — Pack §9.5 | workplan | REFERRAL/PLATFORM/FLASH create; SUPPLIER_COOP approve; budgets; fraud holds; no cash-out | `PD17` |
 | 123 | `PD17` | **Intelligence Factory shadow/promote** — D-54 | new issue | Shadow eval → human+Promptfoo promote; AI drafts only; never payable | `PD18` |
 | 124 | `PD18` | **Spare-web deepen** — Pack §9.2 orders/returns/garage | new issue | Beyond PD3 browse; returns claim; garage vehicles; USD; EcoCash\|COD | expand / next band |
 
@@ -248,11 +248,16 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd15CatalogueFactoryThinVertical`; `pd15CatalogueFactory.test.ts`; liquor reject; payableFromAi=false; B2B leak=0 |
 | Green → | **PD16** Promotions & referrals admin |
 
-### PD16 — Promotions & referrals admin (NEXT)
+### PD16 — Promotions & referrals admin (**GREEN** 2026-08-15)
 
-Pack §9.5 — create `REFERRAL` / `PLATFORM` / `FLASH`; approve `SUPPLIER_COOP`; budgets + fraud holds; promo credit never cash-out (D-42).
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Create PLATFORM/FLASH/REFERRAL → activate; SUPPLIER_COOP propose→accept→ops approve live; fraud hold; cash-out blocked; budgets |
+| Evidence | `runPd16PromotionsAdminThinVertical`; `pd16PromotionsAdmin.test.ts`; `/admin/promotions` |
+| Green → | **PD17** Intelligence Factory shadow/promote |
 
-### PD17 — Intelligence Factory shadow/promote
+### PD17 — Intelligence Factory shadow/promote (NEXT)
 
 D-54 — shadow eval → human + Promptfoo promote; AI drafts only; never auto-publish payable amounts.
 

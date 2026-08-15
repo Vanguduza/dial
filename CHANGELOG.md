@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD16 Promotions & referrals admin** — PLATFORM/FLASH/REFERRAL create, SUPPLIER_COOP ops approve, budgets, fraud holds; promo credit cash-out forbidden (D-42); `/admin/promotions`.
 - **PD15 Catalogue Factory admin** — CSV ingest → human approve → Meili spare + grocery publish; demand-gap KPIs; `/admin/catalogue/factory`; no AI auto-publish / no liquor / B2B informal leak=0; [#36](https://github.com/Vanguduza/dial/issues/36).
 - **PD14 Grocery web deepen** — USD cart → delivery slot (cold-chain; no liquor) → EcoCash\|COD checkout (ZiG only at pay) → ERP track; B2B informal hide; [#35](https://github.com/Vanguduza/dial/issues/35).
 - **PD13 tech-web Pack §9.3** — guide / diagnose / emergency / Cal.com book / customer job status vs `@dial/jobs` rate_card (no AI payable); `/api/tech/services` + IDOR; responsive design-tokens; [#34](https://github.com/Vanguduza/dial/issues/34).

@@ -9,3 +9,5 @@ In-repo promotions engine for DIAL ERP.
 **Authority:** `DIAL_Promotions_Package_Design.md` · v4 §4.1.1 · D-41a / D-42.
 
 Payable amounts are applied only by `@dial/pricing` into `price_quotes`. Promo credit never cash-outs.
+
+**PD16 admin:** `createPromoCampaign` / `approveSupplierCoop` / fraud holds / `runPd16PromotionsAdminThinVertical` — gateway `/admin/promotions` + `/api/admin/promotions`.

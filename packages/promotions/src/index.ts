@@ -23,3 +23,23 @@ export {
   splitCoopFunding,
   respectsFloor,
 } from './supplier-coop.js'
+export {
+  __resetPromoAdminForTests,
+  acceptSupplierCoop,
+  activatePromoCampaign,
+  approveSupplierCoop,
+  attachReferralForAdmin,
+  attemptPromoCreditCashOut,
+  createPromoCampaign,
+  getPromoCampaign,
+  listPromoAdminSnapshot,
+  placeFraudHold,
+  proposeSupplierCoop,
+  recordBudgetUsage,
+  rejectSupplierCoop,
+  releaseFraudHold,
+  runPd16PromotionsAdminThinVertical,
+  type FraudHoldStatus,
+  type PromoAdminSnapshot,
+  type ReferralEdgeAdmin,
+} from './admin.js'
