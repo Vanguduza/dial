@@ -23,6 +23,11 @@ export default function DailyZigAdminPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const [approver, setApprover] = useState("ops_approver");
+  const [pending, setPending] = useState<
+    Array<{ proposalId: string; zigMinorPerUsd: string; proposedBy: string }>
+  >([]);
+
   const headers = useCallback(
     () => ({
       "content-type": "application/json",
@@ -40,6 +45,11 @@ export default function DailyZigAdminPage() {
         error?: string;
         active?: AuditRow | null;
         audit?: AuditRow[];
+        pendingFourEyes?: Array<{
+          proposalId: string;
+          zigMinorPerUsd: string;
+          proposedBy: string;
+        }>;
       };
       if (!res.ok) {
         setMessage(data.error ?? `HTTP ${res.status}`);
@@ -47,6 +57,57 @@ export default function DailyZigAdminPage() {
       }
       setActive(data.active ?? null);
       setAudit(data.audit ?? []);
+      setPending(data.pendingFourEyes ?? []);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function proposeFourEyes() {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/fx/daily-zig", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({
+          action: "propose",
+          zigMinorPerUsd,
+          proposedBy: setBy,
+        }),
+      });
+      const data = (await res.json()) as { error?: string; proposal?: { proposalId: string } };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage(`Proposed ${data.proposal?.proposalId} (awaiting four-eyes)`);
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function approveProposal(proposalId: string) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/fx/daily-zig", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({
+          action: "approve",
+          proposalId,
+          approvedBy: approver,
+        }),
+      });
+      const data = (await res.json()) as { error?: string; rate?: AuditRow };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage(`Four-eyes activated ${data.rate?.fxRateId}`);
+      await refresh();
     } finally {
       setBusy(false);
     }
@@ -109,7 +170,8 @@ export default function DailyZigAdminPage() {
         </h1>
         <p style={{ opacity: 0.8, fontSize: 14, marginTop: dialTokens.space.sm }}>
           Ops-audited FX for EcoCash ZiG display at checkout (D-57). Browse stays USD.
-          IMTT is DIAL opex — never a checkout line (D-60).{" "}
+          PD57 four-eyes: propose then a different ops user approves. IMTT is DIAL opex —
+          never a checkout line (D-60).{" "}
           <a href="/admin/cost-health">Cost / health</a>
         </p>
 
@@ -184,8 +246,49 @@ export default function DailyZigAdminPage() {
             >
               Refresh audit
             </button>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void proposeFourEyes()}
+              style={{
+                padding: "12px 16px",
+                borderRadius: 8,
+                border: `1px solid ${dialTokens.color.brand.primary}`,
+                background: "transparent",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Propose (four-eyes)
+            </button>
           </div>
         </form>
+
+        <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
+          Approver (must ≠ proposer)
+          <input
+            value={approver}
+            onChange={(ev) => setApprover(ev.target.value)}
+            style={fieldStyle}
+          />
+        </label>
+        {pending.length > 0 ? (
+          <ul style={{ marginTop: 12, fontSize: 14 }}>
+            {pending.map((p) => (
+              <li key={p.proposalId}>
+                {p.proposalId} · {p.zigMinorPerUsd} · by {p.proposedBy}
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void approveProposal(p.proposalId)}
+                  style={{ marginLeft: 8 }}
+                >
+                  Approve
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         {message ? (
           <p style={{ marginTop: dialTokens.space.md, fontSize: 14 }} role="status">

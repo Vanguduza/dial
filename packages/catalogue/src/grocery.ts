@@ -676,6 +676,22 @@ export function getGroceryOrder(orderId: string): GroceryOrder | undefined {
   return o ? { ...o } : undefined;
 }
 
+/** Admin ops queue — all grocery orders (Pack §9.5 / PD55). */
+export function listGroceryOrders(filter?: {
+  customerId?: string | null;
+  status?: GroceryOrderStatus;
+}): GroceryOrder[] {
+  return [...store().orders.values()]
+    .filter((o) =>
+      filter?.customerId != null && filter.customerId !== ""
+        ? o.customerId === filter.customerId
+        : true,
+    )
+    .filter((o) => (filter?.status ? o.status === filter.status : true))
+    .map((o) => ({ ...o }))
+    .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
 export function advanceGroceryOrderStatus(orderId: string): GroceryOrder {
   const o = store().orders.get(orderId);
   if (!o) throw new Error(`Unknown grocery order ${orderId}`);

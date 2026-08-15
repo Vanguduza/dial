@@ -874,6 +874,8 @@ export {
   integrationMode as meiliIntegrationMode,
 } from "./meiliClient.js";
 
+export { runPd55AdminOrdersThinVertical } from "./adminOrders.js";
+
 export {
   MEILI_GROCERY_INDEX_DEFAULT,
   MEILI_GROCERY_OFFERS_V1_SETTINGS,
@@ -890,6 +892,7 @@ export {
   groceryMeiliFilterForSession,
   listGroceryDeliverySlots,
   listGroceryMeiliDocuments,
+  listGroceryOrders,
   placeGroceryOrder,
   publishGroceryOfferFromFactory,
   resolveGroceryCertBadge,

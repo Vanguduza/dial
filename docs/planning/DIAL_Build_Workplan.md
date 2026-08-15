@@ -748,6 +748,49 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Admin orders queue (spare + grocery) | **PD55** |
+| Dispatch manual override assign | **PD56** |
+| Daily ZiG four-eyes approve | **PD57** |
+| Customer delivery track read-only | **PD58** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+
+### PD55 — Admin orders queue (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | spare+grocery list → `/admin/orders` → advance status; no liquor; payableFromAi=false |
+| Evidence | `runPd55AdminOrdersThinVertical`; `pd55Pd58Ops.test.ts` |
+| Green → | **PD56** manual override |
+
+### PD56 — Dispatch manual override assign (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | FIFO job → `manualOverrideAssign` → assigned; leave FIFO |
+| Evidence | `runPd56ManualOverrideAssignThinVertical`; `pd55Pd58Ops.test.ts` |
+| Green → | **PD57** ZiG four-eyes |
+
+### PD57 — Daily ZiG four-eyes (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | propose → same-actor blocked → second ops approve → active rate |
+| Evidence | `runPd57DailyZigFourEyesThinVertical`; `pd55Pd58Ops.test.ts` |
+| Green → | **PD58** customer track |
+
+### PD58 — Customer delivery track (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | session + order ownership → read-only MapLibre pin `/delivery/track` |
+| Evidence | `runPd58CustomerDeliveryTrackThinVertical`; `pd55Pd58Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD58)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 

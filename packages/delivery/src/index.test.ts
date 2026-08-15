@@ -190,6 +190,25 @@ test("PD51 courier UX: POD photo + float banner ack", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD56 manual override assign from FIFO", async () => {
+  const { runPd56ManualOverrideAssignThinVertical } = await import("./index.js");
+  const out = runPd56ManualOverrideAssignThinVertical({
+    courierId: "cour_pd56_t",
+  });
+  assert.equal(out.status, "assigned");
+  assert.equal(out.removedFromFifo, true);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD58 customer delivery track read-only", async () => {
+  const { runPd58CustomerDeliveryTrackThinVertical } = await import("./index.js");
+  const out = runPd58CustomerDeliveryTrackThinVertical();
+  assert.equal(out.readOnly, true);
+  assert.equal(out.hasLocation, true);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

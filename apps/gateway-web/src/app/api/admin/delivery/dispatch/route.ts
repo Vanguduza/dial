@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import {
   createDeliveryJob,
   getDispatchBoardSnapshot,
+  manualOverrideAssign,
   setCourierAvailabilityStatus,
   startDeliveryDispatchWorkflow,
 } from "@dial/delivery";
@@ -115,6 +116,32 @@ export async function POST(req: Request) {
           offerId: board.jobs.find((j) => j.id === job.id)?.offerId,
           workflowPhase: wf.phase,
           fifoJobIds: board.fifoJobIds,
+        });
+      }
+      case "manual_override_assign": {
+        const jobId = String(body.jobId ?? "");
+        const courierId = String(body.courierId ?? "");
+        const assignedBy = String(body.assignedBy ?? "ops_dispatch");
+        if (!jobId || !courierId) {
+          return NextResponse.json(
+            { error: "jobId and courierId required" },
+            { status: 400 },
+          );
+        }
+        const job = manualOverrideAssign({ jobId, courierId, assignedBy });
+        const board = getDispatchBoardSnapshot();
+        refreshMetricBindings(board);
+        return NextResponse.json({
+          ok: true,
+          job: {
+            id: job.id,
+            status: job.status,
+            assignedCourierId: job.assignedCourierId,
+            orderId: job.orderId,
+          },
+          fifoJobIds: board.fifoJobIds,
+          payableFromAi: false,
+          note: "PD56 — manual override assign",
         });
       }
       default:

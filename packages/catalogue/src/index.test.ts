@@ -18,6 +18,7 @@ import {
   searchOffersByChassis,
   runPd27SpareDualEntryThinVertical,
   runPd54GroceryDemandGapThinVertical,
+  runPd55AdminOrdersThinVertical,
 } from "./index.js";
 
 describe("catalogue", { concurrency: false }, () => {
@@ -302,6 +303,15 @@ test("PD54 grocery Meili demand-gap thin vertical", () => {
   assert.equal(out.liquorAllowed, false);
   assert.equal(out.payableFromAi, false);
   assert.equal(out.vertical, "grocery");
+});
+
+test("PD55 admin orders thin vertical", () => {
+  const out = runPd55AdminOrdersThinVertical();
+  assert.equal(out.spareAdvanced, true);
+  assert.equal(out.groceryAdvanced, true);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.liquorAllowed, false);
+  assert.ok(out.queueCount >= 2);
 });
 
 test("PD27 dual entry Select Vehicle + Browse EPC join on chassis; USD; B2B hide informal", () => {

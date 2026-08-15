@@ -57,6 +57,26 @@ export type FxDailyRate = {
   setBy: string;
 };
 
+/** PD57 — four-eyes proposal before Daily ZiG activates (Pack §9.5). */
+export type FxRateProposal = {
+  proposalId: string;
+  zigMinorPerUsd: bigint;
+  proposedBy: string;
+  status: "pending" | "approved" | "rejected";
+  approvedBy: string | null;
+  rejectedBy: string | null;
+  fxRateId: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
+  payableFromAi: false;
+};
+
+function fxProposalStore(): FxRateProposal[] {
+  const g = globalThis as { __dialFxProposals?: FxRateProposal[] };
+  if (!g.__dialFxProposals) g.__dialFxProposals = [];
+  return g.__dialFxProposals;
+}
+
 export type PaymentIntent = {
   id: string;
   method: PaymentMethodCode;
@@ -155,6 +175,115 @@ export function getActiveFxRate(): FxDailyRate | undefined {
 /** Audit trail (who / when / effective / rate) — newest first. */
 export function listFxRateAudit(): readonly FxDailyRate[] {
   return fxStore();
+}
+
+/** PD57 — propose Daily ZiG (pending until second ops approves). */
+export function proposeDailyZigRate(input: {
+  zigMinorPerUsd: bigint;
+  proposedBy: string;
+}): FxRateProposal {
+  if (typeof input.zigMinorPerUsd !== "bigint" || input.zigMinorPerUsd <= 0n) {
+    throw new TypeError("zigMinorPerUsd must be positive bigint");
+  }
+  if (!input.proposedBy.trim()) throw new Error("proposedBy required");
+  const row: FxRateProposal = {
+    proposalId: id("fxp"),
+    zigMinorPerUsd: input.zigMinorPerUsd,
+    proposedBy: input.proposedBy.trim(),
+    status: "pending",
+    approvedBy: null,
+    rejectedBy: null,
+    fxRateId: null,
+    createdAt: new Date().toISOString(),
+    resolvedAt: null,
+    payableFromAi: false,
+  };
+  fxProposalStore().unshift(row);
+  return { ...row };
+}
+
+export function listFxRateProposals(filter?: {
+  status?: FxRateProposal["status"];
+}): FxRateProposal[] {
+  return fxProposalStore()
+    .filter((p) => (filter?.status ? p.status === filter.status : true))
+    .map((p) => ({ ...p }));
+}
+
+export function approveDailyZigRate(input: {
+  proposalId: string;
+  approvedBy: string;
+}): { proposal: FxRateProposal; rate: FxDailyRate } {
+  if (!input.approvedBy.trim()) throw new Error("approvedBy required");
+  const p = fxProposalStore().find((x) => x.proposalId === input.proposalId);
+  if (!p) throw new Error(`Unknown FX proposal ${input.proposalId}`);
+  if (p.status !== "pending") throw new Error(`Proposal already ${p.status}`);
+  if (p.proposedBy === input.approvedBy.trim()) {
+    throw new Error("four-eyes: approvedBy must differ from proposedBy");
+  }
+  const rate = setDailyZigRate({
+    zigMinorPerUsd: p.zigMinorPerUsd,
+    setBy: input.approvedBy.trim(),
+  });
+  p.status = "approved";
+  p.approvedBy = input.approvedBy.trim();
+  p.fxRateId = rate.fxRateId;
+  p.resolvedAt = new Date().toISOString();
+  return { proposal: { ...p }, rate };
+}
+
+export function rejectDailyZigRate(input: {
+  proposalId: string;
+  rejectedBy: string;
+}): FxRateProposal {
+  if (!input.rejectedBy.trim()) throw new Error("rejectedBy required");
+  const p = fxProposalStore().find((x) => x.proposalId === input.proposalId);
+  if (!p) throw new Error(`Unknown FX proposal ${input.proposalId}`);
+  if (p.status !== "pending") throw new Error(`Proposal already ${p.status}`);
+  p.status = "rejected";
+  p.rejectedBy = input.rejectedBy.trim();
+  p.resolvedAt = new Date().toISOString();
+  return { ...p };
+}
+
+/**
+ * PD57 thin vertical: propose → same-actor reject fail → second ops approve → active rate.
+ */
+export function runPd57DailyZigFourEyesThinVertical(): {
+  proposalId: string;
+  fourEyesEnforced: true;
+  activatedFxRateId: string;
+  payableFromAi: false;
+} {
+  __resetPaymentsForTests();
+  const proposal = proposeDailyZigRate({
+    zigMinorPerUsd: 2600_00n,
+    proposedBy: "ops_a",
+  });
+  let blocked = false;
+  try {
+    approveDailyZigRate({
+      proposalId: proposal.proposalId,
+      approvedBy: "ops_a",
+    });
+  } catch {
+    blocked = true;
+  }
+  if (!blocked) throw new Error("PD57 must block same-actor approve");
+  const { rate } = approveDailyZigRate({
+    proposalId: proposal.proposalId,
+    approvedBy: "ops_b",
+  });
+  const active = getActiveFxRate();
+  if (!active || active.fxRateId !== rate.fxRateId) {
+    throw new Error("PD57 approved rate must be active");
+  }
+  return {
+    proposalId: proposal.proposalId,
+    fourEyesEnforced: true,
+    activatedFxRateId: rate.fxRateId,
+    payableFromAi: false,
+  };
 }
 
 /** Convert USD minor → ZiG minor using active daily rate (integer math only). */
@@ -1264,6 +1393,7 @@ export async function runE1aMoneySpine(input: {
 /** Test helper — wipe in-memory stores. */
 export function __resetPaymentsForTests(): void {
   fxStore().length = 0;
+  fxProposalStore().length = 0;
   intentStore().clear();
   intentIdemStore().clear();
   codOrderStore().clear();

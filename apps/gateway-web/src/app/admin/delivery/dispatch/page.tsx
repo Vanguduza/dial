@@ -66,6 +66,37 @@ export default function AdminDispatchBoardPage() {
     }
   }
 
+  async function overrideAssign(jobId: string) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/delivery/dispatch", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({
+          action: "manual_override_assign",
+          jobId,
+          courierId: "cour_ops_override",
+          assignedBy: "ops_dispatch",
+        }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        job?: { id: string; status: string; assignedCourierId?: string };
+      };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage(
+        `Override assigned ${data.job?.id} → ${data.job?.assignedCourierId} (${data.job?.status})`,
+      );
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main
       style={{
@@ -162,6 +193,14 @@ export default function AdminDispatchBoardPage() {
               {board.fifoJobIds.map((id) => (
                 <li key={id}>
                   <code>{id}</code>
+                  <button
+                    type="button"
+                    disabled={busy || !secret}
+                    onClick={() => void overrideAssign(id)}
+                    style={{ marginLeft: 8 }}
+                  >
+                    Manual override assign
+                  </button>
                 </li>
               ))}
             </ul>

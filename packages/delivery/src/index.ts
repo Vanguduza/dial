@@ -348,6 +348,67 @@ export function acceptOffer(offerId: string, courierId: CourierId): DeliveryJob 
   return { ...job };
 }
 
+/**
+ * PD56 — ops manual override assign (Pack §9.5). Cancels pending offer if any;
+ * removes from FIFO; assigns courier. Audit via assignedBy (not money).
+ */
+export function manualOverrideAssign(input: {
+  jobId: string;
+  courierId: CourierId;
+  assignedBy: string;
+}): DeliveryJob {
+  if (!input.assignedBy.trim()) throw new Error("assignedBy required");
+  const job = jobs.get(input.jobId);
+  if (!job) throw new Error("Unknown job");
+  if (job.status === "pod_captured" || job.status === "cancelled") {
+    throw new Error(`Cannot override assign job in status ${job.status}`);
+  }
+  if (job.offerId) {
+    const offer = offers.get(job.offerId);
+    if (offer && offer.status === "pending") {
+      offer.status = "rejected";
+    }
+  }
+  const idx = fifoQueue.indexOf(input.jobId);
+  if (idx >= 0) fifoQueue.splice(idx, 1);
+  job.status = "assigned";
+  job.assignedCourierId = input.courierId;
+  setCourierAvailabilityStatus(input.courierId, "busy");
+  const wf = [...workflows.values()].find((w) => w.jobId === job.id);
+  if (wf) wf.phase = "accepted";
+  return { ...job };
+}
+
+/**
+ * PD58 — customer read-only track for a delivery job tied to orderId.
+ * Object-level: caller must already authorize order ownership (D-47).
+ */
+export function getCustomerDeliveryTrack(input: {
+  orderId: string;
+}): {
+  orderId: string;
+  job: DeliveryJob | null;
+  location: CourierLocation | null;
+  mapSor: "maplibre";
+  readOnly: true;
+  payableFromAi: false;
+} {
+  const job =
+    [...jobs.values()].find((j) => j.orderId === input.orderId) ?? null;
+  const location =
+    job?.assignedCourierId != null
+      ? courierLocations.get(job.assignedCourierId) ?? null
+      : null;
+  return {
+    orderId: input.orderId,
+    job: job ? { ...job } : null,
+    location: location ? { ...location } : null,
+    mapSor: "maplibre",
+    readOnly: true,
+    payableFromAi: false,
+  };
+}
+
 export function rejectOffer(offerId: string, courierId: CourierId): DeliveryOffer {
   const offer = offers.get(offerId);
   if (!offer) throw new Error("Unknown offer");
@@ -934,6 +995,101 @@ export function runPd51CourierUxThinVertical(input?: {
     mapSor: "maplibre",
     payableFromAi: false,
     currency: "USD",
+  };
+}
+
+/**
+ * PD56 thin vertical: FIFO job → manual override assign → transit.
+ */
+export function runPd56ManualOverrideAssignThinVertical(input?: {
+  courierId?: string;
+}): {
+  jobId: string;
+  assignedCourierId: string;
+  status: "assigned";
+  removedFromFifo: true;
+  payableFromAi: false;
+  mapSor: "maplibre";
+} {
+  const courierId = input?.courierId ?? "cour_pd56";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "offline");
+  const job = createDeliveryJob({
+    orderId: "ord_pd56",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 15_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  if (!listFifoQueue().includes(job.id)) {
+    throw new Error("PD56 expected FIFO when no couriers available");
+  }
+  const assigned = manualOverrideAssign({
+    jobId: job.id,
+    courierId,
+    assignedBy: "ops_pd56",
+  });
+  if (assigned.status !== "assigned" || assigned.assignedCourierId !== courierId) {
+    throw new Error("PD56 override assign failed");
+  }
+  if (listFifoQueue().includes(job.id)) {
+    throw new Error("PD56 job must leave FIFO after override");
+  }
+  return {
+    jobId: job.id,
+    assignedCourierId: courierId,
+    status: "assigned",
+    removedFromFifo: true,
+    payableFromAi: false,
+    mapSor: "maplibre",
+  };
+}
+
+/**
+ * PD58 thin vertical: assign job for order → post location → customer read-only track.
+ */
+export function runPd58CustomerDeliveryTrackThinVertical(input?: {
+  courierId?: string;
+  orderId?: string;
+}): {
+  orderId: string;
+  hasLocation: true;
+  readOnly: true;
+  mapSor: "maplibre";
+  payableFromAi: false;
+} {
+  const courierId = input?.courierId ?? "cour_pd58";
+  const orderId = input?.orderId ?? "ord_pd58";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+  const job = createDeliveryJob({
+    orderId,
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 12_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD58 expected offer");
+  acceptOffer(offered.offerId, courierId);
+  postCourierLocation({
+    courierId,
+    lat: -17.83,
+    lng: 31.05,
+    jobId: job.id,
+  });
+  const track = getCustomerDeliveryTrack({ orderId });
+  if (!track.readOnly || track.mapSor !== "maplibre") {
+    throw new Error("PD58 track must be read-only MapLibre");
+  }
+  if (!track.location) throw new Error("PD58 expected courier location");
+  if (track.payableFromAi) throw new Error("PD58 payableFromAi must be false");
+  return {
+    orderId,
+    hasLocation: true,
+    readOnly: true,
+    mapSor: "maplibre",
+    payableFromAi: false,
   };
 }
 

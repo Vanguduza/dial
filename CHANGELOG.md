@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD58 Customer delivery track** — session-owned order → read-only MapLibre pin (`/delivery/track`); not Google/Mapbox SoR.
+- **PD57 Daily ZiG four-eyes** — propose → different ops approve before active rate; same-actor blocked (D-57 / Pack §9.5).
+- **PD56 Dispatch manual override assign** — FIFO → `manualOverrideAssign` on `/admin/delivery/dispatch` (D-45).
+- **PD55 Admin orders queue** — spare + grocery list/advance on `/admin/orders`; food only; no liquor; no AI money.
 - **PD54 Grocery Meili demand-gap admin** — grocery-vertical no-result rollup; `/admin/grocery/demand-gap`; food only; no liquor; no AI money.
 - **PD53 Admin disputes queue** — Value Score open→uphold|reject; append-only compensate; `/admin/disputes` (≠ money/ledger).
 - **PD52 Technician Take-Home polish** — ITF263 upload/verify + gross→fee→WHT breakdown on `/admin/tech/take-home` (D-50).
