@@ -29,6 +29,11 @@ test("G1 Meili grocery_offers_v1 settings + index name", () => {
     ),
   );
   assert.ok(
+    MEILI_GROCERY_OFFERS_V1_SETTINGS.filterableAttributes.includes(
+      "supplierKycStatus",
+    ),
+  );
+  assert.ok(
     MEILI_GROCERY_OFFERS_V1_SETTINGS.filterableAttributes.includes("vertical"),
   );
   const docs = listGroceryMeiliDocuments();

@@ -101,9 +101,9 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 138 | `PD32` | **Delivery COD float-limit warning** — Pack §9.8 residual | workplan | optional COD float warn | `PD33` |
 | 139 | `PD33` | **Staging recon / dogfood harden** — Spare + grocery food + Meta WA | [#37](https://github.com/Vanguduza/dial/issues/37) | dial-webapp-recon; sandbox rails | `PD34` |
 | 140 | `PD34` | **B2B grocery polish + take-rate admin** — Wave 3 leftovers | [#38](https://github.com/Vanguduza/dial/issues/38) | formal-only UX deepen; take-rate scaffold | `PD35` |
-| 141 | `PD35` | **Grocery brand polish + KYC cert badge** — Wave 3 leftover | workplan | formal cert display; brand polish | expand |
+| 141 | `PD35` | **Grocery brand polish + KYC cert badge** — Wave 3 leftover | [#39](https://github.com/Vanguduza/dial/issues/39) | formal cert display; brand polish | expand |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD34 is **PD35**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD35 is Wave 3 expand / human gates — **not S99**. Product ≠ finished at S99.
 
 
 ---
@@ -507,9 +507,22 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Multi-stop delivery detail deepen | defer / fold later |
 | Playwright live staging networkidle (ENH-011) | defer until staging URL |
 
-### PD35 — Grocery brand polish + KYC cert badge (NEXT)
+### PD35 — Grocery brand polish + KYC cert badge (**GREEN** 2026-08-15)
 
-Wave 3 leftover — formal supplier KYC cert badge on grocery browse; light brand polish. Display only — not a money path.
+| | |
+| --- | --- |
+| Issue | [#39](https://github.com/Vanguduza/dial/issues/39) |
+| Thin path | formal chilled food-safety badge → ambient KYC badge → informal never; Dial Groceries brand polish |
+| Evidence | `runPd35GroceryBrandKycThinVertical`; `groceryCert.test.ts`; `pd35GroceryBrandKyc.test.ts` |
+| Green → | Wave 3 eng leftovers closed; next ≠ S99 (human staging URL / counsel) |
+
+### Pack / product gap audit (after PD35)
+
+| Gap | Stage |
+| --- | --- |
+| Multi-stop delivery detail deepen | defer / fold later |
+| Playwright live staging networkidle (ENH-011) | defer until staging URL (human) |
+| Liquor Build | counsel gate — not eng |
 
 ### S10 — E2a (historical)
 

@@ -8,6 +8,10 @@ import { type Money, money } from "@dial/shared";
 export type GroceryVertical = "grocery"; // liquor deferred — counsel gate
 export type GroceryColdChain = "ambient" | "chilled" | "frozen" | "fragile";
 export type GroceryAvailability = "available" | "confirm_required" | "sourcing";
+/** PD35 — supplier KYC before payout; display only on browse. */
+export type SupplierKycStatus = "verified" | "pending" | "none";
+/** PD35 — chilled/frozen require food-safety cert (Wave 3 Q10). */
+export type FoodSafetyCertStatus = "certified" | "missing" | "n_a";
 
 export type GroceryOffer = {
   offerId: string;
@@ -28,6 +32,10 @@ export type GroceryOffer = {
   offerSource: "MARKETPLACE";
   supplierFormality: "formal" | "informal";
   supplierDisplayName: string;
+  /** Formal suppliers: KYC before first payout (display). Informal = none. */
+  supplierKycStatus: SupplierKycStatus;
+  /** Chilled/frozen formal: food-safety cert required (display). */
+  foodSafetyCertStatus: FoodSafetyCertStatus;
 };
 
 export type GroceryOfferDocument = {
@@ -51,6 +59,15 @@ export type GroceryOfferDocument = {
   offerSource: "MARKETPLACE";
   supplierFormality: "formal" | "informal";
   supplierDisplayName: string;
+  supplierKycStatus: SupplierKycStatus;
+  foodSafetyCertStatus: FoodSafetyCertStatus;
+};
+
+/** Browse badge — display only; never a payable / payout gate in this slice. */
+export type GroceryCertBadge = {
+  kind: "kyc_verified" | "food_safety_certified" | "food_safety_required";
+  label: string;
+  testId: string;
 };
 
 export const MEILI_GROCERY_INDEX_DEFAULT = "grocery_offers_v1";
@@ -78,6 +95,8 @@ export const MEILI_GROCERY_OFFERS_V1_SETTINGS = {
     "stockValidUntil",
     "offerSource",
     "supplierFormality",
+    "supplierKycStatus",
+    "foodSafetyCertStatus",
   ],
   sortableAttributes: ["priceMinor", "stockValidUntil"],
   displayedAttributes: [
@@ -101,6 +120,8 @@ export const MEILI_GROCERY_OFFERS_V1_SETTINGS = {
     "offerSource",
     "supplierFormality",
     "supplierDisplayName",
+    "supplierKycStatus",
+    "foodSafetyCertStatus",
   ],
 } as const;
 
@@ -124,6 +145,8 @@ const GROCERY_SEED: GroceryOffer[] = [
     offerSource: "MARKETPLACE",
     supplierFormality: "formal",
     supplierDisplayName: "OK Express Agency",
+    supplierKycStatus: "verified",
+    foodSafetyCertStatus: "certified",
   },
   {
     offerId: "groc_rice_2kg",
@@ -144,6 +167,8 @@ const GROCERY_SEED: GroceryOffer[] = [
     offerSource: "MARKETPLACE",
     supplierFormality: "formal",
     supplierDisplayName: "OK Express Agency",
+    supplierKycStatus: "verified",
+    foodSafetyCertStatus: "n_a",
   },
   {
     offerId: "groc_bread_informal",
@@ -164,6 +189,8 @@ const GROCERY_SEED: GroceryOffer[] = [
     offerSource: "MARKETPLACE",
     supplierFormality: "informal",
     supplierDisplayName: "Corner Bakery",
+    supplierKycStatus: "none",
+    foodSafetyCertStatus: "n_a",
   },
 ];
 
@@ -212,6 +239,8 @@ export function publishGroceryOfferFromFactory(input: {
   supplierDisplayName: string;
   description?: string;
   categoryPath?: string[];
+  supplierKycStatus?: SupplierKycStatus;
+  foodSafetyCertStatus?: FoodSafetyCertStatus;
 }): GroceryOffer {
   assertGroceryPublishAllowed({
     offerSource: "MARKETPLACE",
@@ -221,6 +250,17 @@ export function publishGroceryOfferFromFactory(input: {
   if (input.unitPriceUsdMinor <= 0n) {
     throw new Error("unitPriceUsdMinor must be positive integer minor units");
   }
+  const coldNeedsCert =
+    input.coldChain === "chilled" || input.coldChain === "frozen";
+  const supplierKycStatus =
+    input.supplierFormality === "informal"
+      ? "none"
+      : (input.supplierKycStatus ?? "pending");
+  const foodSafetyCertStatus =
+    input.supplierFormality === "informal"
+      ? "n_a"
+      : (input.foodSafetyCertStatus ??
+        (coldNeedsCert ? "missing" : "n_a"));
   const existing = store().offers.findIndex((o) => o.offerId === input.offerId);
   const offer: GroceryOffer = {
     offerId: input.offerId,
@@ -241,6 +281,8 @@ export function publishGroceryOfferFromFactory(input: {
     offerSource: "MARKETPLACE",
     supplierFormality: input.supplierFormality,
     supplierDisplayName: input.supplierDisplayName,
+    supplierKycStatus,
+    foodSafetyCertStatus,
   };
   if (existing >= 0) {
     store().offers[existing] = offer;
@@ -248,6 +290,98 @@ export function publishGroceryOfferFromFactory(input: {
     store().offers.push(offer);
   }
   return { ...offer };
+}
+
+/**
+ * PD35 — resolve browse cert badge (display only).
+ * Informal never badges. Chilled/frozen formal prefer food-safety; else KYC.
+ */
+export function resolveGroceryCertBadge(
+  offer: Pick<
+    GroceryOffer,
+    | "supplierFormality"
+    | "coldChain"
+    | "supplierKycStatus"
+    | "foodSafetyCertStatus"
+  >,
+): GroceryCertBadge | null {
+  if (offer.supplierFormality === "informal") return null;
+  const coldNeedsCert =
+    offer.coldChain === "chilled" || offer.coldChain === "frozen";
+  if (coldNeedsCert) {
+    if (offer.foodSafetyCertStatus === "certified") {
+      return {
+        kind: "food_safety_certified",
+        label: "Food-safety certified",
+        testId: "cert-food-safety",
+      };
+    }
+    return {
+      kind: "food_safety_required",
+      label: "Food-safety cert required",
+      testId: "cert-food-safety-required",
+    };
+  }
+  if (offer.supplierKycStatus === "verified") {
+    return {
+      kind: "kyc_verified",
+      label: "KYC verified",
+      testId: "cert-kyc",
+    };
+  }
+  return null;
+}
+
+/**
+ * PD35 thin vertical: formal chilled shows food-safety badge; ambient KYC;
+ * informal never badges; brand polish fields present; USD/agency locks.
+ */
+export function runPd35GroceryBrandKycThinVertical(): {
+  chilledBadge: "food_safety_certified";
+  ambientBadge: "kyc_verified";
+  informalBadge: null;
+  brandPolish: true;
+  currencyUsd: true;
+  payableFromAi: false;
+  liquorAllowed: false;
+  b2bFormalOnly: true;
+} {
+  __resetGroceryForTests();
+  const chilled = getGroceryOffer("groc_milk_1l");
+  const ambient = getGroceryOffer("groc_rice_2kg");
+  const informal = getGroceryOffer("groc_bread_informal");
+  if (!chilled || !ambient || !informal) {
+    throw new Error("PD35 seed offers missing");
+  }
+  const chilledBadge = resolveGroceryCertBadge(chilled);
+  const ambientBadge = resolveGroceryCertBadge(ambient);
+  const informalBadge = resolveGroceryCertBadge(informal);
+  if (chilledBadge?.kind !== "food_safety_certified") {
+    throw new Error("PD35 chilled formal must show food-safety certified");
+  }
+  if (ambientBadge?.kind !== "kyc_verified") {
+    throw new Error("PD35 ambient formal must show KYC verified");
+  }
+  if (informalBadge !== null) {
+    throw new Error("PD35 informal must never show cert badge");
+  }
+  if (!chilled.brand || !ambient.brand) {
+    throw new Error("PD35 brand polish requires brand on offers");
+  }
+  const b2b = searchGroceryOffers("", { sessionRole: "b2b" });
+  if (b2b.some((o) => o.supplierFormality === "informal")) {
+    throw new Error("PD35 B2B must hide informal (D-49)");
+  }
+  return {
+    chilledBadge: "food_safety_certified",
+    ambientBadge: "kyc_verified",
+    informalBadge: null,
+    brandPolish: true,
+    currencyUsd: true,
+    payableFromAi: false,
+    liquorAllowed: false,
+    b2bFormalOnly: true,
+  };
 }
 
 export type GroceryCartLine = {
@@ -340,6 +474,8 @@ function toDoc(o: GroceryOffer): GroceryOfferDocument {
     offerSource: o.offerSource,
     supplierFormality: o.supplierFormality,
     supplierDisplayName: o.supplierDisplayName,
+    supplierKycStatus: o.supplierKycStatus,
+    foodSafetyCertStatus: o.foodSafetyCertStatus,
   };
 }
 

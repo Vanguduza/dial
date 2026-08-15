@@ -11,7 +11,8 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
-- **PD34 B2B grocery + take-rate admin** — formal-only browse banner (D-49); `@dial/catalogue` take-rate ladder draft→publish→resolve integer bps (`payableFromAi=false`); `/admin/grocery/take-rate`; [#38](https://github.com/Vanguduza/dial/issues/38); eng next **PD35**.
+- **PD35 Grocery brand polish + KYC cert badge** — Dial Groceries brand hero; formal chilled/frozen food-safety + ambient KYC browse badges; informal never badges; display only (not money); [#39](https://github.com/Vanguduza/dial/issues/39); Wave 3 eng leftovers closed (next ≠ S99).
+- **PD34 B2B grocery + take-rate admin** — formal-only browse banner (D-49); `@dial/catalogue` take-rate ladder draft→publish→resolve integer bps (`payableFromAi=false`); `/admin/grocery/take-rate`; [#38](https://github.com/Vanguduza/dial/issues/38).
 - **PD33 Staging dogfood recon** — Spare + grocery food + Meta WA Flows recon-then-act harness; B2B informal grocery cart 403 (D-49); sandbox WA+FDMS rails; Meili index SoR; [#37](https://github.com/Vanguduza/dial/issues/37); eng next **PD34**.
 - **PD32 Delivery COD float-limit warning** — USD `amountMinor` float gate; warn when projected held exceeds limit; block until courier ack; Compose + `/api/delivery/courier`; Pack §9 residual band closed (eng next ≠ S99).
 - **PD31 Technician Bluetooth ESC/POS print hooks** — pair thermal printer + print job ticket (D-46 pattern); ops hook only — not ZIMRA fiscal SoR (D-40a virtual FDMS); Compose + `/api/tech/technician`; eng next **PD32**.

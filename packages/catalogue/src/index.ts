@@ -825,15 +825,20 @@ export {
   listGroceryMeiliDocuments,
   placeGroceryOrder,
   publishGroceryOfferFromFactory,
+  resolveGroceryCertBadge,
+  runPd35GroceryBrandKycThinVertical,
   searchGroceryOffers,
   setGroceryCartSlot,
   trackGroceryOrder,
+  type FoodSafetyCertStatus,
   type GroceryCart,
+  type GroceryCertBadge,
   type GroceryDeliverySlot,
   type GroceryOffer,
   type GroceryOfferDocument,
   type GroceryOrder,
   type GroceryOrderStatus,
+  type SupplierKycStatus,
 } from "./grocery.js";
 
 export {
