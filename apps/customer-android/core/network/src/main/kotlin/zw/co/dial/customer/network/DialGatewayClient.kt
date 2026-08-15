@@ -220,9 +220,11 @@ class DialGatewayClient(
         require(choice == "ecocash" || choice == "cod") {
             "choice must be ecocash|cod (D-57)"
         }
-        // D-47: never send userId/role in body.
+        // D-47: never send userId/role in body. PD97: Idempotency-Key required.
         val body =
             """{"offerId":${jsonString(offerId)},"choice":${jsonString(choice)},"qty":$qty}"""
+        val idem =
+            "android-$choice-$offerId-${System.currentTimeMillis()}"
         val res =
             transport.request(
                 method = "POST",
@@ -231,6 +233,7 @@ class DialGatewayClient(
                     mapOf(
                         "Content-Type" to "application/json",
                         "Accept" to "application/json",
+                        "Idempotency-Key" to idem,
                     ),
                 body = body,
                 cookieHeader = cookies.getCookieHeader(),

@@ -251,7 +251,22 @@ export function classifyJob(input: {
   return { jobClassId: "jc_diag", tradeId: "trade_auto" };
 }
 
-/** Assignment eligibility — active class + minimum value score. */
+export type TechnicianCredentialKind = "trade_licence" | "itf263" | "other";
+export type TechnicianCredentialStatus = "verified" | "pending" | "expired";
+
+export type TechnicianCredential = {
+  credentialId: string;
+  technicianId: string;
+  kind: TechnicianCredentialKind;
+  status: TechnicianCredentialStatus;
+  label: string;
+  updatedAt: string;
+  payableFromAi: false;
+};
+
+const technicianCredentials = new Map<string, TechnicianCredential[]>();
+
+/** Assignment eligibility — active class + minimum value score + verified credential (PD98). */
 export function isTechnicianEligible(input: {
   technicianId: string;
   jobClassId: string;
@@ -261,7 +276,92 @@ export function isTechnicianEligible(input: {
   if (!jc || jc.lifecycle !== "active") return false;
   const snap = valueScores.get(input.technicianId);
   const min = input.minScore ?? 0;
-  return (snap?.score ?? 0) >= min;
+  if ((snap?.score ?? 0) < min) return false;
+  const creds = technicianCredentials.get(input.technicianId) ?? [];
+  const hasVerifiedTrade = creds.some(
+    (c) => c.kind === "trade_licence" && c.status === "verified",
+  );
+  return hasVerifiedTrade;
+}
+
+export function setTechnicianCredential(input: {
+  technicianId: string;
+  kind: TechnicianCredentialKind;
+  status: TechnicianCredentialStatus;
+  label?: string;
+}): TechnicianCredential {
+  if (!input.technicianId.trim()) throw new Error("technicianId required");
+  const row: TechnicianCredential = {
+    credentialId: newId("cred"),
+    technicianId: input.technicianId.trim(),
+    kind: input.kind,
+    status: input.status,
+    label: input.label ?? input.kind,
+    updatedAt: new Date().toISOString(),
+    payableFromAi: false,
+  };
+  const list = technicianCredentials.get(row.technicianId) ?? [];
+  const withoutKind = list.filter((c) => c.kind !== row.kind);
+  withoutKind.push(row);
+  technicianCredentials.set(row.technicianId, withoutKind);
+  return { ...row };
+}
+
+export function listTechnicianCredentials(
+  technicianId: string,
+): TechnicianCredential[] {
+  return (technicianCredentials.get(technicianId) ?? []).map((c) => ({
+    ...c,
+  }));
+}
+
+/**
+ * PD98 thin vertical: pending credential blocks eligibility; verified unlocks.
+ */
+export function runPd98TechnicianCredentialsThinVertical(): {
+  blockedWithoutCredential: true;
+  eligibleWhenVerified: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  const technicianId = "tech_pd98";
+  setValueScoreSnapshot({ technicianId, score: 80, sampleN: 20 });
+  if (
+    isTechnicianEligible({ technicianId, jobClassId: "jc_diag", minScore: 50 })
+  ) {
+    throw new Error("PD98 must block without verified trade_licence");
+  }
+  setTechnicianCredential({
+    technicianId,
+    kind: "trade_licence",
+    status: "pending",
+    label: "Automotive trade",
+  });
+  if (
+    isTechnicianEligible({ technicianId, jobClassId: "jc_diag", minScore: 50 })
+  ) {
+    throw new Error("PD98 pending must still block");
+  }
+  setTechnicianCredential({
+    technicianId,
+    kind: "trade_licence",
+    status: "verified",
+    label: "Automotive trade",
+  });
+  if (
+    !isTechnicianEligible({
+      technicianId,
+      jobClassId: "jc_diag",
+      minScore: 50,
+    })
+  ) {
+    throw new Error("PD98 verified must unlock eligibility");
+  }
+  return {
+    blockedWithoutCredential: true,
+    eligibleWhenVerified: true,
+    payableFromAi: false,
+  };
 }
 
 export function setValueScoreSnapshot(input: {
@@ -1574,6 +1674,7 @@ export function __resetJobsForTests(): void {
   checklistRuns.clear();
   bookedSlotIds.clear();
   technicianAvailability.clear();
+  technicianCredentials.clear();
   trades.length = 0;
   trades.push(...TRADE_SEED.map((t) => ({ ...t })));
   jobClasses.length = 0;

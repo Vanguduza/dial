@@ -52,6 +52,7 @@ test("PD8 gateway spare checkout still USD→ZWG EcoCash for iOS path", async ()
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "Idempotency-Key": "pd8-ios-eco",
         cookie: `${sessionCookieName()}=${token}`,
       },
       body: JSON.stringify({

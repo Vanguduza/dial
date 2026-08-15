@@ -1287,6 +1287,68 @@ export async function runPd4MoneySpine(input: {
 export type CheckoutPayChoice = "ecocash" | "cod";
 
 /**
+ * PD97 — Pack §10: Idempotency-Key required on pay paths (header SoR).
+ */
+export function requireIdempotencyKey(
+  headers: Headers | { get(name: string): string | null },
+): string {
+  const raw =
+    headers.get("Idempotency-Key") ??
+    headers.get("idempotency-key") ??
+    "";
+  const key = raw.trim();
+  if (!key) {
+    throw new Error("Idempotency-Key header required");
+  }
+  if (key.length > 256) {
+    throw new Error("Idempotency-Key too long");
+  }
+  return key;
+}
+
+/**
+ * PD97 thin vertical: missing key fails; same key replays checkout intent.
+ */
+export async function runPd97IdempotencyKeyThinVertical(): Promise<{
+  missingRejected: true;
+  replaySameIntent: true;
+  payableFromAi: false;
+}> {
+  __resetPaymentsForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "pd97" });
+  let missingRejected = false;
+  try {
+    requireIdempotencyKey(new Headers());
+  } catch (e) {
+    missingRejected =
+      e instanceof Error && e.message.includes("Idempotency-Key");
+  }
+  if (!missingRejected) throw new Error("PD97 expected missing key reject");
+
+  const key = "pd97-idem-1";
+  const a = await createCheckoutPayment({
+    choice: "ecocash",
+    orderId: "ord_pd97",
+    amountUsdMinor: 12_00n,
+    idempotencyKey: key,
+  });
+  const b = await createCheckoutPayment({
+    choice: "ecocash",
+    orderId: "ord_pd97",
+    amountUsdMinor: 12_00n,
+    idempotencyKey: key,
+  });
+  if (!a.intent || !b.intent || a.intent.id !== b.intent.id) {
+    throw new Error("PD97 expected same intent on replay");
+  }
+  return {
+    missingRejected: true,
+    replaySameIntent: true,
+    payableFromAi: false,
+  };
+}
+
+/**
  * FLOW_SPARE_CHECKOUT pay step — required EcoCash | COD buttons only (D-57).
  * Not free-text method selection.
  */

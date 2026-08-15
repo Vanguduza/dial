@@ -1186,6 +1186,50 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Spare collections + Meili facets | **PD95** |
+| Promo validate/apply → checkout draft | **PD96** |
+| Idempotency-Key on pay | **PD97** |
+| Technician credentials eligibility | **PD98** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD95 — Spare facets + collections (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | collections + quality/availability/brand/chassis facets |
+| Evidence | `runPd95SpareFacetsCollectionsThinVertical`; `/api/search/spare`; `pd95Pd98Ops.test.ts` |
+| Green → | **PD96** promo cart wire |
+
+### PD96 — Promo draft → checkout (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | validate/apply draft on cart; checkout echoes draft (not payable) |
+| Evidence | `runPd96PromoCartCheckoutThinVertical`; spare checkout `promoDraft` |
+| Green → | **PD97** Idempotency-Key |
+
+### PD97 — Idempotency-Key on pay (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | require header; same key replays intent |
+| Evidence | `runPd97IdempotencyKeyThinVertical`; spare checkout |
+| Green → | **PD98** tech credentials |
+
+### PD98 — Technician credentials (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | trade_licence verified gates `isTechnicianEligible` |
+| Evidence | `runPd98TechnicianCredentialsThinVertical`; tech API |
+| Green → | eng-safe Pack gap ≠ S99 |
+
+### Pack / product gap audit (after PD98)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 | Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |

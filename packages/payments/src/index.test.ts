@@ -268,6 +268,14 @@ test("PD76 WHT certificate download thin vertical", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD97 Idempotency-Key thin vertical", async () => {
+  const { runPd97IdempotencyKeyThinVertical } = await import("./index.js");
+  const out = await runPd97IdempotencyKeyThinVertical();
+  assert.equal(out.missingRejected, true);
+  assert.equal(out.replaySameIntent, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD57 Daily ZiG four-eyes thin vertical", () => {
   const out = runPd57DailyZigFourEyesThinVertical();
   assert.equal(out.fourEyesEnforced, true);

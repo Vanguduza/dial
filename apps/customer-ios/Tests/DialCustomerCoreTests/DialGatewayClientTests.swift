@@ -49,9 +49,10 @@ final class DialGatewayClientTests: XCTestCase {
     }
 
     func testCheckoutEcoCashWithoutIdentityInBody() throws {
-        let transport = MockTransport { method, url, _, body, _ in
+        let transport = MockTransport { method, url, headers, body, _ in
             XCTAssertEqual(method, "POST")
             XCTAssertTrue(url.hasSuffix("/api/spare/checkout"))
+            XCTAssertFalse(headers["Idempotency-Key"]?.isEmpty ?? true)
             XCTAssertTrue(body!.contains(#""choice":"ecocash""#))
             XCTAssertFalse(body!.contains("userId"))
             XCTAssertFalse(body!.contains("\"role\""))

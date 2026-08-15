@@ -486,6 +486,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-502 | **PD92 7-day order cancel** | `done` | Pack §9.2 / §10 |
 | ENH-503 | **PD93 Customer shadow failover** | `done` | Pack §9.2; PD71 SoR |
 | ENH-504 | **PD94 emergency.triage.v1** checklist | `done` | Pack §9.3 |
+| ENH-505 | **PD95 Spare facets + collections** | `done` | Pack §9.2 |
+| ENH-506 | **PD96 Promo draft → checkout** | `done` | Pack §10; D-42 |
+| ENH-507 | **PD97 Idempotency-Key on pay** | `done` | Pack §10 |
+| ENH-508 | **PD98 Technician credentials** | `done` | Pack technicians.credentials |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

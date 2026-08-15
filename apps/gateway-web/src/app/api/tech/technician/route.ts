@@ -31,6 +31,8 @@ import {
   resolveChecklistBySymptom,
   setJobSitePin,
   setValueScoreSnapshot,
+  setTechnicianCredential,
+  listTechnicianCredentials,
   startChecklistRun,
   submitChecklistAnswers,
   uploadJobEvidence,
@@ -38,6 +40,8 @@ import {
   setTechnicianAvailability,
   type ChecklistId,
   type TechnicianAvailabilityStatus,
+  type TechnicianCredentialKind,
+  type TechnicianCredentialStatus,
 } from "@dial/jobs";
 import {
   computeTakeHomeBreakdown,
@@ -173,6 +177,15 @@ export async function GET(req: Request) {
     });
   }
 
+  if (view === "credentials") {
+    return NextResponse.json({
+      technicianId,
+      credentials: listTechnicianCredentials(technicianId),
+      payableFromAi: false,
+      note: "PD98 — Pack technicians.credentials gate eligibility",
+    });
+  }
+
   return NextResponse.json({
     technicianId,
     jobs: listJobsForTechnician(technicianId).map(serializeJob),
@@ -180,6 +193,7 @@ export async function GET(req: Request) {
     valueScore: getValueScoreSnapshot(technicianId) ?? null,
     itf263: getItf263Record(technicianId, new Date().getFullYear()) ?? null,
     availability: getTechnicianAvailability(technicianId),
+    credentials: listTechnicianCredentials(technicianId),
     thermalPrinters: listThermalPrinters(technicianId),
     thermalPrintJobs: listThermalPrintJobs(technicianId),
     printNote: "ESC/POS Bluetooth ops — FDMS virtual API only (D-40a); not ZIMRA printer SoR",
@@ -524,6 +538,23 @@ export async function POST(req: Request) {
           availability,
           payableFromAi: false,
           note: "PD90 — technician availability set (session tech only)",
+        });
+      }
+      case "set_credential": {
+        const kind = String(body.kind ?? "trade_licence") as TechnicianCredentialKind;
+        const status = String(body.status ?? "pending") as TechnicianCredentialStatus;
+        const credential = setTechnicianCredential({
+          technicianId,
+          kind,
+          status,
+          ...(body.label != null ? { label: String(body.label) } : {}),
+        });
+        return NextResponse.json({
+          ok: true,
+          credential,
+          credentials: listTechnicianCredentials(technicianId),
+          payableFromAi: false,
+          note: "PD98 — credential gates matching eligibility",
         });
       }
       default:

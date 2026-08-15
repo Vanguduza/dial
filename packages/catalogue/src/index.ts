@@ -240,7 +240,7 @@ function toMeiliDoc(offer: StubOffer): SpareOfferDocument {
     availability: resolveOfferAvailability(offer),
     chassis_codes: chassisCodesForOffer(offer),
     engine_codes: [],
-    categoryPath: ["spares"],
+    categoryPath: categoryPathForOffer(offer),
     priceMinor: Number(offer.unitPriceUsdMinor),
     currency: "USD",
     warrantyDays: 90,
@@ -291,6 +291,142 @@ export function searchOffers(
   return hits;
 }
 
+export type SpareFacetFilters = {
+  brand?: string;
+  qualityTier?: StubOffer["qualityTier"];
+  availability?: OfferAvailability;
+  chassis?: string;
+  /** Pack §9.2 collection / categoryPath leaf */
+  collection?: string;
+};
+
+export type SpareCollection = {
+  id: string;
+  title: string;
+  count: number;
+};
+
+function categoryPathForOffer(offer: StubOffer): string[] {
+  const t = offer.title.toLowerCase();
+  if (t.includes("filter") || offer.offerId.includes("filter")) {
+    return ["spares", "filters"];
+  }
+  if (t.includes("pad") || t.includes("brake")) {
+    return ["spares", "brakes"];
+  }
+  if (t.includes("wiper")) {
+    return ["spares", "wipers"];
+  }
+  return ["spares"];
+}
+
+/** PD95 — Pack §9.2 home collections from categoryPath (fixture). */
+export function listSpareCollections(
+  sessionRole: SearchSessionRole = "b2c",
+): SpareCollection[] {
+  const counts = new Map<string, number>();
+  for (const o of searchOffers("", { sessionRole })) {
+    const path = categoryPathForOffer(o);
+    const leaf = path[path.length - 1] ?? "spares";
+    counts.set(leaf, (counts.get(leaf) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([id, count]) => ({
+      id,
+      title: id.charAt(0).toUpperCase() + id.slice(1),
+      count,
+    }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/**
+ * PD95 — Pack §9.2 search + Meili-style facets (fixture filter on seed attrs).
+ */
+export function searchOffersWithFacets(
+  query: string,
+  opts?: {
+    sessionRole?: SearchSessionRole;
+    facets?: SpareFacetFilters;
+  },
+): {
+  hits: StubOffer[];
+  facetsApplied: SpareFacetFilters;
+  collections: SpareCollection[];
+  payableFromAi: false;
+} {
+  const role = opts?.sessionRole ?? "b2c";
+  const facets = opts?.facets ?? {};
+  let hits = searchOffers(query, { sessionRole: role });
+  if (facets.brand) {
+    const b = facets.brand.toLowerCase();
+    hits = hits.filter((h) => h.brand.toLowerCase() === b);
+  }
+  if (facets.qualityTier) {
+    hits = hits.filter((h) => h.qualityTier === facets.qualityTier);
+  }
+  if (facets.availability) {
+    hits = hits.filter(
+      (h) => resolveOfferAvailability(h) === facets.availability,
+    );
+  }
+  if (facets.chassis?.trim()) {
+    const c = facets.chassis.trim().toUpperCase();
+    hits = hits.filter((h) =>
+      chassisCodesForOffer(h).some((code) => code.toUpperCase().includes(c)),
+    );
+  }
+  if (facets.collection?.trim()) {
+    const col = facets.collection.trim().toLowerCase();
+    hits = hits.filter((h) =>
+      categoryPathForOffer(h).some((p) => p.toLowerCase() === col),
+    );
+  }
+  return {
+    hits,
+    facetsApplied: { ...facets },
+    collections: listSpareCollections(role),
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD95 thin vertical: collections + facet filter (quality/availability/chassis).
+ */
+export function runPd95SpareFacetsCollectionsThinVertical(): {
+  collectionCount: number;
+  oesHits: number;
+  availableHits: number;
+  payableFromAi: false;
+} {
+  __resetCatalogueForTests();
+  const collections = listSpareCollections("b2c");
+  if (collections.length < 2) {
+    throw new Error("PD95 expected multiple collections");
+  }
+  const oes = searchOffersWithFacets("", {
+    sessionRole: "b2c",
+    facets: { qualityTier: "OES" },
+  });
+  if (oes.hits.length < 1 || oes.hits.some((h) => h.qualityTier !== "OES")) {
+    throw new Error("PD95 OES facet failed");
+  }
+  const avail = searchOffersWithFacets("", {
+    sessionRole: "b2c",
+    facets: { availability: "available" },
+  });
+  if (
+    avail.hits.some((h) => resolveOfferAvailability(h) !== "available")
+  ) {
+    throw new Error("PD95 availability facet failed");
+  }
+  return {
+    collectionCount: collections.length,
+    oesHits: oes.hits.length,
+    availableHits: avail.hits.length,
+    payableFromAi: false,
+  };
+}
+
 function stubOfferFromMeiliDoc(doc: SpareOfferDocument): StubOffer {
   const tier = doc.qualityTier;
   const qualityTier: StubOffer["qualityTier"] =
@@ -321,21 +457,29 @@ function stubOfferFromMeiliDoc(doc: SpareOfferDocument): StubOffer {
  */
 export async function searchOffersAsync(
   query: string,
-  opts?: { sessionRole?: SearchSessionRole },
+  opts?: { sessionRole?: SearchSessionRole; facets?: SpareFacetFilters },
 ): Promise<{
   hits: StubOffer[];
   source: "memory" | "meili";
   meiliFilter: string;
   indexUid: string;
+  collections?: SpareCollection[];
+  facetsApplied?: SpareFacetFilters;
 }> {
   const role = opts?.sessionRole ?? "b2c";
   const filter = meiliFilterForSession(role);
   if (integrationMode() === "fixture") {
+    const faceted = searchOffersWithFacets(query, {
+      sessionRole: role,
+      ...(opts?.facets ? { facets: opts.facets } : {}),
+    });
     return {
-      hits: searchOffers(query, { sessionRole: role }),
+      hits: faceted.hits,
       source: "memory",
       meiliFilter: filter,
       indexUid: process.env.MEILI_SPARE_INDEX?.trim() || "spare_offers_v1",
+      collections: faceted.collections,
+      facetsApplied: faceted.facetsApplied,
     };
   }
   const { searchSpareOfferDocuments, spareOffersIndexName } = await import(
@@ -350,11 +494,26 @@ export async function searchOffersAsync(
   if (query.trim() && hits.length === 0) {
     recordSearchNoResult(query.trim().toLowerCase(), role);
   }
+  const f = opts?.facets;
+  if (f?.brand) {
+    const b = f.brand.toLowerCase();
+    hits = hits.filter((h) => h.brand.toLowerCase() === b);
+  }
+  if (f?.qualityTier) {
+    hits = hits.filter((h) => h.qualityTier === f.qualityTier);
+  }
+  if (f?.availability) {
+    hits = hits.filter(
+      (h) => resolveOfferAvailability(h) === f.availability,
+    );
+  }
   return {
     hits,
     source: "meili",
     meiliFilter: filter,
     indexUid: result.indexUid || spareOffersIndexName(),
+    collections: listSpareCollections(role),
+    facetsApplied: f ?? {},
   };
 }
 

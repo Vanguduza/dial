@@ -1,14 +1,16 @@
 /**
  * Spare checkout API — EcoCash|COD against @dial/payments (D-57).
- * Used by gateway-web and customer-android; no parallel money SoR.
+ * PD96: promo draft on cart (not payable). PD97: Idempotency-Key required.
  */
 import { NextResponse } from "next/server";
 import { addToCart, createCart, getCart, getOffer } from "@dial/catalogue";
+import { getAppliedPromoDraft } from "@dial/promotions";
 import {
   assertB2bMayPurchase,
   createCheckoutPayment,
   freezeOfferSnapshot,
   getActiveFxRate,
+  requireIdempotencyKey,
   setDailyZigRate,
   type CheckoutPayChoice,
 } from "@dial/payments";
@@ -20,6 +22,16 @@ import {
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  let idempotencyKey: string;
+  try {
+    idempotencyKey = requireIdempotencyKey(req.headers);
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Idempotency-Key required" },
+      { status: 400 },
+    );
+  }
+
   const contentType = req.headers.get("content-type") ?? "";
   let offerId = "";
   let qty = 1;
@@ -96,11 +108,13 @@ export async function POST(req: Request) {
       amountUsdMinor: cart.total.amountMinor,
     });
 
+    const promoDraft = getAppliedPromoDraft(cart.id);
+
     const pay = await createCheckoutPayment({
       choice,
       orderId,
       amountUsdMinor: cart.total.amountMinor,
-      idempotencyKey: `spare-api-${choice}-${cart.id}`,
+      idempotencyKey,
     });
 
     return NextResponse.json({
@@ -116,6 +130,16 @@ export async function POST(req: Request) {
       displayPayableCurrency: pay.intent?.displayPayable?.currency,
       choice,
       imttOnCheckoutLines: false,
+      promoDraft: promoDraft
+        ? {
+            code: promoDraft.code,
+            draftDiscountPercent: promoDraft.draftDiscountPercent,
+            payableFromAi: false,
+            note: "PD96 — draft only; pricing engine applies payable",
+          }
+        : null,
+      idempotencyKey,
+      payableFromAi: false,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "checkout failed";

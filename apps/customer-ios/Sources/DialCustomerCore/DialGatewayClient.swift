@@ -309,16 +309,18 @@ public final class DialGatewayClient: @unchecked Sendable {
         guard choice == "ecocash" || choice == "cod" else {
             throw DialGatewayError.invalidChoice
         }
-        // D-47: never send userId/role in body.
+        // D-47: never send userId/role in body. PD97: Idempotency-Key required.
         let body =
             #"{"offerId":\#(jsonString(offerId)),"choice":\#(jsonString(choice)),"qty":\#(qty)}"#
         precondition(!body.contains("userId") && !body.contains("\"role\""))
+        let idem = "ios-\(choice)-\(offerId)-\(Int(Date().timeIntervalSince1970 * 1000))"
         let res = try transport.request(
             method: "POST",
             url: "\(baseUrl)/api/spare/checkout",
             headers: [
                 "Content-Type": "application/json",
                 "Accept": "application/json",
+                "Idempotency-Key": idem,
             ],
             body: body,
             cookieHeader: cookies.getCookieHeader()

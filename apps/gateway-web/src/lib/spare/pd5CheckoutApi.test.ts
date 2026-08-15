@@ -24,6 +24,7 @@ test("PD5 spare checkout API: session SoR; EcoCash USD→ZWG; no body identity",
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "Idempotency-Key": "pd5-bad-id",
         cookie: `${sessionCookieName()}=${token}`,
       },
       body: JSON.stringify({
@@ -38,7 +39,10 @@ test("PD5 spare checkout API: session SoR; EcoCash USD→ZWG; no body identity",
   const unauth = await spareCheckout(
     new Request("http://localhost/api/spare/checkout", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "Idempotency-Key": "pd5-unauth",
+      },
       body: JSON.stringify({
         offerId: "off_filter_oil_kun26",
         choice: "ecocash",
@@ -47,11 +51,27 @@ test("PD5 spare checkout API: session SoR; EcoCash USD→ZWG; no body identity",
   );
   assert.equal(unauth.status, 401);
 
+  const missingKey = await spareCheckout(
+    new Request("http://localhost/api/spare/checkout", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        cookie: `${sessionCookieName()}=${token}`,
+      },
+      body: JSON.stringify({
+        offerId: "off_filter_oil_kun26",
+        choice: "ecocash",
+      }),
+    }),
+  );
+  assert.equal(missingKey.status, 400);
+
   const ok = await spareCheckout(
     new Request("http://localhost/api/spare/checkout", {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "Idempotency-Key": "pd5-eco-1",
         cookie: `${sessionCookieName()}=${token}`,
       },
       body: JSON.stringify({

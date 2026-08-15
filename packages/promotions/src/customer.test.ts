@@ -40,6 +40,16 @@ test("PD85 referral status thin vertical", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD96 promo cart checkout thin vertical", async () => {
+  const { runPd96PromoCartCheckoutThinVertical } = await import("./customer.js");
+  const out = runPd96PromoCartCheckoutThinVertical();
+  assert.equal(out.validated, true);
+  assert.equal(out.draftOnCart, true);
+  assert.equal(out.draftDiscountPercent, 15);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.cashOutAllowed, false);
+});
+
 test("PD21 unknown code rejected; cash-out always forbidden", () => {
   __resetPromoCustomerForTests();
   const bad = validatePromoCode({ code: "NOPE" });

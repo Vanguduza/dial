@@ -335,6 +335,15 @@ test("PD92 seven-day cancel thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD95 spare facets + collections thin vertical", async () => {
+  const { runPd95SpareFacetsCollectionsThinVertical } = await import("./index.js");
+  const out = runPd95SpareFacetsCollectionsThinVertical();
+  assert.ok(out.collectionCount >= 2);
+  assert.ok(out.oesHits >= 1);
+  assert.ok(out.availableHits >= 1);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD54 grocery Meili demand-gap thin vertical", () => {
   __resetCatalogueForTests();
   const out = runPd54GroceryDemandGapThinVertical();

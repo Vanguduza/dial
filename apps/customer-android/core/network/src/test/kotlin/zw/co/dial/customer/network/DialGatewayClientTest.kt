@@ -66,9 +66,10 @@ class DialGatewayClientTest {
     @Test
     fun checkoutSpare_posts_ecocash_without_identity_in_body() {
         val transport =
-            HttpTransport { method, url, _, body, _ ->
+            HttpTransport { method, url, headers, body, _ ->
                 assertEquals("POST", method)
                 assertTrue(url.endsWith("/api/spare/checkout"))
+                assertTrue(headers["Idempotency-Key"]!!.isNotBlank())
                 assertTrue(body!!.contains("\"choice\":\"ecocash\""))
                 assertTrue(!body.contains("userId"))
                 assertTrue(!body.contains("\"role\""))

@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD98 Technician credentials** — verified trade_licence gates matching eligibility (Pack technicians.credentials).
+- **PD97 Idempotency-Key on pay** — required header on spare checkout; same key replays intent (Pack §10).
+- **PD96 Promo draft → checkout** — validate/apply draft echoed at pay; not payable (D-42).
+- **PD95 Spare facets + collections** — quality/availability/brand/chassis filters + home collections (Pack §9.2).
 - **PD94 emergency.triage.v1** — Pack checklist seed + run; AI price bypassed (Pack §9.3).
 - **PD93 Customer shadow failover** — list/accept after confirm SLA breach (`/api/spare/failover`).
 - **PD92 7-day order cancel** — cancel within `cancellableUntil`; deny after (Pack §9.2 / §10).

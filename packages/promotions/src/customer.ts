@@ -435,6 +435,52 @@ export function runPd21CustomerMobilePromoThinVertical(input?: {
 }
 
 /**
+ * PD96 thin vertical: validate → apply draft on cart → checkout reads draft (no AI payable).
+ */
+export function runPd96PromoCartCheckoutThinVertical(): {
+  validated: true;
+  draftOnCart: true;
+  draftDiscountPercent: number;
+  payableFromAi: false;
+  cashOutAllowed: false;
+} {
+  __resetPromoCustomerForTests();
+  const platform = createPromoCampaign({
+    type: "PLATFORM",
+    name: "PD96 Spare 15%",
+    budgetSpendLimitMinor: 50_00n,
+    verticals: ["spare"],
+  });
+  activatePromoCampaign(platform.id);
+  registerPromoCode({
+    code: "PD96SAVE",
+    campaignId: platform.id,
+    draftDiscountPercent: 15,
+    verticals: ["spare"],
+  });
+  const cartId = "cart_pd96";
+  const validated = validatePromoCode({ code: "PD96SAVE", vertical: "spare" });
+  if (!validated.ok) throw new Error("PD96 validate failed");
+  applyPromoCodeDraft({
+    customerId: "cust_pd96",
+    cartId,
+    code: "PD96SAVE",
+    vertical: "spare",
+  });
+  const draft = getAppliedPromoDraft(cartId);
+  if (!draft || draft.code !== "PD96SAVE" || draft.draftDiscountPercent !== 15) {
+    throw new Error("PD96 expected draft on cart for checkout wire");
+  }
+  return {
+    validated: true,
+    draftOnCart: true,
+    draftDiscountPercent: draft.draftDiscountPercent,
+    payableFromAi: false,
+    cashOutAllowed: false,
+  };
+}
+
+/**
  * PD70 thin vertical: grant promo_credit → balance read → cash-out blocked (D-42).
  * Web surface: /account/promo (Pack §9.6 credit balance + referral share).
  */

@@ -1,5 +1,5 @@
 /**
- * Pack §10 Spare search proxy — `GET /api/search/spare` (PD2).
+ * Pack §10 Spare search proxy — `GET /api/search/spare` (PD2 + PD95 facets).
  * Session buyerSegment drives B2B formal-only filter (D-49). Never trust body role.
  * Fixture: in-memory catalogue. Sandbox/live: Meili HTTP with session filter.
  */
@@ -7,7 +7,9 @@ import { NextResponse } from "next/server";
 import {
   meiliFilterForSession,
   searchOffersAsync,
+  type OfferAvailability,
   type SearchSessionRole,
+  type StubOffer,
 } from "@dial/catalogue";
 import {
   getSessionFromToken,
@@ -27,6 +29,10 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const q = url.searchParams.get("q") ?? "";
   const chassis = url.searchParams.get("chassis") ?? undefined;
+  const brand = url.searchParams.get("brand") ?? undefined;
+  const qualityTierRaw = url.searchParams.get("qualityTier");
+  const availabilityRaw = url.searchParams.get("availability");
+  const collection = url.searchParams.get("collection") ?? undefined;
 
   // D-47: ignore any client-supplied role/userId query params for AuthZ.
   if (url.searchParams.has("role") || url.searchParams.has("userId")) {
@@ -36,11 +42,33 @@ export async function GET(req: Request) {
     );
   }
 
+  const qualityTier =
+    qualityTierRaw === "OEM" ||
+    qualityTierRaw === "OES" ||
+    qualityTierRaw === "Aftermarket"
+      ? (qualityTierRaw as StubOffer["qualityTier"])
+      : undefined;
+  const availability =
+    availabilityRaw === "available" ||
+    availabilityRaw === "confirm_required" ||
+    availabilityRaw === "sourcing"
+      ? (availabilityRaw as OfferAvailability)
+      : undefined;
+
   const sessionRole = sessionRoleFromRequest(req);
   try {
-    const result = await searchOffersAsync(q, { sessionRole });
+    const result = await searchOffersAsync(q, {
+      sessionRole,
+      facets: {
+        ...(brand ? { brand } : {}),
+        ...(qualityTier ? { qualityTier } : {}),
+        ...(availability ? { availability } : {}),
+        ...(chassis ? { chassis } : {}),
+        ...(collection ? { collection } : {}),
+      },
+    });
     const filtered =
-      chassis && chassis.trim()
+      chassis && chassis.trim() && !result.facetsApplied?.chassis
         ? result.hits.filter(
             (h) =>
               h.title.toLowerCase().includes(chassis.toLowerCase()) ||
@@ -55,6 +83,8 @@ export async function GET(req: Request) {
       searchSource: result.source,
       indexUid: result.indexUid,
       currency: "USD",
+      collections: result.collections ?? [],
+      facetsApplied: result.facetsApplied ?? {},
       hits: filtered.map((h) => ({
         offerId: h.offerId,
         title: h.title,
@@ -66,10 +96,11 @@ export async function GET(req: Request) {
         supplierFormality: h.supplierFormality,
         oem: h.oem,
         brand: h.brand,
-        /** Agency disclosure — Sold by {Supplier} Agency (D-58 / PD42). */
         soldBy: `${h.brand} Agency`,
         rawQtyExposed: false,
       })),
+      payableFromAi: false,
+      note: "PD95 — collections + facets (Pack §9.2)",
     });
   } catch (e) {
     return NextResponse.json(

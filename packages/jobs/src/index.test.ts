@@ -19,6 +19,7 @@ import {
   runPd24AdminProjectsLegalThinVertical,
   runPd25ValueScoreDeviceThinVertical,
   setValueScoreSnapshot,
+  setTechnicianCredential,
   uploadJobEvidence,
 } from "./index.js";
 
@@ -33,6 +34,11 @@ test("T6 classification + rate-card quote + eligibility + Value Score", () => {
   assert.equal(q.currency, "USD");
   assert.ok(q.draftAmountUsdMinor > 0n);
   setValueScoreSnapshot({ technicianId: "tech_1", score: 72 });
+  setTechnicianCredential({
+    technicianId: "tech_1",
+    kind: "trade_licence",
+    status: "verified",
+  });
   assert.equal(getValueScoreSnapshot("tech_1")?.score, 72);
   assert.equal(
     isTechnicianEligible({
@@ -220,6 +226,14 @@ test("PD94 emergency triage thin vertical", async () => {
   assert.equal(out.catalogId, "emergency.triage.v1");
   assert.equal(out.completed, true);
   assert.equal(out.aiPricingBypassed, true);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD98 technician credentials thin vertical", async () => {
+  const { runPd98TechnicianCredentialsThinVertical } = await import("./index.js");
+  const out = runPd98TechnicianCredentialsThinVertical();
+  assert.equal(out.blockedWithoutCredential, true);
+  assert.equal(out.eligibleWhenVerified, true);
   assert.equal(out.payableFromAi, false);
 });
 
