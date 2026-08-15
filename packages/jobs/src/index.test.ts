@@ -13,6 +13,7 @@ import {
   listTradeDefinitions,
   quoteFromRateCard,
   runPd9TechThinVertical,
+  runPd13TechWebThinVertical,
   setValueScoreSnapshot,
   uploadJobEvidence,
 } from "./index.js";
@@ -101,4 +102,15 @@ test("PD9 thin vertical book → checklist → evidence", async () => {
   assert.equal(out.run.status, "completed");
   assert.equal(out.evidence.kind, "photo");
   assert.equal(out.job.status, "completed");
+});
+
+test("PD13 tech-web thin vertical: guide book + emergency + customer jobs", async () => {
+  const out = await runPd13TechWebThinVertical({ customerId: "cust_pd13" });
+  assert.equal(out.guide.quoteSource, "rate_card");
+  assert.equal(out.guide.payableFromAi, false);
+  assert.ok(out.guide.slotId.startsWith("cal_"));
+  assert.equal(out.emergency.aiPricingBypassed, true);
+  assert.equal(out.emergency.checklistId, "emergency_roadside");
+  assert.ok(out.customerJobs >= 2);
+  assert.ok(out.checklists.includes("automotive_basic"));
 });

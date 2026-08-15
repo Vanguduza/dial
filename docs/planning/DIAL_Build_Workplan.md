@@ -79,11 +79,11 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 116 | `PD10` | **Admin money / dispatch / Command Centre** | [#31](https://github.com/Vanguduza/dial/issues/31) | Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) | `PD11` |
 | 117 | `PD11` | **FDMS sandbox** — Virtual Gateway agency receipts | [#32](https://github.com/Vanguduza/dial/issues/32) | Agency receipt types (D-59); sandbox day open/close; fiscal outbox | `PD12` |
 | 118 | `PD12` | **Meta WA Flows** — Spare + grocery food Cloud API | [#33](https://github.com/Vanguduza/dial/issues/33) | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys / no liquor | `PD13` |
-| 119 | `PD13` | **tech-web** — Pack §9.3 FixItNow patterns | new issue | Guide / emergency / diagnose / book vs `@dial/jobs`; no AI payable | `PD14` |
+| 119 | `PD13` | **tech-web** — Pack §9.3 FixItNow patterns | [#34](https://github.com/Vanguduza/dial/issues/34) | Guide / emergency / diagnose / book vs `@dial/jobs`; no AI payable | `PD14` |
 | 120 | `PD14` | **Grocery web deepen** — slot + track + checkout (food) | new issue | Beyond G1 browse; USD; EcoCash\|COD; no liquor | `PD15` |
 | 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | new issue | Ingest/review/approve → Meili; B2B informal leak=0 | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD12 is **PD13**, not S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD13 is **PD14**, not S99.
 
 ---
 
@@ -215,11 +215,17 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd12WaFlowsSandboxThinVertical`; `pd12WaFlows.test.ts`; no Baileys / no liquor |
 | Green → | **PD13** tech-web |
 
-### PD13 — tech-web (NEXT)
+### PD13 — tech-web (**GREEN** 2026-08-15)
 
-Pack §9.3 FixItNow-patterned guide / emergency / diagnose / Cal.com book against `@dial/jobs` (no AI payable amounts).
+| | |
+| --- | --- |
+| Issue | [#34](https://github.com/Vanguduza/dial/issues/34) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Guide → Cal.com book (rate_card) → emergency book (AI bypass) → customer `/tech/jobs` status; `/api/tech/services` |
+| Evidence | `runPd13TechWebThinVertical`; `pd13TechWeb.test.ts`; design-tokens responsive |
+| Green → | **PD14** grocery web deepen |
 
-### PD14 — Grocery web deepen
+### PD14 — Grocery web deepen (NEXT)
 
 Food/pantry slot + track + checkout beyond G1 browse (USD; EcoCash\|COD; no liquor).
 

@@ -479,6 +479,85 @@ export async function runPd9TechThinVertical(input: {
   };
 }
 
+/**
+ * PD13 thin vertical (customer tech-web Pack §9.3):
+ * guide book (Cal.com + rate_card) → emergency book (no AI payable) → customer job list.
+ */
+export async function runPd13TechWebThinVertical(input?: {
+  customerId?: string;
+}): Promise<{
+  guide: { jobId: string; slotId: string; quoteSource: "rate_card"; payableFromAi: false };
+  emergency: {
+    jobId: string;
+    checklistId: ChecklistId;
+    quoteSource: "rate_card";
+    aiPricingBypassed: true;
+  };
+  customerJobs: number;
+  checklists: ChecklistId[];
+}> {
+  __resetJobsForTests();
+  const customerId = input?.customerId ?? "cust_pd13_web";
+  const slots = await listBookingSlots();
+  const slot = slots[0];
+  if (!slot) throw new Error("PD13 requires Cal.com fixture slots");
+
+  const guideQuote = draftTechQuote({ jobClass: "diagnostics", emergency: false });
+  if (guideQuote.source !== "rate_card") {
+    throw new Error("PD13 guide quote must be rate_card (never AI payable)");
+  }
+  const guideJob = bookTechJob({
+    customerId,
+    jobClass: "diagnostics",
+    slotId: slot.slotId,
+    emergency: false,
+  });
+
+  const emergencyQuote = draftTechQuote({
+    jobClass: "roadside_emergency",
+    emergency: true,
+  });
+  if (emergencyQuote.source !== "rate_card") {
+    throw new Error("PD13 emergency quote must be rate_card");
+  }
+  const emergencyJob = bookTechJob({
+    customerId,
+    jobClass: "roadside_emergency",
+    slotId: null,
+    emergency: true,
+  });
+  const emergencyChecklist = getChecklist("emergency_roadside");
+  if (!emergencyChecklist) {
+    throw new Error("PD13 requires emergency_roadside checklist");
+  }
+
+  const mine = listJobsForCustomer(customerId);
+  if (mine.length < 2) {
+    throw new Error("PD13 expected guide + emergency jobs for customer");
+  }
+  const ids = listChecklists().map((c) => c.id);
+  if (!ids.includes("automotive_basic") || !ids.includes("emergency_roadside")) {
+    throw new Error("PD13 requires automotive + emergency checklists (Pack T4)");
+  }
+
+  return {
+    guide: {
+      jobId: guideJob.id,
+      slotId: slot.slotId,
+      quoteSource: "rate_card",
+      payableFromAi: false,
+    },
+    emergency: {
+      jobId: emergencyJob.id,
+      checklistId: "emergency_roadside",
+      quoteSource: "rate_card",
+      aiPricingBypassed: true,
+    },
+    customerJobs: mine.length,
+    checklists: ids,
+  };
+}
+
 export function __resetJobsForTests(): void {
   valueScores.clear();
   jobs.clear();

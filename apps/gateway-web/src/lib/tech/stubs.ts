@@ -1,7 +1,6 @@
 /**
- * Tech booking / checklist — Pack §15 T4 / PD9.
- * Quotes from @dial/jobs rate_card — AI never writes payable amounts.
- * Re-exports jobs SoR; rate_card_stub path removed.
+ * Tech booking / checklist — Pack §15 T4 / PD9 / PD13.
+ * Re-exports @dial/jobs SoR; rate_card only — AI never writes payable amounts.
  */
 export {
   advanceChecklistStep,

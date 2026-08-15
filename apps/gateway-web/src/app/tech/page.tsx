@@ -35,8 +35,19 @@ export default function TechHomePage() {
           <Link href="/home">Home</Link>
           <Link href="/tech/book">Book</Link>
           <Link href="/tech/emergency">Emergency</Link>
+          <Link href="/tech/jobs">My jobs</Link>
         </nav>
+        <p style={{ fontSize: 13, opacity: 0.7, marginTop: dialTokens.space.sm }}>
+          Calm professional guide (Pack §9.3 FixItNow patterns). Not AI-hype. Quotes are rate_card
+          drafts — AI never writes payable amounts.
+        </p>
         <section style={{ marginTop: dialTokens.space.xl }}>
+          <h2 style={{ fontSize: "1.1rem" }}>Diagnose</h2>
+          <p style={{ fontSize: 14, opacity: 0.75, marginTop: 0 }}>
+            Run a guided checklist, then book a Cal.com slot when you know the need.
+          </p>
+        </section>
+        <section style={{ marginTop: dialTokens.space.lg }}>
           <h2 style={{ fontSize: "1.1rem" }}>Checklists</h2>
           <ul
             style={{

@@ -19,6 +19,8 @@ export default async function TechBookPage() {
     >
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <Link href="/tech">Back</Link>
+        {" · "}
+        <Link href="/tech/jobs">My jobs</Link>
         <h1
           style={{
             fontFamily: `${dialTokens.font.display}, Georgia, serif`,

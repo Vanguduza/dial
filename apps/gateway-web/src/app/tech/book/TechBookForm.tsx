@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
 
-/** Client book form — POST /api/tech/technician action=book (session cookie). */
+/** Client book form — POST /api/tech/services action=book (session cookie). */
 export function TechBookForm({
   slots,
 }: {
@@ -19,14 +19,14 @@ export function TechBookForm({
     setError(null);
     setStatus("");
     try {
-      const res = await fetch("/api/tech/technician", {
+      const res = await fetch("/api/tech/services", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           action: "book",
           jobClass: "diagnostics",
           slotId,
-          assignSelf: false,
+          emergency: false,
         }),
       });
       const json = (await res.json()) as { error?: string; job?: { id: string } };
