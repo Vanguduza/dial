@@ -79,6 +79,8 @@ export default function AdminSupportPage() {
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
         <Link href="/admin/wa">WA templates</Link>
         {" · "}
+        <Link href="/admin/returns">Returns</Link>
+        {" · "}
         <Link href="/admin/command-centre">Command Centre</Link>
         {" · "}
         <Link href="/home">Home</Link>

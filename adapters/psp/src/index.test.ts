@@ -260,3 +260,14 @@ test("PD39 ContiPay/PayPal sandbox createPayment + verifyWebhook fail-closed wit
   const pp = await fxRegistry.paypal.createPayment(baseInput("paypal"));
   assert.equal(pp.redirectUrl?.includes("sandbox.paypal.com"), true);
 });
+
+test("PD49 escrow sandbox fail-closed + fixture hold/release", async () => {
+  const { runPd49EscrowSandboxThinVertical } = await import(
+    "./pd49EscrowSandbox.js"
+  );
+  const out = await runPd49EscrowSandboxThinVertical();
+  assert.equal(out.sandboxFailClosed, true);
+  assert.equal(out.fixtureHoldRelease, true);
+  assert.equal(out.liveContractRequired, false);
+  assert.equal(out.payableFromAi, false);
+});

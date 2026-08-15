@@ -275,6 +275,24 @@ test("PD20 customer mobile: same ERP orders/returns/garage path", async () => {
   assert.equal(out.noExpo, true);
 });
 
+test("PD48 admin returns thin vertical", async () => {
+  const { runPd48AdminReturnsThinVertical } = await import("./spareCustomer.js");
+  const out = runPd48AdminReturnsThinVertical();
+  assert.equal(out.listed, true);
+  assert.equal(out.resolvedPath, "refund");
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.openCountAfterResolve, 0);
+});
+
+test("PD50 Vehicle Hub consent revoke + chassis browse", async () => {
+  const { runPd50VehicleHubThinVertical } = await import("./spareCustomer.js");
+  const out = runPd50VehicleHubThinVertical();
+  assert.equal(out.consentRevoked, true);
+  assert.equal(out.auditHasRevoke, true);
+  assert.match(out.browsePath, /chassis=KUN26/);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD27 dual entry Select Vehicle + Browse EPC join on chassis; USD; B2B hide informal", () => {
   __resetCatalogueForTests();
   const out = runPd27SpareDualEntryThinVertical();

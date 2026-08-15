@@ -1,18 +1,31 @@
 /**
- * PD18 Garage / Vehicle Hub API — reminders need consent (Pack §9.2).
+ * PD18 / PD50 Garage / Vehicle Hub API — reminders need consent (Pack §9.2).
  */
 import { NextResponse } from "next/server";
-import { addGarageVehicle, listGarageVehicles } from "@dial/catalogue";
+import {
+  addGarageVehicle,
+  browsePathForGarageVehicle,
+  listGarageConsentAudit,
+  listGarageVehicles,
+  setGarageReminderConsent,
+} from "@dial/catalogue";
 
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
-  const customerId = new URL(req.url).searchParams.get("customerId");
+  const url = new URL(req.url);
+  const customerId = url.searchParams.get("customerId");
   if (!customerId) {
     return NextResponse.json({ error: "customerId required" }, { status: 400 });
   }
+  const includeAudit = url.searchParams.get("includeAudit") === "1";
+  const vehicles = listGarageVehicles(customerId).map((v) => ({
+    ...v,
+    browsePath: browsePathForGarageVehicle(v.vehicleId),
+  }));
   return NextResponse.json({
-    vehicles: listGarageVehicles(customerId),
+    vehicles,
+    consentAudit: includeAudit ? listGarageConsentAudit(customerId) : undefined,
   });
 }
 
@@ -36,10 +49,45 @@ export async function POST(req: Request) {
       chassisHint: body.chassisHint ?? "",
       reminderConsent: body.reminderConsent === true,
     });
-    return NextResponse.json({ ok: true, vehicle });
+    return NextResponse.json({
+      ok: true,
+      vehicle,
+      browsePath: browsePathForGarageVehicle(vehicle.vehicleId),
+    });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "garage failed" },
+      { status: 400 },
+    );
+  }
+}
+
+/** PD50 — grant/revoke reminder consent + return browse path + audit. */
+export async function PATCH(req: Request) {
+  const body = (await req.json()) as {
+    vehicleId?: string;
+    reminderConsent?: boolean;
+  };
+  if (!body.vehicleId || typeof body.reminderConsent !== "boolean") {
+    return NextResponse.json(
+      { error: "vehicleId and reminderConsent required" },
+      { status: 400 },
+    );
+  }
+  try {
+    const vehicle = setGarageReminderConsent({
+      vehicleId: body.vehicleId,
+      reminderConsent: body.reminderConsent,
+    });
+    return NextResponse.json({
+      ok: true,
+      vehicle,
+      browsePath: browsePathForGarageVehicle(vehicle.vehicleId),
+      consentAudit: listGarageConsentAudit(vehicle.customerId),
+    });
+  } catch (e) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "consent update failed" },
       { status: 400 },
     );
   }

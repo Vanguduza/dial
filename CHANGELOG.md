@@ -11,6 +11,9 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD50 Vehicle Hub deepen** — reminder consent grant/revoke + audit; garage → `/spare?chassis=` browse; `runPd50VehicleHubThinVertical`.
+- **PD49 Escrow sandbox Job Reserve** — sandbox fail-closed without `PSP_ESCROW_*`; fixture hold/release/webhook; `/admin/money/escrow` (≠ ENH-020 live partner).
+- **PD48 Admin returns/refunds queue** — `/admin/returns` list + human refund|replace; `payableFromAi=false`; `runPd48AdminReturnsThinVertical`.
 - **PD47 Command Centre recommended actions** — MetricContract severity→permissioned actions (`autoPay=false`); Simulated never auto-pays (D-54).
 - **PD46 Supplier co-op spend UX** — live SUPPLIER_COOP `record_coop_spend` → budget + `coop_spend` statement; supplier co-op panel; cash-out blocked (D-42).
 - **PD45 Support + consent admin** — `/admin/support` ERP tickets + consent audit; Chatwoot ≠ status SoR; fail-closed internal secret.

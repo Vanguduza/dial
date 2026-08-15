@@ -13,13 +13,18 @@ import {
 export default async function SpareBrowsePage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; chassis?: string }>;
 }) {
   const params = await searchParams;
   const q = params.q ?? "";
+  const chassis = params.chassis?.trim() ?? "";
   const jar = await cookies();
   const { sessionRole } = sessionFromCookieStore((name) => jar.get(name));
-  const { hits, source, meiliFilter } = await searchSpareForSession(q, sessionRole);
+  const { hits, source, meiliFilter, chassisFilter } = await searchSpareForSession(
+    q,
+    sessionRole,
+    chassis ? { chassis } : undefined,
+  );
 
   return (
     <main
@@ -46,6 +51,7 @@ export default async function SpareBrowsePage({
         <p style={{ opacity: 0.7, fontSize: 14 }}>
           Browse USD only · agency marketplace ·{" "}
           {sessionRole === "b2b" ? "B2B formal stock" : "B2C"} · search {source}
+          {chassisFilter ? ` · chassis ${chassisFilter}` : ""}
         </p>
         <nav
           style={{
@@ -89,7 +95,9 @@ export default async function SpareBrowsePage({
             fontSize: 16,
           }}
         />
-        <button
+        {chassis ? (
+          <input type="hidden" name="chassis" value={chassis} />
+        ) : null}        <button
           type="submit"
           style={{
             padding: `${dialTokens.space.sm} ${dialTokens.space.md}`,

@@ -439,6 +439,9 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-455 | **Pack gap audit after PD42** authored PD43–PD45 | `done` | eng next ≠ S99 |
 | ENH-456 | **PD46 Supplier co-op spend UX** — record spend + statement; D-42 | `done` | Pack §9.4/§9.5 |
 | ENH-457 | **PD47 Command Centre recommended actions** — D-54 autoPay=false | `done` | MetricContract severity→actions |
+| ENH-458 | **PD48 Admin returns/refunds queue** — human refund\|replace | `done` | Pack §9.5; payableFromAi=false |
+| ENH-459 | **PD49 Escrow sandbox Job Reserve** — fail-closed + fixture; ≠ ENH-020 | `done` | `/admin/money/escrow` |
+| ENH-460 | **PD50 Vehicle Hub deepen** — consent audit + chassis browse | `done` | Pack §9.2 garage |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

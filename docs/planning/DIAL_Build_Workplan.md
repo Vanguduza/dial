@@ -670,6 +670,43 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Admin spare returns / refunds ops queue | **PD48** |
+| Escrow sandbox Job Reserve (≠ live partner ENH-020) | **PD49** |
+| Vehicle Hub consent audit + chassis browse | **PD50** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+
+### PD48 — Admin spare returns / refunds (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | open claim → `/admin/returns` list → human refund\|replace; `payableFromAi=false` |
+| Evidence | `runPd48AdminReturnsThinVertical`; `pd48Pd50Ops.test.ts` |
+| Green → | **PD49** Escrow sandbox |
+
+### PD49 — Escrow sandbox Job Reserve (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | sandbox fail-closed without `PSP_ESCROW_*`; fixture hold→release→webhook; admin `/admin/money/escrow` |
+| Evidence | `runPd49EscrowSandboxThinVertical`; `pd48Pd50Ops.test.ts` |
+| Green → | **PD50** Vehicle Hub |
+| Note | ≠ ENH-020 live partner contract (human) |
+
+### PD50 — Vehicle Hub deepen (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | grant/revoke reminder consent + audit; `/spare?chassis=` browse from garage |
+| Evidence | `runPd50VehicleHubThinVertical`; `pd48Pd50Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD50)
+
+| Gap | Stage |
+| --- | --- |
+| Delivery courier UX deepen / Take-Home polish | PD51+ candidates |
+| Admin disputes / grocery Meili demand-gap admin | PD51+ candidates |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 

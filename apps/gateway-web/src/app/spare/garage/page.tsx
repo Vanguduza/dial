@@ -9,10 +9,18 @@ type Vehicle = {
   label: string;
   chassisHint: string;
   reminderConsent: boolean;
+  browsePath?: string;
+};
+
+type ConsentEvent = {
+  eventId: string;
+  vehicleId: string;
+  action: string;
+  at: string;
 };
 
 /**
- * PD18 Garage / Vehicle Hub — reminders need consent (Pack §9.2).
+ * PD18 / PD50 Garage / Vehicle Hub — consent audit + chassis browse (Pack §9.2).
  */
 export default function SpareGaragePage() {
   const [customerId, setCustomerId] = useState("cust_pd18");
@@ -20,6 +28,7 @@ export default function SpareGaragePage() {
   const [chassisHint, setChassisHint] = useState("KUN26");
   const [consent, setConsent] = useState(false);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [audit, setAudit] = useState<ConsentEvent[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -28,14 +37,19 @@ export default function SpareGaragePage() {
     setMessage(null);
     try {
       const res = await fetch(
-        `/api/spare/garage?customerId=${encodeURIComponent(customerId)}`,
+        `/api/spare/garage?customerId=${encodeURIComponent(customerId)}&includeAudit=1`,
       );
-      const data = (await res.json()) as { error?: string; vehicles?: Vehicle[] };
+      const data = (await res.json()) as {
+        error?: string;
+        vehicles?: Vehicle[];
+        consentAudit?: ConsentEvent[];
+      };
       if (!res.ok) {
         setMessage(data.error ?? `HTTP ${res.status}`);
         return;
       }
       setVehicles(data.vehicles ?? []);
+      setAudit(data.consentAudit ?? []);
     } finally {
       setBusy(false);
     }
@@ -67,8 +81,32 @@ export default function SpareGaragePage() {
     }
   }
 
+  async function setConsentFor(vehicleId: string, reminderConsent: boolean) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/spare/garage", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ vehicleId, reminderConsent }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage(
+        reminderConsent ? "Consent granted" : "Consent revoked (PD50 audit)",
+      );
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main
+      data-testid="spare-garage-hub"
       style={{
         minHeight: "100vh",
         background: dialTokens.color.brand.surface,
@@ -96,10 +134,11 @@ export default function SpareGaragePage() {
             color: dialTokens.color.brand.primary,
           }}
         >
-          Garage
+          Garage · Vehicle Hub
         </h1>
         <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Vehicle hub for chassis-aware browse. Reminders require explicit consent.
+          Chassis-aware browse and reminder consent audit. Reminders require
+          explicit grant; revoke is recorded.
         </p>
 
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
@@ -146,12 +185,45 @@ export default function SpareGaragePage() {
         {message ? <p role="status">{message}</p> : null}
         <ul style={{ marginTop: dialTokens.space.md }}>
           {vehicles.map((v) => (
-            <li key={v.vehicleId}>
-              {v.label} · {v.chassisHint} · consent=
-              {String(v.reminderConsent)}
+            <li key={v.vehicleId} style={{ marginBottom: 12 }}>
+              {v.label} · {v.chassisHint} · consent={String(v.reminderConsent)}
+              <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+                <Link href={v.browsePath ?? `/spare?chassis=${encodeURIComponent(v.chassisHint)}`}>
+                  Browse parts
+                </Link>
+                {v.reminderConsent ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void setConsentFor(v.vehicleId, false)}
+                  >
+                    Revoke consent
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void setConsentFor(v.vehicleId, true)}
+                  >
+                    Grant consent
+                  </button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
+        {audit.length > 0 ? (
+          <section style={{ marginTop: dialTokens.space.lg }}>
+            <h2 style={{ fontSize: 16 }}>Consent audit</h2>
+            <ul>
+              {audit.map((e) => (
+                <li key={e.eventId}>
+                  {e.action} · {e.vehicleId} · {e.at}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
       </div>
     </main>
   );

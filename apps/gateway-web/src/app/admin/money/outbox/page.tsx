@@ -84,6 +84,10 @@ export default function AdminMoneyOutboxPage() {
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         <Link href="/admin/command-centre">Command Centre</Link>
         {" · "}
+        <Link href="/admin/money/escrow">Escrow sandbox</Link>
+        {" · "}
+        <Link href="/admin/returns">Returns</Link>
+        {" · "}
         <Link href="/admin/fdms">FDMS Gateway</Link>
         {" · "}
         <Link href="/admin/wa">WA Flows</Link>
