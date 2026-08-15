@@ -330,3 +330,51 @@ export async function runPd18SpareWebThinVertical(input?: {
     reminderConsentRequired: true,
   };
 }
+
+/**
+ * PD20 customer-mobile deepen — same ERP SoR as PD18 web (orders/track/returns/garage).
+ * Native Android+iOS clients hit `/api/spare/{orders,returns,garage}` + grocery search.
+ */
+export async function runPd20CustomerMobileThinVertical(input?: {
+  offerId?: string;
+  payChoice?: "ecocash" | "cod";
+  customerId?: string;
+}): Promise<{
+  cartId: string;
+  orderId: string;
+  claimId: string;
+  vehicleId: string;
+  currency: "USD";
+  zigOnlyAtCheckout: true;
+  zigOnTrack: false;
+  soldBy: string;
+  returnPayableFromAi: false;
+  channels: ["android", "ios"];
+  noExpo: true;
+}> {
+  const out = await runPd18SpareWebThinVertical({
+    offerId: input?.offerId ?? "off_filter_oil_kun26",
+    payChoice: input?.payChoice ?? "cod",
+    customerId: input?.customerId ?? "cust_pd20_mobile",
+  });
+  const customerId = input?.customerId ?? "cust_pd20_mobile";
+  const mine = listSpareOrders(customerId);
+  if (!mine.some((o) => o.orderId === out.orderId)) {
+    throw new Error("PD20 order must appear in customer list");
+  }
+  const track = trackSpareOrder(out.orderId);
+  if (track.zigOnTrack !== false) throw new Error("PD20 track must not show ZiG");
+  return {
+    cartId: out.cartId,
+    orderId: out.orderId,
+    claimId: out.claimId,
+    vehicleId: out.vehicleId,
+    currency: "USD",
+    zigOnlyAtCheckout: true,
+    zigOnTrack: false,
+    soldBy: out.soldBy,
+    returnPayableFromAi: false,
+    channels: ["android", "ios"],
+    noExpo: true,
+  };
+}

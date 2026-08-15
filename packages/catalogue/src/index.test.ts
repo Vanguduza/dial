@@ -262,4 +262,14 @@ test("PD18 spare customer: Sold by on cart → order → return → garage", asy
   assert.ok(out.soldBy.includes("Agency"));
   assert.equal(out.returnPayableFromAi, false);
 });
+
+test("PD20 customer mobile: same ERP orders/returns/garage path", async () => {
+  const { runPd20CustomerMobileThinVertical } = await import("./spareCustomer.js");
+  const out = await runPd20CustomerMobileThinVertical();
+  assert.equal(out.currency, "USD");
+  assert.equal(out.zigOnTrack, false);
+  assert.equal(out.returnPayableFromAi, false);
+  assert.deepEqual(out.channels, ["android", "ios"]);
+  assert.equal(out.noExpo, true);
+});
 });

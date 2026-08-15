@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD20 Customer mobile deepen** — Android+iOS orders/track/returns/garage parity vs PD18; grocery USD browse + EcoCash\|COD; C-5 no Expo; returns payableFromAi=false; `pd20CustomerMobile.test.ts`. Pack §9 audit authored **PD21–PD23**.
 - **PD19 Admin Trade/JobClass + Value Score** — TradeDefinition/JobClass lifecycle (draft→active→retired); technician Value Score profiles with factor contributions + confidence; append-only disputes; high score ≠ draft eligibility; AI never writes payable amounts; `/admin/trades`.
 - **PD18 Spare-web deepen** — orders/track/returns/garage beyond PD3; Sold by {Supplier}; USD cart; ZiG only at pay; return claims payableFromAi=false; garage reminder consent.
 - **PD17 Intelligence Factory shadow/promote** — shadow draft → Promptfoo → human → outcome-weighted dataset; auto-publish blocked; Simulated never auto-pays; Flash-Lite P1; capability audit `docs/agent-audits/ai-capability-PD17-2026-08-15.md`; `/admin/intelligence/factory`.

@@ -1,9 +1,9 @@
 package zw.co.dial.customer.network
 
 /**
- * Gateway ERP client for customer-android (PD5).
+ * Gateway ERP client for customer-android (PD5 + PD20 deepen).
  * Session SoR = dial_session cookie from Set-Cookie — never body userId/role (D-47).
- * Browse/cart currency = USD (D-57).
+ * Browse/cart currency = USD (D-57). Orders/returns/garage parity with PD18 web.
  */
 data class DialSession(
     val userId: String,
@@ -36,6 +36,63 @@ data class SpareCheckoutResult(
     val choice: String,
     val intentId: String?,
     val fxRateId: String?,
+    val soldBy: String?,
+    val imttOnCheckoutLines: Boolean,
+    val cartId: String? = null,
+)
+
+data class SpareOrderSummary(
+    val orderId: String,
+    val status: String,
+    val currency: String,
+    val totalUsdMinor: Long,
+    val payChoice: String,
+    val soldBySummary: String,
+)
+
+data class SpareTrackResult(
+    val order: SpareOrderSummary,
+    val statusFrom: String,
+    val zigOnTrack: Boolean,
+)
+
+data class SpareReturnClaim(
+    val claimId: String,
+    val orderId: String,
+    val status: String,
+    val payableFromAi: Boolean,
+)
+
+data class GarageVehicle(
+    val vehicleId: String,
+    val customerId: String,
+    val label: String,
+    val chassisHint: String,
+    val reminderConsent: Boolean,
+)
+
+data class GroceryOfferHit(
+    val offerId: String,
+    val title: String,
+    val unitPriceUsdMinor: Long,
+    val brand: String,
+    val unitLabel: String,
+    val coldChain: Boolean,
+    val offerSource: String,
+    val supplierFormality: String,
+)
+
+data class GrocerySearchResult(
+    val q: String,
+    val currency: String,
+    val liquorSkus: Boolean,
+    val hits: List<GroceryOfferHit>,
+)
+
+data class GroceryCheckoutResult(
+    val ok: Boolean,
+    val currency: String,
+    val cartTotalUsdMinor: Long,
     val soldBy: String?,
     val imttOnCheckoutLines: Boolean,
 )
@@ -171,6 +228,212 @@ class DialGatewayClient(
         return parseCheckout(res.body)
     }
 
+    /** PD20 — place ERP order after checkout (Pack §9.6 / PD18 parity). */
+    fun placeSpareOrder(
+        cartId: String,
+        payChoice: String,
+        customerId: String? = null,
+    ): SpareOrderSummary {
+        require(payChoice == "ecocash" || payChoice == "cod") {
+            "payChoice must be ecocash|cod (D-57)"
+        }
+        val body =
+            buildString {
+                append("""{"cartId":${jsonString(cartId)},"payChoice":${jsonString(payChoice)}""")
+                if (!customerId.isNullOrBlank()) {
+                    append(""","customerId":${jsonString(customerId)}""")
+                }
+                append("}")
+            }
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/spare/orders",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "place order failed",
+                res.statusCode,
+            )
+        }
+        return parseOrder(res.body)
+    }
+
+    fun listSpareOrders(customerId: String? = null): List<SpareOrderSummary> {
+        val qs =
+            if (customerId.isNullOrBlank()) ""
+            else "?customerId=${java.net.URLEncoder.encode(customerId, Charsets.UTF_8)}"
+        val res =
+            transport.request(
+                method = "GET",
+                url = "$baseUrl/api/spare/orders$qs",
+                headers = mapOf("Accept" to "application/json"),
+                body = null,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "list orders failed",
+                res.statusCode,
+            )
+        }
+        return parseOrderList(res.body)
+    }
+
+    fun trackSpareOrder(orderId: String): SpareTrackResult {
+        val encoded = java.net.URLEncoder.encode(orderId, Charsets.UTF_8)
+        val res =
+            transport.request(
+                method = "GET",
+                url = "$baseUrl/api/spare/orders?orderId=$encoded",
+                headers = mapOf("Accept" to "application/json"),
+                body = null,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "track failed",
+                res.statusCode,
+            )
+        }
+        val order = parseOrder(res.body)
+        val zigOnTrack =
+            Regex(""""zigOnTrack"\s*:\s*true""").containsMatchIn(res.body)
+        val statusFrom =
+            Regex(""""statusFrom"\s*:\s*"([^"]+)"""").find(res.body)?.groupValues?.get(1) ?: "erp"
+        return SpareTrackResult(order = order, statusFrom = statusFrom, zigOnTrack = zigOnTrack)
+    }
+
+    fun openSpareReturn(orderId: String): SpareReturnClaim {
+        val body =
+            """{"action":"open","orderId":${jsonString(orderId)},"path":"refund_or_replace"}"""
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/spare/returns",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "return open failed",
+                res.statusCode,
+            )
+        }
+        return parseReturnClaim(res.body)
+    }
+
+    fun listGarageVehicles(customerId: String): List<GarageVehicle> {
+        val encoded = java.net.URLEncoder.encode(customerId, Charsets.UTF_8)
+        val res =
+            transport.request(
+                method = "GET",
+                url = "$baseUrl/api/spare/garage?customerId=$encoded",
+                headers = mapOf("Accept" to "application/json"),
+                body = null,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "garage list failed",
+                res.statusCode,
+            )
+        }
+        return parseGarageList(res.body)
+    }
+
+    fun addGarageVehicle(
+        customerId: String,
+        label: String,
+        chassisHint: String,
+        reminderConsent: Boolean,
+    ): GarageVehicle {
+        val body =
+            """{"customerId":${jsonString(customerId)},"label":${jsonString(label)},"chassisHint":${jsonString(chassisHint)},"reminderConsent":$reminderConsent}"""
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/spare/garage",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "garage add failed",
+                res.statusCode,
+            )
+        }
+        return parseGarageVehicle(res.body)
+    }
+
+    fun searchGrocery(q: String = ""): GrocerySearchResult {
+        val encoded = java.net.URLEncoder.encode(q, Charsets.UTF_8)
+        val res =
+            transport.request(
+                method = "GET",
+                url = "$baseUrl/api/search/grocery?q=$encoded",
+                headers = mapOf("Accept" to "application/json"),
+                body = null,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "grocery search failed",
+                res.statusCode,
+            )
+        }
+        return parseGrocerySearch(res.body)
+    }
+
+    fun checkoutGrocery(
+        offerId: String,
+        choice: String,
+    ): GroceryCheckoutResult {
+        require(choice == "ecocash" || choice == "cod") {
+            "choice must be ecocash|cod (D-57)"
+        }
+        // D-47: never send userId/role in body.
+        val body =
+            """{"offerId":${jsonString(offerId)},"choice":${jsonString(choice)}}"""
+        require(!body.contains("userId") && !body.contains("\"role\""))
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/grocery/checkout",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "grocery checkout failed",
+                res.statusCode,
+            )
+        }
+        return parseGroceryCheckout(res.body)
+    }
+
     fun cookieStore(): CookieStore = cookies
 }
 
@@ -304,6 +567,130 @@ internal fun parseCheckout(body: String): SpareCheckoutResult {
         choice = f("choice") ?: "",
         intentId = f("intentId"),
         fxRateId = f("fxRateId"),
+        soldBy = f("soldBy"),
+        imttOnCheckoutLines =
+            Regex(""""imttOnCheckoutLines"\s*:\s*true""")
+                .containsMatchIn(body),
+        cartId = f("cartId"),
+    )
+}
+
+internal fun parseOrder(body: String): SpareOrderSummary {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    fun n(name: String): Long {
+        val s = Regex(""""$name"\s*:\s*"?(\d+)"?""").find(body)?.groupValues?.get(1)
+        return s?.toLongOrNull() ?: 0L
+    }
+    return SpareOrderSummary(
+        orderId = f("orderId"),
+        status = f("status"),
+        currency = f("currency").ifBlank { "USD" },
+        totalUsdMinor = n("totalUsdMinor"),
+        payChoice = f("payChoice"),
+        soldBySummary = f("soldBySummary"),
+    )
+}
+
+internal fun parseOrderList(body: String): List<SpareOrderSummary> {
+    val orders = mutableListOf<SpareOrderSummary>()
+    val blocks =
+        Regex(
+            """\{[^{}]*"orderId"\s*:\s*"([^"]+)"[^{}]*\}""",
+            RegexOption.DOT_MATCHES_ALL,
+        ).findAll(body)
+    for (block in blocks) {
+        orders.add(parseOrder(block.value))
+    }
+    return orders
+}
+
+internal fun parseReturnClaim(body: String): SpareReturnClaim {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    val payableFromAi =
+        Regex(""""payableFromAi"\s*:\s*true""").containsMatchIn(body)
+    return SpareReturnClaim(
+        claimId = f("claimId"),
+        orderId = f("orderId"),
+        status = f("status"),
+        payableFromAi = payableFromAi,
+    )
+}
+
+internal fun parseGarageVehicle(body: String): GarageVehicle {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    return GarageVehicle(
+        vehicleId = f("vehicleId"),
+        customerId = f("customerId"),
+        label = f("label"),
+        chassisHint = f("chassisHint"),
+        reminderConsent =
+            Regex(""""reminderConsent"\s*:\s*true""").containsMatchIn(body),
+    )
+}
+
+internal fun parseGarageList(body: String): List<GarageVehicle> {
+    val out = mutableListOf<GarageVehicle>()
+    val blocks =
+        Regex(
+            """\{[^{}]*"vehicleId"\s*:\s*"([^"]+)"[^{}]*\}""",
+            RegexOption.DOT_MATCHES_ALL,
+        ).findAll(body)
+    for (block in blocks) {
+        out.add(parseGarageVehicle(block.value))
+    }
+    return out
+}
+
+internal fun parseGrocerySearch(body: String): GrocerySearchResult {
+    val currency =
+        Regex(""""currency"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1) ?: "USD"
+    val q = Regex(""""q"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    val liquorSkus =
+        Regex(""""liquorSkus"\s*:\s*true""").containsMatchIn(body)
+    val hits = mutableListOf<GroceryOfferHit>()
+    val hitBlocks =
+        Regex(
+            """\{[^{}]*"offerId"\s*:\s*"([^"]+)"[^{}]*\}""",
+            RegexOption.DOT_MATCHES_ALL,
+        ).findAll(body)
+    for (block in hitBlocks) {
+        val chunk = block.value
+        fun f(name: String): String =
+            Regex(""""$name"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+        fun n(name: String): Long {
+            val s = Regex(""""$name"\s*:\s*"?(\d+)"?""").find(chunk)?.groupValues?.get(1)
+            return s?.toLongOrNull() ?: 0L
+        }
+        hits.add(
+            GroceryOfferHit(
+                offerId = f("offerId"),
+                title = f("title"),
+                unitPriceUsdMinor = n("unitPriceUsdMinor"),
+                brand = f("brand"),
+                unitLabel = f("unitLabel"),
+                coldChain = Regex(""""coldChain"\s*:\s*true""").containsMatchIn(chunk),
+                offerSource = f("offerSource"),
+                supplierFormality = f("supplierFormality"),
+            ),
+        )
+    }
+    return GrocerySearchResult(q = q, currency = currency, liquorSkus = liquorSkus, hits = hits)
+}
+
+internal fun parseGroceryCheckout(body: String): GroceryCheckoutResult {
+    fun f(name: String): String? =
+        Regex(""""$name"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1)
+    fun n(name: String): Long {
+        val s = Regex(""""$name"\s*:\s*"?(\d+)"?""").find(body)?.groupValues?.get(1)
+        return s?.toLongOrNull() ?: 0L
+    }
+    return GroceryCheckoutResult(
+        ok = body.contains("\"ok\":true") || body.contains("\"ok\": true"),
+        currency = f("currency") ?: "USD",
+        cartTotalUsdMinor = n("cartTotalUsdMinor"),
         soldBy = f("soldBy"),
         imttOnCheckoutLines =
             Regex(""""imttOnCheckoutLines"\s*:\s*true""")

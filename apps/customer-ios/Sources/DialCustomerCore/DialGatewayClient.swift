@@ -1,8 +1,8 @@
 import Foundation
 
-/// PD8 customer-iOS gateway client — same ERP paths as PD5 Android.
+/// PD8/PD20 customer-iOS gateway client — same ERP paths as Android (Pack §9.6).
 /// Session SoR = `dial_session` cookie; never body userId/role (D-47).
-/// Browse/cart currency = USD (D-57).
+/// Browse/cart currency = USD (D-57). Orders/returns/garage + grocery search.
 
 public struct DialSession: Equatable, Sendable {
     public let userId: String
@@ -36,6 +36,66 @@ public struct SpareCheckoutResult: Equatable, Sendable {
     public let choice: String
     public let intentId: String?
     public let fxRateId: String?
+    public let soldBy: String?
+    public let imttOnCheckoutLines: Bool
+    public let cartId: String?
+}
+
+public struct SpareOrderSummary: Equatable, Sendable, Identifiable {
+    public var id: String { orderId }
+    public let orderId: String
+    public let status: String
+    public let currency: String
+    public let totalUsdMinor: Int64
+    public let payChoice: String
+    public let soldBySummary: String
+}
+
+public struct SpareTrackResult: Equatable, Sendable {
+    public let order: SpareOrderSummary
+    public let statusFrom: String
+    public let zigOnTrack: Bool
+}
+
+public struct SpareReturnClaim: Equatable, Sendable {
+    public let claimId: String
+    public let orderId: String
+    public let status: String
+    public let payableFromAi: Bool
+}
+
+public struct GarageVehicle: Equatable, Sendable, Identifiable {
+    public var id: String { vehicleId }
+    public let vehicleId: String
+    public let customerId: String
+    public let label: String
+    public let chassisHint: String
+    public let reminderConsent: Bool
+}
+
+public struct GroceryOfferHit: Equatable, Sendable, Identifiable {
+    public var id: String { offerId }
+    public let offerId: String
+    public let title: String
+    public let unitPriceUsdMinor: Int64
+    public let brand: String
+    public let unitLabel: String
+    public let coldChain: Bool
+    public let offerSource: String
+    public let supplierFormality: String
+}
+
+public struct GrocerySearchResult: Equatable, Sendable {
+    public let q: String
+    public let currency: String
+    public let liquorSkus: Bool
+    public let hits: [GroceryOfferHit]
+}
+
+public struct GroceryCheckoutResult: Equatable, Sendable {
+    public let ok: Bool
+    public let currency: String
+    public let cartTotalUsdMinor: Int64
     public let soldBy: String?
     public let imttOnCheckoutLines: Bool
 }
@@ -218,6 +278,171 @@ public final class DialGatewayClient: @unchecked Sendable {
         }
         return try parseCheckout(res.body)
     }
+
+    /// PD20 — place ERP order after checkout (Pack §9.6 / PD18 parity).
+    public func placeSpareOrder(cartId: String, payChoice: String, customerId: String? = nil) throws -> SpareOrderSummary {
+        guard payChoice == "ecocash" || payChoice == "cod" else {
+            throw DialGatewayError.invalidChoice
+        }
+        var body = #"{"cartId":\#(jsonString(cartId)),"payChoice":\#(jsonString(payChoice))"#
+        if let customerId, !customerId.isEmpty {
+            body += #","customerId":\#(jsonString(customerId))"#
+        }
+        body += "}"
+        precondition(!body.contains("\"role\""))
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/spare/orders",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "place order failed")
+        }
+        return try parseOrder(res.body)
+    }
+
+    public func listSpareOrders(customerId: String? = nil) throws -> [SpareOrderSummary] {
+        var url = "\(baseUrl)/api/spare/orders"
+        if let customerId, !customerId.isEmpty {
+            let enc = customerId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? customerId
+            url += "?customerId=\(enc)"
+        }
+        let res = try transport.request(
+            method: "GET",
+            url: url,
+            headers: ["Accept": "application/json"],
+            body: nil,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "list orders failed")
+        }
+        return parseOrderList(res.body)
+    }
+
+    public func trackSpareOrder(orderId: String) throws -> SpareTrackResult {
+        let enc = orderId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? orderId
+        let res = try transport.request(
+            method: "GET",
+            url: "\(baseUrl)/api/spare/orders?orderId=\(enc)",
+            headers: ["Accept": "application/json"],
+            body: nil,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "track failed")
+        }
+        let order = try parseOrder(res.body)
+        let zigOnTrack: Bool = {
+            if let r = try? NSRegularExpression(pattern: #""zigOnTrack"\s*:\s*true"#),
+               r.firstMatch(in: res.body, range: NSRange(res.body.startIndex..., in: res.body)) != nil {
+                return true
+            }
+            return false
+        }()
+        let statusFrom = (try? field("statusFrom", in: res.body)) ?? "erp"
+        return SpareTrackResult(order: order, statusFrom: statusFrom, zigOnTrack: zigOnTrack)
+    }
+
+    public func openSpareReturn(orderId: String) throws -> SpareReturnClaim {
+        let body = #"{"action":"open","orderId":\#(jsonString(orderId)),"path":"refund_or_replace"}"#
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/spare/returns",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "return open failed")
+        }
+        return parseReturnClaim(res.body)
+    }
+
+    public func listGarageVehicles(customerId: String) throws -> [GarageVehicle] {
+        let enc = customerId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? customerId
+        let res = try transport.request(
+            method: "GET",
+            url: "\(baseUrl)/api/spare/garage?customerId=\(enc)",
+            headers: ["Accept": "application/json"],
+            body: nil,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "garage list failed")
+        }
+        return parseGarageList(res.body)
+    }
+
+    public func addGarageVehicle(
+        customerId: String,
+        label: String,
+        chassisHint: String,
+        reminderConsent: Bool
+    ) throws -> GarageVehicle {
+        let body =
+            #"{"customerId":\#(jsonString(customerId)),"label":\#(jsonString(label)),"chassisHint":\#(jsonString(chassisHint)),"reminderConsent":\#(reminderConsent ? "true" : "false")}"#
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/spare/garage",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "garage add failed")
+        }
+        return parseGarageVehicle(res.body)
+    }
+
+    public func searchGrocery(q: String = "") throws -> GrocerySearchResult {
+        let encoded = q.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? q
+        let res = try transport.request(
+            method: "GET",
+            url: "\(baseUrl)/api/search/grocery?q=\(encoded)",
+            headers: ["Accept": "application/json"],
+            body: nil,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "grocery search failed")
+        }
+        return parseGrocerySearch(res.body)
+    }
+
+    public func checkoutGrocery(offerId: String, choice: String) throws -> GroceryCheckoutResult {
+        guard choice == "ecocash" || choice == "cod" else {
+            throw DialGatewayError.invalidChoice
+        }
+        // D-47: never send userId/role in body.
+        let body = #"{"offerId":\#(jsonString(offerId)),"choice":\#(jsonString(choice))}"#
+        precondition(!body.contains("userId") && !body.contains("\"role\""))
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/grocery/checkout",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "grocery checkout failed")
+        }
+        return parseGroceryCheckout(res.body)
+    }
 }
 
 // MARK: - JSON helpers (fixture-light; no Codable dependency on gateway shape drift)
@@ -315,6 +540,136 @@ func parseCheckout(_ body: String) throws -> SpareCheckoutResult {
         choice: (try? field("choice", in: body)) ?? "",
         intentId: optionalField("intentId", in: body),
         fxRateId: optionalField("fxRateId", in: body),
+        soldBy: optionalField("soldBy", in: body),
+        imttOnCheckoutLines: {
+            if let r = try? NSRegularExpression(pattern: #""imttOnCheckoutLines"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }(),
+        cartId: optionalField("cartId", in: body)
+    )
+}
+
+func parseOrder(_ body: String) throws -> SpareOrderSummary {
+    SpareOrderSummary(
+        orderId: (try? field("orderId", in: body)) ?? "",
+        status: (try? field("status", in: body)) ?? "",
+        currency: (try? field("currency", in: body)) ?? "USD",
+        totalUsdMinor: intField("totalUsdMinor", in: body),
+        payChoice: (try? field("payChoice", in: body)) ?? "",
+        soldBySummary: (try? field("soldBySummary", in: body)) ?? ""
+    )
+}
+
+func parseOrderList(_ body: String) -> [SpareOrderSummary] {
+    var orders: [SpareOrderSummary] = []
+    guard let r = try? NSRegularExpression(pattern: #"\{[^{}]*"orderId"\s*:\s*"([^"]+)"[^{}]*\}"#, options: [.dotMatchesLineSeparators]) else {
+        return []
+    }
+    let ns = body as NSString
+    r.enumerateMatches(in: body, range: NSRange(location: 0, length: ns.length)) { match, _, _ in
+        guard let match else { return }
+        let chunk = ns.substring(with: match.range)
+        if let o = try? parseOrder(chunk) {
+            orders.append(o)
+        }
+    }
+    return orders
+}
+
+func parseReturnClaim(_ body: String) -> SpareReturnClaim {
+    let payable: Bool = {
+        if let r = try? NSRegularExpression(pattern: #""payableFromAi"\s*:\s*true"#),
+           r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+            return true
+        }
+        return false
+    }()
+    return SpareReturnClaim(
+        claimId: (try? field("claimId", in: body)) ?? "",
+        orderId: (try? field("orderId", in: body)) ?? "",
+        status: (try? field("status", in: body)) ?? "",
+        payableFromAi: payable
+    )
+}
+
+func parseGarageVehicle(_ body: String) -> GarageVehicle {
+    GarageVehicle(
+        vehicleId: (try? field("vehicleId", in: body)) ?? "",
+        customerId: (try? field("customerId", in: body)) ?? "",
+        label: (try? field("label", in: body)) ?? "",
+        chassisHint: (try? field("chassisHint", in: body)) ?? "",
+        reminderConsent: {
+            if let r = try? NSRegularExpression(pattern: #""reminderConsent"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }()
+    )
+}
+
+func parseGarageList(_ body: String) -> [GarageVehicle] {
+    var out: [GarageVehicle] = []
+    guard let r = try? NSRegularExpression(pattern: #"\{[^{}]*"vehicleId"\s*:\s*"([^"]+)"[^{}]*\}"#, options: [.dotMatchesLineSeparators]) else {
+        return []
+    }
+    let ns = body as NSString
+    r.enumerateMatches(in: body, range: NSRange(location: 0, length: ns.length)) { match, _, _ in
+        guard let match else { return }
+        out.append(parseGarageVehicle(ns.substring(with: match.range)))
+    }
+    return out
+}
+
+func parseGrocerySearch(_ body: String) -> GrocerySearchResult {
+    let currency = (try? field("currency", in: body)) ?? "USD"
+    let q = (try? field("q", in: body)) ?? ""
+    let liquor: Bool = {
+        if let r = try? NSRegularExpression(pattern: #""liquorSkus"\s*:\s*true"#),
+           r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+            return true
+        }
+        return false
+    }()
+    var hits: [GroceryOfferHit] = []
+    if let r = try? NSRegularExpression(pattern: #"\{[^{}]*"offerId"\s*:\s*"([^"]+)"[^{}]*\}"#, options: [.dotMatchesLineSeparators]) {
+        let ns = body as NSString
+        r.enumerateMatches(in: body, range: NSRange(location: 0, length: ns.length)) { match, _, _ in
+            guard let match else { return }
+            let chunk = ns.substring(with: match.range)
+            func f(_ n: String) -> String { (try? field(n, in: chunk)) ?? "" }
+            let cold: Bool = {
+                if let rr = try? NSRegularExpression(pattern: #""coldChain"\s*:\s*true"#),
+                   rr.firstMatch(in: chunk, range: NSRange(chunk.startIndex..., in: chunk)) != nil {
+                    return true
+                }
+                return false
+            }()
+            hits.append(
+                GroceryOfferHit(
+                    offerId: f("offerId"),
+                    title: f("title"),
+                    unitPriceUsdMinor: intField("unitPriceUsdMinor", in: chunk),
+                    brand: f("brand"),
+                    unitLabel: f("unitLabel"),
+                    coldChain: cold,
+                    offerSource: f("offerSource"),
+                    supplierFormality: f("supplierFormality")
+                )
+            )
+        }
+    }
+    return GrocerySearchResult(q: q, currency: currency, liquorSkus: liquor, hits: hits)
+}
+
+func parseGroceryCheckout(_ body: String) -> GroceryCheckoutResult {
+    GroceryCheckoutResult(
+        ok: body.contains("\"ok\":true") || body.contains("\"ok\": true"),
+        currency: (try? field("currency", in: body)) ?? "USD",
+        cartTotalUsdMinor: intField("cartTotalUsdMinor", in: body),
         soldBy: optionalField("soldBy", in: body),
         imttOnCheckoutLines: {
             if let r = try? NSRegularExpression(pattern: #""imttOnCheckoutLines"\s*:\s*true"#),

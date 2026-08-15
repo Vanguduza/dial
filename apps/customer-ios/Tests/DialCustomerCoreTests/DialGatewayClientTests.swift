@@ -56,7 +56,7 @@ final class DialGatewayClientTests: XCTestCase {
             XCTAssertFalse(body!.contains("\"role\""))
             return HttpResponse(
                 statusCode: 200,
-                body: #"{"ok":true,"currency":"USD","cartTotalUsdMinor":"1250","choice":"ecocash","intentId":"pi_1","fxRateId":"fx_1","soldBy":"Sold by Bosch","imttOnCheckoutLines":false}"#
+                body: #"{"ok":true,"currency":"USD","cartTotalUsdMinor":"1250","choice":"ecocash","intentId":"pi_1","fxRateId":"fx_1","soldBy":"Sold by Bosch","imttOnCheckoutLines":false,"cartId":"cart_1"}"#
             )
         }
         let client = DialGatewayClient(baseUrl: "http://localhost:3000", cookies: MemoryCookieStore(), transport: transport)
@@ -65,6 +65,71 @@ final class DialGatewayClientTests: XCTestCase {
         XCTAssertEqual(result.currency, "USD")
         XCTAssertFalse(result.imttOnCheckoutLines)
         XCTAssertEqual(result.intentId, "pi_1")
+        XCTAssertEqual(result.cartId, "cart_1")
+    }
+
+    func testPd20PlaceTrackReturnGarageGrocery() throws {
+        var step = 0
+        let transport = MockTransport { method, url, _, body, _ in
+            if method == "POST", url.hasSuffix("/api/spare/orders") {
+                XCTAssertTrue(body!.contains(#""payChoice":"cod""#))
+                XCTAssertFalse(body!.contains("\"role\""))
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"ok":true,"order":{"orderId":"sord_1","status":"confirmed","currency":"USD","totalUsdMinor":"1250","payChoice":"cod","soldBySummary":"Bosch"}}"#
+                )
+            }
+            if method == "GET", url.contains("orderId=") {
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"order":{"orderId":"sord_1","status":"awaiting_supplier","currency":"USD","totalUsdMinor":"1250","payChoice":"cod","soldBySummary":"Bosch"},"statusFrom":"erp","zigOnTrack":false}"#
+                )
+            }
+            if method == "POST", url.hasSuffix("/api/spare/returns") {
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"ok":true,"claim":{"claimId":"sret_1","orderId":"sord_1","status":"opened","payableFromAi":false}}"#
+                )
+            }
+            if method == "POST", url.hasSuffix("/api/spare/garage") {
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"ok":true,"vehicle":{"vehicleId":"veh_1","customerId":"u1","label":"Hilux","chassisHint":"KUN26","reminderConsent":true}}"#
+                )
+            }
+            if method == "GET", url.contains("/api/search/grocery") {
+                XCTAssertFalse(url.contains("role="))
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"q":"mealie","currency":"USD","liquorSkus":false,"hits":[{"offerId":"g1","title":"Mealie meal","unitPriceUsdMinor":"500","brand":"Ngwena","unitLabel":"2kg","coldChain":false,"offerSource":"MARKETPLACE","supplierFormality":"formal"}]}"#
+                )
+            }
+            XCTFail("unexpected \(method) \(url)")
+            return HttpResponse(statusCode: 500, body: "{}")
+        }
+        let client = DialGatewayClient(baseUrl: "http://localhost:3000", cookies: MemoryCookieStore(), transport: transport)
+        let order = try client.placeSpareOrder(cartId: "cart_1", payChoice: "cod", customerId: "u1")
+        XCTAssertEqual(order.orderId, "sord_1")
+        let track = try client.trackSpareOrder(orderId: "sord_1")
+        XCTAssertFalse(track.zigOnTrack)
+        let claim = try client.openSpareReturn(orderId: "sord_1")
+        XCTAssertFalse(claim.payableFromAi)
+        let vehicle = try client.addGarageVehicle(
+            customerId: "u1",
+            label: "Hilux",
+            chassisHint: "KUN26",
+            reminderConsent: true
+        )
+        XCTAssertTrue(vehicle.reminderConsent)
+        let grocery = try client.searchGrocery(q: "mealie")
+        XCTAssertEqual(grocery.currency, "USD")
+        XCTAssertFalse(grocery.liquorSkus)
+        XCTAssertEqual(step, 5)
     }
 }
 

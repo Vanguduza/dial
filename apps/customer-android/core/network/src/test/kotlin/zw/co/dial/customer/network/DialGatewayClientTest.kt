@@ -74,7 +74,7 @@ class DialGatewayClientTest {
                 HttpResponse(
                     statusCode = 200,
                     body =
-                        """{"ok":true,"currency":"USD","cartTotalUsdMinor":"1250","choice":"ecocash","intentId":"pi_1","fxRateId":"fx_1","soldBy":"Sold by Bosch","imttOnCheckoutLines":false}""",
+                        """{"ok":true,"currency":"USD","cartTotalUsdMinor":"1250","choice":"ecocash","intentId":"pi_1","fxRateId":"fx_1","soldBy":"Sold by Bosch","imttOnCheckoutLines":false,"cartId":"cart_1"}""",
                     setCookieHeaders = emptyList(),
                 )
             }
@@ -84,5 +84,76 @@ class DialGatewayClientTest {
         assertEquals("USD", result.currency)
         assertEquals(false, result.imttOnCheckoutLines)
         assertEquals("pi_1", result.intentId)
+        assertEquals("cart_1", result.cartId)
+    }
+
+    @Test
+    fun pd20_place_track_return_garage_and_grocery_usd() {
+        var step = 0
+        val transport =
+            HttpTransport { method, url, _, body, _ ->
+                when {
+                    method == "POST" && url.endsWith("/api/spare/orders") -> {
+                        assertTrue(body!!.contains("\"payChoice\":\"cod\""))
+                        assertTrue(!body.contains("\"role\""))
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"ok":true,"order":{"orderId":"sord_1","status":"confirmed","currency":"USD","totalUsdMinor":"1250","payChoice":"cod","soldBySummary":"Bosch"}}""",
+                        )
+                    }
+                    method == "GET" && url.contains("orderId=") -> {
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"order":{"orderId":"sord_1","status":"awaiting_supplier","currency":"USD","totalUsdMinor":"1250","payChoice":"cod","soldBySummary":"Bosch"},"statusFrom":"erp","zigOnTrack":false}""",
+                        )
+                    }
+                    method == "POST" && url.endsWith("/api/spare/returns") -> {
+                        assertTrue(body!!.contains("\"action\":\"open\""))
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"ok":true,"claim":{"claimId":"sret_1","orderId":"sord_1","status":"opened","payableFromAi":false}}""",
+                        )
+                    }
+                    method == "POST" && url.endsWith("/api/spare/garage") -> {
+                        assertTrue(body!!.contains("\"reminderConsent\":true"))
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"ok":true,"vehicle":{"vehicleId":"veh_1","customerId":"u1","label":"Hilux","chassisHint":"KUN26","reminderConsent":true}}""",
+                        )
+                    }
+                    method == "GET" && url.contains("/api/search/grocery") -> {
+                        assertTrue(!url.contains("role="))
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"q":"mealie","currency":"USD","liquorSkus":false,"hits":[{"offerId":"g1","title":"Mealie meal","unitPriceUsdMinor":"500","brand":"Ngwena","unitLabel":"2kg","coldChain":false,"offerSource":"MARKETPLACE","supplierFormality":"formal"}]}""",
+                        )
+                    }
+                    else -> error("unexpected $method $url")
+                }
+            }
+        val client = DialGatewayClient("http://localhost:3000", MemoryCookieStore(), transport)
+        val order = client.placeSpareOrder("cart_1", "cod", "u1")
+        assertEquals("sord_1", order.orderId)
+        assertEquals("USD", order.currency)
+        val track = client.trackSpareOrder("sord_1")
+        assertEquals(false, track.zigOnTrack)
+        val claim = client.openSpareReturn("sord_1")
+        assertEquals(false, claim.payableFromAi)
+        val vehicle = client.addGarageVehicle("u1", "Hilux", "KUN26", true)
+        assertTrue(vehicle.reminderConsent)
+        val grocery = client.searchGrocery("mealie")
+        assertEquals("USD", grocery.currency)
+        assertEquals(false, grocery.liquorSkus)
+        assertEquals(5, step)
     }
 }

@@ -86,9 +86,12 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 123 | `PD17` | **Intelligence Factory shadow/promote** — D-54 | workplan | Shadow eval → human+Promptfoo promote; AI drafts only; never payable | `PD18` |
 | 124 | `PD18` | **Spare-web deepen** — Pack §9.2 orders/returns/garage | workplan | Beyond PD3 browse; returns claim; garage vehicles; USD; EcoCash\|COD | `PD19` |
 | 125 | `PD19` | **Admin Trade/JobClass + Value Score** — Pack §9.5 / D-53 | workplan | TradeDefinition editor + lifecycle; technician Value Score profiles/disputes | `PD20` |
-| 126 | `PD20` | **Customer mobile deepen** — Pack §9.6 | new issue | Android/iOS orders/returns/garage parity vs PD18 web; USD; EcoCash\|COD | expand / next band |
+| 126 | `PD20` | **Customer mobile deepen** — Pack §9.6 | workplan | Android/iOS orders/returns/garage + grocery parity vs PD18; USD; EcoCash\|COD; C-5 | `PD21` |
+| 127 | `PD21` | **Customer mobile promo/referral + tech deep-link** — Pack §9.6 remainder | new issue | Promo code + referral share; deep-link Tech critical paths | `PD22` |
+| 128 | `PD22` | **Admin Daily ZiG rate + Cost & health** — Pack §9.5 | new issue | Daily ZiG rate UI + audit; AI/cloud/SMS spend + kill-switch | `PD23` |
+| 129 | `PD23` | **Admin Compliance/WHT + Commercial Simulation** — Pack §9.5 / D-53 | new issue | WHT remittance centre; Simulated never auto-pays | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD19 is **PD20**, not S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD20 is **PD21**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -287,9 +290,36 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd19AdminTradeValueScoreThinVertical`; `pd19TradesValueScore.test.ts`; `/admin/trades` |
 | Green → | **PD20** Customer mobile deepen |
 
-### PD20 — Customer mobile deepen (NEXT — Pack §9.6)
+### PD20 — Customer mobile deepen (**GREEN** 2026-08-15)
 
-Android/iOS orders/returns/garage parity vs PD18 web; USD; EcoCash\|COD.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Android+iOS: Spare checkout → ERP order/track/return → garage consent; grocery USD browse + EcoCash\|COD; no Expo |
+| Evidence | `runPd20CustomerMobileThinVertical`; `pd20CustomerMobile.test.ts`; DialGatewayClient Kotlin/Swift |
+| Green → | **PD21** Customer mobile promo/referral + tech deep-link |
+
+### Pack §9 gap audit (after PD20)
+
+| § | Gap remaining | Stage |
+| --- | --- | --- |
+| 9.6 | Promo code + referral share; Tech deep-link on mobile | **PD21** |
+| 9.5 | Daily ZiG rate admin + Cost & health kill-switch | **PD22** |
+| 9.5 / D-53 | Compliance/WHT remittance + Commercial Simulation | **PD23** |
+
+Do **not** treat S99 as eng-complete / product-finished.
+
+### PD21 — Customer mobile promo/referral + tech deep-link (NEXT)
+
+Pack §9.6 remainder — promo code apply + referral share on Android/iOS; deep-link Tech critical paths (no AI payable).
+
+### PD22 — Admin Daily ZiG rate + Cost & health
+
+Pack §9.5 — Daily ZiG rate set/activate + audit; AI/cloud/SMS spend thresholds + kill-switch links.
+
+### PD23 — Admin Compliance/WHT + Commercial Simulation
+
+Pack §9.5 / D-53 — WHT remittance centre; Commercial Simulation Actual vs Simulated (Simulated never auto-pays).
 
 ### S10 — E2a (historical)
 
