@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD21** green → **PD22** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD22** green → **PD23** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD22** — Admin Daily ZiG rate + Cost & health (next eng) |
-| `current_issue` | _(open when starting PD22)_ |
+| `current_stage` | **PD23** — Admin Compliance/WHT + Commercial Simulation (next eng) |
+| `current_issue` | _(open when starting PD23)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD21** Customer mobile promo/referral + tech deep-link — **green** |
-| `next_stage` | **PD22** Admin Daily ZiG rate + Cost & health |
+| `prior_stage` | **PD22** Admin Daily ZiG rate + Cost & health — **green** |
+| `next_stage` | **PD23** Admin Compliance/WHT remittance + Commercial Simulation |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -41,17 +41,17 @@
 | **PD19** | 2026-08-15 | Admin Trade/JobClass lifecycle + Value Score profiles/disputes; no money path |
 | **PD20** | 2026-08-15 | Customer Android+iOS orders/returns/garage + grocery; C-5 no Expo |
 | **PD21** | 2026-08-15 | Customer mobile promo/referral + tech deep-link; no cash-out (D-42) |
+| **PD22** | 2026-08-15 | Admin Daily ZiG audit + Cost & health spend/kill-switch; IMTT opex (D-57/D-60) |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD22** | Admin Daily ZiG rate + Cost & health — Pack §9.5 |
 | **PD23** | Admin Compliance/WHT remittance + Commercial Simulation — Pack §9.5 / D-53 |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note
 
-Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Pack §9 audit after PD20 authored **PD21–PD23**. Eng next after PD21 is **PD22**, not S99. Product is **not** finished at S99.
+Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Pack §9 audit after PD20 authored **PD21–PD23**. Eng next after PD22 is **PD23**, not S99. Product is **not** finished at S99.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

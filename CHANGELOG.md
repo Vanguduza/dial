@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD22 Admin Daily ZiG + Cost & health** — audited Daily ZiG set/activate; AI/LiteLLM + cloud + SMS/WhatsApp spend thresholds + kill-switch→rate-limits; IMTT opex never checkout (D-57/D-60); `/admin/cost-health` + `/api/admin/cost-health`.
 - **PD21 Customer mobile promo/referral + tech deep-link** — Android+iOS promo code draft + referral share; cash-out blocked (D-42); tech deep-link rate_card book (payableFromAi=false); `/api/promo`; C-5 no Expo.
 - **PD20 Customer mobile deepen** — Android+iOS orders/track/returns/garage parity vs PD18; grocery USD browse + EcoCash\|COD; C-5 no Expo; returns payableFromAi=false; `pd20CustomerMobile.test.ts`. Pack §9 audit authored **PD21–PD23**.
 - **PD19 Admin Trade/JobClass + Value Score** — TradeDefinition/JobClass lifecycle (draft→active→retired); technician Value Score profiles with factor contributions + confidence; append-only disputes; high score ≠ draft eligibility; AI never writes payable amounts; `/admin/trades`.

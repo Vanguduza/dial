@@ -17,6 +17,7 @@ import {
   listPspMethods,
   runE1aMoneySpine,
   runPd4MoneySpine,
+  runPd22AdminZigCostHealthThinVertical,
   setDailyZigRate,
   toCanonicalPspCode,
   usdToZig,
@@ -29,6 +30,14 @@ test("daily ZiG rate converts USD minor to ZWG with fx_rate_id", () => {
   const zig = usdToZig(10_00n, rate);
   assert.equal(zig.currency, "ZWG");
   assert.equal(zig.amountMinor, 10_00n * 2500_00n / 100n);
+});
+
+test("PD22 Daily ZiG + cost health thin vertical", () => {
+  const out = runPd22AdminZigCostHealthThinVertical();
+  assert.equal(out.imttOnCheckoutLines, false);
+  assert.equal(out.costAnyAlert, true);
+  assert.equal(out.killSwitchEngaged, true);
+  assert.ok(out.fxRateId.startsWith("fx"));
 });
 
 test("checkout EcoCash button creates intent with ZWG display + fx_rate_id", async () => {

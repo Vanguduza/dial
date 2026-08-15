@@ -9,6 +9,29 @@ import {
   __resetIdempotencyForTests,
 } from "@dial/shared";
 import { createVendorPaymentSession } from "./adapterBridge.js";
+import {
+  __resetCostHealthForTests,
+  engageKillSwitch,
+  getCostBucket,
+  getCostHealthSnapshot,
+  recordImttOpex,
+  recordOpsSpend,
+} from "./costHealth.js";
+
+export {
+  __resetCostHealthForTests,
+  engageKillSwitch,
+  getCostBucket,
+  getCostHealthSnapshot,
+  recordImttOpex,
+  recordOpsSpend,
+  releaseKillSwitch,
+  serializeCostHealthSnapshot,
+  setCostThreshold,
+  type CostChannel,
+  type CostHealthSnapshot,
+  type CostSpendBucket,
+} from "./costHealth.js";
 
 export type PaymentMethodCode =
   | "ecocash_direct"
@@ -972,6 +995,73 @@ export function __resetPaymentsForTests(): void {
   jobReserves.clear();
   jobReservesByIdem.clear();
   withholding.clear();
+  __resetCostHealthForTests();
+}
+
+/**
+ * PD22 thin vertical: audited Daily ZiG → EcoCash fx_rate_id; cost health
+ * AI/cloud/SMS thresholds + kill-switch; IMTT opex never checkout line (D-57/D-60).
+ */
+export function runPd22AdminZigCostHealthThinVertical(): {
+  fxRateId: string;
+  zigMinorPerUsd: string;
+  auditLen: number;
+  ecoCashFxRateId: string;
+  costAnyAlert: true;
+  killSwitchEngaged: true;
+  imttOnCheckoutLines: false;
+  imttOpexUsdMinor: string;
+} {
+  __resetPaymentsForTests();
+
+  const rate = setDailyZigRate({
+    zigMinorPerUsd: 2500_00n,
+    setBy: "ops_pd22",
+  });
+  const audit = listFxRateAudit();
+  if (audit.length < 1 || audit[0]!.fxRateId !== rate.fxRateId) {
+    throw new Error("PD22 expected FX audit row");
+  }
+
+  const zig = usdToZig(10_00n, rate);
+  if (zig.currency !== "ZWG" || zig.amountMinor <= 0n) {
+    throw new Error("PD22 USD→ZiG conversion failed");
+  }
+
+  recordOpsSpend({ channel: "ai_litellm", amountUsdMinor: 60_00n });
+  recordOpsSpend({ channel: "cloud", amountUsdMinor: 10_00n });
+  recordOpsSpend({ channel: "sms_whatsapp", amountUsdMinor: 5_00n });
+  const ai = getCostBucket("ai_litellm");
+  if (!ai.alert) throw new Error("PD22 expected AI spend alert over threshold");
+  engageKillSwitch("ai_litellm");
+  const killed = getCostBucket("ai_litellm");
+  if (!killed.killSwitchEngaged) {
+    throw new Error("PD22 expected kill-switch engaged");
+  }
+  if (!killed.rateLimitHref.includes("rate-limits")) {
+    throw new Error("PD22 kill-switch must link rate limits");
+  }
+
+  const imtt = recordImttOpex(2_00n);
+  if (imtt.imttOnCheckoutLines !== false) {
+    throw new Error("PD22 IMTT must never be checkout line");
+  }
+
+  const snap = getCostHealthSnapshot();
+  if (!snap.anyAlert || !snap.anyKillSwitch) {
+    throw new Error("PD22 cost snapshot must show alert + kill-switch");
+  }
+
+  return {
+    fxRateId: rate.fxRateId,
+    zigMinorPerUsd: rate.zigMinorPerUsd.toString(),
+    auditLen: audit.length,
+    ecoCashFxRateId: rate.fxRateId,
+    costAnyAlert: true,
+    killSwitchEngaged: true,
+    imttOnCheckoutLines: false,
+    imttOpexUsdMinor: imtt.imttOpexUsdMinor,
+  };
 }
 
 export {

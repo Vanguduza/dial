@@ -88,10 +88,10 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 125 | `PD19` | **Admin Trade/JobClass + Value Score** — Pack §9.5 / D-53 | workplan | TradeDefinition editor + lifecycle; technician Value Score profiles/disputes | `PD20` |
 | 126 | `PD20` | **Customer mobile deepen** — Pack §9.6 | workplan | Android/iOS orders/returns/garage + grocery parity vs PD18; USD; EcoCash\|COD; C-5 | `PD21` |
 | 127 | `PD21` | **Customer mobile promo/referral + tech deep-link** — Pack §9.6 remainder | workplan | Promo code + referral share; deep-link Tech critical paths; no cash-out | `PD22` |
-| 128 | `PD22` | **Admin Daily ZiG rate + Cost & health** — Pack §9.5 | new issue | Daily ZiG rate UI + audit; AI/cloud/SMS spend + kill-switch | `PD23` |
+| 128 | `PD22` | **Admin Daily ZiG rate + Cost & health** — Pack §9.5 | workplan | Daily ZiG rate UI + audit; AI/cloud/SMS spend + kill-switch; IMTT opex | `PD23` |
 | 129 | `PD23` | **Admin Compliance/WHT + Commercial Simulation** — Pack §9.5 / D-53 | new issue | WHT remittance centre; Simulated never auto-pays | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD21 is **PD22**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD22 is **PD23**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -328,11 +328,26 @@ Do **not** treat S99 as eng-complete / product-finished.
 
 Do **not** treat S99 as eng-complete / product-finished.
 
-### PD22 — Admin Daily ZiG rate + Cost & health (NEXT)
+### PD22 — Admin Daily ZiG rate + Cost & health (**GREEN** 2026-08-15)
 
-Pack §9.5 — Daily ZiG rate set/activate + audit; AI/cloud/SMS spend thresholds + kill-switch links.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Audited Daily ZiG set → EcoCash fx_rate_id; AI/cloud/SMS spend thresholds → kill-switch rate-limit links; IMTT opex never checkout |
+| Evidence | `runPd22AdminZigCostHealthThinVertical`; `pd22ZigCostHealth.test.ts`; `/admin/fx/daily-zig` + `/admin/cost-health` |
+| Green → | **PD23** Admin Compliance/WHT + Commercial Simulation |
 
-### PD23 — Admin Compliance/WHT + Commercial Simulation
+### Pack §9 gap audit (after PD20)
+
+| § | Gap remaining | Stage |
+| --- | --- | --- |
+| 9.6 | Promo code + referral share; Tech deep-link on mobile | **PD21 GREEN** |
+| 9.5 | Daily ZiG rate admin + Cost & health kill-switch | **PD22 GREEN** |
+| 9.5 / D-53 | Compliance/WHT remittance + Commercial Simulation | **PD23** |
+
+Do **not** treat S99 as eng-complete / product-finished.
+
+### PD23 — Admin Compliance/WHT + Commercial Simulation (NEXT)
 
 Pack §9.5 / D-53 — WHT remittance centre; Commercial Simulation Actual vs Simulated (Simulated never auto-pays).
 

@@ -109,6 +109,8 @@ export default function DailyZigAdminPage() {
         </h1>
         <p style={{ opacity: 0.8, fontSize: 14, marginTop: dialTokens.space.sm }}>
           Ops-audited FX for EcoCash ZiG display at checkout (D-57). Browse stays USD.
+          IMTT is DIAL opex — never a checkout line (D-60).{" "}
+          <a href="/admin/cost-health">Cost / health</a>
         </p>
 
         <form
