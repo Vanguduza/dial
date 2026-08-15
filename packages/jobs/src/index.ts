@@ -1217,6 +1217,84 @@ export async function listBookingSlots(): Promise<BookingSlot[]> {
   }
 }
 
+/** PD120 — Cal.com booking confirm sibling (fixture when keys unset). */
+export type CalBookingConfirm = {
+  bookingId: string;
+  slotId: string;
+  startAt: string;
+  endAt: string;
+  source: "calcom" | "calcom_fixture";
+  status: "confirmed";
+  payableFromAi: false;
+};
+
+const calBookings = new Map<string, CalBookingConfirm>();
+
+/**
+ * Confirm a Cal.com slot booking. Marks slot booked; fixture when keys unset.
+ */
+export async function confirmCalBooking(input: {
+  slotId: string;
+}): Promise<CalBookingConfirm> {
+  const slotId = input.slotId.trim();
+  if (!slotId) throw new Error("slotId required");
+  if (bookedSlotIds.has(slotId)) {
+    throw new Error(`Slot ${slotId} already booked`);
+  }
+  const slots = await listBookingSlots();
+  const slot = slots.find((s) => s.slotId === slotId);
+  if (!slot) throw new Error(`Unknown or unavailable slot ${slotId}`);
+  bookedSlotIds.add(slotId);
+  const booking: CalBookingConfirm = {
+    bookingId: `calbook_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    slotId: slot.slotId,
+    startAt: slot.startAt,
+    endAt: slot.endAt,
+    source: slot.source,
+    status: "confirmed",
+    payableFromAi: false,
+  };
+  calBookings.set(booking.bookingId, booking);
+  return { ...booking };
+}
+
+export function getCalBooking(bookingId: string): CalBookingConfirm | undefined {
+  const b = calBookings.get(bookingId);
+  return b ? { ...b } : undefined;
+}
+
+/**
+ * PD120 thin vertical: list slots → confirm → slot unavailable on re-list.
+ */
+export async function runPd120CalComConfirmThinVertical(): Promise<{
+  confirmed: true;
+  slotGoneAfterConfirm: true;
+  source: "calcom" | "calcom_fixture";
+  payableFromAi: false;
+  bookingId: string;
+}> {
+  __resetJobsForTests();
+  calBookings.clear();
+  const slots = await listBookingSlots();
+  if (slots.length < 1) throw new Error("PD120 expected slots");
+  const slotId = slots[0]!.slotId;
+  const booking = await confirmCalBooking({ slotId });
+  if (booking.status !== "confirmed" || booking.payableFromAi !== false) {
+    throw new Error("PD120 confirm failed");
+  }
+  const after = await listBookingSlots();
+  if (after.some((s) => s.slotId === slotId)) {
+    throw new Error("PD120 expected slot removed after confirm");
+  }
+  return {
+    confirmed: true,
+    slotGoneAfterConfirm: true,
+    source: booking.source,
+    payableFromAi: false,
+    bookingId: booking.bookingId,
+  };
+}
+
 export function getTechJob(jobId: string): TechJob | undefined {
   const j = jobs.get(jobId);
   return j ? { ...j } : undefined;
@@ -2310,6 +2388,7 @@ export function __resetJobsForTests(): void {
   evidence.clear();
   checklistRuns.clear();
   bookedSlotIds.clear();
+  calBookings.clear();
   technicianAvailability.clear();
   technicianCredentials.clear();
   technicianProfileDirectory.clear();

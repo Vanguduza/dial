@@ -8,6 +8,7 @@ import {
   createSession,
   getSessionFromToken,
 } from "../auth/session.js";
+import { resolveRiveGreeting } from "@dial/shared";
 
 export type HomeLaneId = "shop" | "services";
 
@@ -38,6 +39,11 @@ export type AuthHomeSnapshot = {
     stackedLanesOnNarrow: true;
   };
   riveOptional: "deferred";
+  /** PD122 — Rive greeting fixture (no voice). */
+  riveGreeting: {
+    assetRef: string;
+    voice: false;
+  };
   payableFromAi: false;
 };
 
@@ -123,6 +129,10 @@ export function buildAuthHomeSnapshot(session: DialSession): AuthHomeSnapshot {
       stackedLanesOnNarrow: true,
     },
     riveOptional: "deferred",
+    riveGreeting: (() => {
+      const g = resolveRiveGreeting();
+      return { assetRef: g.assetRef, voice: false as const };
+    })(),
     payableFromAi: false,
   };
 }

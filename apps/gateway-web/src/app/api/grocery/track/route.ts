@@ -16,16 +16,20 @@ export async function GET(req: Request) {
     return NextResponse.json({
       orderId: track.order.orderId,
       status: track.order.status,
+      statusLabel: track.statusLabel,
       statusFrom: track.statusFrom,
+      timeline: track.timeline,
       slotId: track.slot.slotId,
       windowLabel: track.slot.windowLabel,
       coldChainNotes: track.slot.coldChainNotes,
-      liquorAllowed: track.slot.liquorAllowed,
+      liquorAllowed: track.liquorAllowed,
       totalUsdMinor: track.order.totalUsdMinor.toString(),
       currency: track.order.currency,
       payChoice: track.order.payChoice,
       soldBy: track.order.soldBy,
       deliveryJobId: track.order.deliveryJobId,
+      payableFromAi: false,
+      note: "PD119 — grocery ERP track timeline; liquorAllowed false",
     });
   } catch (e) {
     return NextResponse.json(

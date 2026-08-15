@@ -6,6 +6,7 @@ import {
   runPd113FormbricksPosthogStubThinVertical,
   runPd117RealtimeStatusStubThinVertical,
   runPd118CsatFlowThinVertical,
+  runPd122RiveGreetingStubThinVertical,
 } from "./experienceStubs.js";
 
 test("PD113 Formbricks + PostHog stub thin vertical", () => {
@@ -48,5 +49,13 @@ test("PD118 FLOW_CSAT thin vertical", () => {
   assert.equal(out.score, 5);
   assert.equal(out.statusFrom, "erp");
   assert.equal(out.surveyId, "FLOW_CSAT");
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD122 Rive greeting stub thin vertical", () => {
+  const out = runPd122RiveGreetingStubThinVertical();
+  assert.equal(out.assetPresent, true);
+  assert.equal(out.voice, false);
+  assert.equal(out.surface, "auth_home");
   assert.equal(out.payableFromAi, false);
 });

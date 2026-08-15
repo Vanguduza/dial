@@ -305,3 +305,65 @@ export function runPd118CsatFlowThinVertical(): {
     else delete process.env.FORMBRICKS_API_KEY;
   }
 }
+
+/** PD122 — Rive auth-home greeting stub (Pack §9.1 / D-27); no voice. */
+export type RiveGreetingStub = {
+  assetRef: string;
+  state: "fixture";
+  voice: false;
+  surface: "auth_home";
+  payableFromAi: false;
+};
+
+/**
+ * Resolve greeting motion asset. Always fixture path when unset — never voice.
+ */
+export function resolveRiveGreeting(input?: {
+  assetRef?: string;
+}): RiveGreetingStub {
+  const fromEnv = process.env.DIAL_RIVE_GREETING_ASSET?.trim();
+  const assetRef =
+    input?.assetRef?.trim() ||
+    fromEnv ||
+    "fixture://dial-welcome.riv";
+  return {
+    assetRef,
+    state: "fixture",
+    voice: false,
+    surface: "auth_home",
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD122 thin vertical: Rive greeting fixture; voice forbidden; not money.
+ */
+export function runPd122RiveGreetingStubThinVertical(): {
+  assetPresent: true;
+  voice: false;
+  surface: "auth_home";
+  payableFromAi: false;
+  assetRef: string;
+} {
+  const prev = process.env.DIAL_RIVE_GREETING_ASSET;
+  delete process.env.DIAL_RIVE_GREETING_ASSET;
+  try {
+    const g = resolveRiveGreeting();
+    if (!g.assetRef || g.voice !== false || g.payableFromAi !== false) {
+      throw new Error("PD122 Rive greeting checks failed");
+    }
+    if (g.surface !== "auth_home") {
+      throw new Error("PD122 expected auth_home surface");
+    }
+    return {
+      assetPresent: true,
+      voice: false,
+      surface: "auth_home",
+      payableFromAi: false,
+      assetRef: g.assetRef,
+    };
+  } finally {
+    if (prev !== undefined) process.env.DIAL_RIVE_GREETING_ASSET = prev;
+    else delete process.env.DIAL_RIVE_GREETING_ASSET;
+  }
+}

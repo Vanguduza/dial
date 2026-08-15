@@ -123,4 +123,17 @@ test("PD14 slot + place order + track (food; liquorAllowed false)", () => {
   const track = trackGroceryOrder(order.orderId);
   assert.equal(track.statusFrom, "erp");
   assert.equal(track.slot.liquorAllowed, false);
+  assert.equal(track.liquorAllowed, false);
+  assert.ok(track.timeline.length >= 1);
+});
+
+test("PD119 grocery order track timeline", async () => {
+  const { runPd119GroceryOrderTrackTimelineThinVertical } = await import(
+    "./grocery.js"
+  );
+  const out = runPd119GroceryOrderTrackTimelineThinVertical();
+  assert.ok(out.timelineLen >= 3);
+  assert.equal(out.statusFrom, "erp");
+  assert.equal(out.liquorAllowed, false);
+  assert.equal(out.payableFromAi, false);
 });

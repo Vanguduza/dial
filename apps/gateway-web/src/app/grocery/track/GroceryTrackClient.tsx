@@ -3,16 +3,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
 
+type TimelineEvent = { at: string; event: string; status: string };
+
 export function GroceryTrackClient({ initialOrderId }: { initialOrderId: string }) {
   const [orderId, setOrderId] = useState(initialOrderId);
   const [data, setData] = useState<{
     status?: string;
+    statusLabel?: string;
     statusFrom?: string;
     windowLabel?: string;
     coldChainNotes?: string;
     totalUsdMinor?: string;
     soldBy?: string;
     liquorAllowed?: boolean;
+    timeline?: TimelineEvent[];
     error?: string;
   } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -71,7 +75,8 @@ export function GroceryTrackClient({ initialOrderId }: { initialOrderId: string 
       {data && !data.error ? (
         <section style={{ marginTop: dialTokens.space.lg }}>
           <p>
-            Status: <strong>{data.status}</strong> (from {data.statusFrom})
+            Status: <strong>{data.statusLabel ?? data.status}</strong> (from{" "}
+            {data.statusFrom})
           </p>
           <p style={{ fontSize: 14 }}>{data.windowLabel}</p>
           <p style={{ fontSize: 13, opacity: 0.75 }}>{data.coldChainNotes}</p>
@@ -81,6 +86,21 @@ export function GroceryTrackClient({ initialOrderId }: { initialOrderId: string 
           <p style={{ fontSize: 12, opacity: 0.55 }}>
             liquorAllowed: {String(data.liquorAllowed)}
           </p>
+          {data.timeline && data.timeline.length > 0 ? (
+            <div style={{ marginTop: dialTokens.space.md }}>
+              <p style={{ fontSize: 13, fontWeight: 600 }}>Timeline</p>
+              <ul
+                data-testid="pd119-grocery-timeline"
+                style={{ margin: 0, paddingLeft: 18, fontSize: 13 }}
+              >
+                {data.timeline.map((t) => (
+                  <li key={`${t.at}-${t.event}`}>
+                    {t.event} · {t.status} · {new Date(t.at).toLocaleString()}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
         </section>
       ) : null}
     </div>

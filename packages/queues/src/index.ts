@@ -306,3 +306,120 @@ export async function pingQueuesHealth(
   }
   return { ok: true, mode, redisConfigured, queues };
 }
+
+/** PD121 — bull-board pattern queue inspector (D-46); fixture lists; never money. */
+export type QueueInspectorJobRow = {
+  jobId: string;
+  queue: string;
+  name: string;
+  status: "waiting_fixture";
+};
+
+export type QueueInspectorSnapshot = {
+  mode: IntegrationMode;
+  redisConfigured: boolean;
+  boards: Array<{
+    queue: string;
+    waitingCount: number;
+    jobs: QueueInspectorJobRow[];
+  }>;
+  bullBoardPattern: true;
+  moneyAuthority: false;
+  payableFromAi: false;
+};
+
+/**
+ * Snapshot queues for ops inspector (bull-board pattern).
+ * Fixture: in-memory waiting jobs. Sandbox/live without REDIS_URL → empty + ok false.
+ */
+export function getQueueInspectorSnapshot(
+  env: NodeJS.ProcessEnv = process.env,
+): QueueInspectorSnapshot {
+  const mode = integrationMode(env);
+  const redisConfigured = Boolean(env.REDIS_URL?.trim());
+  if (mode !== "fixture" && !redisConfigured) {
+    return {
+      mode,
+      redisConfigured: false,
+      boards: [
+        { queue: QUEUE_SEARCH_INDEXER, waitingCount: 0, jobs: [] },
+        { queue: QUEUE_OUTBOX_SIDE_EFFECTS, waitingCount: 0, jobs: [] },
+        { queue: QUEUE_FDMS_DAY, waitingCount: 0, jobs: [] },
+      ],
+      bullBoardPattern: true,
+      moneyAuthority: false,
+      payableFromAi: false,
+    };
+  }
+  const searchJobs = fixtureSearch.map((j) => ({
+    jobId: j.id,
+    queue: QUEUE_SEARCH_INDEXER,
+    name: j.name,
+    status: "waiting_fixture" as const,
+  }));
+  const outboxJobs = fixtureOutbox.map((j) => ({
+    jobId: j.id,
+    queue: QUEUE_OUTBOX_SIDE_EFFECTS,
+    name: j.name,
+    status: "waiting_fixture" as const,
+  }));
+  const fdmsJobs = fixtureFdmsDay.map((j) => ({
+    jobId: j.id,
+    queue: QUEUE_FDMS_DAY,
+    name: j.name,
+    status: "waiting_fixture" as const,
+  }));
+  return {
+    mode,
+    redisConfigured,
+    boards: [
+      {
+        queue: QUEUE_SEARCH_INDEXER,
+        waitingCount: searchJobs.length,
+        jobs: searchJobs,
+      },
+      {
+        queue: QUEUE_OUTBOX_SIDE_EFFECTS,
+        waitingCount: outboxJobs.length,
+        jobs: outboxJobs,
+      },
+      {
+        queue: QUEUE_FDMS_DAY,
+        waitingCount: fdmsJobs.length,
+        jobs: fdmsJobs,
+      },
+    ],
+    bullBoardPattern: true,
+    moneyAuthority: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD121 thin vertical: enqueue fixture job → inspector sees it; not money.
+ */
+export async function runPd121BullBoardInspectorThinVertical(): Promise<{
+  sawWaitingJob: true;
+  bullBoardPattern: true;
+  moneyAuthority: false;
+  payableFromAi: false;
+}> {
+  fixtureSearch.length = 0;
+  fixtureOutbox.length = 0;
+  fixtureFdmsDay.length = 0;
+  await enqueueSearchIndexerJob({ type: "ReindexAll" });
+  const snap = getQueueInspectorSnapshot();
+  const search = snap.boards.find((b) => b.queue === QUEUE_SEARCH_INDEXER);
+  if (!search || search.waitingCount < 1) {
+    throw new Error("PD121 expected waiting search job in inspector");
+  }
+  if (!snap.bullBoardPattern || snap.moneyAuthority !== false) {
+    throw new Error("PD121 bull-board / money check failed");
+  }
+  return {
+    sawWaitingJob: true,
+    bullBoardPattern: true,
+    moneyAuthority: false,
+    payableFromAi: false,
+  };
+}

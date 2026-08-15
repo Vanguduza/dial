@@ -1450,6 +1450,52 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd118CsatFlowThinVertical` |
 | Green → | eng-safe Pack gap ≠ S99 (**PD119+**) |
 
+### Pack / product gap audit (after PD118 → PD119–PD122)
+
+| Gap | Stage |
+| --- | --- |
+| Grocery order track timeline | **PD119** |
+| Cal.com booking confirm | **PD120** |
+| Bull-board queue inspector (D-46) | **PD121** |
+| Rive auth-home greeting stub | **PD122** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+| packages/ai missing-info deepen | deferred (D-56 capability review gate) |
+| Schedule-X roster | next eng-safe candidate |
+
+### PD119 — Grocery order track timeline (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `trackGroceryOrder` timeline + statusLabel; track UI |
+| Evidence | `runPd119GroceryOrderTrackTimelineThinVertical` |
+| Green → | **PD120** Cal.com confirm |
+
+### PD120 — Cal.com booking confirm (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `confirmCalBooking` + `action=confirm_cal`; fixture sibling |
+| Evidence | `runPd120CalComConfirmThinVertical` |
+| Green → | **PD121** bull-board |
+
+### PD121 — Bull-board queue inspector (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `getQueueInspectorSnapshot` + `/api/admin/queues` (INTERNAL_API_SECRET) |
+| Evidence | `runPd121BullBoardInspectorThinVertical` |
+| Green → | **PD122** Rive greeting |
+
+### PD122 — Rive greeting stub (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `resolveRiveGreeting` on auth home; voice=false |
+| Evidence | `runPd122RiveGreetingStubThinVertical` |
+| Green → | eng-safe Pack gap ≠ S99 (**PD123+**) |
+
 ### S10 — E2a (historical)
 
 | | |

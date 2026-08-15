@@ -417,6 +417,13 @@ export type GroceryOrderStatus =
   | "out_for_delivery"
   | "delivered";
 
+/** PD119 — ERP grocery track timeline (parity PD115 spare). */
+export type GroceryOrderTimelineEvent = {
+  at: string;
+  event: string;
+  status: GroceryOrderStatus;
+};
+
 export type GroceryOrder = {
   orderId: string;
   cartId: string;
@@ -429,6 +436,8 @@ export type GroceryOrder = {
   deliveryJobId: string | null;
   soldBy: string;
   createdAt: string;
+  /** PD119 — status timeline (ERP SoR). */
+  timeline: GroceryOrderTimelineEvent[];
 };
 
 const GROCERY_SLOTS: GroceryDeliverySlot[] = [
@@ -654,6 +663,7 @@ export function placeGroceryOrder(input: {
   if (!slot || slot.liquorAllowed !== false) {
     throw new Error("Invalid grocery slot");
   }
+  const createdAt = new Date().toISOString();
   const order: GroceryOrder = {
     orderId: `gord_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
     cartId: cart.id,
@@ -665,15 +675,23 @@ export function placeGroceryOrder(input: {
     payChoice: input.payChoice,
     deliveryJobId: input.deliveryJobId ?? null,
     soldBy: input.soldBy,
-    createdAt: new Date().toISOString(),
+    createdAt,
+    timeline: [
+      { at: createdAt, event: "order_placed", status: "confirmed" },
+    ],
   };
   store().orders.set(order.orderId, order);
-  return { ...order };
+  return {
+    ...order,
+    timeline: order.timeline.map((t) => ({ ...t })),
+  };
 }
 
 export function getGroceryOrder(orderId: string): GroceryOrder | undefined {
   const o = store().orders.get(orderId);
-  return o ? { ...o } : undefined;
+  return o
+    ? { ...o, timeline: (o.timeline ?? []).map((t) => ({ ...t })) }
+    : undefined;
 }
 
 /** Admin ops queue — all grocery orders (Pack §9.5 / PD55). */
@@ -688,13 +706,17 @@ export function listGroceryOrders(filter?: {
         : true,
     )
     .filter((o) => (filter?.status ? o.status === filter.status : true))
-    .map((o) => ({ ...o }))
+    .map((o) => ({
+      ...o,
+      timeline: (o.timeline ?? []).map((t) => ({ ...t })),
+    }))
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
 export function advanceGroceryOrderStatus(orderId: string): GroceryOrder {
   const o = store().orders.get(orderId);
   if (!o) throw new Error(`Unknown grocery order ${orderId}`);
+  if (!o.timeline) o.timeline = [];
   const seq: GroceryOrderStatus[] = [
     "confirmed",
     "picking",
@@ -704,18 +726,89 @@ export function advanceGroceryOrderStatus(orderId: string): GroceryOrder {
   const i = seq.indexOf(o.status);
   if (i >= 0 && i < seq.length - 1) {
     o.status = seq[i + 1]!;
+    o.timeline.push({
+      at: new Date().toISOString(),
+      event: `status_${o.status}`,
+      status: o.status,
+    });
   }
-  return { ...o };
+  return {
+    ...o,
+    timeline: o.timeline.map((t) => ({ ...t })),
+  };
 }
 
 export function trackGroceryOrder(orderId: string): {
   order: GroceryOrder;
   slot: GroceryDeliverySlot;
   statusFrom: "erp";
+  timeline: GroceryOrderTimelineEvent[];
+  statusLabel: string;
+  liquorAllowed: false;
 } {
   const order = getGroceryOrder(orderId);
   if (!order) throw new Error(`Unknown grocery order ${orderId}`);
   const slot = getGroceryDeliverySlot(order.slotId);
   if (!slot) throw new Error(`Missing slot ${order.slotId}`);
-  return { order, slot, statusFrom: "erp" };
+  const timeline = order.timeline ?? [];
+  const statusLabel =
+    order.status === "confirmed"
+      ? "Confirmed"
+      : order.status === "picking"
+        ? "Picking"
+        : order.status === "out_for_delivery"
+          ? "Out for delivery"
+          : "Delivered";
+  return {
+    order,
+    slot,
+    statusFrom: "erp",
+    timeline,
+    statusLabel,
+    liquorAllowed: false,
+  };
+}
+
+/**
+ * PD119 thin vertical: place → advance → timeline ≥2; ERP; liquorAllowed false.
+ */
+export function runPd119GroceryOrderTrackTimelineThinVertical(): {
+  timelineLen: number;
+  statusLabel: string;
+  statusFrom: "erp";
+  liquorAllowed: false;
+  payableFromAi: false;
+  orderId: string;
+} {
+  __resetGroceryForTests();
+  const cart = createGroceryCart();
+  addToGroceryCart(cart.id, "groc_rice_2kg", 1);
+  const slots = listGroceryDeliverySlots();
+  setGroceryCartSlot(cart.id, slots[0]!.slotId);
+  const order = placeGroceryOrder({
+    cartId: cart.id,
+    customerId: "cust_pd119",
+    payChoice: "cod",
+    soldBy: "Agency Grocer",
+  });
+  advanceGroceryOrderStatus(order.orderId);
+  advanceGroceryOrderStatus(order.orderId);
+  const track = trackGroceryOrder(order.orderId);
+  if (track.timeline.length < 3) {
+    throw new Error("PD119 expected timeline with place + advances");
+  }
+  if (track.statusFrom !== "erp" || track.liquorAllowed !== false) {
+    throw new Error("PD119 ERP SoR / liquorAllowed false");
+  }
+  if (track.order.status !== "out_for_delivery") {
+    throw new Error("PD119 expected out_for_delivery");
+  }
+  return {
+    timelineLen: track.timeline.length,
+    statusLabel: track.statusLabel,
+    statusFrom: "erp",
+    liquorAllowed: false,
+    payableFromAi: false,
+    orderId: order.orderId,
+  };
 }

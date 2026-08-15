@@ -87,6 +87,13 @@ export default async function AuthHomePage() {
           {home.email} · {home.buyerSegment.toUpperCase()}
           {home.sessionRestored ? " · session restored" : ""}
         </p>
+        <p
+          data-testid="pd122-rive-greeting"
+          style={{ fontSize: 12, opacity: 0.55, marginTop: 4 }}
+        >
+          Greeting motion: {home.riveGreeting.assetRef} · voice=
+          {String(home.riveGreeting.voice)} (PD122)
+        </p>
       </header>
 
       <section className="dial-home-lanes" aria-label="Shop and Services">

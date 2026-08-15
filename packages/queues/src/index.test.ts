@@ -84,3 +84,14 @@ test("S125 pingQueuesHealth fixture ok + sandbox fail-closed without Redis", asy
   assert.ok(closed.error?.includes("fail closed"));
   process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
+
+test("PD121 bull-board inspector thin vertical", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetQueuesForTests();
+  const { runPd121BullBoardInspectorThinVertical } = await import("./index.js");
+  const out = await runPd121BullBoardInspectorThinVertical();
+  assert.equal(out.sawWaitingJob, true);
+  assert.equal(out.bullBoardPattern, true);
+  assert.equal(out.moneyAuthority, false);
+  assert.equal(out.payableFromAi, false);
+});

@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD122 Rive greeting stub** — auth-home fixture asset; voice forbidden (Pack §9.1 / D-27).
+- **PD121 Bull-board queue inspector** — fixture snapshot + `/api/admin/queues` (D-46); not money.
+- **PD120 Cal.com booking confirm** — `confirmCalBooking` / `action=confirm_cal` fixture sibling.
+- **PD119 Grocery order track timeline** — ERP status events on grocery track (parity PD115).
 - **PD118 FLOW_CSAT** — ERP 1–5 score + Formbricks `FLOW_CSAT` queue; not payable.
 - **PD117 Realtime status stub** — fail-closed without Supabase keys; read-only; MapLibre SoR.
 - **PD116 Supplier statement PDF stub** — react-pdf pattern document; integer USD net (Pack §9.4).

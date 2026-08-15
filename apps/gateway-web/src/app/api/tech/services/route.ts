@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import {
   bookJobFromIntake,
   bookTechJob,
+  confirmCalBooking,
   createJobIntake,
   draftTechQuote,
   getCustomerJobStatusDetail,
@@ -248,6 +249,20 @@ export async function POST(req: Request) {
         sameJobId: true,
         payableFromAi: false,
         note: "PD111 — intake → booked/assigned; same job id",
+      });
+    }
+
+    if (action === "confirm_cal") {
+      const slotId = String(body.slotId ?? "").trim();
+      if (!slotId) {
+        return NextResponse.json({ error: "slotId required" }, { status: 400 });
+      }
+      const booking = await confirmCalBooking({ slotId });
+      return NextResponse.json({
+        ok: true,
+        booking,
+        payableFromAi: false,
+        note: "PD120 — Cal.com booking confirm sibling",
       });
     }
 
