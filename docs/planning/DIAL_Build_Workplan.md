@@ -399,11 +399,16 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 
 Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
 
-### PD26 — Gateway home Shop|Services (NEXT)
+### PD26 — Gateway home Shop|Services (**GREEN** 2026-08-15)
 
-Pack §9.1 residual — Welcome-back + Shop \| Services.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | AuthN → Welcome-back → Shop\|Services lanes → session restore; responsive stacked→dual |
+| Evidence | `runPd26GatewayHomeThinVertical`; `pd26GatewayHome.test.ts`; `/home` + `/api/home` |
+| Green → | **PD27** Spare Select Vehicle / Browse EPC |
 
-### PD27 — Spare Select Vehicle / Browse EPC
+### PD27 — Spare Select Vehicle / Browse EPC (NEXT)
 
 Pack §9.2 residual — dual entry vehicle + EPC.
 
