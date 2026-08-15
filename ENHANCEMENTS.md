@@ -419,6 +419,8 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-435 | **PD23 Admin Compliance/WHT + Commercial Simulation** — remittance; Simulated≠pay | `done` | Pack §9.5/D-53/D-54; D-50 |
 | ENH-436 | **Product-depth band PD24–PD25** authored (Projects/legal → tech Value Score) | `done` | Pack §9 gap audit after PD23; eng next ≠ S99 |
 | ENH-437 | **PD24 Admin Projects toggle + legal compliance hub** — C-3 gates; §3.8 T&Cs | `done` | Pack §9.5 residual; `/admin/projects` + `/admin/compliance/legal` |
+| ENH-438 | **PD25 Technician Android Value Score + ITF263** — factors; Take-Home; D-50 | `done` | Pack §9.7 / D-53; Compose |
+| ENH-439 | **Product-depth band PD26–PD28** authored (home → EPC → delivery deepen) | `done` | Pack §9 gap audit after PD25; eng next ≠ S99 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

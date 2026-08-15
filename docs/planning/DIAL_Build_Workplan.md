@@ -380,9 +380,36 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd24AdminProjectsLegalThinVertical`; `pd24ProjectsLegal.test.ts`; `/admin/projects` + `/admin/compliance/legal` |
 | Green → | **PD25** Technician Android Value Score + ITF263 |
 
-### PD25 — Technician Android Value Score + ITF263 (NEXT)
+### PD25 — Technician Android Value Score + ITF263 (**GREEN** 2026-08-15)
 
-Pack §9.7 / D-53 — Value Score factors on device; ITF263 status/upload deepen.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Value Score factors on device → Take-Home 30% without ITF → upload/verify → 0% WHT; certificate PDF stub |
+| Evidence | `runPd25ValueScoreDeviceThinVertical`; `runPd25Itf263TakeHomeThinVertical`; `pd25TechnicianValueScoreItf263.test.ts`; Compose client |
+| Green → | **PD26** Gateway home Shop\|Services |
+
+### Pack §9 gap audit (after PD25)
+
+| § | Gap remaining | Stage |
+| --- | --- | --- |
+| 9.1 | Auth home Shop\|Services | **PD26** |
+| 9.2 | Select Vehicle / Browse EPC dual entry | **PD27** |
+| 9.8 | Delivery availability + offline packs | **PD28** |
+
+Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
+
+### PD26 — Gateway home Shop|Services (NEXT)
+
+Pack §9.1 residual — Welcome-back + Shop \| Services.
+
+### PD27 — Spare Select Vehicle / Browse EPC
+
+Pack §9.2 residual — dual entry vehicle + EPC.
+
+### PD28 — Delivery Android availability + offline packs
+
+Pack §9.8 residual — available/busy/offline + offline packs deepen.
 
 ### S10 — E2a (historical)
 
