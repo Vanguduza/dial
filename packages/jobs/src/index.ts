@@ -140,6 +140,16 @@ export type TechJob = {
   createdAt: string;
 };
 
+/** PD90 — Pack technicians.availability (not delivery courier availability). */
+export type TechnicianAvailabilityStatus = "available" | "busy" | "offline";
+
+export type TechnicianAvailability = {
+  technicianId: string;
+  status: TechnicianAvailabilityStatus;
+  updatedAt: string;
+  payableFromAi: false;
+};
+
 const TRADE_SEED: TradeDefinition[] = [
   { id: "trade_auto", name: "Automotive", lifecycle: "active" },
   { id: "trade_elec", name: "Electrical", lifecycle: "active" },
@@ -201,6 +211,7 @@ const jobs = new Map<string, TechJob>();
 const evidence = new Map<string, JobEvidence>();
 const checklistRuns = new Map<string, ChecklistRun>();
 const bookedSlotIds = new Set<string>();
+const technicianAvailability = new Map<string, TechnicianAvailability>();
 
 function newId(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -1429,6 +1440,66 @@ export async function runPd31BluetoothPrintThinVertical(input?: {
   };
 }
 
+/**
+ * PD90 — set technician availability (Pack technicians.availability).
+ * Distinct from delivery courier availability (D-45).
+ */
+export function setTechnicianAvailability(input: {
+  technicianId: string;
+  status: TechnicianAvailabilityStatus;
+}): TechnicianAvailability {
+  if (!input.technicianId.trim()) throw new Error("technicianId required");
+  if (
+    input.status !== "available" &&
+    input.status !== "busy" &&
+    input.status !== "offline"
+  ) {
+    throw new Error("invalid technician availability status");
+  }
+  const row: TechnicianAvailability = {
+    technicianId: input.technicianId.trim(),
+    status: input.status,
+    updatedAt: new Date().toISOString(),
+    payableFromAi: false,
+  };
+  technicianAvailability.set(row.technicianId, row);
+  return { ...row };
+}
+
+export function getTechnicianAvailability(
+  technicianId: string,
+): TechnicianAvailability {
+  const row = technicianAvailability.get(technicianId);
+  if (row) return { ...row };
+  return {
+    technicianId,
+    status: "offline",
+    updatedAt: new Date(0).toISOString(),
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD90 thin vertical: offline → available → busy → offline.
+ */
+export function runPd90TechnicianAvailabilityThinVertical(): {
+  statuses: TechnicianAvailabilityStatus[];
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  const technicianId = "tech_pd90";
+  const statuses: TechnicianAvailabilityStatus[] = [];
+  for (const status of ["available", "busy", "offline"] as const) {
+    const row = setTechnicianAvailability({ technicianId, status });
+    statuses.push(row.status);
+  }
+  const got = getTechnicianAvailability(technicianId);
+  if (got.status !== "offline") {
+    throw new Error("PD90 expected final offline");
+  }
+  return { statuses, payableFromAi: false };
+}
+
 export function __resetJobsForTests(): void {
   valueScores.clear();
   scoreDisputes.clear();
@@ -1437,6 +1508,7 @@ export function __resetJobsForTests(): void {
   evidence.clear();
   checklistRuns.clear();
   bookedSlotIds.clear();
+  technicianAvailability.clear();
   trades.length = 0;
   trades.push(...TRADE_SEED.map((t) => ({ ...t })));
   jobClasses.length = 0;

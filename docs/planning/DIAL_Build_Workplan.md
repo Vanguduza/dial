@@ -1092,9 +1092,53 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | --- | --- |
 | Thin path | Value Score profile → set/clear Manager's choice (not money) |
 | Evidence | `runPd86ManagersChoiceThinVertical`; `pd83Pd86Ops.test.ts` |
-| Green → | eng-safe continue ≠ S99 |
+| Green → | **PD87** supplier coop propose/ack |
 
 ### Pack / product gap audit (after PD86)
+
+| Gap | Stage |
+| --- | --- |
+| Supplier coop propose → accept → ops live | **PD87** |
+| Guided intake + client assessment HTTP | **PD88** |
+| Ops draft quote HTTP (no ledger) | **PD89** |
+| Technician availability | **PD90** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD87 — Supplier coop propose/ack (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | propose → accept → ops approve → live; cash-out forbidden |
+| Evidence | `runPd87SupplierCoopProposeAckThinVertical`; portal `propose_coop`/`accept_coop`; `pd87Pd90Ops.test.ts` |
+| Green → | **PD88** guided intake |
+
+### PD88 — Guided intake HTTP (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `/api/ai/guided-intake` + client-assessment; Zod JobAssessment; no money |
+| Evidence | `runPd88GuidedIntakeThinVertical`; `ai-capability-PD88-PD89-2026-08-15.md` |
+| Green → | **PD89** ops draft quote |
+
+### PD89 — Ops draft quote HTTP (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `/api/ai/ops-draft-quote` internal; humanApprovalRequired; ledgerWrite=false |
+| Evidence | `runPd89OpsDraftQuoteThinVertical`; dogfood |
+| Green → | **PD90** tech availability |
+
+### PD90 — Technician availability (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | available\|busy\|offline on tech API (≠ delivery courier) |
+| Evidence | `runPd90TechnicianAvailabilityThinVertical`; `pd87Pd90Ops.test.ts` |
+| Green → | eng-safe Pack gap ≠ S99 |
+
+### Pack / product gap audit (after PD90)
 
 | Gap | Stage |
 | --- | --- |

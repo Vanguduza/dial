@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD90 Technician availability** — available|busy|offline on tech API; ≠ delivery courier (Pack technicians.availability).
+- **PD89 Ops draft quote HTTP** — `/api/ai/ops-draft-quote` internal; humanApprovalRequired; ledgerWrite=false (D-61).
+- **PD88 Guided intake HTTP** — `/api/ai/guided-intake` + client-assessment; Zod JobAssessment; no money (D-56 audit).
+- **PD87 Supplier coop propose/ack** — portal propose → accept → ops live; cash-out forbidden (D-42 / Pack §10).
 - **PD86 Manager's choice** — Value Score profile flag set/clear; not money (Pack §9.5 / D-53).
 - **PD85 Referral status** — customer referrer/referee edges; promo_credit only (D-42).
 - **PD84 Supplier stock upload** — MARKETPLACE stock → pending_review (Pack §10; D-58).

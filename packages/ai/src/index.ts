@@ -80,6 +80,68 @@ export function opsDraftQuoteFromAssessment(
   };
 }
 
+/**
+ * Pack §10 `/ai/client-assessment` — same no-money assessment surface as guided intake.
+ */
+export function clientAssessment(input: GuidedIntakeInput): JobAssessment {
+  return guidedIntake(input);
+}
+
+/**
+ * PD88 thin vertical: guided intake → Zod assessment; no payable keys (Pack §10 AI).
+ */
+export function runPd88GuidedIntakeThinVertical(): {
+  urgency: "emergency" | "normal";
+  needsHumanQuote: true;
+  identityOmitted: true;
+  payableFromAi: false;
+} {
+  const egress = toModelEgress({
+    customerText: "battery dead stranded on highway",
+    customerUserId: "usr_secret",
+    customerPhone: "+263771111111",
+  });
+  if (egress.text.includes("usr_secret") || egress.text.includes("+263")) {
+    throw new Error("PD88 identity must be omitted from egress");
+  }
+  const assessment = guidedIntake({
+    customerText: "battery dead stranded on highway",
+    customerUserId: "usr_secret",
+  });
+  if (assessment.urgency !== "emergency" || !assessment.needsHumanQuote) {
+    throw new Error("PD88 expected emergency + needsHumanQuote");
+  }
+  assertNoPayableKeys(assessment);
+  return {
+    urgency: assessment.urgency,
+    needsHumanQuote: true,
+    identityOmitted: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD89 thin vertical: assessment → ops draft quote (never ledger write).
+ */
+export function runPd89OpsDraftQuoteThinVertical(): {
+  humanApprovalRequired: true;
+  ledgerWrite: false;
+  payableFromAi: false;
+} {
+  const assessment = clientAssessment({
+    customerText: "engine noise on idle",
+  });
+  const draft = opsDraftQuoteFromAssessment(assessment);
+  if (!draft.humanApprovalRequired || draft.ledgerWrite !== false) {
+    throw new Error("PD89 draft must require human and forbid ledger write");
+  }
+  return {
+    humanApprovalRequired: true,
+    ledgerWrite: false,
+    payableFromAi: false,
+  };
+}
+
 export {
   registerMetricContract,
   listMetricContracts,

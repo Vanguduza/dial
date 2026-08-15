@@ -262,6 +262,48 @@ export function rejectSupplierCoop(campaignId: string): SupplierCoopAgreement {
   return { ...a, offerIds: [...a.offerIds] };
 }
 
+/**
+ * PD87 thin vertical: supplier propose → accept → ops approve → live (Pack §10).
+ */
+export function runPd87SupplierCoopProposeAckThinVertical(): {
+  campaignId: string;
+  afterAccept: "supplier_accepted";
+  afterOps: "live";
+  cashOutForbidden: true;
+  payableFromAi: false;
+} {
+  __resetPromoAdminForTests();
+  const { campaign, agreement } = proposeSupplierCoop({
+    name: "PD87 Co-op pads",
+    supplierId: "sup_pd87",
+    offerIds: ["off_pd87_pad"],
+    supplierFundShareBps: 4000,
+    dialFundShareBps: 6000,
+    budgetSpendLimitMinor: 80_00n,
+    verticals: ["spare"],
+  });
+  if (agreement.status !== "proposed") {
+    throw new Error("PD87 expected proposed");
+  }
+  const accepted = acceptSupplierCoop(campaign.id);
+  if (accepted.status !== "supplier_accepted") {
+    throw new Error("PD87 expected supplier_accepted");
+  }
+  const listed = listCoopAgreementsForSupplier("sup_pd87");
+  if (!listed.some((a) => a.campaignId === campaign.id)) {
+    throw new Error("PD87 list for supplier missing campaign");
+  }
+  const { agreement: live } = approveSupplierCoop(campaign.id);
+  if (live.status !== "live") throw new Error("PD87 expected live after ops");
+  return {
+    campaignId: campaign.id,
+    afterAccept: "supplier_accepted",
+    afterOps: "live",
+    cashOutForbidden: true,
+    payableFromAi: false,
+  };
+}
+
 export type PendingPromoApproval = {
   campaignId: string;
   campaignName: string;

@@ -39,6 +39,22 @@ test("E4a guidedIntake: Zod assessment, no price, identity omitted from egress",
   assert.equal(draft.ledgerWrite, false);
 });
 
+test("PD88 guided intake thin vertical", async () => {
+  const { runPd88GuidedIntakeThinVertical } = await import("./index.js");
+  const out = runPd88GuidedIntakeThinVertical();
+  assert.equal(out.urgency, "emergency");
+  assert.equal(out.identityOmitted, true);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD89 ops draft quote thin vertical", async () => {
+  const { runPd89OpsDraftQuoteThinVertical } = await import("./index.js");
+  const out = runPd89OpsDraftQuoteThinVertical();
+  assert.equal(out.humanApprovalRequired, true);
+  assert.equal(out.ledgerWrite, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("E6a/T8 MetricContract + shadow promote + Simulated never auto-pays", () => {
   __resetIntelligenceForTests();
   registerMetricContract({

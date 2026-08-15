@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON** — through **PD86** green. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON** — through **PD90** green. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD86** — Manager's choice flag — **green** |
+| `current_stage` | **PD90** — Technician availability — **green** |
 | `current_issue` | (workplan fold; no GitHub issue required) |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD85** Referral status — **green** |
-| `next_stage` | eng-safe Pack gap ≠ S99 |
+| `prior_stage` | **PD89** Ops draft quote HTTP — **green** |
+| `next_stage` | eng-safe Pack gap ≠ S99 (**PD91+**) |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate; take-rate live bps; remote staging URL optional (ENH-011); Meta/ZIMRA/PSP **live** contracts (ENH-020 escrow partner; ENH-021/022) |
 
 ## Completed
@@ -19,17 +19,17 @@
 | --- | --- | --- |
 | S10–S90 | 2026-08-12/13 | Workplan spine green — eng Build complete |
 | S91–S465 | 2026-08-13/14 | **Post-S90 invent** — paused — not workplan SoR |
-| **PD1**–**PD82** | 2026-08-14/15 | Pack product-depth through account profile |
-| **PD83** | 2026-08-15 | Customer delivery addresses |
-| **PD84** | 2026-08-15 | Supplier stock upload |
-| **PD85** | 2026-08-15 | Referral status |
-| **PD86** | 2026-08-15 | Manager's choice flag |
+| **PD1**–**PD86** | 2026-08-14/15 | Pack product-depth through Manager's choice |
+| **PD87** | 2026-08-15 | Supplier coop propose/ack |
+| **PD88** | 2026-08-15 | Guided intake HTTP |
+| **PD89** | 2026-08-15 | Ops draft quote HTTP |
+| **PD90** | 2026-08-15 | Technician availability |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD87+** | Pack gap fold — eng-safe ≠ S99 |
+| **PD91+** | Pack gap fold — eng-safe ≠ S99 |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note

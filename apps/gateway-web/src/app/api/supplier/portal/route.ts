@@ -24,6 +24,11 @@ import {
   type SupplierTier,
 } from "@dial/suppliers";
 import {
+  acceptSupplierCoop,
+  listCoopAgreementsForSupplier,
+  proposeSupplierCoop,
+} from "@dial/promotions";
+import {
   getSessionFromToken,
   parseSessionCookie,
 } from "../../../../lib/auth/session";
@@ -44,6 +49,7 @@ async function parseAction(req: Request): Promise<{
   action: string;
   fields: Record<string, string>;
   rejectedIdentity: boolean;
+  offerIds?: string[];
   rows?: Array<{
     sku: string;
     title: string;
@@ -60,13 +66,16 @@ async function parseAction(req: Request): Promise<{
     }
     const fields: Record<string, string> = {};
     for (const [k, v] of Object.entries(body)) {
-      if (k === "rows" || k === "action") continue;
+      if (k === "rows" || k === "action" || k === "offerIds") continue;
       if (v !== undefined && v !== null) fields[k] = String(v);
     }
     const base = {
       action: String(body.action ?? ""),
       fields,
       rejectedIdentity: false as const,
+      ...(Array.isArray(body.offerIds)
+        ? { offerIds: body.offerIds.map((id) => String(id)) }
+        : {}),
     };
     if (Array.isArray(body.rows)) {
       return {
@@ -162,6 +171,7 @@ export async function GET(req: Request) {
       currency: l.amount.currency,
       createdAt: l.createdAt,
     })),
+    coopAgreements: listCoopAgreementsForSupplier(supplierId),
     payableFromAi: false,
   });
 }
@@ -329,6 +339,65 @@ export async function POST(req: Request) {
             kind: line.kind,
             amountUsdMinor: line.amount.amountMinor.toString(),
           },
+        });
+      }
+      case "propose_coop": {
+        const offerIds =
+          parsed.offerIds ??
+          (parsed.fields.offerIds
+            ? parsed.fields.offerIds.split(",").map((s) => s.trim()).filter(Boolean)
+            : []);
+        if (
+          !parsed.fields.name ||
+          offerIds.length === 0 ||
+          !parsed.fields.budgetSpendLimitMinor ||
+          parsed.fields.supplierFundShareBps === undefined ||
+          parsed.fields.dialFundShareBps === undefined
+        ) {
+          return NextResponse.json(
+            { error: "propose_coop fields incomplete" },
+            { status: 400 },
+          );
+        }
+        const { campaign, agreement } = proposeSupplierCoop({
+          name: parsed.fields.name,
+          supplierId,
+          offerIds,
+          supplierFundShareBps: Number(parsed.fields.supplierFundShareBps),
+          dialFundShareBps: Number(parsed.fields.dialFundShareBps),
+          budgetSpendLimitMinor: BigInt(parsed.fields.budgetSpendLimitMinor),
+        });
+        if (wantsHtml) return redirectSupplier(req, "#coop");
+        return NextResponse.json({
+          ok: true,
+          campaignId: campaign.id,
+          agreementStatus: agreement.status,
+          coopAgreements: listCoopAgreementsForSupplier(supplierId),
+          cashOutForbidden: true,
+          payableFromAi: false,
+          note: "PD87 — supplier propose co-op; ops approve still required for live",
+        });
+      }
+      case "accept_coop": {
+        const campaignId = parsed.fields.campaignId ?? "";
+        const owned = listCoopAgreementsForSupplier(supplierId).find(
+          (a) => a.campaignId === campaignId,
+        );
+        if (!owned) {
+          return NextResponse.json(
+            { error: "coop not owned by session supplier" },
+            { status: 403 },
+          );
+        }
+        const agreement = acceptSupplierCoop(campaignId);
+        if (wantsHtml) return redirectSupplier(req, "#coop");
+        return NextResponse.json({
+          ok: true,
+          agreementStatus: agreement.status,
+          coopAgreements: listCoopAgreementsForSupplier(supplierId),
+          cashOutForbidden: true,
+          payableFromAi: false,
+          note: "PD87 — supplier accept → supplier_accepted; ops approve for live",
         });
       }
       default:

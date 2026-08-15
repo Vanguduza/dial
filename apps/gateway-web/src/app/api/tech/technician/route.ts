@@ -34,7 +34,10 @@ import {
   startChecklistRun,
   submitChecklistAnswers,
   uploadJobEvidence,
+  getTechnicianAvailability,
+  setTechnicianAvailability,
   type ChecklistId,
+  type TechnicianAvailabilityStatus,
 } from "@dial/jobs";
 import {
   computeTakeHomeBreakdown,
@@ -161,12 +164,22 @@ export async function GET(req: Request) {
     });
   }
 
+  if (view === "availability") {
+    return NextResponse.json({
+      technicianId,
+      availability: getTechnicianAvailability(technicianId),
+      payableFromAi: false,
+      note: "PD90 — technician availability (≠ delivery courier)",
+    });
+  }
+
   return NextResponse.json({
     technicianId,
     jobs: listJobsForTechnician(technicianId).map(serializeJob),
     checklists: listChecklists(),
     valueScore: getValueScoreSnapshot(technicianId) ?? null,
     itf263: getItf263Record(technicianId, new Date().getFullYear()) ?? null,
+    availability: getTechnicianAvailability(technicianId),
     thermalPrinters: listThermalPrinters(technicianId),
     thermalPrintJobs: listThermalPrintJobs(technicianId),
     printNote: "ESC/POS Bluetooth ops — FDMS virtual API only (D-40a); not ZIMRA printer SoR",
@@ -499,6 +512,19 @@ export async function POST(req: Request) {
           return NextResponse.json({ error: "unknown run" }, { status: 404 });
         }
         return NextResponse.json({ ok: true, run });
+      }
+      case "set_availability": {
+        const status = String(body.status ?? "") as TechnicianAvailabilityStatus;
+        const availability = setTechnicianAvailability({
+          technicianId,
+          status,
+        });
+        return NextResponse.json({
+          ok: true,
+          availability,
+          payableFromAi: false,
+          note: "PD90 — technician availability set (session tech only)",
+        });
       }
       default:
         return NextResponse.json({ error: `unknown action ${action}` }, { status: 400 });

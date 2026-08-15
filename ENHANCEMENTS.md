@@ -478,6 +478,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-494 | **PD84 Supplier stock upload** pending_review | `done` | Pack §10; D-58 |
 | ENH-495 | **PD85 Referral status** customer edges | `done` | Pack §10; D-42 |
 | ENH-496 | **PD86 Manager's choice** Value Score flag | `done` | Pack §9.5; D-53 |
+| ENH-497 | **PD87 Supplier coop propose/ack** portal | `done` | Pack §10; D-42 |
+| ENH-498 | **PD88 Guided intake HTTP** + client-assessment | `done` | Pack §10 AI; D-56 |
+| ENH-499 | **PD89 Ops draft quote HTTP** no ledger | `done` | Pack §10 AI; D-61 |
+| ENH-500 | **PD90 Technician availability** | `done` | Pack technicians.availability |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

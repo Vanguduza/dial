@@ -206,6 +206,13 @@ test("PD86 managers choice thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD90 technician availability thin vertical", async () => {
+  const { runPd90TechnicianAvailabilityThinVertical } = await import("./index.js");
+  const out = runPd90TechnicianAvailabilityThinVertical();
+  assert.deepEqual(out.statuses, ["available", "busy", "offline"]);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

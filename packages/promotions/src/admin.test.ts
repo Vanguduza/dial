@@ -9,6 +9,7 @@ import {
   createPromoCampaign,
   runPd16PromotionsAdminThinVertical,
   runPd72PromoApproveQueueThinVertical,
+  runPd87SupplierCoopProposeAckThinVertical,
 } from "./admin.js";
 
 test("PD16 thin vertical: PLATFORM/FLASH/REFERRAL + coop approve + fraud + no cash-out", () => {
@@ -76,4 +77,12 @@ test("PD72 promo approve queue thin vertical", () => {
   assert.ok(out.approvedCampaignId);
   assert.equal(out.payableFromAi, false);
   assert.equal(out.cashOutForbidden, true);
+});
+
+test("PD87 supplier coop propose → accept → ops live", () => {
+  const out = runPd87SupplierCoopProposeAckThinVertical();
+  assert.equal(out.afterAccept, "supplier_accepted");
+  assert.equal(out.afterOps, "live");
+  assert.equal(out.cashOutForbidden, true);
+  assert.equal(out.payableFromAi, false);
 });
