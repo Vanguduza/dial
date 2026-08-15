@@ -1142,6 +1142,50 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Spare PDP fitment / quality / availability | **PD91** |
+| 7-day order cancellation | **PD92** |
+| Customer shadow-failover UX | **PD93** |
+| emergency.triage.v1 checklist | **PD94** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD91 — Spare PDP attrs (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | fitmentConfidence + qualityTier + availability state (not raw qty) |
+| Evidence | `runPd91SparePdpAttrsThinVertical`; search hits; PDP; `pd91Pd94Ops.test.ts` |
+| Green → | **PD92** 7-day cancel |
+
+### PD92 — 7-day order cancel (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | cancel while `cancellableUntil` open; deny after |
+| Evidence | `runPd92SevenDayCancelThinVertical`; `/api/spare/orders` action=cancel |
+| Green → | **PD93** shadow failover |
+
+### PD93 — Customer shadow failover (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | list SLA-breached confirms → accept alternate supplier |
+| Evidence | `runPd93CustomerShadowFailoverThinVertical`; `/api/spare/failover` |
+| Green → | **PD94** emergency triage |
+
+### PD94 — emergency.triage.v1 (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | seed + resolve + run checklist; AI price bypassed |
+| Evidence | `runPd94EmergencyTriageThinVertical`; tech services checklists |
+| Green → | eng-safe Pack gap ≠ S99 |
+
+### Pack / product gap audit (after PD94)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 | Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |

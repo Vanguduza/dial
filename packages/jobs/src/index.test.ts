@@ -213,6 +213,16 @@ test("PD90 technician availability thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD94 emergency triage thin vertical", async () => {
+  const { runPd94EmergencyTriageThinVertical } = await import("./index.js");
+  const out = runPd94EmergencyTriageThinVertical();
+  assert.equal(out.checklistId, "emergency_triage");
+  assert.equal(out.catalogId, "emergency.triage.v1");
+  assert.equal(out.completed, true);
+  assert.equal(out.aiPricingBypassed, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

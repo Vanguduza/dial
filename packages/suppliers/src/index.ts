@@ -59,6 +59,8 @@ export type ConfirmOrderStatus = "awaiting_confirm" | "confirmed" | "sla_breache
 export type ConfirmOrder = {
   orderId: string;
   supplierId: string;
+  /** Optional customer owner for shadow-failover UX (PD93). */
+  customerId?: string;
   /** Customer order total snapshot (USD minor) — supplier confirms fulfilment, does not set payable. */
   amountUsdMinor: bigint;
   status: ConfirmOrderStatus;
@@ -513,6 +515,7 @@ export function ackSlaEscalation(input: {
 export function enqueueConfirmOrder(input: {
   supplierId: string;
   orderId?: string;
+  customerId?: string;
   amountUsdMinor: bigint;
   slaMs?: number;
 }): ConfirmOrder {
@@ -528,6 +531,7 @@ export function enqueueConfirmOrder(input: {
     amountUsdMinor: input.amountUsdMinor,
     status: "awaiting_confirm",
     slaDeadlineAt: Date.now() + (input.slaMs ?? DEFAULT_SLA_MS),
+    ...(input.customerId ? { customerId: input.customerId } : {}),
   };
   store().confirms.set(order.orderId, order);
   return { ...order };
@@ -659,6 +663,113 @@ export function runPd71OrderFailoverAcceptThinVertical(): {
   }
   return {
     failoverAccepted: true,
+    toSupplierId: alternate,
+    payableFromAi: false,
+  };
+}
+
+export type ShadowFailoverOffer = {
+  orderId: string;
+  fromSupplierId: string;
+  amountUsdMinor: string;
+  status: "sla_breached";
+  alternateSupplierIds: string[];
+  payableFromAi: false;
+};
+
+/** PD93 — Pack §9.2 customer shadow-failover list after confirm SLA breach. */
+export function listShadowFailoverOffersForCustomer(
+  customerId: string,
+  now = Date.now(),
+): ShadowFailoverOffer[] {
+  if (!customerId.trim()) throw new Error("customerId required");
+  const out: ShadowFailoverOffer[] = [];
+  for (const o of store().confirms.values()) {
+    if (o.customerId !== customerId) continue;
+    if (o.status === "awaiting_confirm" && now > o.slaDeadlineAt) {
+      o.status = "sla_breached";
+    }
+    if (o.status !== "sla_breached") continue;
+    const alternates = [...store().profiles.keys()].filter(
+      (id) => id !== o.supplierId,
+    );
+    out.push({
+      orderId: o.orderId,
+      fromSupplierId: o.supplierId,
+      amountUsdMinor: o.amountUsdMinor.toString(),
+      status: "sla_breached",
+      alternateSupplierIds: alternates,
+      payableFromAi: false,
+    });
+  }
+  return out;
+}
+
+export function acceptShadowFailoverAsCustomer(input: {
+  customerId: string;
+  orderId: string;
+  toSupplierId: string;
+  now?: number;
+}): FailoverAcceptResult {
+  const order = store().confirms.get(input.orderId);
+  if (!order || order.customerId !== input.customerId) {
+    throw new Error("failover offer not owned by customer");
+  }
+  return failoverAcceptOrder({
+    orderId: input.orderId,
+    fromSupplierId: order.supplierId,
+    toSupplierId: input.toSupplierId,
+    ...(input.now !== undefined ? { now: input.now } : {}),
+  });
+}
+
+/**
+ * PD93 thin vertical: customer sees breached confirm → accept alternate supplier.
+ */
+export function runPd93CustomerShadowFailoverThinVertical(): {
+  listed: true;
+  accepted: true;
+  toSupplierId: string;
+  payableFromAi: false;
+} {
+  __resetSuppliersForTests();
+  const customerId = "cust_pd93";
+  const primary = "sup_pd93_a";
+  const alternate = "sup_pd93_b";
+  onboardSupplier({
+    supplierId: primary,
+    displayName: "PD93 Primary",
+    formality: "formal",
+    tier: "bronze",
+  });
+  onboardSupplier({
+    supplierId: alternate,
+    displayName: "PD93 Alternate",
+    formality: "formal",
+    tier: "silver",
+  });
+  const order = enqueueConfirmOrder({
+    supplierId: primary,
+    customerId,
+    amountUsdMinor: 40_00n,
+    slaMs: 1,
+  });
+  listConfirmQueue(primary, Date.now() + 20);
+  const listed = listShadowFailoverOffersForCustomer(customerId);
+  if (!listed.some((x) => x.orderId === order.orderId)) {
+    throw new Error("PD93 expected customer shadow list");
+  }
+  const accepted = acceptShadowFailoverAsCustomer({
+    customerId,
+    orderId: order.orderId,
+    toSupplierId: alternate,
+  });
+  if (accepted.status !== "confirmed" || accepted.toSupplierId !== alternate) {
+    throw new Error("PD93 accept failed");
+  }
+  return {
+    listed: true,
+    accepted: true,
     toSupplierId: alternate,
     payableFromAi: false,
   };

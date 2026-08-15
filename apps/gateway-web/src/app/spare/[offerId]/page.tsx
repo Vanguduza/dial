@@ -68,6 +68,10 @@ export default async function SparePdpPage({
         <p>
           {offer.brand} · OEM {offer.oem} · {offer.qualityTier}
         </p>
+        <p style={{ fontSize: 14 }} data-testid="spare-pdp-attrs">
+          Fitment {(offer.fitmentConfidence ?? 0.8).toFixed(2)} · Availability{" "}
+          {offer.availability ?? "available"} (state, not qty)
+        </p>
         <p style={{ fontSize: "1.25rem", fontWeight: 700 }}>
           USD {(Number(offer.unitPriceUsdMinor) / 100).toFixed(2)}
         </p>

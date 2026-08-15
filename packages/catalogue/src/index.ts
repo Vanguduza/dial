@@ -19,6 +19,9 @@ export {
 
 export type SearchSessionRole = "b2c" | "b2b";
 
+/** Pack §9.2 PDP — availability *state*, never raw qty. */
+export type OfferAvailability = "available" | "confirm_required" | "sourcing";
+
 export type StubOffer = {
   offerId: string;
   title: string;
@@ -29,7 +32,85 @@ export type StubOffer = {
   supplierFormality: SupplierFormality;
   oem: string;
   brand: string;
+  /** Pack §9.2 — display state (defaults available). */
+  availability?: OfferAvailability;
+  /** Pack §9.2 — 0..1 fitment confidence for PDP / search hit. */
+  fitmentConfidence?: number;
 };
+
+export type SparePdpAttrs = {
+  offerId: string;
+  title: string;
+  qualityTier: StubOffer["qualityTier"];
+  availability: OfferAvailability;
+  fitmentConfidence: number;
+  /** Never expose raw stock qty on PDP (Pack §9.2). */
+  rawQtyExposed: false;
+  soldBy: string;
+  currency: "USD";
+  unitPriceUsdMinor: string;
+  payableFromAi: false;
+};
+
+export function resolveOfferAvailability(o: StubOffer): OfferAvailability {
+  return o.availability ?? "available";
+}
+
+export function resolveFitmentConfidence(o: StubOffer): number {
+  const n = o.fitmentConfidence ?? 0.8;
+  if (n < 0 || n > 1) return 0.8;
+  return n;
+}
+
+/** PD91 — Pack §9.2 PDP attrs (fitment / quality / availability state). */
+export function getOfferPdpAttrs(offerId: string): SparePdpAttrs | undefined {
+  const o = getOffer(offerId);
+  if (!o) return undefined;
+  return {
+    offerId: o.offerId,
+    title: o.title,
+    qualityTier: o.qualityTier,
+    availability: resolveOfferAvailability(o),
+    fitmentConfidence: resolveFitmentConfidence(o),
+    rawQtyExposed: false,
+    soldBy: `${o.brand} Agency`,
+    currency: "USD",
+    unitPriceUsdMinor: o.unitPriceUsdMinor.toString(),
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD91 thin vertical: search/PDP expose fitment + qualityTier + availability (not qty).
+ */
+export function runPd91SparePdpAttrsThinVertical(): {
+  offerId: string;
+  qualityTier: StubOffer["qualityTier"];
+  availability: OfferAvailability;
+  fitmentConfidence: number;
+  rawQtyExposed: false;
+  payableFromAi: false;
+} {
+  __resetCatalogueForTests();
+  const hit = searchOffers("oil")[0];
+  if (!hit) throw new Error("PD91 expected oil filter hit");
+  const pdp = getOfferPdpAttrs(hit.offerId);
+  if (!pdp) throw new Error("PD91 PDP attrs missing");
+  if (pdp.rawQtyExposed !== false) {
+    throw new Error("PD91 must not expose raw qty");
+  }
+  if (!pdp.qualityTier || !pdp.availability) {
+    throw new Error("PD91 qualityTier + availability required");
+  }
+  return {
+    offerId: pdp.offerId,
+    qualityTier: pdp.qualityTier,
+    availability: pdp.availability,
+    fitmentConfidence: pdp.fitmentConfidence,
+    rawQtyExposed: false,
+    payableFromAi: false,
+  };
+}
 
 export type CartLine = {
   offerId: string;
@@ -109,6 +190,8 @@ const OFFER_SEED: StubOffer[] = [
     supplierFormality: "formal",
     oem: "KUN26-FILTER",
     brand: "Toyota",
+    availability: "available",
+    fitmentConfidence: 0.92,
   },
   {
     offerId: "off_pad_front_zre152",
@@ -119,6 +202,8 @@ const OFFER_SEED: StubOffer[] = [
     supplierFormality: "formal",
     oem: "ZRE152-PAD-F",
     brand: "Akebono",
+    availability: "confirm_required",
+    fitmentConfidence: 0.75,
   },
   {
     offerId: "off_wiper_informal_01",
@@ -129,6 +214,8 @@ const OFFER_SEED: StubOffer[] = [
     supplierFormality: "informal",
     oem: "WIPER-UNI",
     brand: "Local",
+    availability: "sourcing",
+    fitmentConfidence: 0.55,
   },
 ];
 
@@ -150,7 +237,7 @@ function toMeiliDoc(offer: StubOffer): SpareOfferDocument {
     description: offer.title,
     brand: offer.brand,
     qualityTier: offer.qualityTier,
-    availability: "available",
+    availability: resolveOfferAvailability(offer),
     chassis_codes: chassisCodesForOffer(offer),
     engine_codes: [],
     categoryPath: ["spares"],
@@ -158,7 +245,7 @@ function toMeiliDoc(offer: StubOffer): SpareOfferDocument {
     currency: "USD",
     warrantyDays: 90,
     deliveryBandId: "harare_metro",
-    fitmentConfidence: 0.8,
+    fitmentConfidence: resolveFitmentConfidence(offer),
     stockValidUntil: Date.now() + 86_400_000,
     hasRestrictedSku: false,
     offerSource: offer.offerSource,
@@ -210,6 +297,10 @@ function stubOfferFromMeiliDoc(doc: SpareOfferDocument): StubOffer {
     tier === "OEM" || tier === "OES" || tier === "Aftermarket"
       ? tier
       : "Aftermarket";
+  const availability: OfferAvailability =
+    doc.availability === "confirm_required" || doc.availability === "sourcing"
+      ? doc.availability
+      : "available";
   return {
     offerId: doc.id,
     title: doc.description,
@@ -219,6 +310,8 @@ function stubOfferFromMeiliDoc(doc: SpareOfferDocument): StubOffer {
     supplierFormality: doc.supplierFormality,
     oem: doc.oem,
     brand: doc.brand,
+    availability,
+    fitmentConfidence: doc.fitmentConfidence,
   };
 }
 
@@ -868,6 +961,8 @@ export async function runPd15CatalogueFactoryThinVertical(): Promise<{
       supplierFormality: spareDraft.supplierFormality,
       oem: spareDraft.oem ?? spareDraft.offerId,
       brand: spareDraft.brand,
+      availability: "available",
+      fitmentConfidence: 0.8,
     },
   });
 
@@ -1027,6 +1122,7 @@ export {
   addGarageVehicle,
   advanceSpareOrderStatus,
   browsePathForGarageVehicle,
+  cancelSpareOrder,
   getActiveGarageVehicle,
   getSpareOrder,
   getSpareReturnClaim,
@@ -1043,6 +1139,7 @@ export {
   runPd50VehicleHubThinVertical,
   runPd75SetActiveGarageVehicleThinVertical,
   runPd79GarageCrudThinVertical,
+  runPd92SevenDayCancelThinVertical,
   setActiveGarageVehicle,
   setGarageReminderConsent,
   updateGarageVehicle,

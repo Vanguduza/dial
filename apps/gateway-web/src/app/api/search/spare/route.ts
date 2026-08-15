@@ -60,12 +60,15 @@ export async function GET(req: Request) {
         title: h.title,
         unitPriceUsdMinor: h.unitPriceUsdMinor.toString(),
         qualityTier: h.qualityTier,
+        availability: h.availability ?? "available",
+        fitmentConfidence: h.fitmentConfidence ?? 0.8,
         offerSource: h.offerSource,
         supplierFormality: h.supplierFormality,
         oem: h.oem,
         brand: h.brand,
         /** Agency disclosure — Sold by {Supplier} Agency (D-58 / PD42). */
         soldBy: `${h.brand} Agency`,
+        rawQtyExposed: false,
       })),
     });
   } catch (e) {

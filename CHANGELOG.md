@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD94 emergency.triage.v1** — Pack checklist seed + run; AI price bypassed (Pack §9.3).
+- **PD93 Customer shadow failover** — list/accept after confirm SLA breach (`/api/spare/failover`).
+- **PD92 7-day order cancel** — cancel within `cancellableUntil`; deny after (Pack §9.2 / §10).
+- **PD91 Spare PDP attrs** — fitmentConfidence + qualityTier + availability state (not raw qty).
 - **PD90 Technician availability** — available|busy|offline on tech API; ≠ delivery courier (Pack technicians.availability).
 - **PD89 Ops draft quote HTTP** — `/api/ai/ops-draft-quote` internal; humanApprovalRequired; ledgerWrite=false (D-61).
 - **PD88 Guided intake HTTP** — `/api/ai/guided-intake` + client-assessment; Zod JobAssessment; no money (D-56 audit).

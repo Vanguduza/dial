@@ -98,12 +98,17 @@ export type BookingSlot = {
   source: "calcom" | "calcom_fixture";
 };
 
-export type ChecklistId = "automotive_basic" | "emergency_roadside";
+export type ChecklistId =
+  | "automotive_basic"
+  | "emergency_roadside"
+  | "emergency_triage";
 
 export type Checklist = {
   id: ChecklistId;
   title: string;
   steps: string[];
+  /** Pack catalog id when distinct from runtime id (e.g. emergency.triage.v1). */
+  catalogId?: string;
 };
 
 export type ChecklistRun = {
@@ -193,6 +198,17 @@ const CHECKLISTS: Checklist[] = [
       "Exact landmark / highway km",
       "Vehicle can move? yes/no",
       "Dispatch without AI price suggestion",
+    ],
+  },
+  {
+    id: "emergency_triage",
+    title: "Emergency triage v1",
+    catalogId: "emergency.triage.v1",
+    steps: [
+      "Life-threatening? yes/no → escalate if yes",
+      "Scene safe for tech arrival?",
+      "Triage priority: P1|P2|P3",
+      "Bypass AI price; rate_card emergency only",
     ],
   },
 ];
@@ -784,9 +800,13 @@ export function resolveChecklistBySymptom(input: {
     "flat tire",
   ];
   const isEmergency = emergencyHints.some((h) => s.includes(h));
-  const id: ChecklistId = isEmergency
-    ? "emergency_roadside"
-    : "automotive_basic";
+  const wantsTriage =
+    s.includes("triage") || s.includes("life-threatening") || s.includes("p1");
+  const id: ChecklistId = wantsTriage
+    ? "emergency_triage"
+    : isEmergency
+      ? "emergency_roadside"
+      : "automotive_basic";
   const checklist = getChecklist(id);
   if (!checklist) throw new Error(`Missing checklist ${id}`);
   return checklist;
@@ -1272,6 +1292,51 @@ export function runPd81ChecklistBySymptomThinVertical(): {
     checklistId: "emergency_roadside",
     answersCount: done.answers.length,
     completed: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD94 thin vertical: Pack emergency.triage.v1 seed → run → complete (no AI money).
+ */
+export function runPd94EmergencyTriageThinVertical(): {
+  checklistId: "emergency_triage";
+  catalogId: "emergency.triage.v1";
+  completed: true;
+  aiPricingBypassed: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  const triage = getChecklist("emergency_triage");
+  if (!triage || triage.catalogId !== "emergency.triage.v1") {
+    throw new Error("PD94 requires emergency.triage.v1 catalog seed");
+  }
+  const resolved = resolveChecklistBySymptom({
+    symptom: "triage life-threatening P1 roadside",
+  });
+  if (resolved.id !== "emergency_triage") {
+    throw new Error("PD94 expected emergency_triage for triage symptom");
+  }
+  const job = bookTechJob({
+    customerId: "cust_pd94",
+    technicianId: "tech_pd94",
+    jobClass: "roadside_emergency",
+    emergency: true,
+  });
+  const run = startChecklistRun({
+    jobId: job.id,
+    checklistId: "emergency_triage",
+  });
+  const answers = triage.steps.map((s, i) => `t_${i}_${s.slice(0, 10)}`);
+  const done = submitChecklistAnswers({ runId: run.runId, answers });
+  if (done.status !== "completed") {
+    throw new Error("PD94 triage run must complete");
+  }
+  return {
+    checklistId: "emergency_triage",
+    catalogId: "emergency.triage.v1",
+    completed: true,
+    aiPricingBypassed: true,
     payableFromAi: false,
   };
 }

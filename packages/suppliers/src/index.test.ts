@@ -55,6 +55,15 @@ test("PD84 supplier stock upload pending_review", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD93 customer shadow failover thin vertical", async () => {
+  const { runPd93CustomerShadowFailoverThinVertical } = await import("./index.js");
+  const out = runPd93CustomerShadowFailoverThinVertical();
+  assert.equal(out.listed, true);
+  assert.equal(out.accepted, true);
+  assert.equal(out.toSupplierId, "sup_pd93_b");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD6 cost upload rejects float-like non-bigint", () => {
   onboardSupplier({
     supplierId: "sup_a",

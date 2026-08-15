@@ -182,6 +182,107 @@ export function advanceSpareOrderStatus(orderId: string): SpareOrder {
   return cloneOrder(o);
 }
 
+/**
+ * PD92 — Pack §9.2 / §10: cancel within 7-day `cancellableUntil` window.
+ */
+export function cancelSpareOrder(input: {
+  orderId: string;
+  customerId?: string | null;
+  now?: number;
+}): SpareOrder {
+  const o = store().orders.get(input.orderId);
+  if (!o) throw new Error(`Unknown spare order ${input.orderId}`);
+  if (
+    input.customerId != null &&
+    o.customerId != null &&
+    o.customerId !== input.customerId
+  ) {
+    throw new Error("order not owned by customer");
+  }
+  if (o.status === "cancelled") return cloneOrder(o);
+  if (o.status === "delivered" || o.status === "out_for_delivery") {
+    throw new Error(`cannot cancel order in status ${o.status}`);
+  }
+  const now = input.now ?? Date.now();
+  if (now > Date.parse(o.cancellableUntil)) {
+    throw new Error("cancellation window closed");
+  }
+  o.status = "cancelled";
+  return cloneOrder(o);
+}
+
+/**
+ * PD92 thin vertical: place → cancel in window; deny after window.
+ */
+export function runPd92SevenDayCancelThinVertical(): {
+  cancelledInWindow: true;
+  deniedAfterWindow: true;
+  payableFromAi: false;
+} {
+  __resetSpareCustomerForTests();
+  const order = placeSpareOrder({
+    cart: {
+      id: "cart_pd92",
+      currency: "USD",
+      totalUsdMinor: 12_00n,
+      lines: [
+        {
+          offerId: "off_pd92",
+          title: "PD92 filter",
+          qty: 1,
+          unitPriceUsdMinor: 12_00n,
+          lineTotalUsdMinor: 12_00n,
+          soldBy: "Toyota Agency",
+          supplierFormality: "formal",
+        },
+      ],
+    },
+    customerId: "cust_pd92",
+    payChoice: "ecocash",
+  });
+  const cancelled = cancelSpareOrder({
+    orderId: order.orderId,
+    customerId: "cust_pd92",
+  });
+  if (cancelled.status !== "cancelled") {
+    throw new Error("PD92 expected cancelled in window");
+  }
+  const late = placeSpareOrder({
+    cart: {
+      id: "cart_pd92_late",
+      currency: "USD",
+      totalUsdMinor: 12_00n,
+      lines: [
+        {
+          offerId: "off_pd92b",
+          title: "PD92 late",
+          qty: 1,
+          unitPriceUsdMinor: 12_00n,
+          lineTotalUsdMinor: 12_00n,
+          soldBy: "Toyota Agency",
+          supplierFormality: "formal",
+        },
+      ],
+    },
+    customerId: "cust_pd92",
+    payChoice: "cod",
+  });
+  const stored = store().orders.get(late.orderId)!;
+  stored.cancellableUntil = new Date(Date.now() - 60_000).toISOString();
+  let denied = false;
+  try {
+    cancelSpareOrder({ orderId: late.orderId, customerId: "cust_pd92" });
+  } catch (e) {
+    denied = e instanceof Error && e.message.includes("window closed");
+  }
+  if (!denied) throw new Error("PD92 expected deny after window");
+  return {
+    cancelledInWindow: true,
+    deniedAfterWindow: true,
+    payableFromAi: false,
+  };
+}
+
 export function trackSpareOrder(orderId: string): {
   order: SpareOrder;
   statusFrom: "erp";

@@ -317,6 +317,24 @@ test("PD79 garage CRUD update + delete promote", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD91 spare PDP attrs thin vertical", async () => {
+  const { runPd91SparePdpAttrsThinVertical } = await import("./index.js");
+  const out = runPd91SparePdpAttrsThinVertical();
+  assert.equal(out.rawQtyExposed, false);
+  assert.ok(out.fitmentConfidence > 0);
+  assert.ok(out.qualityTier);
+  assert.ok(out.availability);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD92 seven-day cancel thin vertical", async () => {
+  const { runPd92SevenDayCancelThinVertical } = await import("./spareCustomer.js");
+  const out = runPd92SevenDayCancelThinVertical();
+  assert.equal(out.cancelledInWindow, true);
+  assert.equal(out.deniedAfterWindow, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD54 grocery Meili demand-gap thin vertical", () => {
   __resetCatalogueForTests();
   const out = runPd54GroceryDemandGapThinVertical();
