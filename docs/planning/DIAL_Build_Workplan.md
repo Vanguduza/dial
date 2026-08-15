@@ -419,9 +419,32 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd27SpareDualEntryThinVertical`; `pd27DualEntry.test.ts`; `/spare/entry` + `/api/spare/entry` |
 | Green → | **PD28** Delivery Android availability + offline packs |
 
-### PD28 — Delivery Android availability + offline packs (NEXT)
+### PD28 — Delivery Android availability + offline packs (**GREEN** 2026-08-15)
 
-Pack §9.8 residual — available/busy/offline + offline packs deepen.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | offline ineligible → available offer → Harare+Bulawayo MapLibre packs → accept → busy |
+| Evidence | `runPd28AvailabilityOfflinePacksThinVertical`; `pd28AvailabilityOffline.test.ts`; Compose client |
+| Green → | **PD29** Delivery ETA + stops / VROOM |
+
+### Pack §9 gap audit (after PD28)
+
+| § | Gap remaining | Stage |
+| --- | --- | --- |
+| 9.8 | ETA banner + navigate stops / VROOM re-optimise | **PD29** |
+| 9.7 | Mock-location / evidence camera deepen | **PD30** (optional) |
+| 9.1–9.6 | Primary surfaces covered by PD1–PD27 | defer polish — founder may prioritize |
+
+Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
+
+### PD29 — Delivery ETA + stops / VROOM (NEXT)
+
+Pack §9.8 residual — ETA banner (OSRM); navigate stop list; request re-optimise.
+
+### PD30 — Technician mock-location / camera deepen
+
+Pack §9.7 residual — optional deepen after PD29.
 
 ### S10 — E2a (historical)
 
