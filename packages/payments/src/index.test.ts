@@ -19,6 +19,7 @@ import {
   runPd4MoneySpine,
   runPd22AdminZigCostHealthThinVertical,
   runPd23WhtRemittanceThinVertical,
+  runPd25Itf263TakeHomeThinVertical,
   setDailyZigRate,
   toCanonicalPspCode,
   usdToZig,
@@ -231,6 +232,16 @@ test("Tech WHT 30% without ITF263; zero withhold with clearance (D-50)", () => {
   });
   assert.equal(cleared.withholdMinor, 0n);
   assert.equal(cleared.netPayoutMinor, 100_00n);
+});
+
+test("PD25 ITF263 upload → verify → Take-Home 0% WHT", () => {
+  __resetPaymentsForTests();
+  const out = runPd25Itf263TakeHomeThinVertical();
+  assert.equal(out.withoutItf263RateBps, 3000);
+  assert.equal(out.withItf263RateBps, 0);
+  assert.equal(out.uploadPendingThenVerified, true);
+  assert.equal(out.certificatePdfStub, true);
+  assert.equal(out.payableFromAi, false);
 });
 
 test("E1b admin Daily ZiG audit → EcoCash intent carries fx_rate_id", async () => {

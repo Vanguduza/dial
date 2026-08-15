@@ -17,6 +17,7 @@ import {
   runPd13TechWebThinVertical,
   runPd19AdminTradeValueScoreThinVertical,
   runPd24AdminProjectsLegalThinVertical,
+  runPd25ValueScoreDeviceThinVertical,
   setValueScoreSnapshot,
   uploadJobEvidence,
 } from "./index.js";
@@ -144,4 +145,14 @@ test("PD24 Projects toggle + legal hub; live gated; no money path", () => {
   assert.equal(out.checklistSeeded, true);
   assert.equal(out.moneyPathClean, true);
   assert.equal(out.payableFromAi, false);
+});
+
+test("PD25 Value Score on device factors; no money path", () => {
+  __resetJobsForTests();
+  const out = runPd25ValueScoreDeviceThinVertical();
+  assert.equal(out.factorsExplainable, true);
+  assert.equal(out.noPayableFactors, true);
+  assert.equal(out.moneyPathClean, true);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.score >= 70);
 });

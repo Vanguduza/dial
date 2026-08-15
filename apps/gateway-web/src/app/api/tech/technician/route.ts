@@ -1,6 +1,7 @@
 /**
  * PD9 technician API — wraps @dial/jobs SoR (Cal.com slots, checklist, evidence).
- * Session SoR; never body userId/role (D-47). Take-Home uses @dial/payments WHT (D-50).
+ * PD25: Value Score factors + ITF263 upload/status + Take-Home breakdown (D-50/D-53).
+ * Session SoR; never body userId/role (D-47).
  */
 import { NextResponse } from "next/server";
 import {
@@ -11,17 +12,23 @@ import {
   getChecklist,
   getChecklistRun,
   getTechJob,
+  getValueScoreSnapshot,
   listBookingSlots,
   listChecklists,
   listEvidenceForJob,
   listJobsForTechnician,
+  setValueScoreSnapshot,
   startChecklistRun,
   uploadJobEvidence,
   type ChecklistId,
 } from "@dial/jobs";
 import {
+  computeTakeHomeBreakdown,
   computeTechPayoutWithholding,
+  getItf263Record,
   getWithholdingBalance,
+  setItf263Status,
+  uploadItf263Document,
 } from "@dial/payments";
 import {
   getSessionFromToken,
@@ -82,9 +89,49 @@ export async function GET(req: Request) {
     return NextResponse.json({ checklists: listChecklists() });
   }
 
+  if (view === "value_score") {
+    let snap = getValueScoreSnapshot(technicianId);
+    if (!snap) {
+      snap = setValueScoreSnapshot({
+        technicianId,
+        score: 70,
+        sampleN: 12,
+      });
+    }
+    return NextResponse.json({
+      technicianId,
+      valueScore: snap,
+      note: "D-53 Value Score explainability — never payable amounts",
+      payableFromAi: false,
+    });
+  }
+
+  if (view === "itf263") {
+    const year = Number(
+      url.searchParams.get("year") ?? new Date().getFullYear(),
+    );
+    const record = getItf263Record(technicianId, year) ?? null;
+    const bal = getWithholdingBalance(technicianId, year);
+    return NextResponse.json({
+      technicianId,
+      yearOfAssessment: year,
+      itf263: record,
+      balance: bal
+        ? {
+            ...bal,
+            grossPaidMinor: bal.grossPaidMinor.toString(),
+            withheldMinor: bal.withheldMinor.toString(),
+          }
+        : null,
+      note: "D-50 ITF263 hard preference — 30% WHT without verified clearance",
+      payableFromAi: false,
+    });
+  }
+
   if (view === "take_home") {
     const year = Number(url.searchParams.get("year") ?? new Date().getFullYear());
     const bal = getWithholdingBalance(technicianId, year);
+    const itf = getItf263Record(technicianId, year);
     return NextResponse.json({
       technicianId,
       yearOfAssessment: year,
@@ -95,6 +142,7 @@ export async function GET(req: Request) {
             withheldMinor: bal.withheldMinor.toString(),
           }
         : null,
+      itf263Status: itf?.status ?? "none",
       note: "D-50 WHT 30% unless ITF263 — draft economics only",
     });
   }
@@ -103,6 +151,8 @@ export async function GET(req: Request) {
     technicianId,
     jobs: listJobsForTechnician(technicianId).map(serializeJob),
     checklists: listChecklists(),
+    valueScore: getValueScoreSnapshot(technicianId) ?? null,
+    itf263: getItf263Record(technicianId, new Date().getFullYear()) ?? null,
   });
 }
 
@@ -138,7 +188,6 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, job: serializeJob(job) });
       }
       case "seed_assigned_job": {
-        // Fixture: customer book + assign to this technician for Android thin path.
         const slots = await listBookingSlots();
         const slot = slots[0];
         if (!slot) {
@@ -204,8 +253,11 @@ export async function POST(req: Request) {
       }
       case "take_home_preview": {
         const payoutUsdMinor = BigInt(String(body.payoutUsdMinor ?? "0"));
-        const hasItf263 = Boolean(body.hasItf263);
         const year = Number(body.yearOfAssessment ?? new Date().getFullYear());
+        const hasItf263 =
+          body.hasItf263 !== undefined
+            ? Boolean(body.hasItf263)
+            : getItf263Record(technicianId, year)?.status === "verified";
         const result = computeTechPayoutWithholding({
           technicianId,
           yearOfAssessment: year,
@@ -218,8 +270,47 @@ export async function POST(req: Request) {
           netPayoutMinor: result.netPayoutMinor.toString(),
           withholdMinor: result.withholdMinor.toString(),
           rateBps: result.rateBps,
+          hasItf263,
           note: "Draft economics only — human + pricing engine write payable amounts",
         });
+      }
+      case "take_home_breakdown": {
+        const year = Number(body.yearOfAssessment ?? new Date().getFullYear());
+        const breakdown = computeTakeHomeBreakdown({
+          technicianId,
+          yearOfAssessment: year,
+          grossUsdMinor: BigInt(String(body.grossUsdMinor ?? "0")),
+          dialFeeUsdMinor: BigInt(String(body.dialFeeUsdMinor ?? "0")),
+        });
+        return NextResponse.json({
+          ok: true,
+          technicianId,
+          ...breakdown,
+          note: "Your DIAL Take-Home — draft only; payableFromAi=false",
+        });
+      }
+      case "upload_itf263": {
+        const year = Number(body.yearOfAssessment ?? new Date().getFullYear());
+        const record = uploadItf263Document({
+          technicianId,
+          yearOfAssessment: year,
+          documentRef: String(body.documentRef ?? ""),
+        });
+        return NextResponse.json({
+          ok: true,
+          itf263: record,
+          payableFromAi: false,
+        });
+      }
+      case "verify_itf263_fixture": {
+        const year = Number(body.yearOfAssessment ?? new Date().getFullYear());
+        const record = setItf263Status({
+          technicianId,
+          yearOfAssessment: year,
+          status: "verified",
+          setBy: "fixture_pd25",
+        });
+        return NextResponse.json({ ok: true, itf263: record });
       }
       case "get_run": {
         const run = getChecklistRun(String(body.runId ?? ""));

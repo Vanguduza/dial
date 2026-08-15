@@ -935,6 +935,45 @@ export {
   type TermsVersion,
 } from "./projectsAndLegal.js";
 
+/**
+ * PD25 thin vertical: Value Score factors on device (explainability, no money).
+ */
+export function runPd25ValueScoreDeviceThinVertical(): {
+  score: number;
+  factorsExplainable: true;
+  noPayableFactors: true;
+  moneyPathClean: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  const snap = setValueScoreSnapshot({
+    technicianId: "tech_pd25",
+    score: 78,
+    sampleN: 24,
+    confidence: "high",
+    factorContributions: [
+      { factor: "completion", weight: 0.35, contribution: 28 },
+      { factor: "punctuality", weight: 0.25, contribution: 20 },
+      { factor: "evidence_quality", weight: 0.25, contribution: 18 },
+      { factor: "comeback_penalty", weight: 0.15, contribution: 12 },
+    ],
+  });
+  if (snap.factorContributions.length < 3) {
+    throw new Error("PD25 requires factor breakdown on device");
+  }
+  const money = assertValueScoreNotMoneyPath();
+  if (money.payableFromAi) {
+    throw new Error("PD25 Value Score must keep payableFromAi false");
+  }
+  return {
+    score: snap.score,
+    factorsExplainable: true,
+    noPayableFactors: true,
+    moneyPathClean: true,
+    payableFromAi: false,
+  };
+}
+
 export function __resetJobsForTests(): void {
   valueScores.clear();
   scoreDisputes.clear();

@@ -461,6 +461,18 @@ export {
   type WhtRemittanceStatus,
 } from "./whtRemittance.js";
 
+export {
+  __resetItf263ForTests,
+  attachWithholdingCertificatePdf,
+  getItf263Record,
+  listItf263Records,
+  setItf263Status,
+  technicianHasVerifiedItf263,
+  uploadItf263Document,
+  type Itf263Record,
+  type Itf263Status,
+} from "./itf263.js";
+
 import {
   __resetWhtRemittanceForTests,
   createWhtRemittanceDraft,
@@ -470,6 +482,150 @@ import {
   acknowledgeWhtRemittance,
 } from "./whtRemittance.js";
 
+import {
+  __resetItf263ForTests,
+  attachWithholdingCertificatePdf,
+  getItf263Record,
+  setItf263Status,
+  uploadItf263Document,
+} from "./itf263.js";
+
+/**
+ * Your DIAL Take-Home (Pack §9.7): gross → dial fee → ITF263|30% WHT → net.
+ * Draft economics only — AI never writes payable amounts.
+ */
+export function computeTakeHomeBreakdown(input: {
+  technicianId: string;
+  yearOfAssessment: number;
+  grossUsdMinor: bigint;
+  dialFeeUsdMinor: bigint;
+}): {
+  grossUsdMinor: string;
+  dialFeeUsdMinor: string;
+  taxableShareUsdMinor: string;
+  withholdMinor: string;
+  netPayoutMinor: string;
+  rateBps: number;
+  hasItf263: boolean;
+  itf263Status: import("./itf263.js").Itf263Status;
+  withholdingYtdMinor: string;
+  certificatePdfRef: string | null;
+  payableFromAi: false;
+} {
+  if (input.grossUsdMinor < 0n || input.dialFeeUsdMinor < 0n) {
+    throw new TypeError("amounts must be non-negative bigint");
+  }
+  if (input.dialFeeUsdMinor > input.grossUsdMinor) {
+    throw new Error("dialFeeUsdMinor cannot exceed grossUsdMinor");
+  }
+  const taxable = input.grossUsdMinor - input.dialFeeUsdMinor;
+  const itf = getItf263Record(input.technicianId, input.yearOfAssessment);
+  const hasItf263 = itf?.status === "verified";
+  const taxed = computeTechPayoutWithholding({
+    technicianId: input.technicianId,
+    yearOfAssessment: input.yearOfAssessment,
+    payoutUsdMinor: taxable,
+    hasItf263,
+  });
+  const bal = getWithholdingBalance(
+    input.technicianId,
+    input.yearOfAssessment,
+  );
+  let certificatePdfRef = itf?.certificatePdfRef ?? null;
+  if (!hasItf263 && taxed.withholdMinor > 0n) {
+    certificatePdfRef =
+      certificatePdfRef ??
+      `fixture://wht-cert/${input.technicianId}/${input.yearOfAssessment}.pdf`;
+    attachWithholdingCertificatePdf({
+      technicianId: input.technicianId,
+      yearOfAssessment: input.yearOfAssessment,
+      certificatePdfRef,
+    });
+  }
+  return {
+    grossUsdMinor: input.grossUsdMinor.toString(),
+    dialFeeUsdMinor: input.dialFeeUsdMinor.toString(),
+    taxableShareUsdMinor: taxable.toString(),
+    withholdMinor: taxed.withholdMinor.toString(),
+    netPayoutMinor: taxed.netPayoutMinor.toString(),
+    rateBps: taxed.rateBps,
+    hasItf263,
+    itf263Status: itf?.status ?? "none",
+    withholdingYtdMinor: (bal?.withheldMinor ?? 0n).toString(),
+    certificatePdfRef,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD25 thin vertical (payments): no ITF → 30% WHT → upload → verify → 0% WHT.
+ */
+export function runPd25Itf263TakeHomeThinVertical(input?: {
+  technicianId?: string;
+  yearOfAssessment?: number;
+}): {
+  withoutItf263RateBps: 3000;
+  withItf263RateBps: 0;
+  uploadPendingThenVerified: true;
+  certificatePdfStub: true;
+  payableFromAi: false;
+} {
+  __resetItf263ForTests();
+  const technicianId = input?.technicianId ?? "tech_pd25";
+  const year = input?.yearOfAssessment ?? new Date().getFullYear();
+  // Isolate this tech's withholding for deterministic asserts
+  withholding.delete(`${technicianId}:${year}`);
+
+  const taxed = computeTakeHomeBreakdown({
+    technicianId,
+    yearOfAssessment: year,
+    grossUsdMinor: 12_000n,
+    dialFeeUsdMinor: 2_000n,
+  });
+  if (taxed.rateBps !== 3000 || taxed.withholdMinor !== "3000") {
+    throw new Error("PD25 expected 30% WHT on taxable share without ITF263");
+  }
+  if (!taxed.certificatePdfRef) {
+    throw new Error("PD25 expected withholding certificate PDF stub");
+  }
+
+  const uploaded = uploadItf263Document({
+    technicianId,
+    yearOfAssessment: year,
+    documentRef: "fixture://itf263/tech_pd25.pdf",
+  });
+  if (uploaded.status !== "uploaded_pending") {
+    throw new Error("PD25 upload must be pending");
+  }
+
+  setItf263Status({
+    technicianId,
+    yearOfAssessment: year,
+    status: "verified",
+    setBy: "ops_pd25",
+  });
+
+  const cleared = computeTakeHomeBreakdown({
+    technicianId,
+    yearOfAssessment: year,
+    grossUsdMinor: 12_000n,
+    dialFeeUsdMinor: 2_000n,
+  });
+  if (cleared.rateBps !== 0 || cleared.withholdMinor !== "0") {
+    throw new Error("PD25 verified ITF263 must yield 0% WHT");
+  }
+  if (!cleared.hasItf263 || cleared.payableFromAi) {
+    throw new Error("PD25 clearance / payableFromAi invariant failed");
+  }
+
+  return {
+    withoutItf263RateBps: 3000,
+    withItf263RateBps: 0,
+    uploadPendingThenVerified: true,
+    certificatePdfStub: true,
+    payableFromAi: false,
+  };
+}
 /**
  * PD23 WHT remittance thin path: 30% withhold → draft remittance → submit → ack.
  */
@@ -1095,6 +1251,7 @@ export function __resetPaymentsForTests(): void {
   withholding.clear();
   __resetCostHealthForTests();
   __resetWhtRemittanceForTests();
+  __resetItf263ForTests();
 }
 
 /**

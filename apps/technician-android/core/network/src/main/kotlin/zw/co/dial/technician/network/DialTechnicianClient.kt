@@ -24,6 +24,39 @@ data class TakeHomePreview(
     val rateBps: Int,
 )
 
+data class ValueScoreFactorDto(
+    val factor: String,
+    val weight: Double,
+    val contribution: Double,
+)
+
+data class ValueScoreDto(
+    val technicianId: String,
+    val score: Int,
+    val confidence: String,
+    val factorContributions: List<ValueScoreFactorDto>,
+)
+
+data class Itf263Dto(
+    val recordId: String,
+    val status: String,
+    val documentRef: String?,
+    val certificatePdfRef: String?,
+)
+
+data class TakeHomeBreakdownDto(
+    val grossUsdMinor: Long,
+    val dialFeeUsdMinor: Long,
+    val taxableShareUsdMinor: Long,
+    val withholdMinor: Long,
+    val netPayoutMinor: Long,
+    val rateBps: Int,
+    val hasItf263: Boolean,
+    val itf263Status: String,
+    val certificatePdfRef: String?,
+    val payableFromAi: Boolean,
+)
+
 class DialTechnicianException(message: String, val statusCode: Int = 0) : Exception(message)
 
 interface CookieStore {
@@ -176,6 +209,41 @@ class DialTechnicianClient(
         return TakeHomePreview(net, withhold, rate)
     }
 
+    /** PD25 — Value Score with factor explainability (never payable). */
+    fun fetchValueScore(): ValueScoreDto {
+        val res = get("/api/tech/technician?view=value_score")
+        return parseValueScore(res.body) ?: throw DialTechnicianException("value_score missing")
+    }
+
+    /** PD25 — ITF263 status (D-50). */
+    fun fetchItf263(): Itf263Dto? {
+        val res = get("/api/tech/technician?view=itf263")
+        return parseItf263(res.body)
+    }
+
+    fun uploadItf263(documentRef: String): Itf263Dto {
+        val body =
+            postAction(
+                """{"action":"upload_itf263","documentRef":${jsonString(documentRef)}}""",
+            )
+        return parseItf263(body) ?: throw DialTechnicianException("upload_itf263 missing record")
+    }
+
+    fun verifyItf263Fixture(): Itf263Dto {
+        val body = postAction("""{"action":"verify_itf263_fixture"}""")
+        return parseItf263(body) ?: throw DialTechnicianException("verify_itf263 missing record")
+    }
+
+    /** PD25 — Your DIAL Take-Home gross → fee → WHT → net. */
+    fun takeHomeBreakdown(grossUsdMinor: Long, dialFeeUsdMinor: Long): TakeHomeBreakdownDto {
+        val body =
+            postAction(
+                """{"action":"take_home_breakdown","grossUsdMinor":${jsonString(grossUsdMinor.toString())},"dialFeeUsdMinor":${jsonString(dialFeeUsdMinor.toString())}}""",
+            )
+        return parseTakeHomeBreakdown(body)
+            ?: throw DialTechnicianException("take_home_breakdown missing")
+    }
+
     private fun get(path: String): HttpResponse {
         val res =
             transport.request(
@@ -283,5 +351,100 @@ internal fun parseRun(body: String): ChecklistRunDto? {
         checklistId = f("checklistId"),
         stepIndex = step,
         status = f("status"),
+    )
+}
+
+internal fun parseValueScore(body: String): ValueScoreDto? {
+    val chunk =
+        Regex(""""valueScore"\s*:\s*(\{.*?\})\s*[,}]""", RegexOption.DOT_MATCHES_ALL)
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun f(n: String) = Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    val score =
+        Regex(""""score"\s*:\s*(\d+)""")
+            .find(chunk)
+            ?.groupValues
+            ?.get(1)
+            ?.toIntOrNull() ?: 0
+    val factors =
+        Regex(
+            """\{[^{}]*"factor"\s*:\s*"([^"]+)"[^{}]*"weight"\s*:\s*([0-9.]+)[^{}]*"contribution"\s*:\s*([0-9.]+)[^{}]*\}""",
+        ).findAll(chunk)
+            .map {
+                ValueScoreFactorDto(
+                    factor = it.groupValues[1],
+                    weight = it.groupValues[2].toDoubleOrNull() ?: 0.0,
+                    contribution = it.groupValues[3].toDoubleOrNull() ?: 0.0,
+                )
+            }
+            .toList()
+            .ifEmpty {
+                Regex(
+                    """\{[^{}]*"factor"\s*:\s*"([^"]+)"[^{}]*\}""",
+                ).findAll(chunk)
+                    .map {
+                        ValueScoreFactorDto(it.groupValues[1], 0.0, 0.0)
+                    }
+                    .toList()
+            }
+    return ValueScoreDto(
+        technicianId = f("technicianId"),
+        score = score,
+        confidence = f("confidence"),
+        factorContributions = factors,
+    )
+}
+
+internal fun parseItf263(body: String): Itf263Dto? {
+    val chunk =
+        Regex(""""itf263"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun f(n: String): String? {
+        val m = Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk) ?: return null
+        return m.groupValues[1]
+    }
+    fun nullable(n: String): String? {
+        if (Regex(""""$n"\s*:\s*null""").containsMatchIn(chunk)) return null
+        return f(n)
+    }
+    return Itf263Dto(
+        recordId = f("recordId").orEmpty(),
+        status = f("status").orEmpty(),
+        documentRef = nullable("documentRef"),
+        certificatePdfRef = nullable("certificatePdfRef"),
+    )
+}
+
+internal fun parseTakeHomeBreakdown(body: String): TakeHomeBreakdownDto? {
+    fun num(n: String): Long =
+        Regex(""""$n"\s*:\s*"?(\d+)"?""")
+            .find(body)
+            ?.groupValues
+            ?.get(1)
+            ?.toLongOrNull() ?: 0L
+    fun bool(n: String): Boolean =
+        Regex(""""$n"\s*:\s*(true|false)""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) == "true"
+    fun str(n: String): String? {
+        if (Regex(""""$n"\s*:\s*null""").containsMatchIn(body)) return null
+        return Regex(""""$n"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1)
+    }
+    if (!body.contains("netPayoutMinor")) return null
+    return TakeHomeBreakdownDto(
+        grossUsdMinor = num("grossUsdMinor"),
+        dialFeeUsdMinor = num("dialFeeUsdMinor"),
+        taxableShareUsdMinor = num("taxableShareUsdMinor"),
+        withholdMinor = num("withholdMinor"),
+        netPayoutMinor = num("netPayoutMinor"),
+        rateBps = num("rateBps").toInt(),
+        hasItf263 = bool("hasItf263"),
+        itf263Status = str("itf263Status").orEmpty(),
+        certificatePdfRef = str("certificatePdfRef"),
+        payableFromAi = bool("payableFromAi"),
     )
 }

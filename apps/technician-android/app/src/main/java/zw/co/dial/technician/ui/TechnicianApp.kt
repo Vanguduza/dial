@@ -73,7 +73,7 @@ fun TechnicianApp(baseUrl: String) {
             fontWeight = FontWeight.Bold,
         )
         Text(
-            "Compose · @dial/jobs · Cal.com book on web · Take-Home WHT",
+            "Compose · Value Score · ITF263 · Take-Home WHT (D-50/D-53)",
             style = MaterialTheme.typography.bodySmall,
         )
 
@@ -159,6 +159,38 @@ fun TechnicianApp(baseUrl: String) {
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Take-Home preview (30% WHT)") }
+            Button(
+                onClick = {
+                    run {
+                        val vs = client.fetchValueScore()
+                        val factors =
+                            vs.factorContributions.joinToString { "${it.factor}:${it.contribution}" }
+                        status =
+                            "Value Score ${vs.score} (${vs.confidence}) · $factors — not money"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Value Score factors") }
+            Button(
+                onClick = {
+                    run {
+                        client.uploadItf263("fixture://itf263/android_pd25.pdf")
+                        val verified = client.verifyItf263Fixture()
+                        status = "ITF263 ${verified.status} · ${verified.documentRef}"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Upload + verify ITF263") }
+            Button(
+                onClick = {
+                    run {
+                        val bd = client.takeHomeBreakdown(12_000, 2_000)
+                        status =
+                            "Take-Home gross ${bd.grossUsdMinor} → fee ${bd.dialFeeUsdMinor} → WHT ${bd.withholdMinor} → net ${bd.netPayoutMinor} · ITF=${bd.hasItf263} · payableFromAi=${bd.payableFromAi}"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Take-Home breakdown") }
         }
 
         if (loading) CircularProgressIndicator()

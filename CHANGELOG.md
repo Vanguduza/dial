@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD25 Technician Android Value Score + ITF263** — Compose Value Score factor breakdown; ITF263 upload→verify; Your DIAL Take-Home gross→fee→WHT→net (`amountMinor`); 30% without clearance / 0% with ITF263 (D-50/D-53); `pd25TechnicianValueScoreItf263.test.ts`. Pack §9 audit authored **PD26–PD28**.
 - **PD24 Admin Projects toggle + legal compliance hub** — C-3 client Projects soft-launch (`coming_soon` → live gated on labour-law + working-capital acks); staff internal drafts; §3.8 education/checklists/versioned T&Cs + acceptance log; `/admin/projects` + `/admin/compliance/legal`; no money path.
 - **PD23 Admin Compliance/WHT + Commercial Simulation** — WHT remittance draft→submit→ack (30% without ITF263); Commercial Simulation Actual/Simulated; Simulated never auto-pays (D-50/D-54); `/admin/compliance/wht` + `/admin/commercial-simulation`; capability audit `docs/agent-audits/ai-capability-PD23-2026-08-15.md`. Pack §9 audit authored **PD24–PD25**.
 - **PD22 Admin Daily ZiG + Cost & health** — audited Daily ZiG set/activate; AI/LiteLLM + cloud + SMS/WhatsApp spend thresholds + kill-switch→rate-limits; IMTT opex never checkout (D-57/D-60); `/admin/cost-health` + `/api/admin/cost-health`.
