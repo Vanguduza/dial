@@ -9,6 +9,7 @@ import {
   getSessionFromToken,
   sessionCookieName,
 } from "../../lib/auth/session";
+import { GroceryAddToCartButton } from "./GroceryAddToCartButton";
 
 export default async function GroceryBrowsePage({
   searchParams,
@@ -57,6 +58,8 @@ export default async function GroceryBrowsePage({
         >
           <Link href="/home">Home</Link>
           <Link href="/spare">Spare</Link>
+          <Link href="/grocery/cart">Cart</Link>
+          <Link href="/grocery/track">Track</Link>
         </nav>
       </header>
 
@@ -131,29 +134,7 @@ export default async function GroceryBrowsePage({
               <span style={{ fontSize: 12, opacity: 0.55 }}>
                 Sold by {h.supplierDisplayName} · {h.supplierFormality}
               </span>
-              <form
-                action="/api/grocery/checkout"
-                method="post"
-                style={{ marginTop: dialTokens.space.sm }}
-              >
-                <input type="hidden" name="offerId" value={h.offerId} />
-                <input type="hidden" name="choice" value="ecocash" />
-                <button
-                  type="submit"
-                  style={{
-                    padding: `${dialTokens.space.sm} ${dialTokens.space.md}`,
-                    borderRadius: 8,
-                    border: "none",
-                    background: dialTokens.color.brand.accent,
-                    color: "#fff",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    width: "100%",
-                  }}
-                >
-                  Buy EcoCash (USD→ZiG at pay)
-                </button>
-              </form>
+              <GroceryAddToCartButton offerId={h.offerId} />
             </div>
           </li>
         ))}
@@ -164,7 +145,7 @@ export default async function GroceryBrowsePage({
         </p>
       ) : null}
       <p style={{ maxWidth: 960, margin: `${dialTokens.space.lg} auto 0`, fontSize: 11, opacity: 0.45 }}>
-        G1 · index grocery_offers_v1 · currency USD · liquor SKUs blocked
+        PD14 · grocery_offers_v1 · USD browse/cart · ZiG at checkout only · no liquor
       </p>
     </main>
   );

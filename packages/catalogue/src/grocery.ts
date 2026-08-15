@@ -170,6 +170,7 @@ const GROCERY_SEED: GroceryOffer[] = [
 type GroceryStore = {
   offers: GroceryOffer[];
   carts: Map<string, GroceryCart>;
+  orders: Map<string, GroceryOrder>;
 };
 
 function store(): GroceryStore {
@@ -180,7 +181,11 @@ function store(): GroceryStore {
     g.__dialGroceryStore = {
       offers: [...GROCERY_SEED],
       carts: new Map(),
+      orders: new Map(),
     };
+  }
+  if (!g.__dialGroceryStore.orders) {
+    g.__dialGroceryStore.orders = new Map();
   }
   return g.__dialGroceryStore;
 }
@@ -189,6 +194,7 @@ export function __resetGroceryForTests(): void {
   const s = store();
   s.offers = [...GROCERY_SEED];
   s.carts.clear();
+  s.orders.clear();
 }
 
 export type GroceryCartLine = {
@@ -206,7 +212,58 @@ export type GroceryCart = {
   currency: "USD";
   lines: GroceryCartLine[];
   total: Money;
+  /** PD14 delivery slot — required before checkout. */
+  slotId?: string;
 };
+
+export type GroceryDeliverySlot = {
+  slotId: string;
+  windowLabel: string;
+  coldChainNotes: string;
+  /** Counsel gate — never product-surface liquorAllowed as true. */
+  liquorAllowed: false;
+};
+
+export type GroceryOrderStatus =
+  | "confirmed"
+  | "picking"
+  | "out_for_delivery"
+  | "delivered";
+
+export type GroceryOrder = {
+  orderId: string;
+  cartId: string;
+  customerId: string | null;
+  slotId: string;
+  status: GroceryOrderStatus;
+  totalUsdMinor: bigint;
+  currency: "USD";
+  payChoice: "ecocash" | "cod";
+  deliveryJobId: string | null;
+  soldBy: string;
+  createdAt: string;
+};
+
+const GROCERY_SLOTS: GroceryDeliverySlot[] = [
+  {
+    slotId: "slot_harare_am",
+    windowLabel: "Today 10:00–13:00",
+    coldChainNotes: "Chilled lines keep cold-chain band until POD",
+    liquorAllowed: false,
+  },
+  {
+    slotId: "slot_harare_pm",
+    windowLabel: "Today 15:00–18:00",
+    coldChainNotes: "Ambient + chilled; frozen only if van equipped",
+    liquorAllowed: false,
+  },
+  {
+    slotId: "slot_harare_eve",
+    windowLabel: "Tomorrow 09:00–12:00",
+    coldChainNotes: "Standard pantry window",
+    liquorAllowed: false,
+  },
+];
 
 function toDoc(o: GroceryOffer): GroceryOfferDocument {
   return {
@@ -310,9 +367,14 @@ export function createGroceryCart(): GroceryCart {
 
 export function getGroceryCart(cartId: string): GroceryCart | undefined {
   const c = store().carts.get(cartId);
-  return c
-    ? { ...c, lines: c.lines.map((l) => ({ ...l })), total: { ...c.total } }
-    : undefined;
+  if (!c) return undefined;
+  const out: GroceryCart = {
+    ...c,
+    lines: c.lines.map((l) => ({ ...l })),
+    total: { ...c.total },
+  };
+  if (c.slotId !== undefined) out.slotId = c.slotId;
+  return out;
 }
 
 export function addToGroceryCart(
@@ -360,4 +422,95 @@ export function addToGroceryCart(
   );
   cart.currency = "USD";
   return getGroceryCart(cartId)!;
+}
+
+/** PD14 — list delivery windows (food only; liquorAllowed always false). */
+export function listGroceryDeliverySlots(): GroceryDeliverySlot[] {
+  return GROCERY_SLOTS.map((s) => ({ ...s }));
+}
+
+export function getGroceryDeliverySlot(
+  slotId: string,
+): GroceryDeliverySlot | undefined {
+  const s = GROCERY_SLOTS.find((x) => x.slotId === slotId);
+  return s ? { ...s } : undefined;
+}
+
+/** Assign slot to cart before checkout (PD14). */
+export function setGroceryCartSlot(cartId: string, slotId: string): GroceryCart {
+  const cart = store().carts.get(cartId);
+  if (!cart) throw new Error(`Unknown grocery cart ${cartId}`);
+  if (cart.lines.length === 0) throw new Error("Grocery cart empty");
+  const slot = getGroceryDeliverySlot(slotId);
+  if (!slot) throw new Error(`Unknown grocery slot ${slotId}`);
+  if (slot.liquorAllowed !== false) {
+    throw new Error("liquorAllowed must be false on grocery slots (counsel gate)");
+  }
+  cart.slotId = slotId;
+  return getGroceryCart(cartId)!;
+}
+
+export function placeGroceryOrder(input: {
+  cartId: string;
+  customerId?: string | null;
+  payChoice: "ecocash" | "cod";
+  deliveryJobId?: string | null;
+  soldBy: string;
+}): GroceryOrder {
+  const cart = store().carts.get(input.cartId);
+  if (!cart) throw new Error(`Unknown grocery cart ${input.cartId}`);
+  if (cart.lines.length === 0) throw new Error("Grocery cart empty");
+  if (!cart.slotId) throw new Error("Slot required before grocery checkout (PD14)");
+  const slot = getGroceryDeliverySlot(cart.slotId);
+  if (!slot || slot.liquorAllowed !== false) {
+    throw new Error("Invalid grocery slot");
+  }
+  const order: GroceryOrder = {
+    orderId: `gord_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    cartId: cart.id,
+    customerId: input.customerId ?? null,
+    slotId: cart.slotId,
+    status: "confirmed",
+    totalUsdMinor: cart.total.amountMinor,
+    currency: "USD",
+    payChoice: input.payChoice,
+    deliveryJobId: input.deliveryJobId ?? null,
+    soldBy: input.soldBy,
+    createdAt: new Date().toISOString(),
+  };
+  store().orders.set(order.orderId, order);
+  return { ...order };
+}
+
+export function getGroceryOrder(orderId: string): GroceryOrder | undefined {
+  const o = store().orders.get(orderId);
+  return o ? { ...o } : undefined;
+}
+
+export function advanceGroceryOrderStatus(orderId: string): GroceryOrder {
+  const o = store().orders.get(orderId);
+  if (!o) throw new Error(`Unknown grocery order ${orderId}`);
+  const seq: GroceryOrderStatus[] = [
+    "confirmed",
+    "picking",
+    "out_for_delivery",
+    "delivered",
+  ];
+  const i = seq.indexOf(o.status);
+  if (i >= 0 && i < seq.length - 1) {
+    o.status = seq[i + 1]!;
+  }
+  return { ...o };
+}
+
+export function trackGroceryOrder(orderId: string): {
+  order: GroceryOrder;
+  slot: GroceryDeliverySlot;
+  statusFrom: "erp";
+} {
+  const order = getGroceryOrder(orderId);
+  if (!order) throw new Error(`Unknown grocery order ${orderId}`);
+  const slot = getGroceryDeliverySlot(order.slotId);
+  if (!slot) throw new Error(`Missing slot ${order.slotId}`);
+  return { order, slot, statusFrom: "erp" };
 }

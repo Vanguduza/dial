@@ -9,8 +9,12 @@ import {
   countGroceryInformalB2bLeaks,
   createGroceryCart,
   groceryMeiliFilterForSession,
+  listGroceryDeliverySlots,
   listGroceryMeiliDocuments,
+  placeGroceryOrder,
   searchGroceryOffers,
+  setGroceryCartSlot,
+  trackGroceryOrder,
 } from "./grocery.js";
 
 beforeEach(() => {
@@ -86,4 +90,32 @@ test("G1 rejects DIAL_OWNED and liquor/age-gate publish", () => {
       }),
     /Liquor/,
   );
+});
+
+test("PD14 slot + place order + track (food; liquorAllowed false)", () => {
+  const slots = listGroceryDeliverySlots();
+  assert.ok(slots.length >= 1);
+  assert.ok(slots.every((s) => s.liquorAllowed === false));
+  const cart = createGroceryCart();
+  addToGroceryCart(cart.id, "groc_milk_1l", 1);
+  assert.throws(() =>
+    placeGroceryOrder({
+      cartId: cart.id,
+      payChoice: "cod",
+      soldBy: "OK Express Agency",
+    }),
+  );
+  const withSlot = setGroceryCartSlot(cart.id, slots[0]!.slotId);
+  assert.equal(withSlot.slotId, slots[0]!.slotId);
+  const order = placeGroceryOrder({
+    cartId: cart.id,
+    payChoice: "ecocash",
+    soldBy: "OK Express Agency",
+    deliveryJobId: "dj_test",
+  });
+  assert.equal(order.currency, "USD");
+  assert.equal(order.status, "confirmed");
+  const track = trackGroceryOrder(order.orderId);
+  assert.equal(track.statusFrom, "erp");
+  assert.equal(track.slot.liquorAllowed, false);
 });

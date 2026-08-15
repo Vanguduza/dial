@@ -80,10 +80,10 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 117 | `PD11` | **FDMS sandbox** — Virtual Gateway agency receipts | [#32](https://github.com/Vanguduza/dial/issues/32) | Agency receipt types (D-59); sandbox day open/close; fiscal outbox | `PD12` |
 | 118 | `PD12` | **Meta WA Flows** — Spare + grocery food Cloud API | [#33](https://github.com/Vanguduza/dial/issues/33) | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys / no liquor | `PD13` |
 | 119 | `PD13` | **tech-web** — Pack §9.3 FixItNow patterns | [#34](https://github.com/Vanguduza/dial/issues/34) | Guide / emergency / diagnose / book vs `@dial/jobs`; no AI payable | `PD14` |
-| 120 | `PD14` | **Grocery web deepen** — slot + track + checkout (food) | new issue | Beyond G1 browse; USD; EcoCash\|COD; no liquor | `PD15` |
+| 120 | `PD14` | **Grocery web deepen** — slot + track + checkout (food) | [#35](https://github.com/Vanguduza/dial/issues/35) | Beyond G1 browse; USD; EcoCash\|COD; no liquor | `PD15` |
 | 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | new issue | Ingest/review/approve → Meili; B2B informal leak=0 | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD13 is **PD14**, not S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD14 is **PD15**, not S99.
 
 ---
 
@@ -225,11 +225,17 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd13TechWebThinVertical`; `pd13TechWeb.test.ts`; design-tokens responsive |
 | Green → | **PD14** grocery web deepen |
 
-### PD14 — Grocery web deepen (NEXT)
+### PD14 — Grocery web deepen (**GREEN** 2026-08-15)
 
-Food/pantry slot + track + checkout beyond G1 browse (USD; EcoCash\|COD; no liquor).
+| | |
+| --- | --- |
+| Issue | [#35](https://github.com/Vanguduza/dial/issues/35) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Browse ATC → USD cart → delivery slot → EcoCash\|COD (ZiG at pay) → ERP track; G1 money spine reused |
+| Evidence | `runPd14GroceryWebThinVertical`; `pd14GroceryWeb.test.ts`; slot liquorAllowed=false |
+| Green → | **PD15** Catalogue Factory admin |
 
-### PD15 — Catalogue Factory admin
+### PD15 — Catalogue Factory admin (NEXT)
 
 D-53 ingest/review/approve queues + demand-gap KPIs → Meili; B2B informal leak=0.
 
