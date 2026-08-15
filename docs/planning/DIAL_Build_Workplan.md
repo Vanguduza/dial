@@ -1496,6 +1496,52 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd122RiveGreetingStubThinVertical` |
 | Green → | eng-safe Pack gap ≠ S99 (**PD123+**) |
 
+### Pack / product gap audit (after PD122 → PD123–PD126)
+
+| Gap | Stage |
+| --- | --- |
+| Schedule-X roster day board (D-46) | **PD123** |
+| Tracktor fleet expiry board (D-46) | **PD124** |
+| tableflow CSV map→validate→preview (D-46) | **PD125** |
+| Formance Console ledger explorer (D-46) | **PD126** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+| packages/ai missing-info deepen | deferred (D-56 capability review gate) |
+| PicPeak evidence gallery | next eng-safe candidate (D-46 backlog) |
+
+### PD123 — Schedule-X roster (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `listRosterDayBoard` display-only; Cal.com slots unchanged; `/admin/roster` |
+| Evidence | `runPd123ScheduleXRosterThinVertical` |
+| Green → | **PD124** Tracktor fleet |
+
+### PD124 — Tracktor fleet expiry (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `getFleetExpiryBoard` overdue/approaching; `/admin/fleet/expiry` |
+| Evidence | `runPd124TracktorFleetExpiryThinVertical` |
+| Green → | **PD125** tableflow CSV |
+
+### PD125 — tableflow CSV preview (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `previewSupplierStockCsv` map/validate; `action=preview_stock_csv`; no cloud SoR |
+| Evidence | `runPd125TableflowCsvPreviewThinVertical` |
+| Green → | **PD126** Formance explorer |
+
+### PD126 — Formance Console explorer (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `getLedgerExplorerSnapshot`; DIAL ledger SoR; `/admin/ledger/explorer` |
+| Evidence | `runPd126FormanceConsoleExplorerThinVertical` |
+| Green → | eng-safe Pack gap ≠ S99 (**PD127+**) |
+
 ### S10 — E2a (historical)
 
 | | |

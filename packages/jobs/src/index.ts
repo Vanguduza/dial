@@ -2380,6 +2380,130 @@ export function runPd90TechnicianAvailabilityThinVertical(): {
   return { statuses, payableFromAi: false };
 }
 
+/** PD123 — Schedule-X roster day board (D-46); display-only — Cal.com remains bookable slots. */
+export type RosterBoardEvent = {
+  eventId: string;
+  technicianId: string;
+  jobId: string;
+  jobClassId: string;
+  startAt: string;
+  endAt: string;
+  /** Schedule-X = capacity display; never a Cal.com bookable slot. */
+  displayOnly: true;
+  source: "schedule_x_fixture";
+  payableFromAi: false;
+};
+
+export type RosterDayBoard = {
+  day: string;
+  events: RosterBoardEvent[];
+  scheduleXPattern: true;
+  calComSlotsReplaced: false;
+  moneyAuthority: false;
+};
+
+/**
+ * Build multi-tech day board from assigned jobs (Schedule-X pattern).
+ * Does not create or replace Cal.com bookable slots.
+ */
+export function listRosterDayBoard(input?: {
+  day?: string;
+}): RosterDayBoard {
+  const day =
+    input?.day?.trim() ||
+    new Date().toISOString().slice(0, 10);
+  const events: RosterBoardEvent[] = [];
+  for (const job of jobs.values()) {
+    if (!job.technicianId) continue;
+    if (job.status === "intake") continue;
+    let startAt = job.createdAt;
+    let endAt = job.createdAt;
+    if (job.slotId) {
+      const booking = [...calBookings.values()].find(
+        (b) => b.slotId === job.slotId,
+      );
+      if (booking) {
+        startAt = booking.startAt;
+        endAt = booking.endAt;
+      } else {
+        // Fixture window from slot id hash when Cal confirm not yet recorded.
+        const base = Date.parse(`${day}T08:00:00.000Z`);
+        const offsetH = Math.abs(
+          [...job.slotId].reduce((a, c) => a + c.charCodeAt(0), 0) % 8,
+        );
+        startAt = new Date(base + offsetH * 3_600_000).toISOString();
+        endAt = new Date(base + (offsetH + 1) * 3_600_000).toISOString();
+      }
+    } else {
+      const base = Date.parse(`${day}T09:00:00.000Z`);
+      startAt = new Date(base).toISOString();
+      endAt = new Date(base + 3_600_000).toISOString();
+    }
+    if (!startAt.startsWith(day) && !job.slotId) {
+      // Keep emergency / unslotted jobs visible on requested day board.
+      const base = Date.parse(`${day}T10:00:00.000Z`);
+      startAt = new Date(base).toISOString();
+      endAt = new Date(base + 3_600_000).toISOString();
+    }
+    events.push({
+      eventId: `roster_${job.id}`,
+      technicianId: job.technicianId,
+      jobId: job.id,
+      jobClassId: job.jobClassId,
+      startAt,
+      endAt,
+      displayOnly: true,
+      source: "schedule_x_fixture",
+      payableFromAi: false,
+    });
+  }
+  events.sort((a, b) => a.startAt.localeCompare(b.startAt));
+  return {
+    day,
+    events,
+    scheduleXPattern: true,
+    calComSlotsReplaced: false,
+    moneyAuthority: false,
+  };
+}
+
+/**
+ * PD123 thin vertical: book assigned job → roster day board shows display-only event.
+ */
+export async function runPd123ScheduleXRosterThinVertical(): Promise<{
+  eventCount: number;
+  displayOnly: true;
+  calComSlotsReplaced: false;
+  moneyAuthority: false;
+  payableFromAi: false;
+}> {
+  __resetJobsForTests();
+  const slots = await listBookingSlots();
+  if (slots.length < 1) throw new Error("PD123 expected slots");
+  const job = bookTechJob({
+    customerId: "cust_pd123",
+    technicianId: "tech_pd123",
+    jobClass: "diagnostics",
+    slotId: slots[0]!.slotId,
+  });
+  const day = new Date().toISOString().slice(0, 10);
+  const board = listRosterDayBoard({ day });
+  if (board.calComSlotsReplaced !== false || board.moneyAuthority !== false) {
+    throw new Error("PD123 Schedule-X must not replace Cal.com or claim money");
+  }
+  const hit = board.events.find((e) => e.jobId === job.id);
+  if (!hit || hit.displayOnly !== true || hit.technicianId !== "tech_pd123") {
+    throw new Error("PD123 expected roster event for assigned job");
+  }
+  return {
+    eventCount: board.events.length,
+    displayOnly: true,
+    calComSlotsReplaced: false,
+    moneyAuthority: false,
+    payableFromAi: false,
+  };
+}
+
 export function __resetJobsForTests(): void {
   valueScores.clear();
   scoreDisputes.clear();

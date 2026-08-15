@@ -514,6 +514,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-530 | **PD120 Cal.com booking confirm** | `done` | Pack §9.3 sibling |
 | ENH-531 | **PD121 Bull-board queue inspector** | `done` | D-46 pattern |
 | ENH-532 | **PD122 Rive greeting stub** | `done` | Pack §9.1; no voice |
+| ENH-533 | **PD123 Schedule-X roster** | `done` | D-46; Cal.com slots unchanged |
+| ENH-534 | **PD124 Tracktor fleet expiry** | `done` | D-46; not dispatch SoR |
+| ENH-535 | **PD125 tableflow CSV preview** | `done` | D-46; no cloud SoR |
+| ENH-536 | **PD126 Formance Console explorer** | `done` | D-46; DIAL ledger SoR |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

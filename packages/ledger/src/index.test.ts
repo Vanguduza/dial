@@ -9,6 +9,7 @@ import {
   listMoneyOutbox,
   postJournal,
   postPspCaptureSimple,
+  runPd126FormanceConsoleExplorerThinVertical,
 } from "./index.js";
 
 test("postJournal rejects unbalanced batch", () => {
@@ -39,6 +40,15 @@ test("PSP capture posts balanced entries; idempotent replay", () => {
   const sum = a.entries.reduce((s, e) => s + e.amountMinor, 0n);
   assert.equal(sum, 0n);
   assertNoDialOwnedPath();
+});
+
+test("PD126 Formance Console explorer pattern", () => {
+  const out = runPd126FormanceConsoleExplorerThinVertical();
+  assert.ok(out.journalCount >= 1);
+  assert.ok(out.entryCount >= 2);
+  assert.equal(out.formanceMoneySor, false);
+  assert.equal(out.dialLedgerSor, true);
+  assert.equal(out.moneyAuthority, "dial_ledger");
 });
 
 test("S114 money outbox drain links FiscalReceiptQueued side-effects", async () => {

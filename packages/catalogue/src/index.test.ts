@@ -316,6 +316,19 @@ test("PD110 return claim evidence", async () => {
   assert.ok(out.claimId);
 });
 
+test("PD124 Tracktor fleet expiry board", async () => {
+  const { runPd124TracktorFleetExpiryThinVertical } = await import(
+    "./spareCustomer.js"
+  );
+  const out = runPd124TracktorFleetExpiryThinVertical();
+  assert.ok(out.overdue >= 1);
+  assert.ok(out.approaching >= 1);
+  assert.equal(out.tracktorPattern, true);
+  assert.equal(out.courierDispatchSor, false);
+  assert.equal(out.moneyAuthority, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD115 spare order track timeline", async () => {
   const { runPd115SpareOrderTrackTimelineThinVertical } = await import(
     "./spareCustomer.js"

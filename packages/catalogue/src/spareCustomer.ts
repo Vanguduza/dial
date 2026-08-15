@@ -804,6 +804,125 @@ export function listDueVehicleReminders(
   return listVehicleReminders(customerId, now).filter((r) => r.status === "due");
 }
 
+/** PD124 — Tracktor fleet expiry / maintenance board (D-46); not courier GPS SoR. */
+export type FleetExpirySeverity = "ok" | "approaching" | "overdue";
+
+export type FleetExpiryBoardRow = {
+  vehicleId: string;
+  customerId: string;
+  label: string;
+  chassisHint: string;
+  reminderId: string;
+  kind: VehicleReminder["kind"];
+  dueAt: string;
+  severity: FleetExpirySeverity;
+  tracktorPattern: true;
+  payableFromAi: false;
+};
+
+export type FleetExpiryBoard = {
+  asOf: string;
+  rows: FleetExpiryBoardRow[];
+  tracktorPattern: true;
+  courierDispatchSor: false;
+  moneyAuthority: false;
+};
+
+/**
+ * Admin Care/Fleet compliance board from consent-gated reminders (Tracktor UX).
+ */
+export function getFleetExpiryBoard(input?: {
+  now?: number;
+  approachingWindowMs?: number;
+}): FleetExpiryBoard {
+  const now = input?.now ?? Date.now();
+  const windowMs = input?.approachingWindowMs ?? 7 * 86_400_000;
+  const s = store();
+  const rows: FleetExpiryBoardRow[] = [];
+  for (const rem of s.reminders.values()) {
+    if (rem.status === "cancelled") continue;
+    const vehicle = s.vehicles.get(rem.vehicleId);
+    if (!vehicle || !vehicle.reminderConsent) continue;
+    const dueMs = Date.parse(rem.dueAt);
+    let severity: FleetExpirySeverity = "ok";
+    if (dueMs <= now) severity = "overdue";
+    else if (dueMs - now <= windowMs) severity = "approaching";
+    rows.push({
+      vehicleId: vehicle.vehicleId,
+      customerId: vehicle.customerId,
+      label: vehicle.label,
+      chassisHint: vehicle.chassisHint,
+      reminderId: rem.reminderId,
+      kind: rem.kind,
+      dueAt: rem.dueAt,
+      severity,
+      tracktorPattern: true,
+      payableFromAi: false,
+    });
+  }
+  rows.sort((a, b) => {
+    const rank = { overdue: 0, approaching: 1, ok: 2 } as const;
+    const d = rank[a.severity] - rank[b.severity];
+    if (d !== 0) return d;
+    return a.dueAt.localeCompare(b.dueAt);
+  });
+  return {
+    asOf: new Date(now).toISOString(),
+    rows,
+    tracktorPattern: true,
+    courierDispatchSor: false,
+    moneyAuthority: false,
+  };
+}
+
+/**
+ * PD124 thin vertical: consent + reminders → Tracktor board with overdue + approaching.
+ */
+export function runPd124TracktorFleetExpiryThinVertical(): {
+  overdue: number;
+  approaching: number;
+  tracktorPattern: true;
+  courierDispatchSor: false;
+  moneyAuthority: false;
+  payableFromAi: false;
+} {
+  __resetSpareCustomerForTests();
+  const now = Date.parse("2026-08-16T12:00:00.000Z");
+  const vehicle = addGarageVehicle({
+    customerId: "cust_pd124",
+    label: "PD124 Fleet Prado",
+    chassisHint: "GRJ150",
+    reminderConsent: true,
+  });
+  scheduleVehicleReminder({
+    vehicleId: vehicle.vehicleId,
+    kind: "insurance_expiry",
+    dueAt: new Date(now - 86_400_000).toISOString(),
+  });
+  scheduleVehicleReminder({
+    vehicleId: vehicle.vehicleId,
+    kind: "service_due",
+    dueAt: new Date(now + 2 * 86_400_000).toISOString(),
+  });
+  const board = getFleetExpiryBoard({ now, approachingWindowMs: 7 * 86_400_000 });
+  if (board.courierDispatchSor !== false || board.moneyAuthority !== false) {
+    throw new Error("PD124 must not claim dispatch/money SoR");
+  }
+  const overdue = board.rows.filter((r) => r.severity === "overdue").length;
+  const approaching = board.rows.filter((r) => r.severity === "approaching").length;
+  if (overdue < 1 || approaching < 1) {
+    throw new Error("PD124 expected overdue + approaching rows");
+  }
+  return {
+    overdue,
+    approaching,
+    tracktorPattern: true,
+    courierDispatchSor: false,
+    moneyAuthority: false,
+    payableFromAi: false,
+  };
+}
+
 /**
  * PD108 thin vertical: deny without consent → grant → schedule → due list.
  */

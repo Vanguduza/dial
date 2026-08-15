@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD126 Formance Console explorer** — read-only DIAL ledger journals; Formance UX pattern only (D-46); never Formance money SoR.
+- **PD125 tableflow CSV preview** — map/validate/preview supplier stock CSV; no ingest / no Tableflow cloud SoR (D-46).
+- **PD124 Tracktor fleet expiry** — Care/Fleet compliance board from consent-gated reminders (D-46); not dispatch SoR.
+- **PD123 Schedule-X roster** — multi-tech day board display-only; Cal.com remains bookable slots (D-46).
 - **PD122 Rive greeting stub** — auth-home fixture asset; voice forbidden (Pack §9.1 / D-27).
 - **PD121 Bull-board queue inspector** — fixture snapshot + `/api/admin/queues` (D-46); not money.
 - **PD120 Cal.com booking confirm** — `confirmCalBooking` / `action=confirm_cal` fixture sibling.

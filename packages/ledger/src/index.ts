@@ -258,6 +258,95 @@ export function getJournal(id: string): Journal | undefined {
   return journals.get(id);
 }
 
+export function listJournals(): Journal[] {
+  return [...journals.values()].map((j) => ({
+    ...j,
+    entries: j.entries.map((e) => ({ ...e })),
+  }));
+}
+
+/** PD126 — Formance Console *pattern* ledger explorer; DIAL ledger remains SoR (D-46). */
+export type LedgerExplorerEntry = {
+  id: string;
+  account: LedgerAccount;
+  amountMinor: string;
+  currency: Money["currency"];
+  journalId: string;
+  memo: string;
+  createdAt: string;
+};
+
+export type LedgerExplorerSnapshot = {
+  journals: Array<{
+    id: string;
+    orderId: string;
+    createdAt: string;
+    entries: LedgerExplorerEntry[];
+  }>;
+  formanceConsolePattern: true;
+  formanceMoneySor: false;
+  dialLedgerSor: true;
+  moneyAuthority: "dial_ledger";
+};
+
+/**
+ * Read-only journal explorer for admin module H (Formance Console UX patterns only).
+ */
+export function getLedgerExplorerSnapshot(): LedgerExplorerSnapshot {
+  return {
+    journals: listJournals().map((j) => ({
+      id: j.id,
+      orderId: j.orderId,
+      createdAt: j.createdAt,
+      entries: j.entries.map((e) => ({
+        id: e.id,
+        account: e.account,
+        amountMinor: e.amountMinor.toString(),
+        currency: e.currency,
+        journalId: e.journalId,
+        memo: e.memo,
+        createdAt: e.createdAt,
+      })),
+    })),
+    formanceConsolePattern: true,
+    formanceMoneySor: false,
+    dialLedgerSor: true,
+    moneyAuthority: "dial_ledger",
+  };
+}
+
+/**
+ * PD126 thin vertical: post capture → explorer shows entries; Formance never money SoR.
+ */
+export function runPd126FormanceConsoleExplorerThinVertical(): {
+  journalCount: number;
+  entryCount: number;
+  formanceMoneySor: false;
+  dialLedgerSor: true;
+  moneyAuthority: "dial_ledger";
+} {
+  __resetLedgerForTests();
+  postPspCaptureSimple({
+    orderId: "ord_pd126",
+    amount: money(4_200n, "USD"),
+    idempotencyKey: "pd126_cap",
+  });
+  const snap = getLedgerExplorerSnapshot();
+  if (snap.formanceMoneySor !== false || snap.dialLedgerSor !== true) {
+    throw new Error("PD126 Formance must not be money SoR");
+  }
+  if (snap.journals.length < 1) throw new Error("PD126 expected journal");
+  const entryCount = snap.journals.reduce((n, j) => n + j.entries.length, 0);
+  if (entryCount < 2) throw new Error("PD126 expected balanced entries");
+  return {
+    journalCount: snap.journals.length,
+    entryCount,
+    formanceMoneySor: false,
+    dialLedgerSor: true,
+    moneyAuthority: "dial_ledger",
+  };
+}
+
 export function assertNoDialOwnedPath(): void {
   // D-58 — package never exports DIAL_OWNED / owned COGS helpers.
 }

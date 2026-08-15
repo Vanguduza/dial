@@ -310,6 +310,16 @@ test("PD120 Cal.com confirm thin vertical", async () => {
   assert.ok(out.bookingId);
 });
 
+test("PD123 Schedule-X roster thin vertical", async () => {
+  const { runPd123ScheduleXRosterThinVertical } = await import("./index.js");
+  const out = await runPd123ScheduleXRosterThinVertical();
+  assert.ok(out.eventCount >= 1);
+  assert.equal(out.displayOnly, true);
+  assert.equal(out.calComSlotsReplaced, false);
+  assert.equal(out.moneyAuthority, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

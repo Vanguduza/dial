@@ -127,6 +127,16 @@ test("PD6 confirm SLA breach blocks confirm", () => {
   );
 });
 
+test("PD125 tableflow CSV preview", async () => {
+  const { runPd125TableflowCsvPreviewThinVertical } = await import("./index.js");
+  const out = runPd125TableflowCsvPreviewThinVertical();
+  assert.ok(out.validCount >= 2);
+  assert.ok(out.invalidCount >= 1);
+  assert.equal(out.ingested, false);
+  assert.equal(out.tableflowCloudSor, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD6 heartbeat channels dashboard|whatsapp", () => {
   onboardSupplier({
     supplierId: "sup_c",

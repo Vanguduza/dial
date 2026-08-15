@@ -22,6 +22,7 @@ import {
   uploadSupplierCosts,
   uploadSupplierStock,
   listStockUploads,
+  previewSupplierStockCsv,
   type SupplierTier,
 } from "@dial/suppliers";
 import {
@@ -227,6 +228,15 @@ export async function POST(req: Request) {
           batchId: batch.batchId,
           currency: batch.currency,
           rowCount: batch.rows.length,
+        });
+      }
+      case "preview_stock_csv": {
+        const csvText = parsed.fields.csvText ?? "";
+        const preview = previewSupplierStockCsv({ csvText });
+        return NextResponse.json({
+          ok: true,
+          preview,
+          note: "PD125 — tableflow CSV preview; not ingested",
         });
       }
       case "upload_stock": {

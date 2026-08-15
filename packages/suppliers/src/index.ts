@@ -320,6 +320,154 @@ export function listStockUploads(supplierId: string): StockUploadBatch[] {
     .map((b) => ({ ...b, rows: b.rows.map((r) => ({ ...r })) }));
 }
 
+/** PD125 — tableflow-pattern CSV map → validate → preview (D-46); not Tableflow cloud SoR. */
+export const SUPPLIER_STOCK_CSV_COLUMNS = [
+  "sku",
+  "title",
+  "qty",
+  "unitPriceUsdMinor",
+] as const;
+
+export type SupplierStockCsvColumn = (typeof SUPPLIER_STOCK_CSV_COLUMNS)[number];
+
+const STOCK_CSV_HEADER_ALIASES: Record<string, SupplierStockCsvColumn> = {
+  sku: "sku",
+  title: "title",
+  qty: "qty",
+  quantity: "qty",
+  unitpriceusdminor: "unitPriceUsdMinor",
+  unit_price_usd_minor: "unitPriceUsdMinor",
+  priceusdminor: "unitPriceUsdMinor",
+};
+
+export type SupplierStockCsvPreviewRow = {
+  line: number;
+  sku: string;
+  title: string;
+  qty: number;
+  unitPriceUsdMinor: string;
+  valid: boolean;
+  reason?: string;
+};
+
+export type SupplierStockCsvPreview = {
+  mappedColumns: SupplierStockCsvColumn[];
+  rows: SupplierStockCsvPreviewRow[];
+  validCount: number;
+  invalidCount: number;
+  tableflowPattern: true;
+  tableflowCloudSor: false;
+  ingested: false;
+  payableFromAi: false;
+};
+
+/**
+ * Map/validate/preview supplier stock CSV before upload (tableflow UX pattern).
+ * Does not ingest — caller must uploadSupplierStock with validated rows.
+ */
+export function previewSupplierStockCsv(input: {
+  csvText: string;
+  /** Optional header→canonical map; default assumes sku,title,qty,unitPriceUsdMinor. */
+  columnMap?: Partial<Record<string, SupplierStockCsvColumn>>;
+}): SupplierStockCsvPreview {
+  const lines = input.csvText
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith("#"));
+  if (lines.length === 0) throw new Error("CSV empty");
+  const headerCells = lines[0]!.split(",").map((c) => c.trim().toLowerCase());
+  const resolveHeader = (h: string): SupplierStockCsvColumn | undefined =>
+    input.columnMap?.[h] ?? STOCK_CSV_HEADER_ALIASES[h];
+  const hasHeader = headerCells.some((h) => resolveHeader(h) !== undefined);
+  const dataLines = hasHeader ? lines.slice(1) : lines;
+  const indexOf: Partial<Record<SupplierStockCsvColumn, number>> = {};
+  if (hasHeader) {
+    headerCells.forEach((h, i) => {
+      const mapped = resolveHeader(h);
+      if (mapped) indexOf[mapped] = i;
+    });
+  } else {
+    indexOf.sku = 0;
+    indexOf.title = 1;
+    indexOf.qty = 2;
+    indexOf.unitPriceUsdMinor = 3;
+  }
+  for (const col of SUPPLIER_STOCK_CSV_COLUMNS) {
+    if (indexOf[col] === undefined) {
+      throw new Error(`CSV missing required column ${col}`);
+    }
+  }
+  const rows: SupplierStockCsvPreviewRow[] = [];
+  dataLines.forEach((line, idx) => {
+    const cells = line.split(",").map((c) => c.trim());
+    const lineNo = idx + (hasHeader ? 2 : 1);
+    const sku = cells[indexOf.sku!] ?? "";
+    const title = cells[indexOf.title!] ?? "";
+    const qtyRaw = cells[indexOf.qty!] ?? "";
+    const priceRaw = cells[indexOf.unitPriceUsdMinor!] ?? "";
+    const qty = Number(qtyRaw);
+    let reason: string | undefined;
+    if (!sku || !title) reason = "sku and title required";
+    else if (!Number.isInteger(qty) || qty < 1) reason = "qty must be integer >= 1";
+    else if (!/^\d+$/.test(priceRaw)) reason = "unitPriceUsdMinor must be integer minor units";
+    rows.push({
+      line: lineNo,
+      sku,
+      title,
+      qty: Number.isFinite(qty) ? qty : 0,
+      unitPriceUsdMinor: priceRaw,
+      valid: !reason,
+      ...(reason ? { reason } : {}),
+    });
+  });
+  return {
+    mappedColumns: [...SUPPLIER_STOCK_CSV_COLUMNS],
+    rows,
+    validCount: rows.filter((r) => r.valid).length,
+    invalidCount: rows.filter((r) => !r.valid).length,
+    tableflowPattern: true,
+    tableflowCloudSor: false,
+    ingested: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD125 thin vertical: map/validate/preview CSV; reject float; no ingest / no cloud SoR.
+ */
+export function runPd125TableflowCsvPreviewThinVertical(): {
+  validCount: number;
+  invalidCount: number;
+  ingested: false;
+  tableflowCloudSor: false;
+  payableFromAi: false;
+} {
+  const preview = previewSupplierStockCsv({
+    csvText: [
+      "sku,title,qty,unitPriceUsdMinor",
+      "FILT-PD125,Oil filter,10,1500",
+      "BAD-PD125,Float price,2,12.50",
+      "PAD-PD125,Brake pads,4,4500",
+    ].join("\n"),
+  });
+  if (preview.ingested !== false || preview.tableflowCloudSor !== false) {
+    throw new Error("PD125 must not ingest or claim Tableflow cloud SoR");
+  }
+  if (preview.validCount < 2 || preview.invalidCount < 1) {
+    throw new Error("PD125 expected valid rows + float rejection");
+  }
+  if (preview.payableFromAi !== false) {
+    throw new Error("PD125 payableFromAi must be false");
+  }
+  return {
+    validCount: preview.validCount,
+    invalidCount: preview.invalidCount,
+    ingested: false,
+    tableflowCloudSor: false,
+    payableFromAi: false,
+  };
+}
+
 /**
  * PD84 thin vertical: onboard → upload stock → pending_review (not auto-publish).
  */
