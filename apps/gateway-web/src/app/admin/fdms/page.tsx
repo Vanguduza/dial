@@ -144,7 +144,10 @@ export default function AdminFdmsPage() {
     try {
       const seed = await fetch("/api/admin/fdms/outbox", {
         method: "POST",
-        headers: headers(),
+        headers: {
+          ...headers(),
+          "Idempotency-Key": `admin-fdms-seed-${Date.now()}`,
+        },
         body: JSON.stringify({ action: "seed_agency_receipts" }),
       });
       const seedJson = (await seed.json()) as { error?: string };

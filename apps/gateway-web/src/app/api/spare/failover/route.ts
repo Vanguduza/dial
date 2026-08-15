@@ -1,5 +1,6 @@
 /**
  * PD93 — customer shadow-failover after supplier confirm SLA breach (Pack §9.2).
+ * PD103 — Idempotency-Key required on accept (Pack §10).
  * Session SoR; never body userId/role (D-47).
  */
 import { NextResponse } from "next/server";
@@ -10,6 +11,7 @@ import {
   listShadowFailoverOffersForCustomer,
   onboardSupplier,
 } from "@dial/suppliers";
+import { requireIdempotencyKey } from "@dial/payments";
 import {
   getSessionFromToken,
   parseSessionCookie,
@@ -91,16 +93,29 @@ export async function POST(req: Request) {
       });
     }
     if (action === "accept") {
+      let idempotencyKey: string;
+      try {
+        idempotencyKey = requireIdempotencyKey(req.headers);
+      } catch (e) {
+        return NextResponse.json(
+          {
+            error:
+              e instanceof Error ? e.message : "Idempotency-Key required",
+          },
+          { status: 400 },
+        );
+      }
       const result = acceptShadowFailoverAsCustomer({
         customerId,
         orderId: String(body.orderId ?? ""),
         toSupplierId: String(body.toSupplierId ?? ""),
+        idempotencyKey,
       });
       return NextResponse.json({
         ok: true,
         result,
         payableFromAi: false,
-        note: "PD93 — customer accepted shadow failover",
+        note: "PD103 — customer accepted shadow failover (Idempotency-Key)",
       });
     }
     return NextResponse.json(

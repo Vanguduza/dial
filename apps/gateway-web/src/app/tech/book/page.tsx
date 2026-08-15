@@ -2,8 +2,9 @@ import Link from "next/link";
 import { dialTokens } from "@dial/design-tokens";
 import { draftTechQuote, listBookingSlots } from "../../../lib/tech/stubs";
 import { TechBookForm } from "./TechBookForm";
+import { TechProfileCards } from "./TechProfileCards";
 
-/** PD9 — Cal.com slots + rate_card quote (not rate_card_stub). */
+/** PD9 — Cal.com slots + rate_card quote (not rate_card_stub). PD106 profile cards. */
 export default async function TechBookPage() {
   const slots = await listBookingSlots();
   const quote = draftTechQuote({ jobClass: "diagnostics", emergency: false });
@@ -42,6 +43,7 @@ export default async function TechBookPage() {
           Draft USD {(Number(quote.draftAmountUsdMinor) / 100).toFixed(2)}{" "}
           <span style={{ fontSize: 12, opacity: 0.6 }}>(indicative)</span>
         </p>
+        <TechProfileCards />
         <h2 style={{ fontSize: "1.1rem", marginTop: dialTokens.space.lg }}>Available slots</h2>
         <ul style={{ paddingLeft: 18 }}>
           {slots.map((s) => (

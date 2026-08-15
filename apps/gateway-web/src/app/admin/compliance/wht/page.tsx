@@ -67,9 +67,13 @@ export default function ComplianceWhtPage() {
     setBusy(true);
     setMessage(null);
     try {
+      const hdrs: Record<string, string> = { ...headers() };
+      if (body.action === "record_payout") {
+        hdrs["Idempotency-Key"] = `admin-wht-payout-${Date.now()}`;
+      }
       const res = await fetch("/api/admin/compliance/wht", {
         method: "POST",
-        headers: headers(),
+        headers: hdrs,
         body: JSON.stringify(body),
       });
       const data = (await res.json()) as {

@@ -27,6 +27,14 @@ test("enqueue FiscalReceiptQueued agency classes on in-house Gateway", () => {
   assert.equal(listFdmsOutbox().length, 2);
 });
 
+test("PD104 fiscal Idempotency-Key thin vertical", async () => {
+  const { runPd104FiscalIdempotencyKeyThinVertical } = await import("./index.js");
+  const out = runPd104FiscalIdempotencyKeyThinVertical();
+  assert.equal(out.missingRejected, true);
+  assert.equal(out.replaySameReceipt, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("S95 drainFdmsOutbox submits via Gateway adapter (fixture)", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   __resetTaxForTests();

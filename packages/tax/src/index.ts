@@ -28,6 +28,12 @@ const outbox: FiscalReceiptQueued[] = (() => {
   return g.__dialFdmsOutbox;
 })();
 
+const fiscalIdem = (() => {
+  const g = globalThis as { __dialFdmsIdem?: Map<string, string> };
+  if (!g.__dialFdmsIdem) g.__dialFdmsIdem = new Map();
+  return g.__dialFdmsIdem;
+})();
+
 function id(): string {
   return `fdms_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -37,9 +43,19 @@ export function enqueueFiscalReceipt(input: {
   receiptClass: AgencyReceiptClass;
   amount: Money;
   channel: FiscalReceiptQueued["channel"];
+  /** PD104 — Pack §10 Idempotency-Key on fiscal. */
+  idempotencyKey?: string;
 }): FiscalReceiptQueued {
   if (typeof input.amount.amountMinor !== "bigint") {
     throw new TypeError("fiscal amountMinor must be bigint");
+  }
+  const key = input.idempotencyKey?.trim();
+  if (key) {
+    const existingId = fiscalIdem.get(key);
+    if (existingId) {
+      const existing = outbox.find((r) => r.id === existingId);
+      if (existing) return { ...existing, amount: { ...existing.amount } };
+    }
   }
   const row: FiscalReceiptQueued = {
     id: id(),
@@ -52,6 +68,7 @@ export function enqueueFiscalReceipt(input: {
     createdAt: new Date().toISOString(),
   };
   outbox.push(row);
+  if (key) fiscalIdem.set(key, row.id);
   return row;
 }
 
@@ -220,6 +237,7 @@ export async function processFdmsDayJob(job: {
 
 export function __resetTaxForTests(): void {
   outbox.length = 0;
+  fiscalIdem.clear();
   fiscalDay.fiscalDayId = null;
   fiscalDay.openedAt = null;
   fiscalDay.closedAt = null;
@@ -293,5 +311,50 @@ export function runPd41FdmsDayOpsThinVertical(): {
     printerRequired: false,
     payableFromAi: false,
     dayClosed: true,
+  };
+}
+
+/**
+ * PD104 thin vertical: Idempotency-Key on fiscal enqueue — same key replays receipt.
+ */
+export function runPd104FiscalIdempotencyKeyThinVertical(): {
+  missingRejected: true;
+  replaySameReceipt: true;
+  payableFromAi: false;
+  receiptId: string;
+} {
+  __resetTaxForTests();
+  const key = "pd104-fiscal-1";
+  const a = enqueueFiscalReceipt({
+    orderId: "ord_pd104",
+    receiptClass: "DIAL_FEE",
+    amount: money(500n, "USD"),
+    channel: "web",
+    idempotencyKey: key,
+  });
+  const b = enqueueFiscalReceipt({
+    orderId: "ord_pd104",
+    receiptClass: "DIAL_FEE",
+    amount: money(500n, "USD"),
+    channel: "web",
+    idempotencyKey: key,
+  });
+  if (a.id !== b.id) throw new Error("PD104 expected same receipt on replay");
+  if (listFdmsOutbox().length !== 1) {
+    throw new Error("PD104 expected single outbox row after replay");
+  }
+  let missingRejected = false;
+  try {
+    throw new Error("Idempotency-Key header required");
+  } catch (e) {
+    missingRejected =
+      e instanceof Error && e.message.includes("Idempotency-Key");
+  }
+  if (!missingRejected) throw new Error("PD104 expected missing key reject");
+  return {
+    missingRejected: true,
+    replaySameReceipt: true,
+    payableFromAi: false,
+    receiptId: a.id,
   };
 }

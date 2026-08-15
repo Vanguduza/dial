@@ -64,6 +64,14 @@ test("PD93 customer shadow failover thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD103 failover Idempotency-Key thin vertical", async () => {
+  const { runPd103FailoverIdempotencyKeyThinVertical } = await import("./index.js");
+  const out = runPd103FailoverIdempotencyKeyThinVertical();
+  assert.equal(out.missingRejected, true);
+  assert.equal(out.replaySameOrder, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD6 cost upload rejects float-like non-bigint", () => {
   onboardSupplier({
     supplierId: "sup_a",

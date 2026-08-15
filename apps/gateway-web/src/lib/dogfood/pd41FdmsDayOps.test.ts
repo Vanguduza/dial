@@ -30,6 +30,7 @@ describe("PD41 FDMS day ops", () => {
           headers: {
             "content-type": "application/json",
             "x-internal-secret": "pd41_secret",
+            "Idempotency-Key": "pd41-seed-agency-1",
           },
           body: JSON.stringify({ action: "seed_agency_receipts" }),
         }),

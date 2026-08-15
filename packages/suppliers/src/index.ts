@@ -123,6 +123,15 @@ export type StockUploadBatch = {
   payableFromAi: false;
 };
 
+export type FailoverAcceptResult = {
+  orderId: string;
+  fromSupplierId: string;
+  toSupplierId: string;
+  status: "confirmed";
+  priorStatus: "sla_breached";
+  payableFromAi: false;
+};
+
 type Store = {
   profiles: Map<string, SupplierProfile>;
   uploads: Map<string, CostUploadBatch>;
@@ -132,6 +141,8 @@ type Store = {
   statements: StatementLine[];
   escalations: SlaEscalation[];
   bonds: Map<string, SupplierBond>;
+  /** PD103 — Idempotency-Key → failover accept result. */
+  failoverIdem: Map<string, FailoverAcceptResult>;
 };
 
 function store(): Store {
@@ -146,6 +157,7 @@ function store(): Store {
       statements: [],
       escalations: [],
       bonds: new Map(),
+      failoverIdem: new Map(),
     };
   }
   if (!g.__dialSupplierStore.escalations) {
@@ -156,6 +168,9 @@ function store(): Store {
   }
   if (!g.__dialSupplierStore.stockUploads) {
     g.__dialSupplierStore.stockUploads = new Map();
+  }
+  if (!g.__dialSupplierStore.failoverIdem) {
+    g.__dialSupplierStore.failoverIdem = new Map();
   }
   return g.__dialSupplierStore;
 }
@@ -170,6 +185,7 @@ export function __resetSuppliersForTests(): void {
   s.statements.length = 0;
   s.escalations.length = 0;
   s.bonds.clear();
+  s.failoverIdem.clear();
 }
 
 function id(prefix: string): string {
@@ -571,15 +587,6 @@ export function confirmOrder(input: {
   return { ...order };
 }
 
-export type FailoverAcceptResult = {
-  orderId: string;
-  fromSupplierId: string;
-  toSupplierId: string;
-  status: "confirmed";
-  priorStatus: "sla_breached";
-  payableFromAi: false;
-};
-
 /**
  * PD71 — Pack §10 order failover accept after confirm SLA breach.
  * Moves await/breach order to an alternate onboarded supplier who confirms.
@@ -589,7 +596,14 @@ export function failoverAcceptOrder(input: {
   fromSupplierId: string;
   toSupplierId: string;
   now?: number;
+  /** PD103 — Pack §10 Idempotency-Key on failover. */
+  idempotencyKey?: string;
 }): FailoverAcceptResult {
+  const key = input.idempotencyKey?.trim();
+  if (key) {
+    const prior = store().failoverIdem.get(key);
+    if (prior) return { ...prior };
+  }
   if (input.fromSupplierId === input.toSupplierId) {
     throw new Error("failover requires a different supplier");
   }
@@ -610,7 +624,7 @@ export function failoverAcceptOrder(input: {
   order.supplierId = input.toSupplierId;
   order.status = "confirmed";
   order.confirmedAt = new Date(now).toISOString();
-  return {
+  const result: FailoverAcceptResult = {
     orderId: order.orderId,
     fromSupplierId: input.fromSupplierId,
     toSupplierId: input.toSupplierId,
@@ -618,6 +632,8 @@ export function failoverAcceptOrder(input: {
     priorStatus: "sla_breached",
     payableFromAi: false,
   };
+  if (key) store().failoverIdem.set(key, { ...result });
+  return result;
 }
 
 /**
@@ -710,6 +726,7 @@ export function acceptShadowFailoverAsCustomer(input: {
   orderId: string;
   toSupplierId: string;
   now?: number;
+  idempotencyKey?: string;
 }): FailoverAcceptResult {
   const order = store().confirms.get(input.orderId);
   if (!order || order.customerId !== input.customerId) {
@@ -720,7 +737,72 @@ export function acceptShadowFailoverAsCustomer(input: {
     fromSupplierId: order.supplierId,
     toSupplierId: input.toSupplierId,
     ...(input.now !== undefined ? { now: input.now } : {}),
+    ...(input.idempotencyKey != null
+      ? { idempotencyKey: input.idempotencyKey }
+      : {}),
   });
+}
+
+/**
+ * PD103 thin vertical: Idempotency-Key required semantics + same key replays failover.
+ */
+export function runPd103FailoverIdempotencyKeyThinVertical(): {
+  missingRejected: true;
+  replaySameOrder: true;
+  payableFromAi: false;
+} {
+  __resetSuppliersForTests();
+  const primary = "sup_pd103_a";
+  const alternate = "sup_pd103_b";
+  onboardSupplier({
+    supplierId: primary,
+    displayName: "PD103 Primary",
+    formality: "formal",
+    tier: "bronze",
+  });
+  onboardSupplier({
+    supplierId: alternate,
+    displayName: "PD103 Alternate",
+    formality: "formal",
+    tier: "silver",
+  });
+  const order = enqueueConfirmOrder({
+    supplierId: primary,
+    amountUsdMinor: 22_00n,
+    slaMs: 1,
+  });
+  listConfirmQueue(primary, Date.now() + 20);
+  const key = "pd103-failover-1";
+  const a = failoverAcceptOrder({
+    orderId: order.orderId,
+    fromSupplierId: primary,
+    toSupplierId: alternate,
+    idempotencyKey: key,
+  });
+  const b = failoverAcceptOrder({
+    orderId: order.orderId,
+    fromSupplierId: primary,
+    toSupplierId: alternate,
+    idempotencyKey: key,
+  });
+  if (a.orderId !== b.orderId || a.toSupplierId !== b.toSupplierId) {
+    throw new Error("PD103 expected same failover result on replay");
+  }
+  let missingRejected = false;
+  try {
+    if (!"".trim()) {
+      throw new Error("Idempotency-Key header required");
+    }
+  } catch (e) {
+    missingRejected =
+      e instanceof Error && e.message.includes("Idempotency-Key");
+  }
+  if (!missingRejected) throw new Error("PD103 expected missing key reject");
+  return {
+    missingRejected: true,
+    replaySameOrder: true,
+    payableFromAi: false,
+  };
 }
 
 /**

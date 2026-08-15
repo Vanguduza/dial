@@ -58,7 +58,10 @@ export default function AdminOrderFailoverPage() {
     try {
       const res = await fetch("/api/admin/orders/failover", {
         method: "POST",
-        headers: headers(),
+        headers: {
+          ...headers(),
+          "Idempotency-Key": `admin-failover-${orderId}-${Date.now()}`,
+        },
         body: JSON.stringify({
           action: "failover_accept",
           orderId,

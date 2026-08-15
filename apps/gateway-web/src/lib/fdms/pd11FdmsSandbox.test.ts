@@ -86,6 +86,7 @@ test("PD11 admin API: open day → seed agency → drain → close", async () =>
         "http://localhost/api/admin/fdms/outbox",
         withSecret({
           method: "POST",
+          headers: { "Idempotency-Key": "pd11-seed-agency-1" },
           body: JSON.stringify({ action: "seed_agency_receipts" }),
         }),
       ),

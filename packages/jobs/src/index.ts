@@ -1212,6 +1212,132 @@ export function runPd102TechValueScoreDisputeThinVertical(): {
   };
 }
 
+export type TechnicianProfileCard = {
+  technicianId: string;
+  displayName: string;
+  tradeId: string;
+  tradeName: string;
+  availability: TechnicianAvailabilityStatus;
+  eligible: boolean;
+  managersChoice: boolean;
+  valueScore: number | null;
+  payableFromAi: false;
+};
+
+const technicianProfileDirectory = new Map<
+  string,
+  { displayName: string; tradeId: string }
+>();
+
+/** PD106 — register technician for customer profile cards (Pack §9.3). */
+export function upsertTechnicianProfileDirectory(input: {
+  technicianId: string;
+  displayName: string;
+  tradeId: string;
+}): void {
+  if (!input.technicianId.trim()) throw new Error("technicianId required");
+  technicianProfileDirectory.set(input.technicianId.trim(), {
+    displayName: input.displayName.trim() || input.technicianId,
+    tradeId: input.tradeId.trim() || "trade_auto",
+  });
+}
+
+/**
+ * PD106 — customer technician profile cards with Manager's choice flag.
+ */
+export function listTechnicianProfileCards(): TechnicianProfileCard[] {
+  return [...technicianProfileDirectory.entries()].map(([technicianId, meta]) => {
+    const trade =
+      trades.find((t) => t.id === meta.tradeId) ??
+      trades.find((t) => t.id === "trade_auto");
+    const snap = getValueScoreSnapshot(technicianId);
+    const availability = getTechnicianAvailability(technicianId);
+    return {
+      technicianId,
+      displayName: meta.displayName,
+      tradeId: trade?.id ?? meta.tradeId,
+      tradeName: trade?.name ?? meta.tradeId,
+      availability: availability.status,
+      eligible: isTechnicianEligible({
+        technicianId,
+        jobClassId: "jc_diag",
+        minScore: 0,
+      }),
+      managersChoice: snap?.managersChoice === true,
+      valueScore: snap?.score ?? null,
+      payableFromAi: false,
+    };
+  });
+}
+
+/**
+ * PD106 thin vertical: profile cards include Manager's choice + eligibility.
+ */
+export function runPd106TechnicianProfileCardsThinVertical(): {
+  cardCount: number;
+  managersChoiceVisible: true;
+  eligibleCard: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  upsertTechnicianProfileDirectory({
+    technicianId: "tech_pd106_choice",
+    displayName: "Amai Choice",
+    tradeId: "trade_auto",
+  });
+  upsertTechnicianProfileDirectory({
+    technicianId: "tech_pd106_std",
+    displayName: "Baba Standard",
+    tradeId: "trade_elec",
+  });
+  setTechnicianCredential({
+    technicianId: "tech_pd106_choice",
+    kind: "trade_licence",
+    status: "verified",
+  });
+  setTechnicianCredential({
+    technicianId: "tech_pd106_std",
+    kind: "trade_licence",
+    status: "verified",
+  });
+  setValueScoreSnapshot({
+    technicianId: "tech_pd106_choice",
+    score: 92,
+    sampleN: 40,
+  });
+  setManagersChoice({
+    technicianId: "tech_pd106_choice",
+    managersChoice: true,
+    setBy: "pd106",
+  });
+  setValueScoreSnapshot({
+    technicianId: "tech_pd106_std",
+    score: 74,
+    sampleN: 18,
+  });
+  setTechnicianAvailability({
+    technicianId: "tech_pd106_choice",
+    status: "available",
+  });
+  setTechnicianAvailability({
+    technicianId: "tech_pd106_std",
+    status: "busy",
+  });
+  const cards = listTechnicianProfileCards();
+  if (cards.length < 2) throw new Error("PD106 expected profile cards");
+  const choice = cards.find((c) => c.technicianId === "tech_pd106_choice");
+  if (!choice?.managersChoice) {
+    throw new Error("PD106 expected Manager's choice on card");
+  }
+  if (!choice.eligible) throw new Error("PD106 expected eligible card");
+  return {
+    cardCount: cards.length,
+    managersChoiceVisible: true,
+    eligibleCard: true,
+    payableFromAi: false,
+  };
+}
+
 /** Dev/fixture: assign open job to technician. */
 export function assignJobToTechnician(
   jobId: string,
@@ -1869,6 +1995,7 @@ export function __resetJobsForTests(): void {
   bookedSlotIds.clear();
   technicianAvailability.clear();
   technicianCredentials.clear();
+  technicianProfileDirectory.clear();
   trades.length = 0;
   trades.push(...TRADE_SEED.map((t) => ({ ...t })));
   jobClasses.length = 0;

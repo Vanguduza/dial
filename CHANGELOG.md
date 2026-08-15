@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD106 Technician profile cards** — customer cards with Manager's choice + eligibility (Pack §9.3).
+- **PD105 Payout Idempotency-Key** — WHT `record_payout` keyed; no double withhold (Pack §10).
+- **PD104 Fiscal Idempotency-Key** — FDMS enqueue/seed keyed replay (Pack §10).
+- **PD103 Failover Idempotency-Key** — spare + admin failover accept require header (Pack §10).
 - **PD102 Tech Value Score dispute** — technician self-serve `dispute_value_score`; not money path (Pack §9.5 / D-53).
 - **PD101 Customer job status deepen** — timeline + evidence on `view=job` / TechJobDetail (Pack §9.3).
 - **PD100 Job create intake** — `createJobIntake` pre-book; `action=create_intake` (Pack §10).

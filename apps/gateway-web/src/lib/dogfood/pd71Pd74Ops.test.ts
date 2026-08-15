@@ -58,6 +58,7 @@ test("PD71 order failover", async () => {
         headers: {
           "content-type": "application/json",
           "x-internal-secret": "pd71_secret",
+          "Idempotency-Key": "pd71-failover-accept-1",
         },
         body: JSON.stringify({
           action: "failover_accept",

@@ -1,5 +1,6 @@
 /**
  * Admin Compliance / WHT remittance centre (PD23 / Pack §9.5 / D-50).
+ * PD105 — Idempotency-Key on record_payout (Pack §10).
  * Fail closed without INTERNAL_API_SECRET. AI never writes payable.
  */
 import { NextResponse } from "next/server";
@@ -9,6 +10,7 @@ import {
   computeTechPayoutWithholding,
   createWhtRemittanceDraft,
   listWithholdingBalances,
+  requireIdempotencyKey,
   serializeWhtRemittance,
   submitWhtRemittance,
 } from "@dial/payments";
@@ -51,6 +53,18 @@ export async function POST(req: Request) {
   const action = String(body.action ?? "");
   try {
     if (action === "record_payout") {
+      let idempotencyKey: string;
+      try {
+        idempotencyKey = requireIdempotencyKey(req.headers);
+      } catch (e) {
+        return NextResponse.json(
+          {
+            error:
+              e instanceof Error ? e.message : "Idempotency-Key required",
+          },
+          { status: 400 },
+        );
+      }
       const technicianId = String(body.technicianId ?? "");
       const payoutUsdMinor = BigInt(String(body.payoutUsdMinor ?? ""));
       const year =
@@ -68,6 +82,7 @@ export async function POST(req: Request) {
         yearOfAssessment: year,
         payoutUsdMinor,
         hasItf263: Boolean(body.hasItf263),
+        idempotencyKey,
       });
       return NextResponse.json({
         ok: true,
@@ -75,7 +90,7 @@ export async function POST(req: Request) {
         withholdMinor: result.withholdMinor.toString(),
         rateBps: result.rateBps,
         snapshot: complianceWhtSnapshot(year),
-        note: "Draft economics — human + pricing engine write payable (D-50)",
+        note: "PD105 — draft payout with Idempotency-Key; human + pricing engine write payable (D-50)",
       });
     }
 

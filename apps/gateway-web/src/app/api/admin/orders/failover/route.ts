@@ -1,5 +1,6 @@
 /**
  * PD71 — order failover accept after confirm SLA breach (Pack §10).
+ * PD103 — Idempotency-Key required on failover_accept.
  */
 import { NextResponse } from "next/server";
 import {
@@ -8,6 +9,7 @@ import {
   listConfirmQueue,
   onboardSupplier,
 } from "@dial/suppliers";
+import { requireIdempotencyKey } from "@dial/payments";
 
 export const runtime = "nodejs";
 
@@ -68,16 +70,29 @@ export async function POST(req: Request) {
         });
       }
       case "failover_accept": {
+        let idempotencyKey: string;
+        try {
+          idempotencyKey = requireIdempotencyKey(req.headers);
+        } catch (e) {
+          return NextResponse.json(
+            {
+              error:
+                e instanceof Error ? e.message : "Idempotency-Key required",
+            },
+            { status: 400 },
+          );
+        }
         const result = failoverAcceptOrder({
           orderId: String(body.orderId ?? ""),
           fromSupplierId: String(body.fromSupplierId ?? ""),
           toSupplierId: String(body.toSupplierId ?? ""),
+          idempotencyKey,
         });
         return NextResponse.json({
           ok: true,
           result,
           payableFromAi: false,
-          note: "PD71 — failover accept",
+          note: "PD103 — failover accept (Idempotency-Key)",
         });
       }
       default:

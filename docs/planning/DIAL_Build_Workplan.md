@@ -1271,6 +1271,52 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd102TechValueScoreDisputeThinVertical`; not money path |
 | Green → | eng-safe Pack gap ≠ S99 (**PD103+**) |
 
+### Pack / product gap audit (after PD102 → PD103–PD106)
+
+| Gap | Stage |
+| --- | --- |
+| Idempotency-Key on failover | **PD103** |
+| Idempotency-Key on fiscal | **PD104** |
+| Idempotency-Key on payout | **PD105** |
+| Customer technician profile cards | **PD106** |
+| Credential expiry eligibility | PD107′ candidate |
+| Vehicle Hub reminders (consent) | PD108′ candidate |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD103 — Failover Idempotency-Key (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `Idempotency-Key` on spare + admin failover accept; same key replays |
+| Evidence | `runPd103FailoverIdempotencyKeyThinVertical`; `pd103Pd106Ops` |
+| Green → | **PD104** fiscal Idempotency-Key |
+
+### PD104 — Fiscal Idempotency-Key (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `enqueueFiscalReceipt` keyed; admin `seed_agency_receipts` requires header |
+| Evidence | `runPd104FiscalIdempotencyKeyThinVertical`; FDMS outbox |
+| Green → | **PD105** payout Idempotency-Key |
+
+### PD105 — Payout Idempotency-Key (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `computeTechPayoutWithholding` keyed; WHT `record_payout` requires header |
+| Evidence | `runPd105PayoutIdempotencyKeyThinVertical`; no double WHT |
+| Green → | **PD106** profile cards |
+
+### PD106 — Technician profile cards (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `listTechnicianProfileCards` + `view=profiles` + book UI cards |
+| Evidence | `runPd106TechnicianProfileCardsThinVertical`; Manager's choice visible |
+| Green → | eng-safe Pack gap ≠ S99 (**PD107+**) |
+
 ### S10 — E2a (historical)
 
 | | |

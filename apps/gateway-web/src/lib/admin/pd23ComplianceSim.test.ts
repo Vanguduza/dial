@@ -80,7 +80,10 @@ test("PD23 admin APIs: fail closed + remittance + sim payout block", async () =>
   const payout = await whtPost(
     new Request("http://localhost/api/admin/compliance/wht", {
       method: "POST",
-      headers,
+      headers: {
+        ...headers,
+        "Idempotency-Key": "pd23-record-payout-1",
+      },
       body: JSON.stringify({
         action: "record_payout",
         technicianId: "tech_api_23",

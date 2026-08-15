@@ -1,5 +1,6 @@
 /**
  * PD11 Admin FDMS fiscal outbox — list queued/submitted + drain via money outbox link.
+ * PD104 — Idempotency-Key on seed_agency_receipts (Pack §10 fiscal).
  * Fail closed without INTERNAL_API_SECRET. Virtual Gateway only (no printer).
  */
 import { NextResponse } from "next/server";
@@ -11,6 +12,7 @@ import {
   listFdmsOutbox,
   listQueuedFdmsReceipts,
 } from "@dial/tax";
+import { requireIdempotencyKey } from "@dial/payments";
 import { money } from "@dial/shared";
 
 export const runtime = "nodejs";
@@ -71,6 +73,18 @@ export async function POST(req: Request) {
   try {
     switch (action) {
       case "seed_agency_receipts": {
+        let idempotencyKey: string;
+        try {
+          idempotencyKey = requireIdempotencyKey(req.headers);
+        } catch (e) {
+          return NextResponse.json(
+            {
+              error:
+                e instanceof Error ? e.message : "Idempotency-Key required",
+            },
+            { status: 400 },
+          );
+        }
         const orderId = String(body.orderId ?? `ord_pd11_${Date.now().toString(36)}`);
         const classes = ["GOODS_FORMAL", "GOODS_INFORMAL", "DIAL_FEE"] as const;
         const seeded = [];
@@ -87,6 +101,7 @@ export async function POST(req: Request) {
               "USD",
             ),
             channel: "web",
+            idempotencyKey: `${idempotencyKey}:${receiptClass}`,
           });
           enqueueMoneyOutbox({ kind: "fiscal_queued", refId: row.id });
           seeded.push({ id: row.id, receiptClass });
@@ -96,6 +111,7 @@ export async function POST(req: Request) {
           orderId,
           seeded,
           day: getFiscalDayState(),
+          note: "PD104 — fiscal seed with Idempotency-Key",
         });
       }
       case "drain": {

@@ -12,6 +12,12 @@ import {
   listBookingSlots,
   listChecklists,
   listJobsForCustomer,
+  listTechnicianProfileCards,
+  setManagersChoice,
+  setTechnicianAvailability,
+  setTechnicianCredential,
+  setValueScoreSnapshot,
+  upsertTechnicianProfileDirectory,
 } from "@dial/jobs";
 import {
   getSessionFromToken,
@@ -81,6 +87,59 @@ export async function GET(req: Request) {
 
   if (view === "checklists") {
     return NextResponse.json({ checklists: listChecklists() });
+  }
+
+  if (view === "profiles") {
+    if (listTechnicianProfileCards().length === 0) {
+      upsertTechnicianProfileDirectory({
+        technicianId: "tech_guide_choice",
+        displayName: "Amai Choice",
+        tradeId: "trade_auto",
+      });
+      upsertTechnicianProfileDirectory({
+        technicianId: "tech_guide_std",
+        displayName: "Baba Standard",
+        tradeId: "trade_elec",
+      });
+      setTechnicianCredential({
+        technicianId: "tech_guide_choice",
+        kind: "trade_licence",
+        status: "verified",
+      });
+      setTechnicianCredential({
+        technicianId: "tech_guide_std",
+        kind: "trade_licence",
+        status: "verified",
+      });
+      setValueScoreSnapshot({
+        technicianId: "tech_guide_choice",
+        score: 90,
+        sampleN: 30,
+      });
+      setManagersChoice({
+        technicianId: "tech_guide_choice",
+        managersChoice: true,
+        setBy: "pd106_fixture",
+      });
+      setValueScoreSnapshot({
+        technicianId: "tech_guide_std",
+        score: 72,
+        sampleN: 14,
+      });
+      setTechnicianAvailability({
+        technicianId: "tech_guide_choice",
+        status: "available",
+      });
+      setTechnicianAvailability({
+        technicianId: "tech_guide_std",
+        status: "busy",
+      });
+    }
+    return NextResponse.json({
+      profiles: listTechnicianProfileCards(),
+      payableFromAi: false,
+      note: "PD106 — technician profile cards with Manager's choice (Pack §9.3)",
+    });
   }
 
   if (view === "jobs") {

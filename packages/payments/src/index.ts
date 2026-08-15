@@ -579,6 +579,10 @@ export type WithholdingBalance = {
 };
 
 const withholding = new Map<string, WithholdingBalance>();
+const payoutIdem = new Map<
+  string,
+  { netPayoutMinor: bigint; withholdMinor: bigint; rateBps: number }
+>();
 
 function whKey(technicianId: string, year: number): string {
   return `${technicianId}:${year}`;
@@ -589,12 +593,25 @@ export function computeTechPayoutWithholding(input: {
   yearOfAssessment: number;
   payoutUsdMinor: bigint;
   hasItf263: boolean;
+  /** PD105 — Pack §10 Idempotency-Key on payout. */
+  idempotencyKey?: string;
 }): { netPayoutMinor: bigint; withholdMinor: bigint; rateBps: number } {
   if (typeof input.payoutUsdMinor !== "bigint" || input.payoutUsdMinor < 0n) {
     throw new TypeError("payoutUsdMinor must be non-negative bigint");
   }
-  const key = whKey(input.technicianId, input.yearOfAssessment);
-  let row = withholding.get(key);
+  const key = input.idempotencyKey?.trim();
+  if (key) {
+    const prior = payoutIdem.get(key);
+    if (prior) {
+      return {
+        netPayoutMinor: prior.netPayoutMinor,
+        withholdMinor: prior.withholdMinor,
+        rateBps: prior.rateBps,
+      };
+    }
+  }
+  const wh = whKey(input.technicianId, input.yearOfAssessment);
+  let row = withholding.get(wh);
   if (!row) {
     row = {
       technicianId: input.technicianId,
@@ -603,20 +620,28 @@ export function computeTechPayoutWithholding(input: {
       withheldMinor: 0n,
       hasItf263: input.hasItf263,
     };
-    withholding.set(key, row);
+    withholding.set(wh, row);
   }
   row.hasItf263 = input.hasItf263;
   row.grossPaidMinor += input.payoutUsdMinor;
+  let result: { netPayoutMinor: bigint; withholdMinor: bigint; rateBps: number };
   if (input.hasItf263) {
-    return { netPayoutMinor: input.payoutUsdMinor, withholdMinor: 0n, rateBps: 0 };
+    result = {
+      netPayoutMinor: input.payoutUsdMinor,
+      withholdMinor: 0n,
+      rateBps: 0,
+    };
+  } else {
+    const withholdMinor = (input.payoutUsdMinor * 30n) / 100n;
+    row.withheldMinor += withholdMinor;
+    result = {
+      netPayoutMinor: input.payoutUsdMinor - withholdMinor,
+      withholdMinor,
+      rateBps: 3000,
+    };
   }
-  const withholdMinor = (input.payoutUsdMinor * 30n) / 100n;
-  row.withheldMinor += withholdMinor;
-  return {
-    netPayoutMinor: input.payoutUsdMinor - withholdMinor,
-    withholdMinor,
-    rateBps: 3000,
-  };
+  if (key) payoutIdem.set(key, { ...result });
+  return result;
 }
 
 export function getWithholdingBalance(
@@ -1387,6 +1412,55 @@ export async function runPd99GroceryIdempotencyKeyThinVertical(): Promise<{
 }
 
 /**
+ * PD105 thin vertical: Idempotency-Key on payout — same key does not double WHT.
+ */
+export function runPd105PayoutIdempotencyKeyThinVertical(): {
+  missingRejected: true;
+  replaySameNet: true;
+  noDoubleWithhold: true;
+  payableFromAi: false;
+} {
+  __resetPaymentsForTests();
+  let missingRejected = false;
+  try {
+    requireIdempotencyKey(new Headers());
+  } catch (e) {
+    missingRejected =
+      e instanceof Error && e.message.includes("Idempotency-Key");
+  }
+  if (!missingRejected) throw new Error("PD105 expected missing key reject");
+
+  const key = "pd105-payout-1";
+  const a = computeTechPayoutWithholding({
+    technicianId: "tech_pd105",
+    yearOfAssessment: 2026,
+    payoutUsdMinor: 10_000n,
+    hasItf263: false,
+    idempotencyKey: key,
+  });
+  const b = computeTechPayoutWithholding({
+    technicianId: "tech_pd105",
+    yearOfAssessment: 2026,
+    payoutUsdMinor: 10_000n,
+    hasItf263: false,
+    idempotencyKey: key,
+  });
+  if (a.netPayoutMinor !== b.netPayoutMinor || a.withholdMinor !== b.withholdMinor) {
+    throw new Error("PD105 expected same payout result on replay");
+  }
+  const bal = getWithholdingBalance("tech_pd105", 2026);
+  if (!bal || bal.grossPaidMinor !== 10_000n || bal.withheldMinor !== 3_000n) {
+    throw new Error("PD105 expected single withhold application");
+  }
+  return {
+    missingRejected: true,
+    replaySameNet: true,
+    noDoubleWithhold: true,
+    payableFromAi: false,
+  };
+}
+
+/**
  * FLOW_SPARE_CHECKOUT pay step — required EcoCash | COD buttons only (D-57).
  * Not free-text method selection.
  */
@@ -1654,6 +1728,7 @@ export function __resetPaymentsForTests(): void {
   jobReserves.clear();
   jobReservesByIdem.clear();
   withholding.clear();
+  payoutIdem.clear();
   __resetCostHealthForTests();
   __resetWhtRemittanceForTests();
   __resetItf263ForTests();

@@ -494,6 +494,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-510 | **PD100 Job create intake** | `done` | Pack §10 pre-book |
 | ENH-511 | **PD101 Customer job status deepen** | `done` | Pack §9.3 |
 | ENH-512 | **PD102 Tech Value Score dispute** | `done` | Pack §9.5 / D-53 |
+| ENH-513 | **PD103 Failover Idempotency-Key** | `done` | Pack §10 |
+| ENH-514 | **PD104 Fiscal Idempotency-Key** | `done` | Pack §10 |
+| ENH-515 | **PD105 Payout Idempotency-Key** | `done` | Pack §10; D-50 |
+| ENH-516 | **PD106 Technician profile cards** | `done` | Pack §9.3 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

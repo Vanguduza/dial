@@ -265,6 +265,15 @@ test("PD102 tech Value Score dispute thin vertical", async () => {
   assert.ok(out.disputeId);
 });
 
+test("PD106 technician profile cards thin vertical", async () => {
+  const { runPd106TechnicianProfileCardsThinVertical } = await import("./index.js");
+  const out = runPd106TechnicianProfileCardsThinVertical();
+  assert.ok(out.cardCount >= 2);
+  assert.equal(out.managersChoiceVisible, true);
+  assert.equal(out.eligibleCard, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

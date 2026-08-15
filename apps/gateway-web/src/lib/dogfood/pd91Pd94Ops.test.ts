@@ -136,7 +136,11 @@ test("PD93 customer shadow failover API", async () => {
   const accept = await failoverPost(
     new Request("http://localhost/api/spare/failover", {
       method: "POST",
-      headers: { "content-type": "application/json", cookie },
+      headers: {
+        "content-type": "application/json",
+        cookie,
+        "Idempotency-Key": "pd93-accept-1",
+      },
       body: JSON.stringify({
         action: "accept",
         orderId: seeded.orderId,
