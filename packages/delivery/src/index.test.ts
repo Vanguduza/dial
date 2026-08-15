@@ -258,6 +258,18 @@ test("PD68 offer countdown timeout", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD74 active run polyline MapLibre", async () => {
+  const { runPd74ActiveRunPolylineThinVertical } = await import("./index.js");
+  const out = await runPd74ActiveRunPolylineThinVertical({
+    courierId: "cour_pd74_t",
+  });
+  assert.ok(out.stopCount >= 2);
+  assert.ok(out.coordinateCount >= 2);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.googleMapsSor, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

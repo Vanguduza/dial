@@ -337,8 +337,42 @@ export function completeNavigateStop(
   if (!run) throw new Error(`No navigate run for job ${jobId}`);
   const stop = run.stops.find((s) => s.id === stopId);
   if (!stop) throw new Error("Unknown stop");
+  if (stop.status === "completed") return { ...stop };
   stop.status = "completed";
   return { ...stop };
+}
+
+/** GeoJSON LineString coordinates [lng, lat] for MapLibre (D-44). */
+export type ActiveRunPolyline = {
+  jobId: string;
+  type: "LineString";
+  coordinates: Array<[number, number]>;
+  stopCount: number;
+  mapSor: "maplibre";
+  googleMapsSor: false;
+  payableFromAi: false;
+};
+
+/**
+ * PD74 — active run map polyline from ordered stop pins (Pack §9.8).
+ * MapLibre render SoR; never Google/Mapbox.
+ */
+export function getActiveRunPolyline(jobId: string): ActiveRunPolyline {
+  const run = runs.get(jobId);
+  if (!run) throw new Error(`No navigate run for job ${jobId}`);
+  const ordered = [...run.stops].sort((a, b) => a.sequence - b.sequence);
+  if (ordered.length < 2) {
+    throw new Error("polyline requires at least two stops");
+  }
+  return {
+    jobId,
+    type: "LineString",
+    coordinates: ordered.map((s) => [s.lng, s.lat] as [number, number]),
+    stopCount: ordered.length,
+    mapSor: "maplibre",
+    googleMapsSor: false,
+    payableFromAi: false,
+  };
 }
 
 function cloneRun(run: DeliveryNavigateRun): DeliveryNavigateRun {

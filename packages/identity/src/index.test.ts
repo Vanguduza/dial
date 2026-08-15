@@ -4,6 +4,7 @@ import {
   __resetIdentityForTests,
   listProfilesAs,
   rlsContextFromProfile,
+  runPd73IdentityStepUpThinVertical,
   selectProfileAs,
   signInByEmail,
   signUp,
@@ -28,6 +29,14 @@ test("T1 sign-up/sign-in creates and resolves profile", () => {
   assert.throws(() =>
     signUp({ email: "buyer@dial.test", displayName: "Dup" }),
   );
+});
+
+test("PD73 identity step-up thin vertical", () => {
+  const out = runPd73IdentityStepUpThinVertical();
+  assert.equal(out.verified, true);
+  assert.equal(out.wrongCodeBlocked, true);
+  assert.equal(out.gateEnforced, true);
+  assert.equal(out.payableFromAi, false);
 });
 
 test("T1 RLS profiles: own CRUD; cross-tenant deny; admin all", () => {

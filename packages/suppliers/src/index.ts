@@ -436,6 +436,103 @@ export function confirmOrder(input: {
   return { ...order };
 }
 
+export type FailoverAcceptResult = {
+  orderId: string;
+  fromSupplierId: string;
+  toSupplierId: string;
+  status: "confirmed";
+  priorStatus: "sla_breached";
+  payableFromAi: false;
+};
+
+/**
+ * PD71 — Pack §10 order failover accept after confirm SLA breach.
+ * Moves await/breach order to an alternate onboarded supplier who confirms.
+ */
+export function failoverAcceptOrder(input: {
+  orderId: string;
+  fromSupplierId: string;
+  toSupplierId: string;
+  now?: number;
+}): FailoverAcceptResult {
+  if (input.fromSupplierId === input.toSupplierId) {
+    throw new Error("failover requires a different supplier");
+  }
+  if (!store().profiles.has(input.toSupplierId)) {
+    throw new Error("Failover supplier not onboarded");
+  }
+  const order = store().confirms.get(input.orderId);
+  if (!order || order.supplierId !== input.fromSupplierId) {
+    throw new Error("Unknown confirm order for supplier");
+  }
+  const now = input.now ?? Date.now();
+  if (order.status === "awaiting_confirm" && now > order.slaDeadlineAt) {
+    order.status = "sla_breached";
+  }
+  if (order.status !== "sla_breached") {
+    throw new Error(`failover only after SLA breach (got ${order.status})`);
+  }
+  order.supplierId = input.toSupplierId;
+  order.status = "confirmed";
+  order.confirmedAt = new Date(now).toISOString();
+  return {
+    orderId: order.orderId,
+    fromSupplierId: input.fromSupplierId,
+    toSupplierId: input.toSupplierId,
+    status: "confirmed",
+    priorStatus: "sla_breached",
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD71 thin vertical: SLA breach → failover accept to alternate supplier.
+ */
+export function runPd71OrderFailoverAcceptThinVertical(): {
+  failoverAccepted: true;
+  toSupplierId: string;
+  payableFromAi: false;
+} {
+  __resetSuppliersForTests();
+  const primary = "sup_pd71_a";
+  const alternate = "sup_pd71_b";
+  onboardSupplier({
+    supplierId: primary,
+    displayName: "Primary SLA Agency",
+    formality: "formal",
+    tier: "bronze",
+  });
+  onboardSupplier({
+    supplierId: alternate,
+    displayName: "Failover Agency",
+    formality: "formal",
+    tier: "silver",
+  });
+  const order = enqueueConfirmOrder({
+    supplierId: primary,
+    amountUsdMinor: 30_00n,
+    slaMs: 1,
+  });
+  listConfirmQueue(primary, Date.now() + 10);
+  const breached = store().confirms.get(order.orderId);
+  if (!breached || breached.status !== "sla_breached") {
+    throw new Error("PD71 expected SLA breach");
+  }
+  const out = failoverAcceptOrder({
+    orderId: order.orderId,
+    fromSupplierId: primary,
+    toSupplierId: alternate,
+  });
+  if (out.status !== "confirmed" || out.toSupplierId !== alternate) {
+    throw new Error("PD71 failover accept failed");
+  }
+  return {
+    failoverAccepted: true,
+    toSupplierId: alternate,
+    payableFromAi: false,
+  };
+}
+
 export function addStatementLine(input: {
   supplierId: string;
   kind: StatementLine["kind"];

@@ -462,6 +462,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-478 | **PD68 Offer countdown timeout** | `done` | Pack §9.8 |
 | ENH-479 | **PD69 Job variation approve** AI blocked | `done` | Pack §10 |
 | ENH-480 | **PD70 Customer promo credit balance** UI | `done` | Pack §9.6; D-42 |
+| ENH-481 | **PD71 Order failover accept** after SLA breach | `done` | Pack §10 |
+| ENH-482 | **PD72 Promo approve queue** SUPPLIER_COOP | `done` | Pack §10; D-42 |
+| ENH-483 | **PD73 Identity step-up** session gate | `done` | Pack §10; D-47 |
+| ENH-484 | **PD74 Active run polyline** MapLibre LineString | `done` | Pack §9.8; D-44 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

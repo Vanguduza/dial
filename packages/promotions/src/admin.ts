@@ -262,6 +262,72 @@ export function rejectSupplierCoop(campaignId: string): SupplierCoopAgreement {
   return { ...a, offerIds: [...a.offerIds] };
 }
 
+export type PendingPromoApproval = {
+  campaignId: string;
+  campaignName: string;
+  supplierId: string;
+  agreementStatus: SupplierCoopAgreement["status"];
+  campaignStatus: PromoCampaign["status"];
+  offerIds: string[];
+  payableFromAi: false;
+};
+
+/** PD72 — Pack §10 admin promo approve queue (SUPPLIER_COOP awaiting ops). */
+export function listPendingPromoApprovals(): PendingPromoApproval[] {
+  const out: PendingPromoApproval[] = [];
+  for (const [campaignId, a] of store().coopAgreements) {
+    if (a.status !== "supplier_accepted" && a.status !== "proposed") continue;
+    const c = store().campaigns.get(campaignId);
+    if (!c || c.type !== "SUPPLIER_COOP") continue;
+    if (c.status === "active" || c.status === "archived") continue;
+    out.push({
+      campaignId,
+      campaignName: c.name,
+      supplierId: a.supplierId,
+      agreementStatus: a.status,
+      campaignStatus: c.status,
+      offerIds: [...a.offerIds],
+      payableFromAi: false,
+    });
+  }
+  return out;
+}
+
+/**
+ * PD72 thin vertical: propose → supplier accept → pending queue → ops approve clears.
+ */
+export function runPd72PromoApproveQueueThinVertical(): {
+  queuedThenCleared: true;
+  approvedCampaignId: string;
+  payableFromAi: false;
+  cashOutForbidden: true;
+} {
+  __resetPromoAdminForTests();
+  const { campaign } = proposeSupplierCoop({
+    name: "PD72 Coop",
+    supplierId: "sup_pd72",
+    offerIds: ["off_pd72"],
+    supplierFundShareBps: 5000,
+    dialFundShareBps: 5000,
+    budgetSpendLimitMinor: 100_00n,
+  });
+  acceptSupplierCoop(campaign.id);
+  const pending = listPendingPromoApprovals();
+  if (!pending.some((p) => p.campaignId === campaign.id)) {
+    throw new Error("PD72 expected pending promo approval");
+  }
+  approveSupplierCoop(campaign.id);
+  if (listPendingPromoApprovals().some((p) => p.campaignId === campaign.id)) {
+    throw new Error("PD72 queue must clear after approve");
+  }
+  return {
+    queuedThenCleared: true,
+    approvedCampaignId: campaign.id,
+    payableFromAi: false,
+    cashOutForbidden: true,
+  };
+}
+
 /**
  * Attempt cash-out of promo credit — always blocked (D-42).
  */

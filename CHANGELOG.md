@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD74 Active run polyline** — GeoJSON LineString from navigate stops; MapLibre SoR (Pack §9.8).
+- **PD73 Identity step-up** — session-bound challenge/verify gate for money-sensitive admin (Pack §10 / D-47).
+- **PD72 Promo approve queue** — SUPPLIER_COOP pending ops approve on `/admin/promotions/approve` (Pack §10).
+- **PD71 Order failover accept** — after confirm SLA breach, accept alternate supplier (Pack §10).
 - **PD70 Customer promo credit balance** — `/account/promo` balance + cash-out blocked (D-42 / Pack §9.6).
 - **PD69 Job variation approve** — human propose/approve draft deltas; AI propose blocked; `/admin/jobs/variations` (Pack §10).
 - **PD68 Offer countdown timeout** — `getOfferCountdown` + `expireOfferIfPast` → timed_out (Pack §9.8).

@@ -4,6 +4,8 @@
  * Fixture: in-memory SoR. Sandbox/live: PostgREST `profiles` with service-role upsert + JWT RLS reads.
  */
 
+import { __resetStepUpForTests } from "./stepUp.js";
+
 export type ProfileRole = "customer" | "technician" | "supplier" | "admin";
 export type BuyerSegment = "b2c" | "b2b";
 
@@ -48,6 +50,7 @@ export function __resetIdentityForTests(): void {
   const s = store();
   s.profiles.clear();
   s.emailIndex.clear();
+  __resetStepUpForTests();
 }
 
 function putProfile(profile: Profile): Profile {
@@ -281,6 +284,16 @@ export function rlsContextFromSession(session: {
         : "customer";
   return { userId: session.userId, role };
 }
+
+export {
+  assertStepUpVerified,
+  getStepUpChallenge,
+  requestStepUp,
+  runPd73IdentityStepUpThinVertical,
+  verifyStepUp,
+  __resetStepUpForTests,
+  type StepUpChallenge,
+} from "./stepUp.js";
 
 export {
   getSupabasePublicConfig,

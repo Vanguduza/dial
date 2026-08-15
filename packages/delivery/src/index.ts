@@ -12,11 +12,12 @@ import {
 } from "./offlinePacks.js";
 import {
   __resetNavigateStopsForTests,
+  getActiveRunPolyline,
   getEtaBanner,
   listNavigateStops,
   openNavigateRun,
-  reoptimiseRemainingStops,
   refreshEtaBanner,
+  reoptimiseRemainingStops,
 } from "./navigateStops.js";
 import {
   __resetCodFloatForTests,
@@ -50,12 +51,14 @@ export {
 
 export {
   completeNavigateStop,
+  getActiveRunPolyline,
   getEtaBanner,
   getNavigateRun,
   listNavigateStops,
   openNavigateRun,
   refreshEtaBanner,
   reoptimiseRemainingStops,
+  type ActiveRunPolyline,
   type DeliveryNavigateRun,
   type DeliveryNavigateStop,
   type EtaBanner,
@@ -1432,6 +1435,48 @@ export function runPd68OfferCountdownTimeoutThinVertical(): {
   return {
     countdownOk: true,
     timedOut: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD74 thin vertical: navigate stops → MapLibre polyline LineString (not Google).
+ */
+export async function runPd74ActiveRunPolylineThinVertical(input?: {
+  courierId?: string;
+}): Promise<{
+  stopCount: number;
+  coordinateCount: number;
+  mapSor: "maplibre";
+  googleMapsSor: false;
+  payableFromAi: false;
+}> {
+  const courierId = input?.courierId ?? "cour_pd74";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+  const job = createDeliveryJob({
+    orderId: "ord_pd74",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 8_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD74 expected offer");
+  acceptOffer(offered.offerId, courierId);
+  await openNavigateRun({ jobId: job.id, courierId });
+  const poly = getActiveRunPolyline(job.id);
+  if (poly.mapSor !== "maplibre" || poly.googleMapsSor !== false) {
+    throw new Error("PD74 polyline must be MapLibre SoR");
+  }
+  if (poly.coordinates.length < 2 || poly.type !== "LineString") {
+    throw new Error("PD74 expected LineString with 2+ coordinates");
+  }
+  return {
+    stopCount: poly.stopCount,
+    coordinateCount: poly.coordinates.length,
+    mapSor: "maplibre",
+    googleMapsSor: false,
     payableFromAi: false,
   };
 }

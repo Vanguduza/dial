@@ -8,6 +8,7 @@ import {
   attemptPromoCreditCashOut,
   createPromoCampaign,
   runPd16PromotionsAdminThinVertical,
+  runPd72PromoApproveQueueThinVertical,
 } from "./admin.js";
 
 test("PD16 thin vertical: PLATFORM/FLASH/REFERRAL + coop approve + fraud + no cash-out", () => {
@@ -67,4 +68,12 @@ test("PD46 coop spend thin vertical — live spend + cash-out blocked", async ()
   assert.equal(out.cashOutForbidden, true);
   assert.equal(out.payableFromAi, false);
   assert.equal(out.budgetUsedMinor, "1500");
+});
+
+test("PD72 promo approve queue thin vertical", () => {
+  const out = runPd72PromoApproveQueueThinVertical();
+  assert.equal(out.queuedThenCleared, true);
+  assert.ok(out.approvedCampaignId);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.cashOutForbidden, true);
 });

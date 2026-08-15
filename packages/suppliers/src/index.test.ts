@@ -12,6 +12,7 @@ import {
   runPd6SupplierThinVertical,
   runPd38HeartbeatSlaThinVertical,
   runPd65SupplierBondThinVertical,
+  runPd71OrderFailoverAcceptThinVertical,
   uploadSupplierCosts,
 } from "./index.js";
 
@@ -35,6 +36,13 @@ test("PD65 supplier bond hold → release", () => {
   assert.equal(out.bondHeldThenReleased, true);
   assert.ok(out.bondStatementLines >= 2);
   assert.equal(out.currency, "USD");
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD71 order failover accept after SLA breach", () => {
+  const out = runPd71OrderFailoverAcceptThinVertical();
+  assert.equal(out.failoverAccepted, true);
+  assert.equal(out.toSupplierId, "sup_pd71_b");
   assert.equal(out.payableFromAi, false);
 });
 

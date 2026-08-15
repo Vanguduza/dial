@@ -922,6 +922,50 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Order failover accept | **PD71** |
+| Promo approve queue (SUPPLIER_COOP) | **PD72** |
+| Identity step-up | **PD73** |
+| Active run MapLibre polyline | **PD74** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD71 — Order failover accept (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | confirm SLA breach → failover accept to alternate supplier |
+| Evidence | `runPd71OrderFailoverAcceptThinVertical`; `pd71Pd74Ops.test.ts` |
+| Green → | **PD72** promo approve |
+
+### PD72 — Promo approve queue (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | SUPPLIER_COOP pending → `/admin/promotions/approve` → ops approve clears |
+| Evidence | `runPd72PromoApproveQueueThinVertical`; `pd71Pd74Ops.test.ts` |
+| Green → | **PD73** step-up |
+
+### PD73 — Identity step-up (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | request → bad code blocked → verify → assert gate (session SoR) |
+| Evidence | `runPd73IdentityStepUpThinVertical`; `pd71Pd74Ops.test.ts` |
+| Green → | **PD74** polyline |
+
+### PD74 — Active run polyline (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | navigate stops → GeoJSON LineString; MapLibre SoR; not Google |
+| Evidence | `runPd74ActiveRunPolylineThinVertical`; `pd71Pd74Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD74)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 | Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |

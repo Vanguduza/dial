@@ -20,6 +20,7 @@ import {
   getNavigateRun,
   getOffer,
   getOfferCountdown,
+  getActiveRunPolyline,
   listCourierLocations,
   listCourierOfflinePacks,
   listJobsForCourier,
@@ -101,8 +102,15 @@ export async function GET(req: Request) {
           jobId: activeJob.id,
           etaBanner: getEtaBanner(activeJob.id),
           stops: listNavigateStops(activeJob.id),
+          polyline: (() => {
+            try {
+              return getActiveRunPolyline(activeJob.id);
+            } catch {
+              return null;
+            }
+          })(),
           mapSor: "maplibre" as const,
-          note: "D-44 OSRM ETA + VROOM re-optimise — not Google/Mapbox",
+          note: "D-44 OSRM ETA + VROOM + polyline — MapLibre SoR",
         }
       : null;
   return NextResponse.json({
