@@ -20,6 +20,25 @@ import {
   pairThermalPrinter,
   printJobTicket,
 } from "./bluetoothPrint.js";
+import {
+  __resetJobVariationsForTests,
+  approveJobVariation,
+  listJobVariations,
+  proposeJobVariation,
+  rejectJobVariation,
+  runPd69JobVariationApproveThinVertical,
+} from "./variations.js";
+
+export {
+  approveJobVariation,
+  listJobVariations,
+  proposeJobVariation,
+  rejectJobVariation,
+  runPd69JobVariationApproveThinVertical,
+  __resetJobVariationsForTests,
+  type JobVariation,
+  type JobVariationStatus,
+} from "./variations.js";
 
 export type JobClassDefinition = {
   id: string;
@@ -1249,4 +1268,5 @@ export function __resetJobsForTests(): void {
   __resetProjectsAndLegalForTests();
   __resetMockLocationEvidenceForTests();
   __resetBluetoothPrintForTests();
+  __resetJobVariationsForTests();
 }

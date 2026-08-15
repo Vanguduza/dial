@@ -458,6 +458,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-474 | **PD64 Catalogue claim → resolve** pending_review | `done` | Pack §10; D-53 |
 | ENH-475 | **PD65 Supplier bonds** hold/release | `done` | Pack §9.4 |
 | ENH-476 | **PD66 Admin pending_review queue** claim UI | `done` | Pack §10 |
+| ENH-477 | **PD67 Delivery run inbox** delivery_runs | `done` | Pack §9.8 |
+| ENH-478 | **PD68 Offer countdown timeout** | `done` | Pack §9.8 |
+| ENH-479 | **PD69 Job variation approve** AI blocked | `done` | Pack §10 |
+| ENH-480 | **PD70 Customer promo credit balance** UI | `done` | Pack §9.6; D-42 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

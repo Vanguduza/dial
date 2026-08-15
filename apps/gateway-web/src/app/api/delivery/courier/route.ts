@@ -8,21 +8,25 @@ import {
   acceptOffer,
   activateOfflinePack,
   capturePod,
+  completeDeliveryRun,
   createDeliveryJob,
   createJobsFromMultiStopPlan,
   evaluateCodCollect,
+  expireOfferIfPast,
   getCourierAvailability,
   getCourierCodFloat,
   getDeliveryJob,
   getEtaBanner,
   getNavigateRun,
   getOffer,
+  getOfferCountdown,
   listCourierLocations,
   listCourierOfflinePacks,
   listJobsForCourier,
   listNavigateStops,
   listOffersForCourier,
   listOfflinePackDefinitions,
+  listRunsForCourier,
   openNavigateRun,
   postCourierLocation,
   reconcileCodAfterPod,
@@ -34,6 +38,7 @@ import {
   setCourierAvailabilityStatus,
   setCourierCodFloatLimit,
   startDeliveryDispatchWorkflow,
+  startDeliveryRun,
   startTransit,
   timeoutOffer,
   type CourierAvailability,
@@ -103,7 +108,15 @@ export async function GET(req: Request) {
   return NextResponse.json({
     courierId,
     availability: getCourierAvailability(courierId),
-    offers: listOffersForCourier(courierId),
+    offers: listOffersForCourier(courierId).map((o) => {
+      const countdown = getOfferCountdown(o.id);
+      return {
+        ...o,
+        remainingMs: countdown.remainingMs,
+        expired: countdown.expired,
+      };
+    }),
+    runs: listRunsForCourier(courierId),
     jobs: jobs.map((j) => serializeJob(j)),
     float: (() => {
       const f = getCourierCodFloat(courierId);
@@ -484,6 +497,38 @@ export async function POST(req: Request) {
           attempt,
           payableFromAi: false,
           note: "PD61 — COD failure reason recorded",
+        });
+      }
+      case "offer_countdown": {
+        const countdown = getOfferCountdown(String(body.offerId ?? ""));
+        return NextResponse.json({ ok: true, countdown, payableFromAi: false });
+      }
+      case "expire_offer_if_past": {
+        const offer = expireOfferIfPast(String(body.offerId ?? ""));
+        return NextResponse.json({
+          ok: true,
+          offer,
+          payableFromAi: false,
+          note: "PD68 — countdown timeout path",
+        });
+      }
+      case "start_run": {
+        const run = startDeliveryRun(String(body.runId ?? ""), courierId);
+        return NextResponse.json({
+          ok: true,
+          run,
+          mapSor: "maplibre",
+          payableFromAi: false,
+          note: "PD67 — delivery_run start",
+        });
+      }
+      case "complete_run": {
+        const run = completeDeliveryRun(String(body.runId ?? ""), courierId);
+        return NextResponse.json({
+          ok: true,
+          run,
+          mapSor: "maplibre",
+          payableFromAi: false,
         });
       }
       default:

@@ -379,3 +379,39 @@ export function runPd21CustomerMobilePromoThinVertical(input?: {
     noExpo: true,
   };
 }
+
+/**
+ * PD70 thin vertical: grant promo_credit → balance read → cash-out blocked (D-42).
+ * Web surface: /account/promo (Pack §9.6 credit balance + referral share).
+ */
+export function runPd70CustomerPromoBalanceThinVertical(): {
+  balanceMinor: string;
+  cashOutForbidden: true;
+  currency: "USD";
+  payableFromAi: false;
+} {
+  __resetPromoCustomerForTests();
+  const customerId = "cust_pd70";
+  grantPromoCredit({ customerId, amountMinor: 15_00n });
+  const bal = getPromoCreditBalance(customerId);
+  if (bal.balanceMinor !== "1500" || bal.cashOutAllowed !== false) {
+    throw new Error("PD70 expected non-cash promo credit balance");
+  }
+  let blocked = false;
+  try {
+    attemptCustomerPromoCashOut({ customerId, amountMinor: 5_00n });
+  } catch (e) {
+    if (e instanceof Error && e.message === "promo_credit_cash_out_forbidden") {
+      blocked = true;
+    } else {
+      throw e;
+    }
+  }
+  if (!blocked) throw new Error("PD70 must forbid cash-out");
+  return {
+    balanceMinor: bal.balanceMinor,
+    cashOutForbidden: true,
+    currency: "USD",
+    payableFromAi: false,
+  };
+}

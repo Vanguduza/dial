@@ -30,6 +30,12 @@ import {
   listAssignmentEvents,
   recordAssignmentEvent,
 } from "./assignmentEvents.js";
+import {
+  __resetDeliveryRunsForTests,
+  listRunsForCourier,
+  openDeliveryRun,
+  startDeliveryRun,
+} from "./deliveryRuns.js";
 
 export {
   activateOfflinePack,
@@ -76,6 +82,18 @@ export {
   type AssignmentEventType,
   type DeliveryAssignmentEvent,
 } from "./assignmentEvents.js";
+
+export {
+  completeDeliveryRun,
+  getActiveRunForJob,
+  getDeliveryRun,
+  listRunsForCourier,
+  openDeliveryRun,
+  startDeliveryRun,
+  __resetDeliveryRunsForTests,
+  type DeliveryRun,
+  type DeliveryRunStatus,
+} from "./deliveryRuns.js";
 
 export {
   createJobsFromMultiStopPlan,
@@ -397,6 +415,7 @@ export function acceptOffer(offerId: string, courierId: CourierId): DeliveryJob 
     courierId,
     actor: courierId,
   });
+  openDeliveryRun({ jobId: job.id, courierId });
   return { ...job };
 }
 
@@ -434,6 +453,7 @@ export function manualOverrideAssign(input: {
     courierId: input.courierId,
     actor: input.assignedBy.trim(),
   });
+  openDeliveryRun({ jobId: job.id, courierId: input.courierId });
   return { ...job };
 }
 
@@ -497,6 +517,42 @@ export function timeoutOffer(offerId: string): DeliveryOffer {
   });
   reassignOrFifo(offer.jobId);
   return { ...offer };
+}
+
+/**
+ * PD68 — offer countdown for courier Accept/Reject card (Pack §9.8).
+ */
+export function getOfferCountdown(offerId: string): {
+  offerId: string;
+  status: DeliveryOfferStatus;
+  expiresAt: string;
+  remainingMs: number;
+  expired: boolean;
+  payableFromAi: false;
+} {
+  const offer = offers.get(offerId);
+  if (!offer) throw new Error("Unknown offer");
+  const remainingMs = Math.max(0, Date.parse(offer.expiresAt) - Date.now());
+  const expired = offer.status === "pending" && remainingMs === 0;
+  return {
+    offerId: offer.id,
+    status: offer.status,
+    expiresAt: offer.expiresAt,
+    remainingMs,
+    expired,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD68 — if pending and past expiresAt, run timeoutOffer path.
+ */
+export function expireOfferIfPast(offerId: string): DeliveryOffer {
+  const offer = offers.get(offerId);
+  if (!offer) throw new Error("Unknown offer");
+  if (offer.status !== "pending") return { ...offer };
+  if (Date.parse(offer.expiresAt) > Date.now()) return { ...offer };
+  return timeoutOffer(offerId);
 }
 
 function reassignOrFifo(jobId: string): void {
@@ -1303,6 +1359,84 @@ export function runPd63PodSignatureGpsThinVertical(): {
 }
 
 /**
+ * PD67 thin vertical: accept offer → delivery_run inbox → start run.
+ */
+export function runPd67DeliveryRunInboxThinVertical(): {
+  runId: string;
+  inboxCount: number;
+  started: true;
+  mapSor: "maplibre";
+  payableFromAi: false;
+} {
+  __resetDeliveryForTests();
+  const courierId = "cour_pd67";
+  setCourierAvailabilityStatus(courierId, "available");
+  const job = createDeliveryJob({
+    orderId: "ord_pd67",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 11_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD67 expected offer");
+  acceptOffer(offered.offerId, courierId);
+  const inbox = listRunsForCourier(courierId);
+  if (inbox.length < 1 || inbox[0]!.jobId !== job.id) {
+    throw new Error("PD67 expected run in courier inbox");
+  }
+  const started = startDeliveryRun(inbox[0]!.runId, courierId);
+  if (started.status !== "active" || started.payableFromAi !== false) {
+    throw new Error("PD67 start run failed");
+  }
+  return {
+    runId: started.runId,
+    inboxCount: inbox.length,
+    started: true,
+    mapSor: "maplibre",
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD68 thin vertical: countdown → force-expire past offer → timed_out.
+ */
+export function runPd68OfferCountdownTimeoutThinVertical(): {
+  countdownOk: true;
+  timedOut: true;
+  payableFromAi: false;
+} {
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus("cour_pd68_a", "available");
+  setCourierAvailabilityStatus("cour_pd68_b", "available");
+  const job = createDeliveryJob({
+    orderId: "ord_pd68",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 9_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD68 expected offer");
+  const offer = offers.get(offered.offerId)!;
+  // Force past expiry for deterministic timeout without sleeping.
+  offer.expiresAt = new Date(Date.now() - 1_000).toISOString();
+  const countdown = getOfferCountdown(offer.id);
+  if (!countdown.expired || countdown.payableFromAi !== false) {
+    throw new Error("PD68 countdown must report expired");
+  }
+  const timed = expireOfferIfPast(offer.id);
+  if (timed.status !== "timed_out") {
+    throw new Error("PD68 expireOfferIfPast must timeout");
+  }
+  return {
+    countdownOk: true,
+    timedOut: true,
+    payableFromAi: false,
+  };
+}
+
+/**
  * PD58 thin vertical: assign job for order → post location → customer read-only track.
  */
 export function runPd58CustomerDeliveryTrackThinVertical(input?: {
@@ -1512,5 +1646,6 @@ export function __resetDeliveryForTests(): void {
   __resetNavigateStopsForTests();
   __resetCodFloatForTests();
   __resetAssignmentEventsForTests();
+  __resetDeliveryRunsForTests();
   podMediaStore.clear();
 }

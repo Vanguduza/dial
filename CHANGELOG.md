@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD70 Customer promo credit balance** — `/account/promo` balance + cash-out blocked (D-42 / Pack §9.6).
+- **PD69 Job variation approve** — human propose/approve draft deltas; AI propose blocked; `/admin/jobs/variations` (Pack §10).
+- **PD68 Offer countdown timeout** — `getOfferCountdown` + `expireOfferIfPast` → timed_out (Pack §9.8).
+- **PD67 Delivery run inbox** — `delivery_runs` on accept/override; start run (Pack §9.8).
 - **PD66 Admin pending_review queue** — `/admin/pending-review` list/claim/approve|reject (Pack §10).
 - **PD65 Supplier bonds** — hold/release USD amountMinor bonds + statement lines; `/admin/suppliers/bonds` (Pack §9.4).
 - **PD64 Catalogue claim → resolve** — `claimCatalogueReview` before approve/reject; no AI auto-publish.

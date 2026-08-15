@@ -56,6 +56,7 @@ export {
   grantPromoCredit,
   registerPromoCode,
   runPd21CustomerMobilePromoThinVertical,
+  runPd70CustomerPromoBalanceThinVertical,
   shareReferral,
   validatePromoCode,
   type PromoCodeReject,

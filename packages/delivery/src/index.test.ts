@@ -240,6 +240,24 @@ test("PD63 POD signature + GPS → pod_media", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD67 delivery run inbox", async () => {
+  const { runPd67DeliveryRunInboxThinVertical } = await import("./index.js");
+  const out = runPd67DeliveryRunInboxThinVertical();
+  assert.equal(out.started, true);
+  assert.ok(out.inboxCount >= 1);
+  assert.ok(out.runId);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD68 offer countdown timeout", async () => {
+  const { runPd68OfferCountdownTimeoutThinVertical } = await import("./index.js");
+  const out = runPd68OfferCountdownTimeoutThinVertical();
+  assert.equal(out.countdownOk, true);
+  assert.equal(out.timedOut, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

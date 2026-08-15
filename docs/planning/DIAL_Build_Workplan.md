@@ -878,6 +878,50 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Delivery run inbox (`delivery_runs`) | **PD67** |
+| Offer countdown → timeout | **PD68** |
+| Job variation propose/approve | **PD69** |
+| Customer promo credit balance UI | **PD70** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD67 — Delivery run inbox (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | accept offer → `delivery_runs` inbox → start run (MapLibre SoR) |
+| Evidence | `runPd67DeliveryRunInboxThinVertical`; `pd67Pd70Ops.test.ts` |
+| Green → | **PD68** offer countdown |
+
+### PD68 — Offer countdown timeout (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | countdown remainingMs → expire past offer → timed_out |
+| Evidence | `runPd68OfferCountdownTimeoutThinVertical`; `pd67Pd70Ops.test.ts` |
+| Green → | **PD69** job variations |
+
+### PD69 — Job variation approve (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | human propose draft delta → AI blocked → ops approve; `/admin/jobs/variations` |
+| Evidence | `runPd69JobVariationApproveThinVertical`; `pd67Pd70Ops.test.ts` |
+| Green → | **PD70** promo balance |
+
+### PD70 — Customer promo credit balance (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | grant promo_credit → `/account/promo` balance → cash-out blocked (D-42) |
+| Evidence | `runPd70CustomerPromoBalanceThinVertical`; `pd67Pd70Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD70)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 | Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |

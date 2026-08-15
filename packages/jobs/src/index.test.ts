@@ -179,6 +179,15 @@ test("PD30 mock-location blocked + camera overlay queue", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD69 job variation approve", async () => {
+  const { runPd69JobVariationApproveThinVertical } = await import("./index.js");
+  const out = runPd69JobVariationApproveThinVertical();
+  assert.equal(out.approved, true);
+  assert.equal(out.aiProposeBlocked, true);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.currency, "USD");
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({
