@@ -3,6 +3,8 @@
  * Quotes are drafts only — AI never writes payable amounts.
  * Booking slots = Cal.com (fixture when CALCOM_* unset) — no parallel in-house calendar.
  */
+import { __resetProjectsAndLegalForTests } from "./projectsAndLegal.js";
+
 export type JobClassDefinition = {
   id: string;
   tradeId: string;
@@ -905,6 +907,34 @@ export async function runPd13TechWebThinVertical(input?: {
   };
 }
 
+export {
+  acceptTermsVersion,
+  assertProjectsLegalNotMoneyPath,
+  clientProjectsSurface,
+  createInternalProjectDraft,
+  getProjectsToggle,
+  legalComplianceSnapshot,
+  listInternalProjectDrafts,
+  listLegalEducationTopics,
+  listLegalEntityChecklists,
+  listTermsAcceptances,
+  listTermsVersions,
+  publishTermsVersion,
+  runPd24AdminProjectsLegalThinVertical,
+  seedLegalEntityChecklist,
+  setProjectsClientVisibility,
+  setProjectsLabourGates,
+  __resetProjectsAndLegalForTests,
+  type InternalProjectDraft,
+  type LegalEducationTopic,
+  type LegalEntityChecklist,
+  type LegalEntityType,
+  type ProjectsClientVisibility,
+  type ProjectsToggleState,
+  type TermsAcceptance,
+  type TermsVersion,
+} from "./projectsAndLegal.js";
+
 export function __resetJobsForTests(): void {
   valueScores.clear();
   scoreDisputes.clear();
@@ -917,4 +947,5 @@ export function __resetJobsForTests(): void {
   trades.push(...TRADE_SEED.map((t) => ({ ...t })));
   jobClasses.length = 0;
   jobClasses.push(...JOB_CLASS_SEED.map((j) => ({ ...j })));
+  __resetProjectsAndLegalForTests();
 }

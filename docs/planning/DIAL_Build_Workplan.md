@@ -90,10 +90,10 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 127 | `PD21` | **Customer mobile promo/referral + tech deep-link** — Pack §9.6 remainder | workplan | Promo code + referral share; deep-link Tech critical paths; no cash-out | `PD22` |
 | 128 | `PD22` | **Admin Daily ZiG rate + Cost & health** — Pack §9.5 | workplan | Daily ZiG rate UI + audit; AI/cloud/SMS spend + kill-switch; IMTT opex | `PD23` |
 | 129 | `PD23` | **Admin Compliance/WHT + Commercial Simulation** — Pack §9.5 / D-53 | workplan | WHT remittance centre; Simulated never auto-pays | `PD24` |
-| 130 | `PD24` | **Admin Projects toggle + legal compliance hub** — Pack §9.5 residual | new issue | Projects feature toggle; legal/compliance hub screens | `PD25` |
+| 130 | `PD24` | **Admin Projects toggle + legal compliance hub** — Pack §9.5 residual | workplan | Projects feature toggle; legal/compliance hub screens | `PD25` |
 | 131 | `PD25` | **Technician Android Value Score + ITF263** — Pack §9.7 / D-53 | new issue | Value Score factors on device; ITF263 status/upload deepen | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD23 is **PD24**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD24 is **PD25**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -368,11 +368,16 @@ Do **not** treat S99 as eng-complete / product-finished.
 
 Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
 
-### PD24 — Admin Projects toggle + legal compliance hub (NEXT)
+### PD24 — Admin Projects toggle + legal compliance hub (**GREEN** 2026-08-15)
 
-Pack §9.5 residual — Projects feature toggle; legal/compliance hub screens.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | coming_soon default → staff internal draft → live blocked without gates → gates + live; legal checklist + T&C publish/accept |
+| Evidence | `runPd24AdminProjectsLegalThinVertical`; `pd24ProjectsLegal.test.ts`; `/admin/projects` + `/admin/compliance/legal` |
+| Green → | **PD25** Technician Android Value Score + ITF263 |
 
-### PD25 — Technician Android Value Score + ITF263
+### PD25 — Technician Android Value Score + ITF263 (NEXT)
 
 Pack §9.7 / D-53 — Value Score factors on device; ITF263 status/upload deepen.
 

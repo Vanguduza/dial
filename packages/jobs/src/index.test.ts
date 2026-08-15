@@ -16,6 +16,7 @@ import {
   runPd9TechThinVertical,
   runPd13TechWebThinVertical,
   runPd19AdminTradeValueScoreThinVertical,
+  runPd24AdminProjectsLegalThinVertical,
   setValueScoreSnapshot,
   uploadJobEvidence,
 } from "./index.js";
@@ -130,4 +131,17 @@ test("PD19 Trade/JobClass lifecycle + Value Score dispute; no money writes", () 
   const money = assertValueScoreNotMoneyPath();
   assert.equal(money.writesLedger, false);
   assert.equal(money.payableFromAi, false);
+});
+
+test("PD24 Projects toggle + legal hub; live gated; no money path", () => {
+  __resetJobsForTests();
+  const out = runPd24AdminProjectsLegalThinVertical();
+  assert.equal(out.defaultComingSoon, true);
+  assert.equal(out.staffDraftWhileOff, true);
+  assert.equal(out.liveBlockedWithoutGates, true);
+  assert.equal(out.liveAfterGates, true);
+  assert.equal(out.termsAccepted, true);
+  assert.equal(out.checklistSeeded, true);
+  assert.equal(out.moneyPathClean, true);
+  assert.equal(out.payableFromAi, false);
 });
