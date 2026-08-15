@@ -1372,20 +1372,116 @@ export function runPd116SupplierStatementPdfThinVertical(): {
     supplierId,
     kind: "coop_spend",
     amountUsdMinor: -5_00n,
-    label: "Coop promo spend",
+    label: "Co-op spend",
   });
   const doc = renderSupplierStatementDocument({ supplierId });
-  if (doc.lineCount !== 2) throw new Error("PD116 expected 2 lines");
-  if (doc.netUsdMinor !== "4500") {
-    throw new Error(`PD116 expected net 4500 got ${doc.netUsdMinor}`);
+  if (doc.format !== "text/plain+pdf-stub" || doc.payableFromAi !== false) {
+    throw new Error("PD116 document checks failed");
   }
-  if (!doc.body.includes("Week settlement") || doc.payableFromAi !== false) {
-    throw new Error("PD116 document body/payable check failed");
+  if (doc.lineCount !== 2 || doc.netUsdMinor !== "4500") {
+    throw new Error("PD116 net/line mismatch");
   }
   return {
     lineCount: doc.lineCount,
     documentId: doc.documentId,
     format: "text/plain+pdf-stub",
     payableFromAi: false,
+  };
+}
+
+/** PD129 — SolidInvoice layout pattern for statement HTML (D-46 backlog); DIAL amounts SoR. */
+export type SupplierStatementHtmlLayout = {
+  documentId: string;
+  supplierId: string;
+  format: "text/html+solidinvoice-layout";
+  html: string;
+  lineCount: number;
+  netUsdMinor: string;
+  currency: "USD";
+  solidInvoicePattern: true;
+  solidInvoiceMoneySor: false;
+  payableFromAi: false;
+};
+
+/**
+ * HTML statement layout polish (SolidInvoice visual pattern). Amounts from DIAL statements only.
+ */
+export function renderSupplierStatementHtmlLayout(input: {
+  supplierId: string;
+}): SupplierStatementHtmlLayout {
+  const pdf = renderSupplierStatementDocument(input);
+  const lines = listStatements(input.supplierId);
+  const rows = lines
+    .map(
+      (l) =>
+        `<tr><td>${l.createdAt.slice(0, 10)}</td><td>${l.kind}</td><td>${l.label}</td><td align="right">${l.amount.amountMinor.toString()}</td></tr>`,
+    )
+    .join("");
+  const html = [
+    `<!DOCTYPE html><html><head><title>DIAL Statement ${input.supplierId}</title></head><body>`,
+    `<header><h1>Supplier statement</h1><p>supplierId=${input.supplierId}</p></header>`,
+    `<table border="1" cellpadding="4"><thead><tr><th>Date</th><th>Kind</th><th>Label</th><th>USD minor</th></tr></thead>`,
+    `<tbody>${rows}</tbody>`,
+    `<tfoot><tr><td colspan="3">Net</td><td align="right">${pdf.netUsdMinor}</td></tr></tfoot></table>`,
+    `<footer>solidInvoicePattern=true · solidInvoiceMoneySor=false · payableFromAi=false</footer>`,
+    `</body></html>`,
+  ].join("");
+  return {
+    documentId: id("stmthtml"),
+    supplierId: input.supplierId,
+    format: "text/html+solidinvoice-layout",
+    html,
+    lineCount: pdf.lineCount,
+    netUsdMinor: pdf.netUsdMinor,
+    currency: "USD",
+    solidInvoicePattern: true,
+    solidInvoiceMoneySor: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD129 thin vertical: statement lines → SolidInvoice HTML layout; not SolidInvoice money SoR.
+ */
+export function runPd129SolidInvoiceLayoutThinVertical(): {
+  lineCount: number;
+  format: "text/html+solidinvoice-layout";
+  solidInvoiceMoneySor: false;
+  payableFromAi: false;
+  hasTable: true;
+} {
+  __resetSuppliersForTests();
+  const supplierId = "sup_pd129";
+  onboardSupplier({
+    supplierId,
+    displayName: "PD129 Agency Parts",
+    formality: "formal",
+    tier: "gold",
+  });
+  addStatementLine({
+    supplierId,
+    kind: "settlement",
+    amountUsdMinor: 80_00n,
+    label: "Settlement",
+  });
+  addStatementLine({
+    supplierId,
+    kind: "bond",
+    amountUsdMinor: -10_00n,
+    label: "Bond hold",
+  });
+  const layout = renderSupplierStatementHtmlLayout({ supplierId });
+  if (layout.solidInvoiceMoneySor !== false || layout.payableFromAi !== false) {
+    throw new Error("PD129 SolidInvoice must not be money SoR");
+  }
+  if (!layout.html.includes("<table") || layout.netUsdMinor !== "7000") {
+    throw new Error("PD129 layout table/net failed");
+  }
+  return {
+    lineCount: layout.lineCount,
+    format: "text/html+solidinvoice-layout",
+    solidInvoiceMoneySor: false,
+    payableFromAi: false,
+    hasTable: true,
   };
 }

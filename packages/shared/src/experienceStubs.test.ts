@@ -59,3 +59,23 @@ test("PD122 Rive greeting stub thin vertical", () => {
   assert.equal(out.surface, "auth_home");
   assert.equal(out.payableFromAi, false);
 });
+
+test("PD130 Langfuse trace stub thin vertical", async () => {
+  const { runPd130LangfuseTraceStubThinVertical } = await import(
+    "./experienceStubs.js"
+  );
+  const out = runPd130LangfuseTraceStubThinVertical();
+  assert.equal(out.skippedWithoutKey, true);
+  assert.equal(out.moneyAuthority, false);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD128 Plane ops triage thin vertical", async () => {
+  const { runPd128PlaneOpsTriageThinVertical } = await import("./opsTriage.js");
+  const out = runPd128PlaneOpsTriageThinVertical();
+  assert.equal(out.claimedThenResolved, true);
+  assert.equal(out.slaOverdueVisible, true);
+  assert.equal(out.planePattern, true);
+  assert.equal(out.chatwootStatusSor, false);
+  assert.equal(out.payableFromAi, false);
+});

@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD130 Langfuse trace stub** — T8 fail-closed without keys; not money; not `packages/ai` schema expand.
+- **PD129 SolidInvoice statement layout** — HTML table layout sibling to PDF stub; DIAL amounts SoR (D-46 backlog).
+- **PD128 Plane ops triage** — claim→resolve inbox + SLA badges; Chatwoot ≠ status SoR (AGPL pattern only).
+- **PD127 PicPeak evidence gallery** — near-dupe fingerprint + next/prev + approve|reject (D-46 backlog).
 - **PD126 Formance Console explorer** — read-only DIAL ledger journals; Formance UX pattern only (D-46); never Formance money SoR.
 - **PD125 tableflow CSV preview** — map/validate/preview supplier stock CSV; no ingest / no Tableflow cloud SoR (D-46).
 - **PD124 Tracktor fleet expiry** — Care/Fleet compliance board from consent-gated reminders (D-46); not dispatch SoR.

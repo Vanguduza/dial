@@ -6,10 +6,12 @@ import { NextResponse } from "next/server";
 import {
   evaluatePostHogFlag,
   queueFormbricksSurvey,
+  queueLangfuseTrace,
   recordCsatScore,
   runPd113FormbricksPosthogStubThinVertical,
   runPd117RealtimeStatusStubThinVertical,
   runPd118CsatFlowThinVertical,
+  runPd130LangfuseTraceStubThinVertical,
   subscribeRealtimeStatusChannel,
 } from "@dial/shared";
 import {
@@ -36,6 +38,14 @@ export async function GET(req?: Request) {
       ok: true,
       thin,
       note: "PD118 — FLOW_CSAT ERP score",
+    });
+  }
+  if (view === "pd130") {
+    const thin = runPd130LangfuseTraceStubThinVertical();
+    return NextResponse.json({
+      ok: true,
+      thin,
+      note: "PD130 — Langfuse trace stub; fail-closed",
     });
   }
   const thin = runPd113FormbricksPosthogStubThinVertical();
@@ -116,6 +126,16 @@ export async function POST(req: Request) {
         ok: true,
         csat: out,
         note: "PD118 — FLOW_CSAT; ERP score SoR; not payable",
+      });
+    }
+    if (action === "queue_langfuse_trace") {
+      const out = queueLangfuseTrace({
+        name: String(body.surveyId ?? body.flagKey ?? "ai.invocation"),
+      });
+      return NextResponse.json({
+        ok: true,
+        trace: out,
+        note: "PD130 — Langfuse stub; not money; fail-closed without keys",
       });
     }
     return NextResponse.json({ error: `unknown action ${action}` }, { status: 400 });

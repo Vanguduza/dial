@@ -137,6 +137,13 @@ export type JobEvidence = {
   /** Opaque payload ref — never secrets; base64/text stub for fixture. */
   payloadRef: string;
   createdAt: string;
+  /** PD127 — PicPeak gallery review (ops proofing). */
+  reviewStatus: "pending" | "approved" | "rejected";
+  /** PD127 — MediaFingerprint stub for near-dupe review. */
+  fingerprintHash: string;
+  nearDupeOf: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
 };
 
 export type TechJob = {
@@ -1827,22 +1834,197 @@ export function uploadJobEvidence(input: {
     job.technicianId = input.technicianId;
     job.status = job.status === "booked" ? "assigned" : job.status;
   }
+  const payloadRef = input.payloadRef.slice(0, 2048);
+  const fingerprintHash = simpleEvidenceFingerprint(payloadRef);
+  let nearDupeOf: string | null = null;
+  for (const e of evidence.values()) {
+    if (e.jobId === input.jobId && e.fingerprintHash === fingerprintHash) {
+      nearDupeOf = e.evidenceId;
+      break;
+    }
+  }
   const row: JobEvidence = {
     evidenceId: `ev_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 5)}`,
     jobId: input.jobId,
     technicianId: input.technicianId,
     kind: input.kind,
-    payloadRef: input.payloadRef.slice(0, 2048),
+    payloadRef,
     createdAt: new Date().toISOString(),
+    reviewStatus: "pending",
+    fingerprintHash,
+    nearDupeOf,
+    reviewedBy: null,
+    reviewedAt: null,
   };
   evidence.set(row.evidenceId, row);
   return { ...row };
+}
+
+function simpleEvidenceFingerprint(payloadRef: string): string {
+  let h = 0;
+  for (let i = 0; i < payloadRef.length; i++) {
+    h = (h * 31 + payloadRef.charCodeAt(i)) >>> 0;
+  }
+  return `fp_${h.toString(16)}`;
 }
 
 export function listEvidenceForJob(jobId: string): JobEvidence[] {
   return [...evidence.values()]
     .filter((e) => e.jobId === jobId)
     .map((e) => ({ ...e }));
+}
+
+/** PD127 — PicPeak evidence gallery item (lightbox / next-prev / approve-reject). */
+export type EvidenceGalleryItem = JobEvidence & {
+  index: number;
+  total: number;
+  picPeakPattern: true;
+  customerPhotoShare: false;
+};
+
+export type EvidenceGallerySnapshot = {
+  items: EvidenceGalleryItem[];
+  pendingCount: number;
+  nearDupeCount: number;
+  picPeakPattern: true;
+  customerPhotoShare: false;
+  moneyAuthority: false;
+};
+
+/**
+ * List evidence for ops proofing gallery (PicPeak UX). Not a customer photo product.
+ */
+export function listEvidenceGallery(input?: {
+  jobId?: string;
+  pendingOnly?: boolean;
+}): EvidenceGallerySnapshot {
+  let rows = [...evidence.values()];
+  if (input?.jobId) rows = rows.filter((e) => e.jobId === input.jobId);
+  if (input?.pendingOnly) rows = rows.filter((e) => e.reviewStatus === "pending");
+  rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const items: EvidenceGalleryItem[] = rows.map((e, index) => ({
+    ...e,
+    index,
+    total: rows.length,
+    picPeakPattern: true,
+    customerPhotoShare: false,
+  }));
+  return {
+    items,
+    pendingCount: items.filter((i) => i.reviewStatus === "pending").length,
+    nearDupeCount: items.filter((i) => i.nearDupeOf).length,
+    picPeakPattern: true,
+    customerPhotoShare: false,
+    moneyAuthority: false,
+  };
+}
+
+/**
+ * Navigate gallery cursor (keyboard next/prev pattern).
+ */
+export function navigateEvidenceGallery(input: {
+  jobId?: string;
+  evidenceId: string;
+  direction: "next" | "prev";
+}): EvidenceGalleryItem | null {
+  const snap = listEvidenceGallery(
+    input.jobId ? { jobId: input.jobId } : undefined,
+  );
+  const idx = snap.items.findIndex((i) => i.evidenceId === input.evidenceId);
+  if (idx < 0) return null;
+  const nextIdx =
+    input.direction === "next"
+      ? Math.min(idx + 1, snap.items.length - 1)
+      : Math.max(idx - 1, 0);
+  return snap.items[nextIdx] ?? null;
+}
+
+/**
+ * Approve or reject evidence in gallery. Never payable.
+ */
+export function reviewEvidence(input: {
+  evidenceId: string;
+  decision: "approve" | "reject";
+  reviewedBy: string;
+}): JobEvidence {
+  const row = evidence.get(input.evidenceId);
+  if (!row) throw new Error(`Unknown evidence ${input.evidenceId}`);
+  if (!input.reviewedBy.trim()) throw new Error("reviewedBy required");
+  row.reviewStatus = input.decision === "approve" ? "approved" : "rejected";
+  row.reviewedBy = input.reviewedBy.trim();
+  row.reviewedAt = new Date().toISOString();
+  return { ...row };
+}
+
+/**
+ * PD127 thin vertical: upload → near-dupe → gallery navigate → approve|reject.
+ */
+export async function runPd127PicPeakEvidenceGalleryThinVertical(): Promise<{
+  pendingThenResolved: true;
+  nearDupeDetected: true;
+  navigated: true;
+  picPeakPattern: true;
+  customerPhotoShare: false;
+  payableFromAi: false;
+}> {
+  __resetJobsForTests();
+  const slots = await listBookingSlots();
+  const job = bookTechJob({
+    customerId: "cust_pd127",
+    technicianId: "tech_pd127",
+    jobClass: "diagnostics",
+    slotId: slots[0]!.slotId,
+  });
+  const first = uploadJobEvidence({
+    jobId: job.id,
+    technicianId: "tech_pd127",
+    kind: "photo",
+    payloadRef: "data:image/jpeg;base64,pd127same",
+  });
+  const dupe = uploadJobEvidence({
+    jobId: job.id,
+    technicianId: "tech_pd127",
+    kind: "photo",
+    payloadRef: "data:image/jpeg;base64,pd127same",
+  });
+  if (!dupe.nearDupeOf || dupe.nearDupeOf !== first.evidenceId) {
+    throw new Error("PD127 expected near-dupe fingerprint match");
+  }
+  const gallery = listEvidenceGallery({ jobId: job.id });
+  if (gallery.pendingCount < 2 || gallery.customerPhotoShare !== false) {
+    throw new Error("PD127 gallery pending / share checks failed");
+  }
+  const moved = navigateEvidenceGallery({
+    jobId: job.id,
+    evidenceId: first.evidenceId,
+    direction: "next",
+  });
+  if (!moved || moved.evidenceId !== dupe.evidenceId) {
+    throw new Error("PD127 expected next navigate to dupe");
+  }
+  const approved = reviewEvidence({
+    evidenceId: first.evidenceId,
+    decision: "approve",
+    reviewedBy: "ops_pd127",
+  });
+  const rejected = reviewEvidence({
+    evidenceId: dupe.evidenceId,
+    decision: "reject",
+    reviewedBy: "ops_pd127",
+  });
+  if (approved.reviewStatus !== "approved" || rejected.reviewStatus !== "rejected") {
+    throw new Error("PD127 review decisions failed");
+  }
+  const after = listEvidenceGallery({ jobId: job.id, pendingOnly: true });
+  if (after.pendingCount !== 0) throw new Error("PD127 expected no pending");
+  return {
+    pendingThenResolved: true,
+    nearDupeDetected: true,
+    navigated: true,
+    picPeakPattern: true,
+    customerPhotoShare: false,
+    payableFromAi: false,
+  };
 }
 
 /** PD9 thin vertical: book (Cal.com fixture) → assign → checklist → evidence. */

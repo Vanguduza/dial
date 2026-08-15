@@ -1542,6 +1542,52 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd126FormanceConsoleExplorerThinVertical` |
 | Green → | eng-safe Pack gap ≠ S99 (**PD127+**) |
 
+### Pack / product gap audit (after PD126 → PD127–PD130)
+
+| Gap | Stage |
+| --- | --- |
+| PicPeak evidence gallery (D-46 backlog) | **PD127** |
+| Plane ops triage claim/resolve (AGPL pattern only) | **PD128** |
+| SolidInvoice statement HTML layout | **PD129** |
+| Langfuse T8 trace stub (fail-closed) | **PD130** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+| packages/ai missing-info deepen | deferred (D-56 capability review gate) |
+| Ballerine KYC UX / Lago portal | pattern backlog — not eng next |
+
+### PD127 — PicPeak evidence gallery (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | near-dupe fingerprint → gallery navigate → approve\|reject; `/admin/evidence/gallery` |
+| Evidence | `runPd127PicPeakEvidenceGalleryThinVertical` |
+| Green → | **PD128** Plane triage |
+
+### PD128 — Plane ops triage (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | enqueue → claim → resolve + SLA badges; Chatwoot ≠ status SoR |
+| Evidence | `runPd128PlaneOpsTriageThinVertical` |
+| Green → | **PD129** SolidInvoice layout |
+
+### PD129 — SolidInvoice statement layout (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `renderSupplierStatementHtmlLayout`; `export_statement_html`; DIAL amounts SoR |
+| Evidence | `runPd129SolidInvoiceLayoutThinVertical` |
+| Green → | **PD130** Langfuse stub |
+
+### PD130 — Langfuse trace stub (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `queueLangfuseTrace` fail-closed; `/api/experience` view=pd130; not packages/ai schema |
+| Evidence | `runPd130LangfuseTraceStubThinVertical` |
+| Green → | eng-safe Pack gap ≠ S99 (**PD131+**) |
+
 ### S10 — E2a (historical)
 
 | | |

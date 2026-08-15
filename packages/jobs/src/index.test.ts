@@ -320,6 +320,17 @@ test("PD123 Schedule-X roster thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD127 PicPeak evidence gallery thin vertical", async () => {
+  const { runPd127PicPeakEvidenceGalleryThinVertical } = await import("./index.js");
+  const out = await runPd127PicPeakEvidenceGalleryThinVertical();
+  assert.equal(out.pendingThenResolved, true);
+  assert.equal(out.nearDupeDetected, true);
+  assert.equal(out.navigated, true);
+  assert.equal(out.picPeakPattern, true);
+  assert.equal(out.customerPhotoShare, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

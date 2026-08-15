@@ -18,6 +18,7 @@ import {
   onboardSupplier,
   postHeartbeat,
   renderSupplierStatementDocument,
+  renderSupplierStatementHtmlLayout,
   syncSupplierSlaEscalations,
   uploadSupplierCosts,
   uploadSupplierStock,
@@ -359,6 +360,14 @@ export async function POST(req: Request) {
           ok: true,
           document: doc,
           note: "PD116 — statement PDF stub (react-pdf pattern); integer USD",
+        });
+      }
+      case "export_statement_html": {
+        const layout = renderSupplierStatementHtmlLayout({ supplierId });
+        return NextResponse.json({
+          ok: true,
+          layout,
+          note: "PD129 — SolidInvoice HTML layout pattern; DIAL amounts SoR",
         });
       }
       case "propose_coop": {

@@ -137,6 +137,16 @@ test("PD125 tableflow CSV preview", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD129 SolidInvoice statement HTML layout", async () => {
+  const { runPd129SolidInvoiceLayoutThinVertical } = await import("./index.js");
+  const out = runPd129SolidInvoiceLayoutThinVertical();
+  assert.equal(out.format, "text/html+solidinvoice-layout");
+  assert.equal(out.solidInvoiceMoneySor, false);
+  assert.equal(out.hasTable, true);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.lineCount >= 2);
+});
+
 test("PD6 heartbeat channels dashboard|whatsapp", () => {
   onboardSupplier({
     supplierId: "sup_c",

@@ -518,6 +518,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-534 | **PD124 Tracktor fleet expiry** | `done` | D-46; not dispatch SoR |
 | ENH-535 | **PD125 tableflow CSV preview** | `done` | D-46; no cloud SoR |
 | ENH-536 | **PD126 Formance Console explorer** | `done` | D-46; DIAL ledger SoR |
+| ENH-537 | **PD127 PicPeak evidence gallery** | `done` | D-46 backlog; near-dupe + review |
+| ENH-538 | **PD128 Plane ops triage** | `done` | AGPL pattern only; Chatwoot ≠ SoR |
+| ENH-539 | **PD129 SolidInvoice statement layout** | `done` | D-46 backlog; DIAL amounts |
+| ENH-540 | **PD130 Langfuse trace stub** | `done` | T8 fail-closed; ≠ packages/ai |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

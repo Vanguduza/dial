@@ -367,3 +367,74 @@ export function runPd122RiveGreetingStubThinVertical(): {
     else delete process.env.DIAL_RIVE_GREETING_ASSET;
   }
 }
+
+/** PD130 — Langfuse trace stub (T8); fail-closed without keys; not money / not packages/ai schema. */
+export type LangfuseTraceStub = {
+  traceId: string;
+  name: string;
+  status: "queued" | "skipped_no_key";
+  fixture: true;
+  moneyAuthority: false;
+  payableFromAi: false;
+};
+
+function langfuseKeysSet(): boolean {
+  return Boolean(
+    process.env.LANGFUSE_PUBLIC_KEY?.trim() &&
+      process.env.LANGFUSE_SECRET_KEY?.trim(),
+  );
+}
+
+/**
+ * Queue AiInvocation-shaped trace metadata. Without Langfuse keys → fail-closed skip.
+ */
+export function queueLangfuseTrace(input: {
+  name: string;
+  metadata?: Record<string, string>;
+}): LangfuseTraceStub {
+  if (!input.name.trim()) throw new Error("trace name required");
+  return {
+    traceId: `lf_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    name: input.name.trim(),
+    status: langfuseKeysSet() ? "queued" : "skipped_no_key",
+    fixture: true,
+    moneyAuthority: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD130 thin vertical: Langfuse stub fail-closed without keys; not money.
+ */
+export function runPd130LangfuseTraceStubThinVertical(): {
+  skippedWithoutKey: true;
+  moneyAuthority: false;
+  payableFromAi: false;
+} {
+  const prevPub = process.env.LANGFUSE_PUBLIC_KEY;
+  const prevSec = process.env.LANGFUSE_SECRET_KEY;
+  delete process.env.LANGFUSE_PUBLIC_KEY;
+  delete process.env.LANGFUSE_SECRET_KEY;
+  try {
+    const t = queueLangfuseTrace({
+      name: "guidedIntake.shadow",
+      metadata: { capability: "guidedIntake" },
+    });
+    if (t.status !== "skipped_no_key" || t.moneyAuthority !== false) {
+      throw new Error("PD130 expected Langfuse fail-closed skip");
+    }
+    if (t.payableFromAi !== false) {
+      throw new Error("PD130 payableFromAi must be false");
+    }
+    return {
+      skippedWithoutKey: true,
+      moneyAuthority: false,
+      payableFromAi: false,
+    };
+  } finally {
+    if (prevPub !== undefined) process.env.LANGFUSE_PUBLIC_KEY = prevPub;
+    else delete process.env.LANGFUSE_PUBLIC_KEY;
+    if (prevSec !== undefined) process.env.LANGFUSE_SECRET_KEY = prevSec;
+    else delete process.env.LANGFUSE_SECRET_KEY;
+  }
+}
