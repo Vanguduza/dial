@@ -23,6 +23,7 @@ export default async function SpareBrowsePage({
 
   return (
     <main
+      data-testid="spare-browse"
       style={{
         minHeight: "100vh",
         background: `linear-gradient(160deg, ${dialTokens.color.brand.surface} 0%, #e8ebe4 55%, ${dialTokens.color.brand.primary}22 100%)`,

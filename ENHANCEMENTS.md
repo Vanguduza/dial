@@ -446,7 +446,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ID | Enhancement | Status | Notes |
 | --- | --- | --- | --- |
 | ENH-010 | **Machine-strict DoD / PR gates** â€” CI or bot checks that tracer matrix evidence cells and feature DoD are not blank on merge of epic PRs | `proposed` | Complements D-52 human + `dial-tracer-slice`; does not replace human sign-off |
-| ENH-011 | **Playwright / `dial-webapp-recon` viewport matrix** (desktop + mobile) in CI or staging smoke | `proposed` | Blocked on staging URL; patterns only until then |
+| ENH-011 | **Playwright / `dial-webapp-recon` viewport matrix** (desktop + mobile) in CI or staging smoke | `in_progress` | **PD37** local Chromium path green (harness + optional localhost); remote staging URL still optional |
 | ENH-012 | **KMP `packages/mobile-shared`** for non-UI shared logic (Blueprint I-1) | `proposed` | Does **not** reopen C-5; no CMP customer UI |
 | ENH-013 | Self-hosted **Nominatim / OSRM / VROOM** Tier-2 siblings (Blueprint I-2 / D-44) | `proposed` | After maps/delivery spine scaffolds |
 

@@ -11,7 +11,8 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
-- **PD36 Grocery/Spare multi-stop delivery** — same band/slot → one multi-stop job (pickup per supplier → dropoff); different band/slot → split; Temporal `activityCreateMultiStopDispatch`; POD/spoilage unchanged; no liquor; [#40](https://github.com/Vanguduza/dial/issues/40); eng next **PD37**.
+- **PD37 Local Playwright recon** — Chromium dial-webapp-recon Spare+grocery+WA (live localhost or harness); `spare-browse` testid; ENH-011 local path; [#41](https://github.com/Vanguduza/dial/issues/41).
+- **PD36 Grocery/Spare multi-stop delivery** — same band/slot → one multi-stop job (pickup per supplier → dropoff); different band/slot → split; Temporal `activityCreateMultiStopDispatch`; POD/spoilage unchanged; no liquor; [#40](https://github.com/Vanguduza/dial/issues/40).
 - **PD35 Grocery brand polish + KYC cert badge** — Dial Groceries brand hero; formal chilled/frozen food-safety + ambient KYC browse badges; informal never badges; display only (not money); [#39](https://github.com/Vanguduza/dial/issues/39).
 - **PD34 B2B grocery + take-rate admin** — formal-only browse banner (D-49); `@dial/catalogue` take-rate ladder draft→publish→resolve integer bps (`payableFromAi=false`); `/admin/grocery/take-rate`; [#38](https://github.com/Vanguduza/dial/issues/38).
 - **PD33 Staging dogfood recon** — Spare + grocery food + Meta WA Flows recon-then-act harness; B2B informal grocery cart 403 (D-49); sandbox WA+FDMS rails; Meili index SoR; [#37](https://github.com/Vanguduza/dial/issues/37); eng next **PD34**.
