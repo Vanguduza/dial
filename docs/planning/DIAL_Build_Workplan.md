@@ -1048,9 +1048,53 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | --- | --- |
 | Thin path | session profile get/update; cross-tenant deny (Pack §10 Identity) |
 | Evidence | `runPd82AccountProfileThinVertical`; `pd79Pd82Ops.test.ts` |
-| Green → | eng-safe continue ≠ S99 |
+| Green → | **PD83** addresses |
 
 ### Pack / product gap audit (after PD82)
+
+| Gap | Stage |
+| --- | --- |
+| Customer delivery addresses | **PD83** |
+| Supplier stock upload | **PD84** |
+| Referral status | **PD85** |
+| Manager's choice flag | **PD86** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD83 — Customer delivery addresses (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | add pin+landmark+phone → default → delete promotes (MapLibre) |
+| Evidence | `runPd83CustomerAddressesThinVertical`; `pd83Pd86Ops.test.ts` |
+| Green → | **PD84** stock upload |
+
+### PD84 — Supplier stock upload (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | onboard → upload stock → pending_review (agency MARKETPLACE; D-58) |
+| Evidence | `runPd84SupplierStockUploadThinVertical`; `pd83Pd86Ops.test.ts` |
+| Green → | **PD85** referral status |
+
+### PD85 — Referral status (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | share → attach → getReferralStatus; cash-out forbidden (D-42) |
+| Evidence | `runPd85ReferralStatusThinVertical`; `pd83Pd86Ops.test.ts` |
+| Green → | **PD86** managers choice |
+
+### PD86 — Manager's choice flag (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | Value Score profile → set/clear Manager's choice (not money) |
+| Evidence | `runPd86ManagersChoiceThinVertical`; `pd83Pd86Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD86)
 
 | Gap | Stage |
 | --- | --- |

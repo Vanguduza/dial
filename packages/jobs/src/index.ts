@@ -61,6 +61,8 @@ export type ValueScoreSnapshot = {
   profileId: string;
   sampleN: number;
   outcomeWindowDays: number;
+  /** Pack §9.5 / D-53 — ops Manager's choice flag (not a money path). */
+  managersChoice: boolean;
   /** Explainability — never payable amounts. */
   factorContributions: Array<{ factor: string; weight: number; contribution: number }>;
 };
@@ -266,6 +268,7 @@ export function setValueScoreSnapshot(input: {
     profileId: input.profileId ?? "vscore_default_v1",
     sampleN: input.sampleN ?? 10,
     outcomeWindowDays: input.outcomeWindowDays ?? 90,
+    managersChoice: false,
     factorContributions: factors.map((f) => ({ ...f })),
   };
   valueScores.set(input.technicianId, row);
@@ -290,9 +293,78 @@ export function getValueScoreSnapshot(
   return row
     ? {
         ...row,
+        managersChoice: row.managersChoice === true,
         factorContributions: row.factorContributions.map((f) => ({ ...f })),
       }
     : undefined;
+}
+
+/**
+ * PD86 — Pack §9.5 Manager's choice flag on Value Score profile (not money).
+ */
+export function setManagersChoice(input: {
+  technicianId: string;
+  managersChoice: boolean;
+  setBy: string;
+}): ValueScoreSnapshot {
+  if (!input.technicianId.trim()) throw new Error("technicianId required");
+  if (!input.setBy.trim()) throw new Error("setBy required");
+  let row = valueScores.get(input.technicianId);
+  if (!row) {
+    row = setValueScoreSnapshot({
+      technicianId: input.technicianId,
+      score: 50,
+      sampleN: 5,
+    });
+    row = valueScores.get(input.technicianId)!;
+  }
+  row.managersChoice = input.managersChoice === true;
+  scoreEvents.push({
+    eventId: newId("sev"),
+    technicianId: input.technicianId,
+    eventType: input.managersChoice ? "managers_choice_on" : "managers_choice_off",
+    delta: 0,
+    actor: "ops",
+    at: new Date().toISOString(),
+  });
+  return getValueScoreSnapshot(input.technicianId)!;
+}
+
+/**
+ * PD86 thin vertical: snapshot → set Manager's choice → clear (not money path).
+ */
+export function runPd86ManagersChoiceThinVertical(): {
+  flagged: true;
+  cleared: true;
+  moneyPathClean: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  setValueScoreSnapshot({
+    technicianId: "tech_pd86",
+    score: 81,
+    sampleN: 22,
+  });
+  const on = setManagersChoice({
+    technicianId: "tech_pd86",
+    managersChoice: true,
+    setBy: "ops_pd86",
+  });
+  if (!on.managersChoice) throw new Error("PD86 expected managersChoice true");
+  const off = setManagersChoice({
+    technicianId: "tech_pd86",
+    managersChoice: false,
+    setBy: "ops_pd86",
+  });
+  if (off.managersChoice) throw new Error("PD86 expected managersChoice false");
+  const money = assertValueScoreNotMoneyPath();
+  if (money.payableFromAi) throw new Error("PD86 must keep payableFromAi false");
+  return {
+    flagged: true,
+    cleared: true,
+    moneyPathClean: true,
+    payableFromAi: false,
+  };
 }
 
 /** PD19 — create Trade in draft (admin editor). */

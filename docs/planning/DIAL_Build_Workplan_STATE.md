@@ -2,14 +2,14 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON** — through **PD82** green. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON** — through **PD86** green. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD82** — Customer account profile — **green** |
+| `current_stage` | **PD86** — Manager's choice flag — **green** |
 | `current_issue` | (workplan fold; no GitHub issue required) |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD81** Checklist by symptom — **green** |
+| `prior_stage` | **PD85** Referral status — **green** |
 | `next_stage` | eng-safe Pack gap ≠ S99 |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate; take-rate live bps; remote staging URL optional (ENH-011); Meta/ZIMRA/PSP **live** contracts (ENH-020 escrow partner; ENH-021/022) |
 
@@ -19,17 +19,17 @@
 | --- | --- | --- |
 | S10–S90 | 2026-08-12/13 | Workplan spine green — eng Build complete |
 | S91–S465 | 2026-08-13/14 | **Post-S90 invent** — paused — not workplan SoR |
-| **PD1**–**PD78** | 2026-08-14/15 | Pack §9 product-depth through marketing consent |
-| **PD79** | 2026-08-15 | Garage CRUD update + delete |
-| **PD80** | 2026-08-15 | COD confirm settle |
-| **PD81** | 2026-08-15 | Checklist by symptom + submit answers |
-| **PD82** | 2026-08-15 | Customer account profile |
+| **PD1**–**PD82** | 2026-08-14/15 | Pack product-depth through account profile |
+| **PD83** | 2026-08-15 | Customer delivery addresses |
+| **PD84** | 2026-08-15 | Supplier stock upload |
+| **PD85** | 2026-08-15 | Referral status |
+| **PD86** | 2026-08-15 | Manager's choice flag |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD83+** | Pack gap fold — eng-safe ≠ S99 |
+| **PD87+** | Pack gap fold — eng-safe ≠ S99 |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note

@@ -57,6 +57,15 @@ test("PD82 account profile thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD83 customer addresses thin vertical", async () => {
+  const { runPd83CustomerAddressesThinVertical } = await import("./index.js");
+  const out = runPd83CustomerAddressesThinVertical();
+  assert.equal(out.defaultPinned, true);
+  assert.equal(out.promotedAfterDelete, true);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("T1 RLS profiles: own CRUD; cross-tenant deny; admin all", () => {
   __resetIdentityForTests();
   const alice = signUp({ email: "alice@dial.test", displayName: "Alice" });

@@ -7,6 +7,7 @@ import {
   attemptCustomerPromoCashOut,
   runPd21CustomerMobilePromoThinVertical,
   runPd70CustomerPromoBalanceThinVertical,
+  runPd85ReferralStatusThinVertical,
   validatePromoCode,
   __resetPromoCustomerForTests,
 } from "./customer.js";
@@ -28,6 +29,14 @@ test("PD70 customer promo credit balance", () => {
   assert.equal(out.balanceMinor, "1500");
   assert.equal(out.cashOutForbidden, true);
   assert.equal(out.currency, "USD");
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD85 referral status thin vertical", () => {
+  const out = runPd85ReferralStatusThinVertical();
+  assert.ok(out.asReferrerCount >= 1);
+  assert.ok(out.asRefereeCount >= 1);
+  assert.equal(out.cashOutAllowed, false);
   assert.equal(out.payableFromAi, false);
 });
 

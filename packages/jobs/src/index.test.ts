@@ -197,6 +197,15 @@ test("PD81 checklist by symptom + submit answers", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD86 managers choice thin vertical", async () => {
+  const { runPd86ManagersChoiceThinVertical } = await import("./index.js");
+  const out = runPd86ManagersChoiceThinVertical();
+  assert.equal(out.flagged, true);
+  assert.equal(out.cleared, true);
+  assert.equal(out.moneyPathClean, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

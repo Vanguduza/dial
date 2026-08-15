@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD86 Manager's choice** — Value Score profile flag set/clear; not money (Pack §9.5 / D-53).
+- **PD85 Referral status** — customer referrer/referee edges; promo_credit only (D-42).
+- **PD84 Supplier stock upload** — MARKETPLACE stock → pending_review (Pack §10; D-58).
+- **PD83 Customer delivery addresses** — pin+landmark+phone; MapLibre SoR (Pack customers.addresses).
 - **PD82 Customer account profile** — `/account/profile` get/update; session SoR; cross-tenant deny (Pack §10).
 - **PD81 Checklist by symptom** — resolve + submit answers on tech API (Pack §10).
 - **PD80 COD confirm settle** — recorded attempt → confirm USD settle (Pack §10).

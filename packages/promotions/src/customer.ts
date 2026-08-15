@@ -265,6 +265,60 @@ export function attachReferralAsCustomer(input: {
   };
 }
 
+/**
+ * PD85 — Pack §10 referral status for a customer (referrer + referee edges).
+ * Promo credit only — never cash-out (D-42).
+ */
+export function getReferralStatus(customerId: string): {
+  customerId: string;
+  asReferrer: Array<{
+    edgeId: string;
+    campaignId: string;
+    refereeCustomerId: string;
+    status: string;
+    fraudHold: string;
+  }>;
+  asReferee: Array<{
+    edgeId: string;
+    campaignId: string;
+    referrerCustomerId: string;
+    status: string;
+    fraudHold: string;
+  }>;
+  cashOutAllowed: false;
+  rewardKind: "promo_credit";
+  payableFromAi: false;
+} {
+  if (!customerId.trim()) throw new Error("customerId required");
+  const snap = listPromoAdminSnapshot();
+  const asReferrer = snap.referralEdges
+    .filter((e) => e.referrerCustomerId === customerId)
+    .map((e) => ({
+      edgeId: e.edgeId,
+      campaignId: e.campaignId,
+      refereeCustomerId: e.refereeCustomerId,
+      status: e.status,
+      fraudHold: e.fraudHold,
+    }));
+  const asReferee = snap.referralEdges
+    .filter((e) => e.refereeCustomerId === customerId)
+    .map((e) => ({
+      edgeId: e.edgeId,
+      campaignId: e.campaignId,
+      referrerCustomerId: e.referrerCustomerId,
+      status: e.status,
+      fraudHold: e.fraudHold,
+    }));
+  return {
+    customerId,
+    asReferrer,
+    asReferee,
+    cashOutAllowed: false,
+    rewardKind: "promo_credit",
+    payableFromAi: false,
+  };
+}
+
 /** Always forbidden (D-42). */
 export function attemptCustomerPromoCashOut(input: {
   customerId: string;
@@ -412,6 +466,67 @@ export function runPd70CustomerPromoBalanceThinVertical(): {
     balanceMinor: bal.balanceMinor,
     cashOutForbidden: true,
     currency: "USD",
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD85 thin vertical: share → attach → getReferralStatus as referrer + referee.
+ */
+export function runPd85ReferralStatusThinVertical(): {
+  asReferrerCount: number;
+  asRefereeCount: number;
+  cashOutAllowed: false;
+  payableFromAi: false;
+} {
+  __resetPromoCustomerForTests();
+  const referral = createPromoCampaign({
+    type: "REFERRAL",
+    name: "PD85 Referral",
+    budgetSpendLimitMinor: 100_00n,
+    verticals: ["spare"],
+    referral: {
+      codePrefix: "PD85",
+      attributionWindowDays: 30,
+      referrerReward: {
+        kind: "promo_credit",
+        amountMinor: 5_00n,
+        currency: "USD",
+      },
+      refereeReward: {
+        kind: "promo_credit",
+        amountMinor: 5_00n,
+        currency: "USD",
+      },
+      maxReferralsPerReferrerMonth: 10,
+    },
+  });
+  activatePromoCampaign(referral.id);
+  const share = shareReferral({
+    customerId: "cust_pd85_ref",
+    campaignId: referral.id,
+  });
+  attachReferralAsCustomer({
+    campaignId: referral.id,
+    referrerCustomerId: "cust_pd85_ref",
+    refereeCustomerId: "cust_pd85_ee",
+    code: share.shareCode,
+  });
+  const referrerStatus = getReferralStatus("cust_pd85_ref");
+  const refereeStatus = getReferralStatus("cust_pd85_ee");
+  if (referrerStatus.asReferrer.length < 1) {
+    throw new Error("PD85 expected referrer edge");
+  }
+  if (refereeStatus.asReferee.length < 1) {
+    throw new Error("PD85 expected referee edge");
+  }
+  if (referrerStatus.cashOutAllowed !== false) {
+    throw new Error("PD85 cash-out must stay forbidden");
+  }
+  return {
+    asReferrerCount: referrerStatus.asReferrer.length,
+    asRefereeCount: refereeStatus.asReferee.length,
+    cashOutAllowed: false,
     payableFromAi: false,
   };
 }

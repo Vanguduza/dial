@@ -8,6 +8,7 @@ import {
   attachReferralAsCustomer,
   attemptCustomerPromoCashOut,
   getPromoCreditBalance,
+  getReferralStatus,
   listPromoAdminSnapshot,
   shareReferral,
   validatePromoCode,
@@ -46,6 +47,13 @@ export async function GET(req: Request) {
     return NextResponse.json({
       balance: getPromoCreditBalance(customerId),
       cashOutAllowed: false,
+    });
+  }
+
+  if (view === "referral_status") {
+    return NextResponse.json({
+      ...getReferralStatus(customerId),
+      note: "PD85 — referral status; promo_credit only (D-42)",
     });
   }
 

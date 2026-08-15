@@ -13,6 +13,7 @@ import {
   openValueScoreDispute,
   resolveValueScoreDispute,
   setJobClassLifecycle,
+  setManagersChoice,
   setTradeLifecycle,
   setValueScoreSnapshot,
   type TradeLifecycle,
@@ -73,6 +74,8 @@ export async function POST(req: Request) {
     resolution?: "upheld" | "rejected";
     resolvedBy?: string;
     compensatingDelta?: number;
+    managersChoice?: boolean;
+    setBy?: string;
   };
 
   try {
@@ -140,6 +143,26 @@ export async function POST(req: Request) {
         score: body.score,
       });
       return NextResponse.json({ ok: true, valueScore, ...snapshot() });
+    }
+    if (body.action === "set_managers_choice") {
+      if (!body.technicianId || body.managersChoice === undefined) {
+        return NextResponse.json(
+          { error: "technicianId and managersChoice required" },
+          { status: 400 },
+        );
+      }
+      const valueScore = setManagersChoice({
+        technicianId: body.technicianId,
+        managersChoice: Boolean(body.managersChoice),
+        setBy: body.setBy ?? "ops_admin",
+      });
+      return NextResponse.json({
+        ok: true,
+        valueScore,
+        payableFromAi: false,
+        note: "PD86 — Manager's choice flag (not money)",
+        ...snapshot(),
+      });
     }
     if (body.action === "open_dispute") {
       if (!body.technicianId || !body.reason || !body.openedBy) {

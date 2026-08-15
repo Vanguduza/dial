@@ -60,6 +60,8 @@ export {
   registerPromoCode,
   runPd21CustomerMobilePromoThinVertical,
   runPd70CustomerPromoBalanceThinVertical,
+  runPd85ReferralStatusThinVertical,
+  getReferralStatus,
   shareReferral,
   validatePromoCode,
   type PromoCodeReject,

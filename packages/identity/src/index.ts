@@ -6,6 +6,7 @@
 
 import { __resetStepUpForTests } from "./stepUp.js";
 import { __resetMarketingConsentForTests } from "./marketingConsent.js";
+import { __resetCustomerAddressesForTests } from "./customerAddresses.js";
 
 export type ProfileRole = "customer" | "technician" | "supplier" | "admin";
 export type BuyerSegment = "b2c" | "b2b";
@@ -53,6 +54,7 @@ export function __resetIdentityForTests(): void {
   s.emailIndex.clear();
   __resetStepUpForTests();
   __resetMarketingConsentForTests();
+  __resetCustomerAddressesForTests();
 }
 
 function putProfile(profile: Profile): Profile {
@@ -354,6 +356,16 @@ export {
   type MarketingConsentEvent,
   type MarketingConsentState,
 } from "./marketingConsent.js";
+
+export {
+  addCustomerAddress,
+  deleteCustomerAddress,
+  listCustomerAddresses,
+  runPd83CustomerAddressesThinVertical,
+  setDefaultCustomerAddress,
+  __resetCustomerAddressesForTests,
+  type CustomerAddress,
+} from "./customerAddresses.js";
 
 export {
   getSupabasePublicConfig,

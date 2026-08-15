@@ -102,9 +102,29 @@ export type SupplierBond = {
   payableFromAi: false;
 };
 
+/** PD84 — Pack §10 stock upload (SKU qty + unit price USD minor) → pending_review. */
+export type StockUploadRow = {
+  sku: string;
+  title: string;
+  qty: number;
+  unitPriceUsdMinor: bigint;
+};
+
+export type StockUploadBatch = {
+  batchId: string;
+  supplierId: string;
+  rows: StockUploadRow[];
+  currency: "USD";
+  createdAt: string;
+  status: "pending_review" | "published" | "rejected";
+  offerSource: "MARKETPLACE";
+  payableFromAi: false;
+};
+
 type Store = {
   profiles: Map<string, SupplierProfile>;
   uploads: Map<string, CostUploadBatch>;
+  stockUploads: Map<string, StockUploadBatch>;
   heartbeats: Heartbeat[];
   confirms: Map<string, ConfirmOrder>;
   statements: StatementLine[];
@@ -118,6 +138,7 @@ function store(): Store {
     g.__dialSupplierStore = {
       profiles: new Map(),
       uploads: new Map(),
+      stockUploads: new Map(),
       heartbeats: [],
       confirms: new Map(),
       statements: [],
@@ -131,6 +152,9 @@ function store(): Store {
   if (!g.__dialSupplierStore.bonds) {
     g.__dialSupplierStore.bonds = new Map();
   }
+  if (!g.__dialSupplierStore.stockUploads) {
+    g.__dialSupplierStore.stockUploads = new Map();
+  }
   return g.__dialSupplierStore;
 }
 
@@ -138,6 +162,7 @@ export function __resetSuppliersForTests(): void {
   const s = store();
   s.profiles.clear();
   s.uploads.clear();
+  s.stockUploads.clear();
   s.heartbeats.length = 0;
   s.confirms.clear();
   s.statements.length = 0;
@@ -219,6 +244,112 @@ export function listCostUploads(supplierId: string): CostUploadBatch[] {
   return [...store().uploads.values()]
     .filter((b) => b.supplierId === supplierId)
     .map((b) => ({ ...b, rows: b.rows.map((r) => ({ ...r })) }));
+}
+
+/**
+ * PD84 — Pack §10 upload stock (agency MARKETPLACE only).
+ * Unit prices are supplier drafts → pending_review; AI never writes payable.
+ */
+export function uploadSupplierStock(input: {
+  supplierId: string;
+  rows: Array<{
+    sku: string;
+    title: string;
+    qty: number;
+    unitPriceUsdMinor: bigint;
+  }>;
+}): StockUploadBatch {
+  const profile = store().profiles.get(input.supplierId);
+  if (!profile) throw new Error("Supplier not onboarded");
+  if (profile.offerSource !== "MARKETPLACE") {
+    throw new Error("DIAL_OWNED / non-marketplace stock upload forbidden (D-58)");
+  }
+  if (input.rows.length === 0) throw new Error("rows required");
+  for (const row of input.rows) {
+    if (!row.sku.trim() || !row.title.trim()) {
+      throw new Error("sku and title required");
+    }
+    if (row.qty < 1) throw new Error("qty must be >= 1");
+    if (typeof row.unitPriceUsdMinor !== "bigint" || row.unitPriceUsdMinor < 0n) {
+      throw new TypeError("unitPriceUsdMinor must be non-negative bigint");
+    }
+  }
+  const batch: StockUploadBatch = {
+    batchId: id("sstock"),
+    supplierId: input.supplierId,
+    rows: input.rows.map((r) => ({
+      sku: r.sku.trim(),
+      title: r.title.trim(),
+      qty: r.qty,
+      unitPriceUsdMinor: r.unitPriceUsdMinor,
+    })),
+    currency: "USD",
+    createdAt: new Date().toISOString(),
+    status: "pending_review",
+    offerSource: "MARKETPLACE",
+    payableFromAi: false,
+  };
+  store().stockUploads.set(batch.batchId, batch);
+  return {
+    ...batch,
+    rows: batch.rows.map((r) => ({ ...r })),
+  };
+}
+
+export function listStockUploads(supplierId: string): StockUploadBatch[] {
+  return [...store().stockUploads.values()]
+    .filter((b) => b.supplierId === supplierId)
+    .map((b) => ({ ...b, rows: b.rows.map((r) => ({ ...r })) }));
+}
+
+/**
+ * PD84 thin vertical: onboard → upload stock → pending_review (not auto-publish).
+ */
+export function runPd84SupplierStockUploadThinVertical(): {
+  batchId: string;
+  rowCount: number;
+  status: "pending_review";
+  offerSource: "MARKETPLACE";
+  payableFromAi: false;
+} {
+  __resetSuppliersForTests();
+  const supplierId = "sup_pd84";
+  onboardSupplier({
+    supplierId,
+    displayName: "PD84 Stock Agency",
+    formality: "formal",
+    tier: "silver",
+  });
+  const batch = uploadSupplierStock({
+    supplierId,
+    rows: [
+      {
+        sku: "FILT-PD84",
+        title: "Oil filter",
+        qty: 12,
+        unitPriceUsdMinor: 15_00n,
+      },
+      {
+        sku: "PAD-PD84",
+        title: "Brake pads",
+        qty: 4,
+        unitPriceUsdMinor: 45_00n,
+      },
+    ],
+  });
+  if (batch.status !== "pending_review" || batch.payableFromAi !== false) {
+    throw new Error("PD84 stock must stay pending_review / no AI payable");
+  }
+  if (listStockUploads(supplierId).length !== 1) {
+    throw new Error("PD84 expected one stock batch");
+  }
+  return {
+    batchId: batch.batchId,
+    rowCount: batch.rows.length,
+    status: "pending_review",
+    offerSource: "MARKETPLACE",
+    payableFromAi: false,
+  };
 }
 
 /** Heartbeat inbox — dashboard or WhatsApp channel flag (Cloud API only at edge). */

@@ -474,6 +474,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-490 | **PD80 COD confirm** settle USD minor | `done` | Pack §10 Delivery |
 | ENH-491 | **PD81 Checklist by symptom** + submit answers | `done` | Pack §10 Checklists |
 | ENH-492 | **PD82 Customer account profile** session SoR | `done` | Pack §10 Identity |
+| ENH-493 | **PD83 Customer delivery addresses** pin+landmark+phone | `done` | Pack customers.addresses; D-44 |
+| ENH-494 | **PD84 Supplier stock upload** pending_review | `done` | Pack §10; D-58 |
+| ENH-495 | **PD85 Referral status** customer edges | `done` | Pack §10; D-42 |
+| ENH-496 | **PD86 Manager's choice** Value Score flag | `done` | Pack §9.5; D-53 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

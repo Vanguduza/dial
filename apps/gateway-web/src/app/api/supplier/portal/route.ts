@@ -19,6 +19,8 @@ import {
   postHeartbeat,
   syncSupplierSlaEscalations,
   uploadSupplierCosts,
+  uploadSupplierStock,
+  listStockUploads,
   type SupplierTier,
 } from "@dial/suppliers";
 import {
@@ -42,7 +44,13 @@ async function parseAction(req: Request): Promise<{
   action: string;
   fields: Record<string, string>;
   rejectedIdentity: boolean;
-  rows?: Array<{ sku: string; title: string; costUsdMinor: string; qty: string }>;
+  rows?: Array<{
+    sku: string;
+    title: string;
+    costUsdMinor: string;
+    unitPriceUsdMinor?: string;
+    qty: string;
+  }>;
 }> {
   const contentType = req.headers.get("content-type") ?? "";
   if (contentType.includes("application/json")) {
@@ -66,7 +74,8 @@ async function parseAction(req: Request): Promise<{
         rows: (body.rows as Array<Record<string, unknown>>).map((r) => ({
           sku: String(r.sku ?? ""),
           title: String(r.title ?? ""),
-          costUsdMinor: String(r.costUsdMinor ?? "0"),
+          costUsdMinor: String(r.costUsdMinor ?? r.unitPriceUsdMinor ?? "0"),
+          unitPriceUsdMinor: String(r.unitPriceUsdMinor ?? r.costUsdMinor ?? "0"),
           qty: String(r.qty ?? "1"),
         })),
       };
@@ -207,6 +216,35 @@ export async function POST(req: Request) {
           batchId: batch.batchId,
           currency: batch.currency,
           rowCount: batch.rows.length,
+        });
+      }
+      case "upload_stock": {
+        const rows = parsed.rows ?? [];
+        const batch = uploadSupplierStock({
+          supplierId,
+          rows: rows.map((r) => ({
+            sku: r.sku,
+            title: r.title,
+            qty: Number(r.qty) || 1,
+            unitPriceUsdMinor: BigInt(
+              r.unitPriceUsdMinor ?? r.costUsdMinor ?? "0",
+            ),
+          })),
+        });
+        if (wantsHtml) return redirectSupplier(req, "#stock");
+        return NextResponse.json({
+          ok: true,
+          batchId: batch.batchId,
+          status: batch.status,
+          currency: batch.currency,
+          rowCount: batch.rows.length,
+          stockUploads: listStockUploads(supplierId).map((b) => ({
+            batchId: b.batchId,
+            status: b.status,
+            rowCount: b.rows.length,
+          })),
+          payableFromAi: false,
+          note: "PD84 — stock upload pending_review (agency MARKETPLACE)",
         });
       }
       case "heartbeat": {
