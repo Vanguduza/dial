@@ -1317,6 +1317,50 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd106TechnicianProfileCardsThinVertical`; Manager's choice visible |
 | Green → | eng-safe Pack gap ≠ S99 (**PD107+**) |
 
+### Pack / product gap audit (after PD106 → PD107–PD110)
+
+| Gap | Stage |
+| --- | --- |
+| Credential expiry eligibility | **PD107** |
+| Vehicle Hub reminders (consent) | **PD108** |
+| Web Chatwoot handoff ids | **PD109** |
+| Return claim evidence | **PD110** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD107 — Credential expiry (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `expiresAt` / `expire_credential` blocks eligibility; re-verify unlocks |
+| Evidence | `runPd107CredentialExpiryThinVertical`; tech API |
+| Green → | **PD108** vehicle reminders |
+
+### PD108 — Vehicle Hub reminders (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `scheduleVehicleReminder` requires consent; due list |
+| Evidence | `runPd108VehicleRemindersThinVertical`; garage API + UI |
+| Green → | **PD109** Chatwoot handoff |
+
+### PD109 — Web Chatwoot handoff (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `/api/support/handoff`; ERP ticket SoR; Chatwoot ≠ status |
+| Evidence | `runPd109WebChatwootHandoffThinVertical` |
+| Green → | **PD110** return evidence |
+
+### PD110 — Return claim evidence (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `attachSpareReturnEvidence` photo/note; not payable |
+| Evidence | `runPd110ReturnClaimEvidenceThinVertical`; returns API |
+| Green → | eng-safe Pack gap ≠ S99 (**PD111+**) |
+
 ### S10 — E2a (historical)
 
 | | |

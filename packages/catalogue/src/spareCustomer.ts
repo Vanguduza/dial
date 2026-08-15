@@ -43,6 +43,8 @@ export type SpareReturnClaim = {
   path: SpareReturnPath;
   status: "opened" | "resolved";
   resolution: SpareReturnPath | null;
+  /** PD110 — evidence refs (photo/note); never payable. */
+  evidence: Array<{ kind: "photo" | "note"; payloadRef: string; at: string }>;
   /** Never set by AI — human/ERP only. */
   payableFromAi: false;
   createdAt: string;
@@ -57,6 +59,18 @@ export type GarageVehicle = {
   /** Pack §10 Vehicles — at most one active per customer. */
   isActive: boolean;
   createdAt: string;
+};
+
+/** PD108 — Pack vehicles.expiry_reminders (consent required). */
+export type VehicleReminder = {
+  reminderId: string;
+  vehicleId: string;
+  customerId: string;
+  kind: "service_due" | "licence_expiry" | "insurance_expiry" | "other";
+  dueAt: string;
+  createdAt: string;
+  status: "scheduled" | "due" | "cancelled";
+  payableFromAi: false;
 };
 
 /** PD50 — consent grant/revoke audit (Vehicle Hub deepen). */
@@ -88,6 +102,8 @@ type SpareCustomerStore = {
   returns: Map<string, SpareReturnClaim>;
   vehicles: Map<string, GarageVehicle>;
   consentAudit: GarageConsentEvent[];
+  /** PD108 — Pack vehicles.expiry_reminders (consent-gated). */
+  reminders: Map<string, VehicleReminder>;
 };
 
 function store(): SpareCustomerStore {
@@ -100,10 +116,14 @@ function store(): SpareCustomerStore {
       returns: new Map(),
       vehicles: new Map(),
       consentAudit: [],
+      reminders: new Map(),
     };
   }
   if (!g.__dialSpareCustomerStore.consentAudit) {
     g.__dialSpareCustomerStore.consentAudit = [];
+  }
+  if (!g.__dialSpareCustomerStore.reminders) {
+    g.__dialSpareCustomerStore.reminders = new Map();
   }
   return g.__dialSpareCustomerStore;
 }
@@ -114,6 +134,7 @@ export function __resetSpareCustomerForTests(): void {
   s.returns.clear();
   s.vehicles.clear();
   s.consentAudit.length = 0;
+  s.reminders.clear();
 }
 
 function cloneOrder(o: SpareOrder): SpareOrder {
@@ -306,6 +327,7 @@ export function openSpareReturnClaim(input: {
     path: input.path ?? "refund_or_replace",
     status: "opened",
     resolution: null,
+    evidence: [],
     payableFromAi: false,
     createdAt: new Date().toISOString(),
   };
@@ -324,14 +346,81 @@ export function resolveSpareReturnClaim(input: {
   }
   claim.status = "resolved";
   claim.resolution = input.path;
-  return { ...claim };
+  return {
+    ...claim,
+    evidence: (claim.evidence ?? []).map((e) => ({ ...e })),
+  };
 }
 
 export function getSpareReturnClaim(
   claimId: string,
 ): SpareReturnClaim | undefined {
   const c = store().returns.get(claimId);
-  return c ? { ...c } : undefined;
+  return c
+    ? { ...c, evidence: (c.evidence ?? []).map((e) => ({ ...e })) }
+    : undefined;
+}
+
+/**
+ * PD110 — attach photo/note evidence to open return claim (Pack §9.2); not money.
+ */
+export function attachSpareReturnEvidence(input: {
+  claimId: string;
+  kind: "photo" | "note";
+  payloadRef: string;
+}): SpareReturnClaim {
+  const claim = store().returns.get(input.claimId);
+  if (!claim) throw new Error(`Unknown return claim ${input.claimId}`);
+  if (claim.status === "resolved") {
+    throw new Error("Cannot attach evidence to resolved claim");
+  }
+  const ref = input.payloadRef.trim();
+  if (!ref) throw new Error("payloadRef required");
+  if (input.kind !== "photo" && input.kind !== "note") {
+    throw new Error("kind must be photo|note");
+  }
+  if (!claim.evidence) claim.evidence = [];
+  claim.evidence.push({
+    kind: input.kind,
+    payloadRef: ref.slice(0, 2048),
+    at: new Date().toISOString(),
+  });
+  return {
+    ...claim,
+    evidence: claim.evidence.map((e) => ({ ...e })),
+  };
+}
+
+/**
+ * PD110 thin vertical: open return → attach evidence → still not payable.
+ */
+export function runPd110ReturnClaimEvidenceThinVertical(): {
+  evidenceCount: number;
+  payableFromAi: false;
+  claimId: string;
+} {
+  __resetSpareCustomerForTests();
+  const thin = seedSpareOrderForReturns();
+  const claim = openSpareReturnClaim({ orderId: thin.orderId });
+  attachSpareReturnEvidence({
+    claimId: claim.claimId,
+    kind: "photo",
+    payloadRef: "fixture://pd110-return.jpg",
+  });
+  const note = attachSpareReturnEvidence({
+    claimId: claim.claimId,
+    kind: "note",
+    payloadRef: "wrong part delivered",
+  });
+  if (note.evidence.length < 2) throw new Error("PD110 expected evidence");
+  if (note.payableFromAi !== false) {
+    throw new Error("PD110 must keep payableFromAi false");
+  }
+  return {
+    evidenceCount: note.evidence.length,
+    payableFromAi: false,
+    claimId: note.claimId,
+  };
 }
 
 /** Admin ops queue — all spare return claims (Pack §9.5 / PD48). */
@@ -340,7 +429,10 @@ export function listSpareReturnClaims(filter?: {
 }): SpareReturnClaim[] {
   return [...store().returns.values()]
     .filter((c) => (filter?.status ? c.status === filter.status : true))
-    .map((c) => ({ ...c }))
+    .map((c) => ({
+      ...c,
+      evidence: (c.evidence ?? []).map((e) => ({ ...e })),
+    }))
     .sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
 }
 
@@ -553,6 +645,108 @@ export function listGarageConsentAudit(customerId?: string): GarageConsentEvent[
       customerId ? e.customerId === customerId : true,
     )
     .map((e) => ({ ...e }));
+}
+
+/**
+ * PD108 — schedule Vehicle Hub reminder; Pack: reminders need consent.
+ */
+export function scheduleVehicleReminder(input: {
+  vehicleId: string;
+  kind?: VehicleReminder["kind"];
+  dueAt: string;
+}): VehicleReminder {
+  const v = store().vehicles.get(input.vehicleId);
+  if (!v) throw new Error(`Unknown garage vehicle ${input.vehicleId}`);
+  if (!v.reminderConsent) {
+    throw new Error("reminderConsent required to schedule Vehicle Hub reminder");
+  }
+  if (!Date.parse(input.dueAt)) throw new Error("dueAt must be ISO date");
+  const row: VehicleReminder = {
+    reminderId: `vrem_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    vehicleId: v.vehicleId,
+    customerId: v.customerId,
+    kind: input.kind ?? "service_due",
+    dueAt: input.dueAt,
+    createdAt: new Date().toISOString(),
+    status: "scheduled",
+    payableFromAi: false,
+  };
+  store().reminders.set(row.reminderId, row);
+  return { ...row };
+}
+
+/** List reminders for customer; marks past-due as due. */
+export function listVehicleReminders(
+  customerId: string,
+  now = Date.now(),
+): VehicleReminder[] {
+  const out: VehicleReminder[] = [];
+  for (const r of store().reminders.values()) {
+    if (r.customerId !== customerId) continue;
+    if (r.status === "scheduled" && Date.parse(r.dueAt) <= now) {
+      r.status = "due";
+    }
+    out.push({ ...r });
+  }
+  return out.sort((a, b) => (a.dueAt < b.dueAt ? -1 : 1));
+}
+
+export function listDueVehicleReminders(
+  customerId: string,
+  now = Date.now(),
+): VehicleReminder[] {
+  return listVehicleReminders(customerId, now).filter((r) => r.status === "due");
+}
+
+/**
+ * PD108 thin vertical: deny without consent → grant → schedule → due list.
+ */
+export function runPd108VehicleRemindersThinVertical(): {
+  deniedWithoutConsent: true;
+  scheduled: true;
+  dueCount: number;
+  payableFromAi: false;
+} {
+  __resetSpareCustomerForTests();
+  const vehicle = addGarageVehicle({
+    customerId: "cust_pd108",
+    label: "PD108 Prado",
+    chassisHint: "GRJ150",
+    reminderConsent: false,
+  });
+  let deniedWithoutConsent = false;
+  try {
+    scheduleVehicleReminder({
+      vehicleId: vehicle.vehicleId,
+      dueAt: new Date(Date.now() + 86_400_000).toISOString(),
+    });
+  } catch (e) {
+    deniedWithoutConsent =
+      e instanceof Error && e.message.includes("reminderConsent");
+  }
+  if (!deniedWithoutConsent) {
+    throw new Error("PD108 expected schedule deny without consent");
+  }
+  setGarageReminderConsent({
+    vehicleId: vehicle.vehicleId,
+    reminderConsent: true,
+  });
+  const scheduled = scheduleVehicleReminder({
+    vehicleId: vehicle.vehicleId,
+    kind: "licence_expiry",
+    dueAt: new Date(Date.now() - 60_000).toISOString(),
+  });
+  if (scheduled.payableFromAi !== false) {
+    throw new Error("PD108 reminders must keep payableFromAi false");
+  }
+  const due = listDueVehicleReminders("cust_pd108");
+  if (due.length < 1) throw new Error("PD108 expected due reminder");
+  return {
+    deniedWithoutConsent: true,
+    scheduled: true,
+    dueCount: due.length,
+    payableFromAi: false,
+  };
 }
 
 /** Chassis-aware Spare browse deep-link from Vehicle Hub. */

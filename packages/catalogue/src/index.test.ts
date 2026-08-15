@@ -297,6 +297,25 @@ test("PD50 Vehicle Hub consent revoke + chassis browse", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD108 vehicle reminders consent-gated", async () => {
+  const { runPd108VehicleRemindersThinVertical } = await import("./spareCustomer.js");
+  const out = runPd108VehicleRemindersThinVertical();
+  assert.equal(out.deniedWithoutConsent, true);
+  assert.equal(out.scheduled, true);
+  assert.ok(out.dueCount >= 1);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD110 return claim evidence", async () => {
+  const { runPd110ReturnClaimEvidenceThinVertical } = await import(
+    "./spareCustomer.js"
+  );
+  const out = runPd110ReturnClaimEvidenceThinVertical();
+  assert.ok(out.evidenceCount >= 2);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.claimId);
+});
+
 test("PD75 set active garage vehicle", async () => {
   const { runPd75SetActiveGarageVehicleThinVertical } = await import(
     "./spareCustomer.js"

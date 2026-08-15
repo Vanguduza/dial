@@ -487,6 +487,80 @@ export function listSupportTickets(): SupportTicket[] {
 }
 
 /**
+ * PD109 — web/customer Chatwoot handoff without WA Flow session (Pack Matrix B).
+ * Chatwoot ≠ status SoR; ERP ticket is SoR.
+ */
+export function openWebChatwootHandoff(input: {
+  customerId: string;
+  topic: string;
+  orderId?: string;
+  jobId?: string;
+}): { handoff: ChatwootHandoff; ticket: SupportTicket } {
+  if (!input.customerId.trim()) throw new Error("customerId required");
+  if (!input.topic.trim()) throw new Error("topic required");
+  const conversationKey = `cw_web_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+  const erpTicketId = `tkt_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
+  const handoff: ChatwootHandoff = {
+    conversationKey,
+    chatwootContactId:
+      process.env.CHATWOOT_CONTACT_ID_STUB?.trim() ||
+      `cw_contact_${input.customerId.trim()}`,
+    inboxId: process.env.CHATWOOT_INBOX_ID?.trim() || "inbox_fx_support",
+    erpTicketId,
+    topic: input.topic.trim(),
+    customerId: input.customerId.trim(),
+  };
+  if (input.orderId) handoff.orderId = input.orderId;
+  if (input.jobId) handoff.jobId = input.jobId;
+  handoffs.set(handoff.conversationKey, handoff);
+
+  const ticket: SupportTicket = {
+    ticketId: erpTicketId,
+    conversationKey,
+    topic: handoff.topic,
+    status: "pending_human",
+    statusFrom: "erp",
+    customerId: input.customerId.trim(),
+  };
+  if (input.orderId) ticket.orderId = input.orderId;
+  if (input.jobId) ticket.jobId = input.jobId;
+  supportTickets.set(ticket.ticketId, ticket);
+  assertChatwootHandoffIdContract(handoff);
+  return { handoff: { ...handoff }, ticket: { ...ticket } };
+}
+
+/**
+ * PD109 thin vertical: web handoff ids present; Chatwoot not status SoR.
+ */
+export function runPd109WebChatwootHandoffThinVertical(): {
+  idsPresent: true;
+  chatwootIsStatusSor: false;
+  statusFrom: "erp";
+  payableFromAi: false;
+  conversationKey: string;
+} {
+  const { handoff, ticket } = openWebChatwootHandoff({
+    customerId: "cust_pd109",
+    topic: "order_status",
+    orderId: "ord_pd109",
+  });
+  assertChatwootHandoffIdContract(handoff);
+  if (ticket.statusFrom !== "erp") {
+    throw new Error("PD109 ERP must be status SoR");
+  }
+  if (ticket.status !== "pending_human") {
+    throw new Error("PD109 expected pending_human ticket");
+  }
+  return {
+    idsPresent: true,
+    chatwootIsStatusSor: false,
+    statusFrom: "erp",
+    payableFromAi: false,
+    conversationKey: handoff.conversationKey,
+  };
+}
+
+/**
  * PD43 thin vertical — CPA §7.5 eighteen-item disclosure + review-before-pay gate.
  * Channels: web spare (+ native mirror). Official WA already has review.
  */

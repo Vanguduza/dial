@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD110 Return claim evidence** — photo/note attach on spare returns; not payable (Pack §9.2).
+- **PD109 Web Chatwoot handoff** — `/api/support/handoff`; ERP ticket SoR; Chatwoot ≠ status (Matrix B).
+- **PD108 Vehicle Hub reminders** — consent-gated schedule + due list (Pack vehicles.expiry_reminders).
+- **PD107 Credential expiry** — expired / past `expiresAt` blocks matching; re-verify unlocks (Pack technicians.credentials).
 - **PD106 Technician profile cards** — customer cards with Manager's choice + eligibility (Pack §9.3).
 - **PD105 Payout Idempotency-Key** — WHT `record_payout` keyed; no double withhold (Pack §10).
 - **PD104 Fiscal Idempotency-Key** — FDMS enqueue/seed keyed replay (Pack §10).

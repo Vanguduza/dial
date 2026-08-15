@@ -35,6 +35,7 @@ import {
   setValueScoreSnapshot,
   setTechnicianCredential,
   listTechnicianCredentials,
+  expireTechnicianCredential,
   startChecklistRun,
   submitChecklistAnswers,
   uploadJobEvidence,
@@ -554,13 +555,30 @@ export async function POST(req: Request) {
           kind,
           status,
           ...(body.label != null ? { label: String(body.label) } : {}),
+          ...(body.expiresAt != null
+            ? { expiresAt: String(body.expiresAt) }
+            : {}),
         });
         return NextResponse.json({
           ok: true,
           credential,
           credentials: listTechnicianCredentials(technicianId),
           payableFromAi: false,
-          note: "PD98 — credential gates matching eligibility",
+          note: "PD98/PD107 — credential gates matching eligibility + expiry",
+        });
+      }
+      case "expire_credential": {
+        const kind = String(body.kind ?? "trade_licence") as TechnicianCredentialKind;
+        const credential = expireTechnicianCredential({
+          technicianId,
+          kind,
+        });
+        return NextResponse.json({
+          ok: true,
+          credential,
+          credentials: listTechnicianCredentials(technicianId),
+          payableFromAi: false,
+          note: "PD107 — credential expired; re-verify to unlock eligibility",
         });
       }
       case "dispute_value_score": {

@@ -498,6 +498,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-514 | **PD104 Fiscal Idempotency-Key** | `done` | Pack §10 |
 | ENH-515 | **PD105 Payout Idempotency-Key** | `done` | Pack §10; D-50 |
 | ENH-516 | **PD106 Technician profile cards** | `done` | Pack §9.3 |
+| ENH-517 | **PD107 Credential expiry** | `done` | Pack technicians.credentials |
+| ENH-518 | **PD108 Vehicle Hub reminders** | `done` | Pack §9.2 consent |
+| ENH-519 | **PD109 Web Chatwoot handoff** | `done` | Matrix B; Chatwoot ≠ SoR |
+| ENH-520 | **PD110 Return claim evidence** | `done` | Pack §9.2 returns |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

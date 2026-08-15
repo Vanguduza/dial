@@ -411,3 +411,13 @@ test("PD43–PD45 CPA disclosure + support consent admin thin verticals", async 
   assert.equal(pd45.chatwootIsStatusSor, false);
   assert.ok(listSupportTickets().length >= 1);
 });
+
+test("PD109 web Chatwoot handoff thin vertical", async () => {
+  const { runPd109WebChatwootHandoffThinVertical } = await import("./index.js");
+  const out = runPd109WebChatwootHandoffThinVertical();
+  assert.equal(out.idsPresent, true);
+  assert.equal(out.chatwootIsStatusSor, false);
+  assert.equal(out.statusFrom, "erp");
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.conversationKey);
+});

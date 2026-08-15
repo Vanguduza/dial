@@ -1,14 +1,17 @@
 /**
- * PD18 / PD50 / PD75 / PD79 Garage / Vehicle Hub API.
- * Pack §9.2 consent + Pack §10 Vehicles CRUD + set active.
+ * PD18 / PD50 / PD75 / PD79 / PD108 Garage / Vehicle Hub API.
+ * Pack §9.2 consent + Pack §10 Vehicles CRUD + expiry_reminders.
  */
 import { NextResponse } from "next/server";
 import {
   addGarageVehicle,
   browsePathForGarageVehicle,
   deleteGarageVehicle,
+  listDueVehicleReminders,
   listGarageConsentAudit,
   listGarageVehicles,
+  listVehicleReminders,
+  scheduleVehicleReminder,
   setActiveGarageVehicle,
   setGarageReminderConsent,
   updateGarageVehicle,
@@ -23,6 +26,16 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "customerId required" }, { status: 400 });
   }
   const includeAudit = url.searchParams.get("includeAudit") === "1";
+  const view = url.searchParams.get("view");
+  if (view === "reminders") {
+    return NextResponse.json({
+      customerId,
+      reminders: listVehicleReminders(customerId),
+      due: listDueVehicleReminders(customerId),
+      payableFromAi: false,
+      note: "PD108 — Vehicle Hub reminders (consent-gated)",
+    });
+  }
   const vehicles = listGarageVehicles(customerId).map((v) => ({
     ...v,
     browsePath: browsePathForGarageVehicle(v.vehicleId),
@@ -30,23 +43,47 @@ export async function GET(req: Request) {
   return NextResponse.json({
     vehicles,
     consentAudit: includeAudit ? listGarageConsentAudit(customerId) : undefined,
+    reminders: listVehicleReminders(customerId),
   });
 }
 
 export async function POST(req: Request) {
   const body = (await req.json()) as {
+    action?: string;
     customerId?: string;
     label?: string;
     chassisHint?: string;
     reminderConsent?: boolean;
+    vehicleId?: string;
+    kind?: string;
+    dueAt?: string;
   };
-  if (!body.customerId || !body.label) {
-    return NextResponse.json(
-      { error: "customerId and label required" },
-      { status: 400 },
-    );
-  }
   try {
+    if (body.action === "schedule_reminder") {
+      const reminder = scheduleVehicleReminder({
+        vehicleId: String(body.vehicleId ?? ""),
+        dueAt: String(body.dueAt ?? ""),
+        ...(body.kind === "service_due" ||
+        body.kind === "licence_expiry" ||
+        body.kind === "insurance_expiry" ||
+        body.kind === "other"
+          ? { kind: body.kind }
+          : {}),
+      });
+      return NextResponse.json({
+        ok: true,
+        reminder,
+        due: listDueVehicleReminders(reminder.customerId),
+        payableFromAi: false,
+        note: "PD108 — reminder scheduled (consent required)",
+      });
+    }
+    if (!body.customerId || !body.label) {
+      return NextResponse.json(
+        { error: "customerId and label required (or action=schedule_reminder)" },
+        { status: 400 },
+      );
+    }
     const vehicle = addGarageVehicle({
       customerId: body.customerId,
       label: body.label,

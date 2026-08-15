@@ -105,6 +105,36 @@ export default function SpareGaragePage() {
     }
   }
 
+  async function scheduleReminder(vehicleId: string) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const dueAt = new Date(Date.now() + 30 * 86_400_000).toISOString();
+      const res = await fetch("/api/spare/garage", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          action: "schedule_reminder",
+          vehicleId,
+          kind: "service_due",
+          dueAt,
+        }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        reminder?: { reminderId: string };
+      };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage(`Reminder scheduled ${data.reminder?.reminderId ?? ""} (PD108)`);
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function setActive(vehicleId: string) {
     setBusy(true);
     setMessage(null);
@@ -251,13 +281,22 @@ export default function SpareGaragePage() {
                   Delete
                 </button>
                 {v.reminderConsent ? (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void setConsentFor(v.vehicleId, false)}
-                  >
-                    Revoke consent
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void setConsentFor(v.vehicleId, false)}
+                    >
+                      Revoke consent
+                    </button>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void scheduleReminder(v.vehicleId)}
+                    >
+                      Schedule service reminder
+                    </button>
+                  </>
                 ) : (
                   <button
                     type="button"

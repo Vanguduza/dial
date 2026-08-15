@@ -264,16 +264,26 @@ export type TechnicianCredential = {
   status: TechnicianCredentialStatus;
   label: string;
   updatedAt: string;
+  /** PD107 — ISO expiry; past date forces expired for eligibility. */
+  expiresAt?: string;
   payableFromAi: false;
 };
 
 const technicianCredentials = new Map<string, TechnicianCredential[]>();
 
-/** Assignment eligibility — active class + minimum value score + verified credential (PD98). */
+function credentialIsCurrentlyVerified(c: TechnicianCredential, now = Date.now()): boolean {
+  if (c.status === "expired" || c.status === "pending") return false;
+  if (c.status !== "verified") return false;
+  if (c.expiresAt && Date.parse(c.expiresAt) <= now) return false;
+  return true;
+}
+
+/** Assignment eligibility — active class + min score + verified non-expired credential (PD98/PD107). */
 export function isTechnicianEligible(input: {
   technicianId: string;
   jobClassId: string;
   minScore?: number;
+  now?: number;
 }): boolean {
   const jc = jobClasses.find((j) => j.id === input.jobClassId);
   if (!jc || jc.lifecycle !== "active") return false;
@@ -281,10 +291,10 @@ export function isTechnicianEligible(input: {
   const min = input.minScore ?? 0;
   if ((snap?.score ?? 0) < min) return false;
   const creds = technicianCredentials.get(input.technicianId) ?? [];
-  const hasVerifiedTrade = creds.some(
-    (c) => c.kind === "trade_licence" && c.status === "verified",
+  const now = input.now ?? Date.now();
+  return creds.some(
+    (c) => c.kind === "trade_licence" && credentialIsCurrentlyVerified(c, now),
   );
-  return hasVerifiedTrade;
 }
 
 export function setTechnicianCredential(input: {
@@ -292,6 +302,7 @@ export function setTechnicianCredential(input: {
   kind: TechnicianCredentialKind;
   status: TechnicianCredentialStatus;
   label?: string;
+  expiresAt?: string | null;
 }): TechnicianCredential {
   if (!input.technicianId.trim()) throw new Error("technicianId required");
   const row: TechnicianCredential = {
@@ -303,10 +314,29 @@ export function setTechnicianCredential(input: {
     updatedAt: new Date().toISOString(),
     payableFromAi: false,
   };
+  if (input.expiresAt != null && String(input.expiresAt).trim()) {
+    row.expiresAt = String(input.expiresAt).trim();
+  }
   const list = technicianCredentials.get(row.technicianId) ?? [];
   const withoutKind = list.filter((c) => c.kind !== row.kind);
   withoutKind.push(row);
   technicianCredentials.set(row.technicianId, withoutKind);
+  return { ...row };
+}
+
+/**
+ * PD107 — mark credential expired (or force-expire past expiresAt).
+ * Re-verify via setTechnicianCredential unlocks eligibility.
+ */
+export function expireTechnicianCredential(input: {
+  technicianId: string;
+  kind: TechnicianCredentialKind;
+}): TechnicianCredential {
+  const list = technicianCredentials.get(input.technicianId) ?? [];
+  const row = list.find((c) => c.kind === input.kind);
+  if (!row) throw new Error(`No ${input.kind} credential for technician`);
+  row.status = "expired";
+  row.updatedAt = new Date().toISOString();
   return { ...row };
 }
 
@@ -363,6 +393,66 @@ export function runPd98TechnicianCredentialsThinVertical(): {
   return {
     blockedWithoutCredential: true,
     eligibleWhenVerified: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD107 thin vertical: verified → expire (or past expiresAt) blocks; re-verify unlocks.
+ */
+export function runPd107CredentialExpiryThinVertical(): {
+  blockedWhenExpired: true;
+  blockedWhenPastExpiresAt: true;
+  eligibleWhenReverified: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  const technicianId = "tech_pd107";
+  setValueScoreSnapshot({ technicianId, score: 80, sampleN: 20 });
+  setTechnicianCredential({
+    technicianId,
+    kind: "trade_licence",
+    status: "verified",
+    label: "Automotive trade",
+    expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+  });
+  if (
+    !isTechnicianEligible({ technicianId, jobClassId: "jc_diag", minScore: 50 })
+  ) {
+    throw new Error("PD107 expected eligible with future expiresAt");
+  }
+  expireTechnicianCredential({ technicianId, kind: "trade_licence" });
+  if (
+    isTechnicianEligible({ technicianId, jobClassId: "jc_diag", minScore: 50 })
+  ) {
+    throw new Error("PD107 expected blocked when status=expired");
+  }
+  setTechnicianCredential({
+    technicianId,
+    kind: "trade_licence",
+    status: "verified",
+    expiresAt: new Date(Date.now() - 1_000).toISOString(),
+  });
+  if (
+    isTechnicianEligible({ technicianId, jobClassId: "jc_diag", minScore: 50 })
+  ) {
+    throw new Error("PD107 expected blocked when expiresAt in the past");
+  }
+  setTechnicianCredential({
+    technicianId,
+    kind: "trade_licence",
+    status: "verified",
+    expiresAt: new Date(Date.now() + 86_400_000).toISOString(),
+  });
+  if (
+    !isTechnicianEligible({ technicianId, jobClassId: "jc_diag", minScore: 50 })
+  ) {
+    throw new Error("PD107 expected eligible after re-verify");
+  }
+  return {
+    blockedWhenExpired: true,
+    blockedWhenPastExpiresAt: true,
+    eligibleWhenReverified: true,
     payableFromAi: false,
   };
 }

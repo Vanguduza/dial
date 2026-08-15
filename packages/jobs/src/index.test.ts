@@ -274,6 +274,15 @@ test("PD106 technician profile cards thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD107 credential expiry thin vertical", async () => {
+  const { runPd107CredentialExpiryThinVertical } = await import("./index.js");
+  const out = runPd107CredentialExpiryThinVertical();
+  assert.equal(out.blockedWhenExpired, true);
+  assert.equal(out.blockedWhenPastExpiresAt, true);
+  assert.equal(out.eligibleWhenReverified, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({
