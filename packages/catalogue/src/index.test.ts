@@ -316,6 +316,18 @@ test("PD110 return claim evidence", async () => {
   assert.ok(out.claimId);
 });
 
+test("PD115 spare order track timeline", async () => {
+  const { runPd115SpareOrderTrackTimelineThinVertical } = await import(
+    "./spareCustomer.js"
+  );
+  const out = runPd115SpareOrderTrackTimelineThinVertical();
+  assert.ok(out.timelineLen >= 3);
+  assert.equal(out.statusFrom, "erp");
+  assert.equal(out.zigOnTrack, false);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.statusLabel);
+});
+
 test("PD75 set active garage vehicle", async () => {
   const { runPd75SetActiveGarageVehicleThinVertical } = await import(
     "./spareCustomer.js"

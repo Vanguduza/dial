@@ -1,12 +1,16 @@
 /**
- * PD113 — Formbricks survey + PostHog flag stubs (T8).
+ * PD113 / PD117 / PD118 — Formbricks, PostHog, Realtime stubs + FLOW_CSAT.
  * Session SoR; fail-closed without keys; never money.
  */
 import { NextResponse } from "next/server";
 import {
   evaluatePostHogFlag,
   queueFormbricksSurvey,
+  recordCsatScore,
   runPd113FormbricksPosthogStubThinVertical,
+  runPd117RealtimeStatusStubThinVertical,
+  runPd118CsatFlowThinVertical,
+  subscribeRealtimeStatusChannel,
 } from "@dial/shared";
 import {
   getSessionFromToken,
@@ -15,7 +19,25 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(req?: Request) {
+  const url = req ? new URL(req.url) : null;
+  const view = url?.searchParams.get("view") ?? "pd113";
+  if (view === "pd117") {
+    const thin = runPd117RealtimeStatusStubThinVertical();
+    return NextResponse.json({
+      ok: true,
+      thin,
+      note: "PD117 — Realtime status stub; fail-closed",
+    });
+  }
+  if (view === "pd118") {
+    const thin = runPd118CsatFlowThinVertical();
+    return NextResponse.json({
+      ok: true,
+      thin,
+      note: "PD118 — FLOW_CSAT ERP score",
+    });
+  }
   const thin = runPd113FormbricksPosthogStubThinVertical();
   return NextResponse.json({
     ok: true,
@@ -37,6 +59,9 @@ export async function POST(req: Request) {
     jobId?: string;
     orderId?: string;
     flagKey?: string;
+    channel?: string;
+    score?: number;
+    comment?: string;
     userId?: string;
     role?: string;
   };
@@ -68,6 +93,29 @@ export async function POST(req: Request) {
         ok: true,
         flag: out,
         note: "PD113 — PostHog stub; not money / pricing authority",
+      });
+    }
+    if (action === "subscribe_realtime") {
+      const out = subscribeRealtimeStatusChannel({
+        channel: String(body.channel ?? "run:status"),
+      });
+      return NextResponse.json({
+        ok: true,
+        subscription: out,
+        note: "PD117 — Realtime stub; MapLibre map SoR; read-only",
+      });
+    }
+    if (action === "record_csat") {
+      const out = recordCsatScore({
+        score: Number(body.score),
+        ...(body.comment != null ? { comment: String(body.comment) } : {}),
+        ...(body.orderId != null ? { orderId: String(body.orderId) } : {}),
+        ...(body.jobId != null ? { jobId: String(body.jobId) } : {}),
+      });
+      return NextResponse.json({
+        ok: true,
+        csat: out,
+        note: "PD118 — FLOW_CSAT; ERP score SoR; not payable",
       });
     }
     return NextResponse.json({ error: `unknown action ${action}` }, { status: 400 });

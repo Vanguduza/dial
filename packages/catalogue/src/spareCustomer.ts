@@ -11,6 +11,13 @@ export type SpareOrderStatus =
   | "delivered"
   | "cancelled";
 
+/** PD115 — ERP status timeline events (Pack §9.2 track). */
+export type SpareOrderTimelineEvent = {
+  at: string;
+  event: string;
+  status: SpareOrderStatus;
+};
+
 export type SpareOrderLine = {
   offerId: string;
   title: string;
@@ -33,6 +40,8 @@ export type SpareOrder = {
   lines: SpareOrderLine[];
   createdAt: string;
   cancellableUntil: string;
+  /** PD115 — status timeline (ERP SoR). */
+  timeline: SpareOrderTimelineEvent[];
 };
 
 export type SpareReturnPath = "refund_or_replace" | "refund" | "replace";
@@ -141,7 +150,21 @@ function cloneOrder(o: SpareOrder): SpareOrder {
   return {
     ...o,
     lines: o.lines.map((l) => ({ ...l })),
+    timeline: (o.timeline ?? []).map((t) => ({ ...t })),
   };
+}
+
+function pushTimeline(
+  o: SpareOrder,
+  event: string,
+  status: SpareOrderStatus,
+): void {
+  if (!o.timeline) o.timeline = [];
+  o.timeline.push({
+    at: new Date().toISOString(),
+    event,
+    status,
+  });
 }
 
 /** Place ERP spare order from USD cart snapshot after EcoCash|COD (PD18). */
@@ -161,6 +184,7 @@ export function placeSpareOrder(input: {
     }
   }
   const soldBySummary = [...new Set(cart.lines.map((l) => l.soldBy))].join(", ");
+  const createdAt = new Date().toISOString();
   const order: SpareOrder = {
     orderId: `sord_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
     cartId: cart.id,
@@ -171,8 +195,11 @@ export function placeSpareOrder(input: {
     payChoice: input.payChoice,
     soldBySummary,
     lines: cart.lines.map((l) => ({ ...l })),
-    createdAt: new Date().toISOString(),
+    createdAt,
     cancellableUntil: new Date(Date.now() + 7 * 24 * 3600_000).toISOString(),
+    timeline: [
+      { at: createdAt, event: "order_placed", status: "confirmed" },
+    ],
   };
   store().orders.set(order.orderId, order);
   return cloneOrder(order);
@@ -192,6 +219,7 @@ export function listSpareOrders(customerId?: string | null): SpareOrder[] {
 export function advanceSpareOrderStatus(orderId: string): SpareOrder {
   const o = store().orders.get(orderId);
   if (!o) throw new Error(`Unknown spare order ${orderId}`);
+  if (!o.timeline) o.timeline = [];
   const seq: SpareOrderStatus[] = [
     "confirmed",
     "awaiting_supplier",
@@ -199,7 +227,10 @@ export function advanceSpareOrderStatus(orderId: string): SpareOrder {
     "delivered",
   ];
   const i = seq.indexOf(o.status);
-  if (i >= 0 && i < seq.length - 1) o.status = seq[i + 1]!;
+  if (i >= 0 && i < seq.length - 1) {
+    o.status = seq[i + 1]!;
+    pushTimeline(o, `status_${o.status}`, o.status);
+  }
   return cloneOrder(o);
 }
 
@@ -229,6 +260,7 @@ export function cancelSpareOrder(input: {
     throw new Error("cancellation window closed");
   }
   o.status = "cancelled";
+  pushTimeline(o, "order_cancelled", "cancelled");
   return cloneOrder(o);
 }
 
@@ -308,10 +340,83 @@ export function trackSpareOrder(orderId: string): {
   order: SpareOrder;
   statusFrom: "erp";
   zigOnTrack: false;
+  timeline: SpareOrderTimelineEvent[];
+  statusLabel: string;
 } {
   const order = getSpareOrder(orderId);
   if (!order) throw new Error(`Unknown spare order ${orderId}`);
-  return { order, statusFrom: "erp", zigOnTrack: false };
+  const timeline = order.timeline ?? [];
+  const statusLabel =
+    order.status === "confirmed"
+      ? "Confirmed"
+      : order.status === "awaiting_supplier"
+        ? "Awaiting supplier"
+        : order.status === "out_for_delivery"
+          ? "Out for delivery"
+          : order.status === "delivered"
+            ? "Delivered"
+            : "Cancelled";
+  return {
+    order,
+    statusFrom: "erp",
+    zigOnTrack: false,
+    timeline,
+    statusLabel,
+  };
+}
+
+/**
+ * PD115 thin vertical: place → advance → timeline ≥2; ERP SoR; no ZiG on track.
+ */
+export function runPd115SpareOrderTrackTimelineThinVertical(): {
+  timelineLen: number;
+  statusLabel: string;
+  statusFrom: "erp";
+  zigOnTrack: false;
+  payableFromAi: false;
+  orderId: string;
+} {
+  __resetSpareCustomerForTests();
+  const order = placeSpareOrder({
+    cart: {
+      id: "cart_pd115",
+      currency: "USD",
+      totalUsdMinor: 18_00n,
+      lines: [
+        {
+          offerId: "off_filter_oil_kun26",
+          title: "Oil filter",
+          qty: 1,
+          unitPriceUsdMinor: 18_00n,
+          lineTotalUsdMinor: 18_00n,
+          soldBy: "Agency Autoparts",
+          supplierFormality: "formal",
+        },
+      ],
+    },
+    customerId: "cust_pd115",
+    payChoice: "cod",
+  });
+  advanceSpareOrderStatus(order.orderId);
+  advanceSpareOrderStatus(order.orderId);
+  const track = trackSpareOrder(order.orderId);
+  if (track.timeline.length < 3) {
+    throw new Error("PD115 expected timeline with place + advances");
+  }
+  if (track.statusFrom !== "erp" || track.zigOnTrack !== false) {
+    throw new Error("PD115 ERP SoR / no ZiG on track");
+  }
+  if (track.order.status !== "out_for_delivery") {
+    throw new Error("PD115 expected out_for_delivery after two advances");
+  }
+  return {
+    timelineLen: track.timeline.length,
+    statusLabel: track.statusLabel,
+    statusFrom: "erp",
+    zigOnTrack: false,
+    payableFromAi: false,
+    orderId: order.orderId,
+  };
 }
 
 /** Open return claim — ERP stub; no AI payable (S113 / Pack §9.2). */
@@ -502,6 +607,7 @@ function seedSpareOrderForReturns(): { orderId: string } {
     ],
     createdAt: now,
     cancellableUntil: now,
+    timeline: [{ at: now, event: "order_placed", status: "confirmed" }],
   };
   store().orders.set(orderId, order);
   return { orderId };

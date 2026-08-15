@@ -29,6 +29,7 @@ function serializeOrder(o: NonNullable<ReturnType<typeof listSpareOrders>[number
       unitPriceUsdMinor: l.unitPriceUsdMinor.toString(),
       lineTotalUsdMinor: l.lineTotalUsdMinor.toString(),
     })),
+    timeline: o.timeline ?? [],
   };
 }
 
@@ -43,6 +44,10 @@ export async function GET(req: Request) {
         order: serializeOrder(track.order),
         statusFrom: track.statusFrom,
         zigOnTrack: track.zigOnTrack,
+        timeline: track.timeline,
+        statusLabel: track.statusLabel,
+        payableFromAi: false,
+        note: "PD115 — ERP track timeline; no ZiG on track (D-57)",
       });
     } catch (e) {
       return NextResponse.json(

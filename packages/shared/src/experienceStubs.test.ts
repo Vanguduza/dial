@@ -4,6 +4,8 @@ import {
   evaluatePostHogFlag,
   queueFormbricksSurvey,
   runPd113FormbricksPosthogStubThinVertical,
+  runPd117RealtimeStatusStubThinVertical,
+  runPd118CsatFlowThinVertical,
 } from "./experienceStubs.js";
 
 test("PD113 Formbricks + PostHog stub thin vertical", () => {
@@ -31,4 +33,20 @@ test("PD113 Formbricks queues when key set", () => {
 test("PD113 PostHog flag has no money authority", () => {
   const f = evaluatePostHogFlag({ flagKey: "x" });
   assert.equal(f.moneyAuthority, false);
+});
+
+test("PD117 Realtime status stub thin vertical", () => {
+  const out = runPd117RealtimeStatusStubThinVertical();
+  assert.equal(out.skippedWithoutKeys, true);
+  assert.equal(out.readOnly, true);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD118 FLOW_CSAT thin vertical", () => {
+  const out = runPd118CsatFlowThinVertical();
+  assert.equal(out.score, 5);
+  assert.equal(out.statusFrom, "erp");
+  assert.equal(out.surveyId, "FLOW_CSAT");
+  assert.equal(out.payableFromAi, false);
 });

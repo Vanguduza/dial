@@ -1,5 +1,5 @@
 /**
- * PD18 Spare order track — ERP status; Sold by; no ZiG (D-57).
+ * PD18 Spare order track — ERP status + PD115 timeline; Sold by; no ZiG (D-57).
  */
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -18,7 +18,7 @@ export default async function SpareOrderTrackPage({
   } catch {
     notFound();
   }
-  const { order } = track;
+  const { order, timeline, statusLabel } = track;
 
   return (
     <main
@@ -42,7 +42,9 @@ export default async function SpareOrderTrackPage({
         >
           Track {order.orderId}
         </h1>
-        <p style={{ fontWeight: 700 }}>Status: {order.status}</p>
+        <p style={{ fontWeight: 700 }}>
+          Status: {statusLabel ?? order.status}
+        </p>
         <p style={{ fontSize: 14 }}>
           USD {(Number(order.totalUsdMinor) / 100).toFixed(2)} · {order.payChoice} ·
           Sold by {order.soldBySummary}
@@ -52,6 +54,21 @@ export default async function SpareOrderTrackPage({
           {new Date(order.cancellableUntil).toLocaleString()} (7-day aware). No ZiG
           on track (D-57).
         </p>
+        {timeline.length > 0 ? (
+          <div style={{ marginTop: dialTokens.space.md }}>
+            <p style={{ fontSize: 13, fontWeight: 600 }}>Timeline</p>
+            <ul
+              data-testid="pd115-order-timeline"
+              style={{ margin: 0, paddingLeft: 18, fontSize: 13 }}
+            >
+              {timeline.map((t) => (
+                <li key={`${t.at}-${t.event}`}>
+                  {t.event} · {t.status} · {new Date(t.at).toLocaleString()}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         <ul>
           {order.lines.map((l) => (
             <li key={l.offerId}>

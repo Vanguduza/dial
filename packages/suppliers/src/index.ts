@@ -1138,3 +1138,106 @@ export function runPd38HeartbeatSlaThinVertical(input?: {
     currency: "USD",
   };
 }
+
+/** PD116 — statement document stub (react-pdf pattern; no live PDF engine required). */
+export type SupplierStatementDocument = {
+  documentId: string;
+  supplierId: string;
+  format: "text/plain+pdf-stub";
+  body: string;
+  lineCount: number;
+  netUsdMinor: string;
+  currency: "USD";
+  generatedAt: string;
+  payableFromAi: false;
+};
+
+/**
+ * Render supplier statement as PDF-shaped text stub (D-46 @react-pdf pattern).
+ * Integer money only; AI never authors amounts.
+ */
+export function renderSupplierStatementDocument(input: {
+  supplierId: string;
+}): SupplierStatementDocument {
+  if (!input.supplierId.trim()) throw new Error("supplierId required");
+  if (!store().profiles.has(input.supplierId)) {
+    throw new Error(`Unknown supplier ${input.supplierId}`);
+  }
+  const lines = listStatements(input.supplierId);
+  let net = 0n;
+  const rows: string[] = [];
+  for (const l of lines) {
+    net += l.amount.amountMinor;
+    rows.push(
+      `${l.createdAt.slice(0, 10)}\t${l.kind}\t${l.amount.amountMinor.toString()}\t${l.label}`,
+    );
+  }
+  const generatedAt = new Date().toISOString();
+  const body = [
+    `DIAL Supplier Statement (stub)`,
+    `supplierId=${input.supplierId}`,
+    `generatedAt=${generatedAt}`,
+    `currency=USD`,
+    `netUsdMinor=${net.toString()}`,
+    `---`,
+    ...rows,
+    `---`,
+    `payableFromAi=false`,
+  ].join("\n");
+  return {
+    documentId: id("stmtpdf"),
+    supplierId: input.supplierId,
+    format: "text/plain+pdf-stub",
+    body,
+    lineCount: lines.length,
+    netUsdMinor: net.toString(),
+    currency: "USD",
+    generatedAt,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD116 thin vertical: statement lines → document stub; net matches lines; not money path for AI.
+ */
+export function runPd116SupplierStatementPdfThinVertical(): {
+  lineCount: number;
+  documentId: string;
+  format: "text/plain+pdf-stub";
+  payableFromAi: false;
+} {
+  __resetSuppliersForTests();
+  const supplierId = "sup_pd116";
+  onboardSupplier({
+    supplierId,
+    displayName: "PD116 Agency Parts",
+    formality: "formal",
+    tier: "silver",
+  });
+  addStatementLine({
+    supplierId,
+    kind: "settlement",
+    amountUsdMinor: 50_00n,
+    label: "Week settlement",
+  });
+  addStatementLine({
+    supplierId,
+    kind: "coop_spend",
+    amountUsdMinor: -5_00n,
+    label: "Coop promo spend",
+  });
+  const doc = renderSupplierStatementDocument({ supplierId });
+  if (doc.lineCount !== 2) throw new Error("PD116 expected 2 lines");
+  if (doc.netUsdMinor !== "4500") {
+    throw new Error(`PD116 expected net 4500 got ${doc.netUsdMinor}`);
+  }
+  if (!doc.body.includes("Week settlement") || doc.payableFromAi !== false) {
+    throw new Error("PD116 document body/payable check failed");
+  }
+  return {
+    lineCount: doc.lineCount,
+    documentId: doc.documentId,
+    format: "text/plain+pdf-stub",
+    payableFromAi: false,
+  };
+}

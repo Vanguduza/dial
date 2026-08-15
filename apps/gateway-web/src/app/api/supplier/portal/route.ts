@@ -17,6 +17,7 @@ import {
   listStatements,
   onboardSupplier,
   postHeartbeat,
+  renderSupplierStatementDocument,
   syncSupplierSlaEscalations,
   uploadSupplierCosts,
   uploadSupplierStock,
@@ -339,6 +340,15 @@ export async function POST(req: Request) {
             kind: line.kind,
             amountUsdMinor: line.amount.amountMinor.toString(),
           },
+        });
+      }
+      case "export_statement": {
+        const doc = renderSupplierStatementDocument({ supplierId });
+        if (wantsHtml) return redirectSupplier(req, "#statements");
+        return NextResponse.json({
+          ok: true,
+          document: doc,
+          note: "PD116 — statement PDF stub (react-pdf pattern); integer USD",
         });
       }
       case "propose_coop": {

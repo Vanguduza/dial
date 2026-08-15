@@ -23,7 +23,15 @@ export {
 export {
   evaluatePostHogFlag,
   queueFormbricksSurvey,
+  recordCsatScore,
+  getCsatScore,
+  subscribeRealtimeStatusChannel,
   runPd113FormbricksPosthogStubThinVertical,
+  runPd117RealtimeStatusStubThinVertical,
+  runPd118CsatFlowThinVertical,
+  __resetCsatForTests,
   type FormbricksSurveyStub,
   type PostHogFlagStub,
+  type RealtimeStatusSubscription,
+  type CsatScoreRecord,
 } from "./experienceStubs.js";

@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD118 FLOW_CSAT** — ERP 1–5 score + Formbricks `FLOW_CSAT` queue; not payable.
+- **PD117 Realtime status stub** — fail-closed without Supabase keys; read-only; MapLibre SoR.
+- **PD116 Supplier statement PDF stub** — react-pdf pattern document; integer USD net (Pack §9.4).
+- **PD115 Spare order track timeline** — ERP status events on track API + UI (Pack §9.2).
 - **PD114 Checklist catalog seed** — library `catalogId` tranche (≥8; ≠ full 42) + symptom resolve (Pack checklist library).
 - **PD113 Formbricks + PostHog stubs** — `/api/experience` fail-closed without keys; not money (T8).
 - **PD112 Web Paynow URL checkout** — optional hosted rail; EcoCash|COD remain required CTAs (D-57).

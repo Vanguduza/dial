@@ -506,6 +506,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-522 | **PD112 Web Paynow URL checkout** | `done` | Optional rail; D-57 EcoCash\|COD required |
 | ENH-523 | **PD113 Formbricks + PostHog stubs** | `done` | T8 fail-closed; not money |
 | ENH-524 | **PD114 Checklist catalog seed** | `done` | Library tranche ≠ full 42 |
+| ENH-525 | **PD115 Spare order track timeline** | `done` | Pack §9.2 |
+| ENH-526 | **PD116 Supplier statement PDF stub** | `done` | Pack §9.4; D-46 pattern |
+| ENH-527 | **PD117 Realtime status stub** | `done` | Fail-closed; MapLibre SoR |
+| ENH-528 | **PD118 FLOW_CSAT** | `done` | ERP score + Formbricks |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

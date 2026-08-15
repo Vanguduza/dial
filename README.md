@@ -99,7 +99,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 | `packages/search-indexer` | Meili reindex jobs |
 | `packages/ai` | guidedIntake + LiteLLM + Intelligence stubs (D-61) |
 
-**Build status:** eng spine **S90** green; product-depth through **PD114** Checklist catalog seed. **S99** remains human launch-only (not product-finished). **PD99 ≠ S99.** OpenAPI invent paused. No liquor Build.
+**Build status:** eng spine **S90** green; product-depth through **PD118** FLOW_CSAT. **S99** remains human launch-only (not product-finished). **PD99 ≠ S99.** OpenAPI invent paused. No liquor Build.
 
 ### Gateway integration surface (plug-in)
 

@@ -40,6 +40,15 @@ test("PD65 supplier bond hold → release", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD116 supplier statement PDF stub", async () => {
+  const { runPd116SupplierStatementPdfThinVertical } = await import("./index.js");
+  const out = runPd116SupplierStatementPdfThinVertical();
+  assert.equal(out.lineCount, 2);
+  assert.equal(out.format, "text/plain+pdf-stub");
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.documentId);
+});
+
 test("PD71 order failover accept after SLA breach", () => {
   const out = runPd71OrderFailoverAcceptThinVertical();
   assert.equal(out.failoverAccepted, true);

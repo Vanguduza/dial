@@ -1405,6 +1405,51 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd114ChecklistCatalogSeedThinVertical` |
 | Green → | eng-safe Pack gap ≠ S99 (**PD115+**) |
 
+### Pack / product gap audit (after PD114 → PD115–PD118)
+
+| Gap | Stage |
+| --- | --- |
+| Spare order track timeline | **PD115** |
+| Supplier statement PDF stub | **PD116** |
+| Supabase Realtime status stub | **PD117** |
+| FLOW_CSAT post-fulfililment | **PD118** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+| packages/ai missing-info deepen | deferred (D-56 capability review gate) |
+
+### PD115 — Spare order track timeline (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `trackSpareOrder` timeline + statusLabel; order track UI |
+| Evidence | `runPd115SpareOrderTrackTimelineThinVertical` |
+| Green → | **PD116** statement PDF |
+
+### PD116 — Supplier statement PDF stub (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `renderSupplierStatementDocument` + `export_statement` (react-pdf pattern) |
+| Evidence | `runPd116SupplierStatementPdfThinVertical` |
+| Green → | **PD117** Realtime stub |
+
+### PD117 — Realtime status stub (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `subscribeRealtimeStatusChannel` fail-closed; MapLibre SoR |
+| Evidence | `runPd117RealtimeStatusStubThinVertical` |
+| Green → | **PD118** FLOW_CSAT |
+
+### PD118 — FLOW_CSAT post-fulfililment (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `recordCsatScore` 1–5 ERP + Formbricks FLOW_CSAT |
+| Evidence | `runPd118CsatFlowThinVertical` |
+| Green → | eng-safe Pack gap ≠ S99 (**PD119+**) |
+
 ### S10 — E2a (historical)
 
 | | |
