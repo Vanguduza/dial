@@ -434,8 +434,215 @@ class DialGatewayClient(
         return parseGroceryCheckout(res.body)
     }
 
+    /** PD21 — validate / apply promo code (draft only; D-42). */
+    fun validatePromoCode(code: String, vertical: String = "spare"): PromoCodeResult {
+        val body =
+            """{"action":"validate_code","code":${jsonString(code)},"vertical":${jsonString(vertical)}}"""
+        require(!body.contains("userId") && !body.contains("\"role\""))
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/promo",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "promo validate failed",
+                res.statusCode,
+            )
+        }
+        return parsePromoCodeResult(res.body)
+    }
+
+    fun applyPromoCodeDraft(
+        code: String,
+        cartId: String,
+        vertical: String = "spare",
+    ): PromoCodeResult {
+        val body =
+            """{"action":"apply_draft","code":${jsonString(code)},"cartId":${jsonString(cartId)},"vertical":${jsonString(vertical)}}"""
+        require(!body.contains("userId") && !body.contains("\"role\""))
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/promo",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "promo apply failed",
+                res.statusCode,
+            )
+        }
+        return parsePromoCodeResult(res.body)
+    }
+
+    fun shareReferral(campaignId: String, codeSuffix: String? = null): ReferralShareResult {
+        val body =
+            buildString {
+                append("""{"action":"share_referral","campaignId":${jsonString(campaignId)}""")
+                if (!codeSuffix.isNullOrBlank()) {
+                    append(""","codeSuffix":${jsonString(codeSuffix)}""")
+                }
+                append("}")
+            }
+        require(!body.contains("\"role\""))
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/promo",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "referral share failed",
+                res.statusCode,
+            )
+        }
+        return parseReferralShare(res.body)
+    }
+
+    fun attemptPromoCashOut(amountMinor: Long): Boolean {
+        val body =
+            """{"action":"attempt_cash_out","amountMinor":"$amountMinor"}"""
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/promo",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        // 403 + promo_credit_cash_out_forbidden = expected (D-42)
+        if (res.statusCode == 403 && res.body.contains("promo_credit_cash_out_forbidden")) {
+            return false
+        }
+        throw DialGatewayException(
+            parseError(res.body) ?: "unexpected cash-out response",
+            res.statusCode,
+        )
+    }
+
+    /** PD21 — tech deep-link (rate_card draft; payableFromAi=false). */
+    fun techHome(): TechHomeResult {
+        val res =
+            transport.request(
+                method = "GET",
+                url = "$baseUrl/api/tech/services",
+                headers = mapOf("Accept" to "application/json"),
+                body = null,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "tech home failed",
+                res.statusCode,
+            )
+        }
+        return parseTechHome(res.body)
+    }
+
+    fun techSlots(): TechSlotsResult {
+        val res =
+            transport.request(
+                method = "GET",
+                url = "$baseUrl/api/tech/services?view=slots",
+                headers = mapOf("Accept" to "application/json"),
+                body = null,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "tech slots failed",
+                res.statusCode,
+            )
+        }
+        return parseTechSlots(res.body)
+    }
+
+    fun bookTechGuide(slotId: String): TechBookResult {
+        val body =
+            """{"action":"book","slotId":${jsonString(slotId)},"jobClass":"diagnostics","emergency":false}"""
+        require(!body.contains("userId") && !body.contains("\"role\""))
+        val res =
+            transport.request(
+                method = "POST",
+                url = "$baseUrl/api/tech/services",
+                headers =
+                    mapOf(
+                        "Content-Type" to "application/json",
+                        "Accept" to "application/json",
+                    ),
+                body = body,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "tech book failed",
+                res.statusCode,
+            )
+        }
+        return parseTechBook(res.body)
+    }
+
     fun cookieStore(): CookieStore = cookies
 }
+
+data class PromoCodeResult(
+    val ok: Boolean,
+    val code: String?,
+    val draftDiscountPercent: Int,
+    val payableFromAi: Boolean,
+    val cashOutAllowed: Boolean,
+)
+
+data class ReferralShareResult(
+    val shareCode: String,
+    val shareUrl: String,
+    val cashOutAllowed: Boolean,
+    val rewardKind: String,
+)
+
+data class TechHomeResult(
+    val guideTitle: String,
+    val aiHypeForbidden: Boolean,
+)
+
+data class TechSlotsResult(
+    val slotIds: List<String>,
+    val quoteSource: String,
+    val draftAmountUsdMinor: Long,
+    val payableFromAi: Boolean,
+)
+
+data class TechBookResult(
+    val jobId: String,
+    val draftOnly: Boolean,
+    val payableFromAi: Boolean,
+    val draftAmountUsdMinor: Long,
+)
 
 data class HttpResponse(
     val statusCode: Int,
@@ -695,5 +902,91 @@ internal fun parseGroceryCheckout(body: String): GroceryCheckoutResult {
         imttOnCheckoutLines =
             Regex(""""imttOnCheckoutLines"\s*:\s*true""")
                 .containsMatchIn(body),
+    )
+}
+
+internal fun parsePromoCodeResult(body: String): PromoCodeResult {
+    fun f(name: String): String? =
+        Regex(""""$name"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1)
+    fun n(name: String): Int {
+        val s = Regex(""""$name"\s*:\s*"?(\d+)"?""").find(body)?.groupValues?.get(1)
+        return s?.toIntOrNull() ?: 0
+    }
+    val nested =
+        Regex(""""applied"\s*:\s*\{([^}]*)\}""").find(body)?.groupValues?.get(1)
+    val source = nested ?: body
+    return PromoCodeResult(
+        ok =
+            body.contains("\"ok\":true") ||
+                body.contains("\"ok\": true") ||
+                Regex(""""ok"\s*:\s*true""").containsMatchIn(source),
+        code = f("code") ?: Regex(""""code"\s*:\s*"([^"]+)"""").find(source)?.groupValues?.get(1),
+        draftDiscountPercent =
+            n("draftDiscountPercent").takeIf { it > 0 }
+                ?: Regex(""""draftDiscountPercent"\s*:\s*"?(\d+)"?""")
+                    .find(source)
+                    ?.groupValues
+                    ?.get(1)
+                    ?.toIntOrNull()
+                ?: 0,
+        payableFromAi = Regex(""""payableFromAi"\s*:\s*true""").containsMatchIn(body),
+        cashOutAllowed = Regex(""""cashOutAllowed"\s*:\s*true""").containsMatchIn(body),
+    )
+}
+
+internal fun parseReferralShare(body: String): ReferralShareResult {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    return ReferralShareResult(
+        shareCode = f("shareCode"),
+        shareUrl = f("shareUrl"),
+        cashOutAllowed = Regex(""""cashOutAllowed"\s*:\s*true""").containsMatchIn(body),
+        rewardKind = f("rewardKind").ifBlank { "promo_credit" },
+    )
+}
+
+internal fun parseTechHome(body: String): TechHomeResult {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    return TechHomeResult(
+        guideTitle = f("title").ifBlank { "Dial a Tech" },
+        aiHypeForbidden =
+            !Regex(""""aiHypeForbidden"\s*:\s*false""").containsMatchIn(body),
+    )
+}
+
+internal fun parseTechSlots(body: String): TechSlotsResult {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    fun n(name: String): Long {
+        val s = Regex(""""$name"\s*:\s*"?(\d+)"?""").find(body)?.groupValues?.get(1)
+        return s?.toLongOrNull() ?: 0L
+    }
+    val slotIds = mutableListOf<String>()
+    Regex(""""(?:slotId|id)"\s*:\s*"([^"]+)"""").findAll(body).forEach {
+        slotIds.add(it.groupValues[1])
+    }
+    return TechSlotsResult(
+        slotIds = slotIds.distinct(),
+        quoteSource = f("source").ifBlank { "rate_card" },
+        draftAmountUsdMinor = n("draftAmountUsdMinor"),
+        payableFromAi = Regex(""""payableFromAi"\s*:\s*true""").containsMatchIn(body),
+    )
+}
+
+internal fun parseTechBook(body: String): TechBookResult {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    fun n(name: String): Long {
+        val s = Regex(""""$name"\s*:\s*"?(\d+)"?""").find(body)?.groupValues?.get(1)
+        return s?.toLongOrNull() ?: 0L
+    }
+    return TechBookResult(
+        jobId = f("id").ifBlank { f("jobId") },
+        draftOnly =
+            body.contains("\"draftOnly\":true") || body.contains("\"draftOnly\": true") ||
+                !Regex(""""draftOnly"\s*:\s*false""").containsMatchIn(body),
+        payableFromAi = Regex(""""payableFromAi"\s*:\s*true""").containsMatchIn(body),
+        draftAmountUsdMinor = n("draftAmountUsdMinor"),
     )
 }

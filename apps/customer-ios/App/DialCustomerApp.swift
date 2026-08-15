@@ -18,6 +18,8 @@ private enum Tab: String, CaseIterable {
     case orders = "Orders"
     case garage = "Garage"
     case grocery = "Grocery"
+    case promo = "Promo"
+    case tech = "Tech"
 }
 
 struct RootView: View {
@@ -40,6 +42,8 @@ struct RootView: View {
     @State private var garageLabel = ""
     @State private var garageChassis = ""
     @State private var garageConsent = false
+    @State private var promoCode = "SPARE10"
+    @State private var referralCampaignId = ""
 
     init(baseUrl: String) {
         self.baseUrl = baseUrl
@@ -71,6 +75,8 @@ struct RootView: View {
                         case .orders: ordersView
                         case .garage: garageView
                         case .grocery: groceryBrowseView
+                        case .promo: promoView
+                        case .tech: techView
                         }
                     }
                 }
@@ -293,7 +299,69 @@ struct RootView: View {
                     throw DialGatewayError.http(status: 0, message: "Grocery must be USD without liquor")
                 }
                 groceryHits = g.hits
+            case .promo, .tech:
+                break
             }
+        }
+    }
+
+    private var promoView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Promo & referral").font(.title2.bold())
+            Text("Draft only · never cash-out (D-42)").font(.caption).foregroundStyle(.secondary)
+            TextField("Promo code", text: $promoCode)
+            TextField("Referral campaignId", text: $referralCampaignId)
+            Button("Validate code") {
+                run {
+                    let v = try client.validatePromoCode(code: promoCode.trimmingCharacters(in: .whitespaces))
+                    precondition(v.payableFromAi == false && v.cashOutAllowed == false)
+                    status = "Code \(v.code ?? "") · draft \(v.draftDiscountPercent)%"
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            Button("Share referral") {
+                run {
+                    let share = try client.shareReferral(campaignId: referralCampaignId.trimmingCharacters(in: .whitespaces))
+                    precondition(share.cashOutAllowed == false)
+                    status = "Share \(share.shareCode) · \(share.shareUrl)"
+                }
+            }
+            .buttonStyle(.bordered)
+            Button("Attempt cash-out (must fail)") {
+                run {
+                    let allowed = try client.attemptPromoCashOut(amountMinor: 100)
+                    status = allowed ? "unexpected" : "Cash-out blocked (D-42)"
+                }
+            }
+            if !status.isEmpty { Text(status).font(.footnote) }
+            if let error { Text(error).foregroundStyle(.red) }
+        }
+    }
+
+    private var techView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Dial a Tech").font(.title2.bold())
+            Text("rate_card draft · AI never writes payable").font(.caption).foregroundStyle(.secondary)
+            Button("Load guide + book slot") {
+                run {
+                    let home = try client.techHome()
+                    precondition(home.aiHypeForbidden)
+                    let slots = try client.techSlots()
+                    precondition(slots.payableFromAi == false && slots.quoteSource == "rate_card")
+                    if let slot = slots.slotIds.first {
+                        let book = try client.bookTechGuide(slotId: slot)
+                        precondition(book.payableFromAi == false && book.draftOnly)
+                        status = "Booked \(book.jobId) · draft \(book.draftAmountUsdMinor) · payableFromAi=false"
+                    } else {
+                        status = "\(home.guideTitle) · rate_card · payableFromAi=false"
+                    }
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Color(red: 11 / 255, green: 61 / 255, blue: 46 / 255))
+            if !status.isEmpty { Text(status).font(.footnote) }
+            if let error { Text(error).foregroundStyle(.red) }
+            if busy { ProgressView() }
         }
     }
 

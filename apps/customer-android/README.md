@@ -28,4 +28,5 @@ Windows CI without SDK: `apps/gateway-web/src/lib/spare/pd20CustomerMobile.test.
 
 ## Out of scope
 
-Promo/referral share (PD21+) · liquor · Expo · S99
+Liquor · Expo · S99
+

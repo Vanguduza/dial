@@ -100,6 +100,40 @@ public struct GroceryCheckoutResult: Equatable, Sendable {
     public let imttOnCheckoutLines: Bool
 }
 
+public struct PromoCodeResult: Equatable, Sendable {
+    public let ok: Bool
+    public let code: String?
+    public let draftDiscountPercent: Int
+    public let payableFromAi: Bool
+    public let cashOutAllowed: Bool
+}
+
+public struct ReferralShareResult: Equatable, Sendable {
+    public let shareCode: String
+    public let shareUrl: String
+    public let cashOutAllowed: Bool
+    public let rewardKind: String
+}
+
+public struct TechHomeResult: Equatable, Sendable {
+    public let guideTitle: String
+    public let aiHypeForbidden: Bool
+}
+
+public struct TechSlotsResult: Equatable, Sendable {
+    public let slotIds: [String]
+    public let quoteSource: String
+    public let draftAmountUsdMinor: Int64
+    public let payableFromAi: Bool
+}
+
+public struct TechBookResult: Equatable, Sendable {
+    public let jobId: String
+    public let draftOnly: Bool
+    public let payableFromAi: Bool
+    public let draftAmountUsdMinor: Int64
+}
+
 public enum DialGatewayError: Error, Equatable {
     case http(status: Int, message: String)
     case invalidChoice
@@ -443,6 +477,137 @@ public final class DialGatewayClient: @unchecked Sendable {
         }
         return parseGroceryCheckout(res.body)
     }
+
+    /// PD21 — validate promo code (draft only; D-42).
+    public func validatePromoCode(code: String, vertical: String = "spare") throws -> PromoCodeResult {
+        let body =
+            #"{"action":"validate_code","code":\#(jsonString(code)),"vertical":\#(jsonString(vertical))}"#
+        precondition(!body.contains("userId") && !body.contains("\"role\""))
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/promo",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "promo validate failed")
+        }
+        return parsePromoCodeResult(res.body)
+    }
+
+    public func applyPromoCodeDraft(code: String, cartId: String, vertical: String = "spare") throws -> PromoCodeResult {
+        let body =
+            #"{"action":"apply_draft","code":\#(jsonString(code)),"cartId":\#(jsonString(cartId)),"vertical":\#(jsonString(vertical))}"#
+        precondition(!body.contains("userId") && !body.contains("\"role\""))
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/promo",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "promo apply failed")
+        }
+        return parsePromoCodeResult(res.body)
+    }
+
+    public func shareReferral(campaignId: String, codeSuffix: String? = nil) throws -> ReferralShareResult {
+        var body = #"{"action":"share_referral","campaignId":\#(jsonString(campaignId))"#
+        if let codeSuffix, !codeSuffix.isEmpty {
+            body += #","codeSuffix":\#(jsonString(codeSuffix))"#
+        }
+        body += "}"
+        precondition(!body.contains("\"role\""))
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/promo",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "referral share failed")
+        }
+        return parseReferralShare(res.body)
+    }
+
+    /// Returns false when cash-out blocked (expected D-42).
+    public func attemptPromoCashOut(amountMinor: Int64) throws -> Bool {
+        let body = #"{"action":"attempt_cash_out","amountMinor":"\#(amountMinor)"}"#
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/promo",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        if res.statusCode == 403, res.body.contains("promo_credit_cash_out_forbidden") {
+            return false
+        }
+        throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "unexpected cash-out")
+    }
+
+    public func techHome() throws -> TechHomeResult {
+        let res = try transport.request(
+            method: "GET",
+            url: "\(baseUrl)/api/tech/services",
+            headers: ["Accept": "application/json"],
+            body: nil,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "tech home failed")
+        }
+        return parseTechHome(res.body)
+    }
+
+    public func techSlots() throws -> TechSlotsResult {
+        let res = try transport.request(
+            method: "GET",
+            url: "\(baseUrl)/api/tech/services?view=slots",
+            headers: ["Accept": "application/json"],
+            body: nil,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "tech slots failed")
+        }
+        return parseTechSlots(res.body)
+    }
+
+    public func bookTechGuide(slotId: String) throws -> TechBookResult {
+        let body =
+            #"{"action":"book","slotId":\#(jsonString(slotId)),"jobClass":"diagnostics","emergency":false}"#
+        precondition(!body.contains("userId") && !body.contains("\"role\""))
+        let res = try transport.request(
+            method: "POST",
+            url: "\(baseUrl)/api/tech/services",
+            headers: [
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            ],
+            body: body,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "tech book failed")
+        }
+        return parseTechBook(res.body)
+    }
 }
 
 // MARK: - JSON helpers (fixture-light; no Codable dependency on gateway shape drift)
@@ -678,5 +843,101 @@ func parseGroceryCheckout(_ body: String) -> GroceryCheckoutResult {
             }
             return false
         }()
+    )
+}
+
+func parsePromoCodeResult(_ body: String) -> PromoCodeResult {
+    PromoCodeResult(
+        ok: body.contains("\"ok\":true") || body.contains("\"ok\": true"),
+        code: optionalField("code", in: body),
+        draftDiscountPercent: Int(intField("draftDiscountPercent", in: body)),
+        payableFromAi: {
+            if let r = try? NSRegularExpression(pattern: #""payableFromAi"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }(),
+        cashOutAllowed: {
+            if let r = try? NSRegularExpression(pattern: #""cashOutAllowed"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }()
+    )
+}
+
+func parseReferralShare(_ body: String) -> ReferralShareResult {
+    ReferralShareResult(
+        shareCode: (try? field("shareCode", in: body)) ?? "",
+        shareUrl: (try? field("shareUrl", in: body)) ?? "",
+        cashOutAllowed: {
+            if let r = try? NSRegularExpression(pattern: #""cashOutAllowed"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }(),
+        rewardKind: (try? field("rewardKind", in: body)) ?? "promo_credit"
+    )
+}
+
+func parseTechHome(_ body: String) -> TechHomeResult {
+    TechHomeResult(
+        guideTitle: (try? field("title", in: body)) ?? "Dial a Tech",
+        aiHypeForbidden: {
+            if let r = try? NSRegularExpression(pattern: #""aiHypeForbidden"\s*:\s*false"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return false
+            }
+            return true
+        }()
+    )
+}
+
+func parseTechSlots(_ body: String) -> TechSlotsResult {
+    var slotIds: [String] = []
+    if let r = try? NSRegularExpression(pattern: #""(?:slotId|id)"\s*:\s*"([^"]+)""#) {
+        let ns = body as NSString
+        r.enumerateMatches(in: body, range: NSRange(location: 0, length: ns.length)) { match, _, _ in
+            guard let match, match.numberOfRanges > 1,
+                  let range = Range(match.range(at: 1), in: body) else { return }
+            slotIds.append(String(body[range]))
+        }
+    }
+    return TechSlotsResult(
+        slotIds: Array(Set(slotIds)),
+        quoteSource: (try? field("source", in: body)) ?? "rate_card",
+        draftAmountUsdMinor: intField("draftAmountUsdMinor", in: body),
+        payableFromAi: {
+            if let r = try? NSRegularExpression(pattern: #""payableFromAi"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }()
+    )
+}
+
+func parseTechBook(_ body: String) -> TechBookResult {
+    TechBookResult(
+        jobId: (try? field("id", in: body)) ?? ((try? field("jobId", in: body)) ?? ""),
+        draftOnly: body.contains("\"draftOnly\":true") || body.contains("\"draftOnly\": true") ||
+            {
+                if let r = try? NSRegularExpression(pattern: #""draftOnly"\s*:\s*false"#),
+                   r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                    return false
+                }
+                return true
+            }(),
+        payableFromAi: {
+            if let r = try? NSRegularExpression(pattern: #""payableFromAi"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }(),
+        draftAmountUsdMinor: intField("draftAmountUsdMinor", in: body)
     )
 }

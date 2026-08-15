@@ -33,4 +33,5 @@ Simulator gateway: `DIAL_GATEWAY_BASE_URL=http://127.0.0.1:3000`.
 
 ## Out of scope
 
-Promo/referral share (PD21+) · liquor · Expo · S99
+Liquor · Expo · S99
+

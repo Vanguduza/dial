@@ -414,6 +414,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-430 | **PD19 Admin Trade/JobClass + Value Score** — lifecycle + disputes; no money path | `done` | Pack §9.5 / D-53; `/admin/trades` |
 | ENH-431 | **PD20 Customer mobile deepen** — Android+iOS orders/returns/garage + grocery | `done` | Pack §9.6; C-5; no Expo |
 | ENH-432 | **Product-depth band PD21–PD23** authored (promo/tech mobile → ZiG/cost → WHT/sim) | `done` | Pack §9 gap audit after PD20; eng next ≠ S99 |
+| ENH-433 | **PD21 Customer mobile promo/referral + tech deep-link** — D-42 no cash-out | `done` | Pack §9.6; `/api/promo`; C-5 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

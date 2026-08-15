@@ -156,4 +156,73 @@ class DialGatewayClientTest {
         assertEquals(false, grocery.liquorSkus)
         assertEquals(5, step)
     }
+
+    @Test
+    fun pd21_promo_referral_and_tech_deep_link() {
+        var step = 0
+        val transport =
+            HttpTransport { method, url, _, body, _ ->
+                when {
+                    method == "POST" && url.endsWith("/api/promo") && body!!.contains("validate_code") -> {
+                        assertTrue(!body.contains("userId"))
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"ok":true,"code":"SPARE10","draftDiscountPercent":10,"payableFromAi":false,"cashOutAllowed":false}""",
+                        )
+                    }
+                    method == "POST" && url.endsWith("/api/promo") && body!!.contains("share_referral") -> {
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"ok":true,"share":{"shareCode":"PD21-ALICE","shareUrl":"https://dial.zw/r/PD21-ALICE","cashOutAllowed":false,"rewardKind":"promo_credit"}}""",
+                        )
+                    }
+                    method == "POST" && url.endsWith("/api/promo") && body!!.contains("attempt_cash_out") -> {
+                        step++
+                        HttpResponse(
+                            statusCode = 403,
+                            body = """{"ok":false,"error":"promo_credit_cash_out_forbidden","cashOutAllowed":false}""",
+                        )
+                    }
+                    method == "GET" && url.contains("/api/tech/services?view=slots") -> {
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"slots":[{"id":"slot_1"}],"quote":{"source":"rate_card","draftAmountUsdMinor":"4500","payableFromAi":false}}""",
+                        )
+                    }
+                    method == "POST" && url.endsWith("/api/tech/services") -> {
+                        assertTrue(body!!.contains("\"action\":\"book\""))
+                        assertTrue(!body.contains("userId"))
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"ok":true,"job":{"id":"job_1","draftOnly":true,"payableFromAi":false},"quote":{"draftAmountUsdMinor":"4500","payableFromAi":false,"source":"rate_card"}}""",
+                        )
+                    }
+                    else -> error("unexpected $method $url $body")
+                }
+            }
+        val client = DialGatewayClient("http://localhost:3000", MemoryCookieStore(), transport)
+        val promo = client.validatePromoCode("SPARE10")
+        assertEquals(true, promo.ok)
+        assertEquals(false, promo.payableFromAi)
+        assertEquals(false, promo.cashOutAllowed)
+        val share = client.shareReferral("pcamp_1", "alice")
+        assertEquals("PD21-ALICE", share.shareCode)
+        assertEquals(false, share.cashOutAllowed)
+        assertEquals(false, client.attemptPromoCashOut(300))
+        val slots = client.techSlots()
+        assertEquals(false, slots.payableFromAi)
+        assertEquals("rate_card", slots.quoteSource)
+        val book = client.bookTechGuide(slots.slotIds.first())
+        assertEquals(false, book.payableFromAi)
+        assertEquals(true, book.draftOnly)
+        assertEquals(5, step)
+    }
 }

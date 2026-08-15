@@ -57,6 +57,10 @@ private sealed interface Screen {
 
     data object Grocery : Screen
 
+    data object Promo : Screen
+
+    data object Tech : Screen
+
     data class Cart(
         val offer: SpareOfferHit,
     ) : Screen
@@ -96,6 +100,8 @@ fun DialApp(baseUrl: String) {
                 onOrders = { screen = Screen.Orders },
                 onGarage = { screen = Screen.Garage },
                 onGrocery = { screen = Screen.Grocery },
+                onPromo = { screen = Screen.Promo },
+                onTech = { screen = Screen.Tech },
                 onSignOut = {
                     cookies.clear()
                     session = null
@@ -118,6 +124,16 @@ fun DialApp(baseUrl: String) {
             GroceryBrowseScreen(
                 client = client,
                 onOpenCart = { offer -> screen = Screen.GroceryCart(offer) },
+                onBack = { screen = Screen.Browse },
+            )
+        Screen.Promo ->
+            PromoScreen(
+                client = client,
+                onBack = { screen = Screen.Browse },
+            )
+        Screen.Tech ->
+            TechDeepLinkScreen(
+                client = client,
                 onBack = { screen = Screen.Browse },
             )
         is Screen.Cart ->
@@ -236,6 +252,8 @@ private fun SpareBrowseScreen(
     onOrders: () -> Unit,
     onGarage: () -> Unit,
     onGrocery: () -> Unit,
+    onPromo: () -> Unit,
+    onTech: () -> Unit,
     onSignOut: () -> Unit,
 ) {
     var query by remember { mutableStateOf("") }
@@ -303,6 +321,8 @@ private fun SpareBrowseScreen(
             TextButton(onClick = onOrders) { Text("Orders") }
             TextButton(onClick = onGarage) { Text("Garage") }
             TextButton(onClick = onGrocery) { Text("Grocery") }
+            TextButton(onClick = onPromo) { Text("Promo") }
+            TextButton(onClick = onTech) { Text("Tech") }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -766,6 +786,176 @@ private fun GroceryCheckoutScreen(
         }
         OutlinedButton(onClick = { pay("cod") }, enabled = !loading, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
             Text("Cash on delivery (USD)")
+        }
+    }
+}
+
+@Composable
+private fun PromoScreen(
+    client: DialGatewayClient,
+    onBack: () -> Unit,
+) {
+    var code by remember { mutableStateOf("SPARE10") }
+    var campaignId by remember { mutableStateOf("") }
+    var status by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+    ) {
+        TextButton(onClick = onBack) { Text("← Spare") }
+        Text(
+            "Promo & referral",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+        )
+        Text("Draft discount only · never cash-out (D-42)", style = MaterialTheme.typography.bodySmall)
+        OutlinedTextField(
+            value = code,
+            onValueChange = { code = it },
+            label = { Text("Promo code") },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+        OutlinedTextField(
+            value = campaignId,
+            onValueChange = { campaignId = it },
+            label = { Text("Referral campaignId") },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        )
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        Button(
+            onClick = {
+                scope.launch {
+                    try {
+                        val v =
+                            withContext(Dispatchers.IO) {
+                                client.validatePromoCode(code.trim())
+                            }
+                        require(!v.payableFromAi && !v.cashOutAllowed)
+                        status = "Code ${v.code} · draft ${v.draftDiscountPercent}% · payableFromAi=false"
+                    } catch (e: Exception) {
+                        error = e.message
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+        ) {
+            Text("Validate code")
+        }
+        Button(
+            onClick = {
+                scope.launch {
+                    try {
+                        val share =
+                            withContext(Dispatchers.IO) {
+                                client.shareReferral(campaignId.trim())
+                            }
+                        require(!share.cashOutAllowed)
+                        status = "Share ${share.shareCode} · ${share.shareUrl}"
+                    } catch (e: Exception) {
+                        error = e.message
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        ) {
+            Text("Share referral")
+        }
+        OutlinedButton(
+            onClick = {
+                scope.launch {
+                    try {
+                        val allowed =
+                            withContext(Dispatchers.IO) {
+                                client.attemptPromoCashOut(100)
+                            }
+                        status = if (!allowed) "Cash-out blocked (D-42)" else "unexpected"
+                    } catch (e: Exception) {
+                        error = e.message
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        ) {
+            Text("Attempt cash-out (must fail)")
+        }
+    }
+}
+
+@Composable
+private fun TechDeepLinkScreen(
+    client: DialGatewayClient,
+    onBack: () -> Unit,
+) {
+    var status by remember { mutableStateOf<String?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        try {
+            val home =
+                withContext(Dispatchers.IO) {
+                    client.techHome()
+                }
+            status = "${home.guideTitle} · aiHypeForbidden=${home.aiHypeForbidden}"
+        } catch (e: Exception) {
+            error = e.message
+        }
+    }
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(16.dp),
+    ) {
+        TextButton(onClick = onBack) { Text("← Spare") }
+        Text(
+            "Dial a Tech",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold,
+        )
+        Text("rate_card draft only · AI never writes payable", style = MaterialTheme.typography.bodySmall)
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        status?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
+        Button(
+            onClick = {
+                scope.launch {
+                    try {
+                        val slots =
+                            withContext(Dispatchers.IO) {
+                                client.techSlots()
+                            }
+                        require(!slots.payableFromAi && slots.quoteSource == "rate_card")
+                        val slot = slots.slotIds.firstOrNull()
+                        if (slot != null) {
+                            val book =
+                                withContext(Dispatchers.IO) {
+                                    client.bookTechGuide(slot)
+                                }
+                            require(!book.payableFromAi && book.draftOnly)
+                            status =
+                                "Booked ${book.jobId} · draft USD ${book.draftAmountUsdMinor / 100.0} · payableFromAi=false"
+                        } else {
+                            status = "Slots loaded · quote rate_card · payableFromAi=false"
+                        }
+                    } catch (e: Exception) {
+                        error = e.message
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        ) {
+            Text("Book guide slot (deep-link)")
         }
     }
 }

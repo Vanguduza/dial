@@ -131,6 +131,68 @@ final class DialGatewayClientTests: XCTestCase {
         XCTAssertFalse(grocery.liquorSkus)
         XCTAssertEqual(step, 5)
     }
+
+    func testPd21PromoReferralAndTechDeepLink() throws {
+        var step = 0
+        let transport = MockTransport { method, url, _, body, _ in
+            if method == "POST", url.hasSuffix("/api/promo"), body!.contains("validate_code") {
+                XCTAssertFalse(body!.contains("userId"))
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"ok":true,"code":"SPARE10","draftDiscountPercent":10,"payableFromAi":false,"cashOutAllowed":false}"#
+                )
+            }
+            if method == "POST", url.hasSuffix("/api/promo"), body!.contains("share_referral") {
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"ok":true,"share":{"shareCode":"PD21-ALICE","shareUrl":"https://dial.zw/r/PD21-ALICE","cashOutAllowed":false,"rewardKind":"promo_credit"}}"#
+                )
+            }
+            if method == "POST", url.hasSuffix("/api/promo"), body!.contains("attempt_cash_out") {
+                step += 1
+                return HttpResponse(
+                    statusCode: 403,
+                    body: #"{"ok":false,"error":"promo_credit_cash_out_forbidden","cashOutAllowed":false}"#
+                )
+            }
+            if method == "GET", url.contains("/api/tech/services?view=slots") {
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"slots":[{"id":"slot_1"}],"quote":{"source":"rate_card","draftAmountUsdMinor":"4500","payableFromAi":false}}"#
+                )
+            }
+            if method == "POST", url.hasSuffix("/api/tech/services") {
+                XCTAssertTrue(body!.contains(#""action":"book""#))
+                XCTAssertFalse(body!.contains("userId"))
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"ok":true,"job":{"id":"job_1","draftOnly":true,"payableFromAi":false},"quote":{"draftAmountUsdMinor":"4500","payableFromAi":false,"source":"rate_card"}}"#
+                )
+            }
+            XCTFail("unexpected \(method) \(url)")
+            return HttpResponse(statusCode: 500, body: "{}")
+        }
+        let client = DialGatewayClient(baseUrl: "http://localhost:3000", cookies: MemoryCookieStore(), transport: transport)
+        let promo = try client.validatePromoCode(code: "SPARE10")
+        XCTAssertTrue(promo.ok)
+        XCTAssertFalse(promo.payableFromAi)
+        XCTAssertFalse(promo.cashOutAllowed)
+        let share = try client.shareReferral(campaignId: "pcamp_1", codeSuffix: "alice")
+        XCTAssertEqual(share.shareCode, "PD21-ALICE")
+        XCTAssertFalse(share.cashOutAllowed)
+        XCTAssertFalse(try client.attemptPromoCashOut(amountMinor: 300))
+        let slots = try client.techSlots()
+        XCTAssertFalse(slots.payableFromAi)
+        XCTAssertEqual(slots.quoteSource, "rate_card")
+        let book = try client.bookTechGuide(slotId: slots.slotIds.first!)
+        XCTAssertFalse(book.payableFromAi)
+        XCTAssertTrue(book.draftOnly)
+        XCTAssertEqual(step, 5)
+    }
 }
 
 struct MockTransport: HttpTransport {

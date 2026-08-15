@@ -43,3 +43,20 @@ export {
   type PromoAdminSnapshot,
   type ReferralEdgeAdmin,
 } from './admin.js'
+export {
+  __resetPromoCustomerForTests,
+  applyPromoCodeDraft,
+  attachReferralAsCustomer,
+  attemptCustomerPromoCashOut,
+  getAppliedPromoDraft,
+  getPromoCreditBalance,
+  grantPromoCredit,
+  registerPromoCode,
+  runPd21CustomerMobilePromoThinVertical,
+  shareReferral,
+  validatePromoCode,
+  type PromoCodeReject,
+  type PromoCodeValidation,
+  type PromoCreditBalance,
+  type ReferralSharePayload,
+} from './customer.js'
