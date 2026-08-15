@@ -2,7 +2,7 @@
  * Agency FDMS outbox (D-40a / D-59 / PD11) — virtual fiscalisation; in-house Gateway default.
  * AI never writes fiscal amounts. No physical printer required.
  */
-import { type Money } from "@dial/shared";
+import { money, type Money } from "@dial/shared";
 
 export type AgencyReceiptClass =
   | "DIAL_FEE"
@@ -223,4 +223,75 @@ export function __resetTaxForTests(): void {
   fiscalDay.fiscalDayId = null;
   fiscalDay.openedAt = null;
   fiscalDay.closedAt = null;
+}
+
+/** PD41 — agency receipt-class rollup for day-ops UX (D-59). */
+export function countFdmsReceiptClasses(): {
+  DIAL_FEE: number;
+  GOODS_FORMAL: number;
+  GOODS_INFORMAL: number;
+  queued: number;
+  submitted: number;
+  failed: number;
+} {
+  const counts = {
+    DIAL_FEE: 0,
+    GOODS_FORMAL: 0,
+    GOODS_INFORMAL: 0,
+    queued: 0,
+    submitted: 0,
+    failed: 0,
+  };
+  for (const r of outbox) {
+    counts[r.receiptClass] += 1;
+    counts[r.status] += 1;
+  }
+  return counts;
+}
+
+/**
+ * PD41 thin vertical: open day → seed three agency classes → counts → close day.
+ * Fixture Virtual Gateway; no physical printer; payable amounts are human/seed only.
+ */
+export function runPd41FdmsDayOpsThinVertical(): {
+  dayOpen: true;
+  receiptClassCounts: ReturnType<typeof countFdmsReceiptClasses>;
+  agencyClassesPresent: true;
+  printerRequired: false;
+  payableFromAi: false;
+  dayClosed: true;
+} {
+  __resetTaxForTests();
+  fiscalDay.fiscalDayId = `fd_pd41_${Date.now().toString(36)}`;
+  fiscalDay.openedAt = new Date().toISOString();
+  fiscalDay.closedAt = null;
+  const orderId = `ord_pd41_${Date.now().toString(36)}`;
+  for (const receiptClass of ["GOODS_FORMAL", "GOODS_INFORMAL", "DIAL_FEE"] as const) {
+    enqueueFiscalReceipt({
+      orderId,
+      receiptClass,
+      amount: money(
+        receiptClass === "DIAL_FEE" ? 300n : receiptClass === "GOODS_FORMAL" ? 4500n : 1200n,
+        "USD",
+      ),
+      channel: "web",
+    });
+  }
+  const receiptClassCounts = countFdmsReceiptClasses();
+  if (
+    receiptClassCounts.DIAL_FEE < 1 ||
+    receiptClassCounts.GOODS_FORMAL < 1 ||
+    receiptClassCounts.GOODS_INFORMAL < 1
+  ) {
+    throw new Error("PD41 expected all three agency receipt classes");
+  }
+  fiscalDay.closedAt = new Date().toISOString();
+  return {
+    dayOpen: true,
+    receiptClassCounts,
+    agencyClassesPresent: true,
+    printerRequired: false,
+    payableFromAi: false,
+    dayClosed: true,
+  };
 }

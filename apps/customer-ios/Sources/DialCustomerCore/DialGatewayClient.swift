@@ -20,6 +20,8 @@ public struct SpareOfferHit: Equatable, Sendable, Identifiable {
     public let qualityTier: String
     public let offerSource: String
     public let supplierFormality: String
+    /// Agency disclosure — Sold by {Supplier} Agency (D-58 / PD42).
+    public let soldBy: String
 }
 
 public struct SpareSearchResult: Equatable, Sendable {
@@ -83,6 +85,8 @@ public struct GroceryOfferHit: Equatable, Sendable, Identifiable {
     public let coldChain: Bool
     public let offerSource: String
     public let supplierFormality: String
+    /// Agency supplier display name (D-58 / PD42).
+    public let supplierDisplayName: String
 }
 
 public struct GrocerySearchResult: Equatable, Sendable {
@@ -98,6 +102,18 @@ public struct GroceryCheckoutResult: Equatable, Sendable {
     public let cartTotalUsdMinor: Int64
     public let soldBy: String?
     public let imttOnCheckoutLines: Bool
+    public let groceryOrderId: String?
+}
+
+public struct GroceryTrackResult: Equatable, Sendable {
+    public let orderId: String
+    public let status: String
+    public let statusFrom: String
+    public let currency: String
+    public let totalUsdMinor: Int64
+    public let payChoice: String
+    public let soldBy: String
+    public let liquorAllowed: Bool
 }
 
 public struct PromoCodeResult: Equatable, Sendable {
@@ -478,6 +494,22 @@ public final class DialGatewayClient: @unchecked Sendable {
         return parseGroceryCheckout(res.body)
     }
 
+    /// PD42 — grocery ERP track parity with web `/api/grocery/track`.
+    public func trackGrocery(orderId: String) throws -> GroceryTrackResult {
+        let enc = orderId.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? orderId
+        let res = try transport.request(
+            method: "GET",
+            url: "\(baseUrl)/api/grocery/track?orderId=\(enc)",
+            headers: ["Accept": "application/json"],
+            body: nil,
+            cookieHeader: cookies.getCookieHeader()
+        )
+        guard (200 ... 299).contains(res.statusCode) else {
+            throw DialGatewayError.http(status: res.statusCode, message: parseError(res.body) ?? "grocery track failed")
+        }
+        return parseGroceryTrack(res.body)
+    }
+
     /// PD21 — validate promo code (draft only; D-42).
     public func validatePromoCode(code: String, vertical: String = "spare") throws -> PromoCodeResult {
         let body =
@@ -690,7 +722,11 @@ func parseSpareSearch(_ body: String) throws -> SpareSearchResult {
                 oem: f("oem"),
                 qualityTier: f("qualityTier"),
                 offerSource: f("offerSource"),
-                supplierFormality: f("supplierFormality")
+                supplierFormality: f("supplierFormality"),
+                soldBy: {
+                    let s = f("soldBy")
+                    return s.isEmpty ? "\(f("brand")) Agency" : s
+                }()
             )
         )
     }
@@ -822,7 +858,11 @@ func parseGrocerySearch(_ body: String) -> GrocerySearchResult {
                     unitLabel: f("unitLabel"),
                     coldChain: cold,
                     offerSource: f("offerSource"),
-                    supplierFormality: f("supplierFormality")
+                    supplierFormality: f("supplierFormality"),
+                    supplierDisplayName: {
+                        let s = f("supplierDisplayName")
+                        return s.isEmpty ? f("brand") : s
+                    }()
                 )
             )
         }
@@ -838,6 +878,26 @@ func parseGroceryCheckout(_ body: String) -> GroceryCheckoutResult {
         soldBy: optionalField("soldBy", in: body),
         imttOnCheckoutLines: {
             if let r = try? NSRegularExpression(pattern: #""imttOnCheckoutLines"\s*:\s*true"#),
+               r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
+                return true
+            }
+            return false
+        }(),
+        groceryOrderId: optionalField("groceryOrderId", in: body)
+    )
+}
+
+func parseGroceryTrack(_ body: String) -> GroceryTrackResult {
+    GroceryTrackResult(
+        orderId: (try? field("orderId", in: body)) ?? "",
+        status: (try? field("status", in: body)) ?? "",
+        statusFrom: (try? field("statusFrom", in: body)) ?? "erp",
+        currency: (try? field("currency", in: body)) ?? "USD",
+        totalUsdMinor: intField("totalUsdMinor", in: body),
+        payChoice: (try? field("payChoice", in: body)) ?? "",
+        soldBy: (try? field("soldBy", in: body)) ?? "",
+        liquorAllowed: {
+            if let r = try? NSRegularExpression(pattern: #""liquorAllowed"\s*:\s*true"#),
                r.firstMatch(in: body, range: NSRange(body.startIndex..., in: body)) != nil {
                 return true
             }

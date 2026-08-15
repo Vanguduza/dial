@@ -64,6 +64,8 @@ export async function GET(req: Request) {
         supplierFormality: h.supplierFormality,
         oem: h.oem,
         brand: h.brand,
+        /** Agency disclosure — Sold by {Supplier} Agency (D-58 / PD42). */
+        soldBy: `${h.brand} Agency`,
       })),
     });
   } catch (e) {

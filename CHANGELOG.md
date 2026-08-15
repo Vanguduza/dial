@@ -11,6 +11,9 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD42 iOS/Android customer parity** — Spare search `soldBy` agency disclosure; grocery `supplierDisplayName` + `trackGrocery` vs web; USD EcoCash|COD; C-5 no Expo.
+- **PD41 FDMS day ops UX deepen** — Virtual Gateway day banner, agency receipt-class counts, drain-only, auto-refresh; `runPd41FdmsDayOpsThinVertical` (D-59; no printer).
+- **PD40 WA template registry admin polish** — env key hints, FLOW_SPARE_* + FLOW_GROCERY_* badges, sandbox template send; Cloud API only; no Baileys/liquor; payableFromAi=false.
 - **PD39 ContiPay + PayPal sandbox deepen** — sandbox createPayment/verifyWebhook fail-closed without keys; fixture path unchanged; [#43](https://github.com/Vanguduza/dial/issues/43).
 - **PD38 Supplier heartbeat + confirm SLA harden** — heartbeat healthy\|stale\|missing; confirm SLA breach escalations + ack; portal `/supplier` SLA panel; payableFromAi=false; [#42](https://github.com/Vanguduza/dial/issues/42).
 - **PD37 Local Playwright recon** — Chromium dial-webapp-recon Spare+grocery+WA (live localhost or harness); `spare-browse` testid; ENH-011 local path; [#41](https://github.com/Vanguduza/dial/issues/41).

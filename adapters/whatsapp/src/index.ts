@@ -1088,8 +1088,10 @@ export {
 export {
   listWaTemplateRegistry,
   resolveWaTemplate,
+  runPd40WaTemplateRegistryThinVertical,
   type WaTemplateBinding,
   type WaTemplateKey,
+  type WaTemplateVertical,
 } from "./templateRegistry.js";
 
 export {

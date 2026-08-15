@@ -30,7 +30,7 @@ final class DialGatewayClientTests: XCTestCase {
             XCTAssertEqual(cookie, "dial_session=tok")
             return HttpResponse(
                 statusCode: 200,
-                body: #"{"q":"filter","currency":"USD","sessionRole":"b2c","hits":[{"offerId":"o1","title":"Oil filter","unitPriceUsdMinor":"1250","brand":"Bosch","oem":"OEM1","qualityTier":"OEM","offerSource":"MARKETPLACE","supplierFormality":"formal"}]}"#
+                body: #"{"q":"filter","currency":"USD","sessionRole":"b2c","hits":[{"offerId":"o1","title":"Oil filter","unitPriceUsdMinor":"1250","brand":"Bosch","oem":"OEM1","qualityTier":"OEM","offerSource":"MARKETPLACE","supplierFormality":"formal","soldBy":"Bosch Agency"}]}"#
             )
         }
         let client = DialGatewayClient(baseUrl: "http://localhost:3000", cookies: store, transport: transport)
@@ -38,6 +38,7 @@ final class DialGatewayClientTests: XCTestCase {
         XCTAssertEqual(result.currency, "USD")
         XCTAssertEqual(result.hits.count, 1)
         XCTAssertEqual(result.hits[0].unitPriceUsdMinor, 1250)
+        XCTAssertEqual(result.hits[0].soldBy, "Bosch Agency")
     }
 
     func testCheckoutRejectsNonButtonChoice() {
@@ -106,7 +107,14 @@ final class DialGatewayClientTests: XCTestCase {
                 step += 1
                 return HttpResponse(
                     statusCode: 200,
-                    body: #"{"q":"mealie","currency":"USD","liquorSkus":false,"hits":[{"offerId":"g1","title":"Mealie meal","unitPriceUsdMinor":"500","brand":"Ngwena","unitLabel":"2kg","coldChain":false,"offerSource":"MARKETPLACE","supplierFormality":"formal"}]}"#
+                    body: #"{"q":"mealie","currency":"USD","liquorSkus":false,"hits":[{"offerId":"g1","title":"Mealie meal","unitPriceUsdMinor":"500","brand":"Ngwena","unitLabel":"2kg","coldChain":false,"offerSource":"MARKETPLACE","supplierFormality":"formal","supplierDisplayName":"OK Express Agency"}]}"#
+                )
+            }
+            if method == "GET", url.contains("/api/grocery/track") {
+                step += 1
+                return HttpResponse(
+                    statusCode: 200,
+                    body: #"{"orderId":"gord_1","status":"confirmed","statusFrom":"erp","currency":"USD","totalUsdMinor":"500","payChoice":"cod","soldBy":"OK Express Agency","liquorAllowed":false}"#
                 )
             }
             XCTFail("unexpected \(method) \(url)")
@@ -129,7 +137,11 @@ final class DialGatewayClientTests: XCTestCase {
         let grocery = try client.searchGrocery(q: "mealie")
         XCTAssertEqual(grocery.currency, "USD")
         XCTAssertFalse(grocery.liquorSkus)
-        XCTAssertEqual(step, 5)
+        XCTAssertEqual(grocery.hits[0].supplierDisplayName, "OK Express Agency")
+        let gTrack = try client.trackGrocery(orderId: "gord_1")
+        XCTAssertEqual(gTrack.soldBy, "OK Express Agency")
+        XCTAssertFalse(gTrack.liquorAllowed)
+        XCTAssertEqual(step, 6)
     }
 
     func testPd21PromoReferralAndTechDeepLink() throws {

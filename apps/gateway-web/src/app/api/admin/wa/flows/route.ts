@@ -1,5 +1,5 @@
 /**
- * Admin WA Flows sandbox status / thin-vertical probe (PD12 / D-40).
+ * Admin WA Flows sandbox status / thin-vertical probe (PD12 / PD40 / D-40).
  * Fail closed without INTERNAL_API_SECRET. Official Cloud API only.
  */
 import { NextResponse } from "next/server";
@@ -7,8 +7,11 @@ import {
   listWaFlowRegistry,
   listWaSandboxOutbound,
   listWaTemplateRegistry,
+  MetaCloudApiAdapter,
   pingWhatsAppHealth,
   runPd12WaFlowsSandboxThinVertical,
+  runPd40WaTemplateRegistryThinVertical,
+  type WaTemplateKey,
 } from "@dial/adapter-whatsapp";
 import { integrationMode } from "@dial/queues";
 
@@ -41,6 +44,8 @@ export async function GET(req: Request) {
     sandboxOutbound: listWaSandboxOutbound(),
     liquorFlows: false,
     baileysForbidden: true,
+    payableFromAi: false,
+    pd40: runPd40WaTemplateRegistryThinVertical(),
   });
 }
 
@@ -49,11 +54,45 @@ export async function POST(req: Request) {
   if (denied) return denied;
 
   const body = (await req.json().catch(() => ({}))) as {
-    action?: "thin_vertical";
+    action?: "thin_vertical" | "send_sandbox_template";
+    templateKey?: string;
+    toE164?: string;
+    userId?: unknown;
+    role?: unknown;
   };
+  if (body.userId !== undefined || body.role !== undefined) {
+    return NextResponse.json(
+      { error: "userId/role from body rejected (D-47)" },
+      { status: 400 },
+    );
+  }
+
+  if (body.action === "send_sandbox_template") {
+    const key = (body.templateKey ?? "SPARE_ORDER_CONFIRMED") as WaTemplateKey;
+    const toE164 = body.toE164 ?? "+263771234567";
+    try {
+      const sent = await new MetaCloudApiAdapter().sendRegisteredTemplate({
+        toE164,
+        key,
+      });
+      return NextResponse.json({
+        ok: true,
+        messageId: sent.messageId,
+        binding: sent.binding,
+        payableFromAi: false,
+        note: "PD40 sandbox/fixture template send — no payable amounts",
+      });
+    } catch (e) {
+      return NextResponse.json(
+        { error: e instanceof Error ? e.message : "template send failed" },
+        { status: 400 },
+      );
+    }
+  }
+
   if (body.action !== "thin_vertical") {
     return NextResponse.json(
-      { error: "action must be thin_vertical" },
+      { error: "action must be thin_vertical|send_sandbox_template" },
       { status: 400 },
     );
   }

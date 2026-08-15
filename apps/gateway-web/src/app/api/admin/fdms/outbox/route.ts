@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { drainMoneyOutbox, enqueueMoneyOutbox, listMoneyOutbox } from "@dial/ledger";
 import {
+  countFdmsReceiptClasses,
   enqueueFiscalReceipt,
   getFiscalDayState,
   listFdmsOutbox,
@@ -46,12 +47,13 @@ export async function GET(req: Request) {
       createdAt: r.createdAt,
       submittedAt: r.submittedAt,
     })),
+    receiptClassCounts: countFdmsReceiptClasses(),
     queuedCount: listQueuedFdmsReceipts().length,
     moneyFiscalPending: listMoneyOutbox().filter((r) => r.kind === "fiscal_queued")
       .length,
     gateway: "zimra_virtual_in_house",
     printerRequired: false,
-    note: "D-59 agency Virtual Gateway — no physical printer",
+    note: "D-59 agency Virtual Gateway — no physical printer (PD41 day ops)",
   });
 }
 

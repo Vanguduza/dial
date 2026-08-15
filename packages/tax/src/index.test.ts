@@ -5,6 +5,7 @@ import {
   __resetTaxForTests,
   enqueueFiscalReceipt,
   listFdmsOutbox,
+  runPd41FdmsDayOpsThinVertical,
 } from "./index.js";
 
 test("enqueue FiscalReceiptQueued agency classes on in-house Gateway", () => {
@@ -113,4 +114,14 @@ test("S107 drain FDMS day queue then process", async () => {
     await processFdmsDayJob(job);
   }
   assert.ok(getFiscalDayState().closedAt);
+});
+
+test("PD41 FDMS day ops thin vertical — agency class counts", () => {
+  const out = runPd41FdmsDayOpsThinVertical();
+  assert.equal(out.agencyClassesPresent, true);
+  assert.equal(out.printerRequired, false);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.receiptClassCounts.DIAL_FEE >= 1);
+  assert.ok(out.receiptClassCounts.GOODS_FORMAL >= 1);
+  assert.ok(out.receiptClassCounts.GOODS_INFORMAL >= 1);
 });

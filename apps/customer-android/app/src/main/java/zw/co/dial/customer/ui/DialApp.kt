@@ -360,6 +360,10 @@ private fun SpareBrowseScreen(
                                 style = MaterialTheme.typography.bodySmall,
                             )
                             Text(
+                                "Sold by ${offer.soldBy}",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            Text(
                                 "USD ${"%.2f".format(offer.unitPriceUsdMinor / 100.0)}",
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(top = 8.dp),
@@ -733,6 +737,10 @@ private fun GroceryBrowseScreen(
                         Column(Modifier = Modifier.padding(12.dp)) {
                             Text(offer.title, fontWeight = FontWeight.SemiBold)
                             Text("${offer.brand} · ${offer.unitLabel}")
+                            Text(
+                                "Sold by ${offer.supplierDisplayName}",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
                             Text("USD ${"%.2f".format(offer.unitPriceUsdMinor / 100.0)}")
                             Button(onClick = { onOpenCart(offer) }) { Text("Checkout") }
                         }
@@ -759,7 +767,12 @@ private fun GroceryCheckoutScreen(
         scope.launch {
             try {
                 withContext(Dispatchers.IO) {
-                    client.checkoutGrocery(offer.offerId, choice)
+                    val checkout = client.checkoutGrocery(offer.offerId, choice)
+                    val oid = checkout.groceryOrderId
+                    if (!oid.isNullOrBlank()) {
+                        val track = client.trackGrocery(oid)
+                        check(!track.liquorAllowed)
+                    }
                 }
                 onPaid()
             } catch (e: Exception) {
@@ -779,6 +792,7 @@ private fun GroceryCheckoutScreen(
     ) {
         TextButton(onClick = onBack) { Text("← Grocery") }
         Text(offer.title, fontWeight = FontWeight.Bold)
+        Text("Sold by ${offer.supplierDisplayName}", style = MaterialTheme.typography.bodySmall)
         Text("USD ${"%.2f".format(offer.unitPriceUsdMinor / 100.0)}")
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         Button(onClick = { pay("ecocash") }, enabled = !loading, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {

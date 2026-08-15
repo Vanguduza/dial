@@ -20,6 +20,8 @@ data class SpareOfferHit(
     val qualityTier: String,
     val offerSource: String,
     val supplierFormality: String,
+    /** Agency disclosure — Sold by {Supplier} Agency (D-58 / PD42). */
+    val soldBy: String,
 )
 
 data class SpareSearchResult(
@@ -80,6 +82,8 @@ data class GroceryOfferHit(
     val coldChain: Boolean,
     val offerSource: String,
     val supplierFormality: String,
+    /** Agency supplier display name (D-58 / PD42). */
+    val supplierDisplayName: String,
 )
 
 data class GrocerySearchResult(
@@ -95,6 +99,18 @@ data class GroceryCheckoutResult(
     val cartTotalUsdMinor: Long,
     val soldBy: String?,
     val imttOnCheckoutLines: Boolean,
+    val groceryOrderId: String? = null,
+)
+
+data class GroceryTrackResult(
+    val orderId: String,
+    val status: String,
+    val statusFrom: String,
+    val currency: String,
+    val totalUsdMinor: Long,
+    val payChoice: String,
+    val soldBy: String,
+    val liquorAllowed: Boolean,
 )
 
 class DialGatewayException(message: String, val statusCode: Int = 0) : Exception(message)
@@ -434,6 +450,26 @@ class DialGatewayClient(
         return parseGroceryCheckout(res.body)
     }
 
+    /** PD42 — grocery ERP track parity with web `/api/grocery/track`. */
+    fun trackGrocery(orderId: String): GroceryTrackResult {
+        val encoded = java.net.URLEncoder.encode(orderId, Charsets.UTF_8)
+        val res =
+            transport.request(
+                method = "GET",
+                url = "$baseUrl/api/grocery/track?orderId=$encoded",
+                headers = mapOf("Accept" to "application/json"),
+                body = null,
+                cookieHeader = cookies.getCookieHeader(),
+            )
+        if (res.statusCode !in 200..299) {
+            throw DialGatewayException(
+                parseError(res.body) ?: "grocery track failed",
+                res.statusCode,
+            )
+        }
+        return parseGroceryTrack(res.body)
+    }
+
     /** PD21 — validate / apply promo code (draft only; D-42). */
     fun validatePromoCode(code: String, vertical: String = "spare"): PromoCodeResult {
         val body =
@@ -754,6 +790,7 @@ internal fun parseSpareSearch(body: String): SpareSearchResult {
                 qualityTier = f("qualityTier"),
                 offerSource = f("offerSource"),
                 supplierFormality = f("supplierFormality"),
+                soldBy = f("soldBy").ifBlank { "${f("brand")} Agency" },
             ),
         )
     }
@@ -881,6 +918,7 @@ internal fun parseGrocerySearch(body: String): GrocerySearchResult {
                 coldChain = Regex(""""coldChain"\s*:\s*true""").containsMatchIn(chunk),
                 offerSource = f("offerSource"),
                 supplierFormality = f("supplierFormality"),
+                supplierDisplayName = f("supplierDisplayName").ifBlank { f("brand") },
             ),
         )
     }
@@ -902,6 +940,26 @@ internal fun parseGroceryCheckout(body: String): GroceryCheckoutResult {
         imttOnCheckoutLines =
             Regex(""""imttOnCheckoutLines"\s*:\s*true""")
                 .containsMatchIn(body),
+        groceryOrderId = f("groceryOrderId"),
+    )
+}
+
+internal fun parseGroceryTrack(body: String): GroceryTrackResult {
+    fun f(name: String): String =
+        Regex(""""$name"\s*:\s*"([^"]*)"""").find(body)?.groupValues?.get(1).orEmpty()
+    fun n(name: String): Long {
+        val s = Regex(""""$name"\s*:\s*"?(\d+)"?""").find(body)?.groupValues?.get(1)
+        return s?.toLongOrNull() ?: 0L
+    }
+    return GroceryTrackResult(
+        orderId = f("orderId"),
+        status = f("status"),
+        statusFrom = f("statusFrom").ifBlank { "erp" },
+        currency = f("currency").ifBlank { "USD" },
+        totalUsdMinor = n("totalUsdMinor"),
+        payChoice = f("payChoice"),
+        soldBy = f("soldBy"),
+        liquorAllowed = Regex(""""liquorAllowed"\s*:\s*true""").containsMatchIn(body),
     )
 }
 

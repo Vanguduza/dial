@@ -1,17 +1,26 @@
 /**
- * Admin WA Flows sandbox ops (PD12) — Virtual Cloud API Flows, no Baileys, no liquor.
+ * Admin WA Flows + template registry (PD12 / PD40) — Cloud API only, no Baileys, no liquor.
  */
 "use client";
 
 import { useCallback, useState } from "react";
+import { dialTokens } from "@dial/design-tokens";
 
 type FlowsStatus = {
   mode?: string;
   health?: { ok?: boolean; mode?: string };
   flows?: Array<{ key: string; flowId: string; status: string; vertical: string }>;
-  templates?: Array<{ key: string; templateName: string; status: string }>;
+  templates?: Array<{
+    key: string;
+    templateName: string;
+    status: string;
+    envKeyHint?: string;
+    vertical?: string;
+    payableFromAi?: boolean;
+  }>;
   sandboxOutbound?: Array<{ kind: string; messageId: string }>;
   liquorFlows?: boolean;
+  baileysForbidden?: boolean;
   error?: string;
 };
 
@@ -45,20 +54,33 @@ export default function AdminWaFlowsPage() {
     }
   }
 
-  async function runThinVertical() {
+  async function runAction(action: "thin_vertical" | "send_sandbox_template") {
     setBusy(true);
     setMsg(null);
     try {
       const res = await fetch("/api/admin/wa/flows", {
         method: "POST",
         headers: headers(),
-        body: JSON.stringify({ action: "thin_vertical" }),
+        body: JSON.stringify({
+          action,
+          ...(action === "send_sandbox_template"
+            ? { templateKey: "SPARE_ORDER_CONFIRMED", toE164: "+263771234567" }
+            : {}),
+        }),
       });
-      const data = (await res.json()) as { ok?: boolean; error?: string; result?: unknown };
+      const data = (await res.json()) as {
+        ok?: boolean;
+        error?: string;
+        result?: unknown;
+      };
       if (!res.ok) {
         setMsg(data.error ?? `HTTP ${res.status}`);
       } else {
-        setMsg("Thin vertical OK — Spare EcoCash + grocery COD via sandbox Cloud API");
+        setMsg(
+          action === "thin_vertical"
+            ? "Thin vertical OK — Spare EcoCash + grocery COD via sandbox Cloud API"
+            : "Sandbox template send OK (no payable amounts)",
+        );
         await refresh();
       }
     } finally {
@@ -66,32 +88,76 @@ export default function AdminWaFlowsPage() {
     }
   }
 
+  const spareFlows = (status?.flows ?? []).filter((f) =>
+    f.key.startsWith("FLOW_SPARE_"),
+  );
+  const groceryFlows = (status?.flows ?? []).filter((f) =>
+    f.key.startsWith("FLOW_GROCERY_"),
+  );
+
   return (
-    <main style={{ padding: "1.5rem", maxWidth: 720, fontFamily: "system-ui" }}>
-      <h1 style={{ fontSize: "1.35rem", marginBottom: "0.35rem" }}>
-        WA Flows sandbox
+    <main
+      data-testid="admin-wa-templates"
+      style={{
+        minHeight: "100vh",
+        padding: dialTokens.space.md,
+        maxWidth: 800,
+        margin: "0 auto",
+        fontFamily: `${dialTokens.font.body}, system-ui, sans-serif`,
+        color: dialTokens.color.brand.ink,
+        background: dialTokens.color.brand.surface,
+      }}
+    >
+      <h1
+        style={{
+          fontFamily: `${dialTokens.font.display}, Georgia, serif`,
+          fontSize: "clamp(1.35rem, 4vw, 1.85rem)",
+          color: dialTokens.color.brand.primary,
+          marginBottom: 4,
+        }}
+      >
+        WA Flows + template registry
       </h1>
-      <p style={{ color: "#444", marginTop: 0 }}>
+      <p style={{ color: "#444", marginTop: 0, fontSize: 14 }}>
         Official Meta Cloud API only (D-40). FLOW_SPARE_* + FLOW_GROCERY_* food.
-        EcoCash | COD buttons same payment intents as web (D-57). No liquor Flows.
-        No Baileys.
+        EcoCash | COD buttons (D-57). No liquor Flows. No Baileys. Templates never
+        carry AI payables.
       </p>
-      <label style={{ display: "block", marginBottom: "0.75rem" }}>
+      <label style={{ display: "block", marginBottom: 12, fontSize: 14 }}>
         Internal secret
         <input
           type="password"
           value={secret}
           onChange={(e) => setSecret(e.target.value)}
-          style={{ display: "block", width: "100%", marginTop: 4 }}
+          style={{
+            display: "block",
+            width: "100%",
+            marginTop: 4,
+            padding: 10,
+            borderRadius: 8,
+            border: "1px solid #ccc",
+          }}
           autoComplete="off"
         />
       </label>
-      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-        <button type="button" disabled={busy} onClick={() => void refresh()}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <button type="button" disabled={busy || !secret} onClick={() => void refresh()}>
           Refresh status
         </button>
-        <button type="button" disabled={busy} onClick={() => void runThinVertical()}>
+        <button
+          type="button"
+          disabled={busy || !secret}
+          onClick={() => void runAction("thin_vertical")}
+        >
           Run PD12 thin vertical
+        </button>
+        <button
+          type="button"
+          disabled={busy || !secret}
+          data-testid="wa-send-sandbox-template"
+          onClick={() => void runAction("send_sandbox_template")}
+        >
+          Send sandbox template
         </button>
         <a href="/admin/money/outbox">Money outbox</a>
         <a href="/admin/fdms">FDMS</a>
@@ -103,11 +169,19 @@ export default function AdminWaFlowsPage() {
         </p>
       ) : null}
       {status && !status.error ? (
-        <section style={{ marginTop: "1.25rem" }}>
+        <section style={{ marginTop: 20 }}>
           <p>
             Mode: <strong>{status.mode}</strong> · health ok:{" "}
             {String(status.health?.ok)} · liquor Flows:{" "}
-            {String(status.liquorFlows)}
+            <span data-testid="wa-liquor-flows">{String(status.liquorFlows)}</span>{" "}
+            · Baileys forbidden:{" "}
+            <span data-testid="wa-baileys-forbidden">
+              {String(status.baileysForbidden)}
+            </span>
+          </p>
+          <p data-testid="wa-flow-badges" style={{ fontSize: 14 }}>
+            <strong>FLOW_SPARE_*</strong> ×{spareFlows.length} ·{" "}
+            <strong>FLOW_GROCERY_*</strong> ×{groceryFlows.length}
           </p>
           <h2 style={{ fontSize: "1.05rem" }}>Registered Flows</h2>
           <ul>
@@ -117,11 +191,18 @@ export default function AdminWaFlowsPage() {
               </li>
             ))}
           </ul>
-          <h2 style={{ fontSize: "1.05rem" }}>Templates</h2>
-          <ul>
+          <h2 style={{ fontSize: "1.05rem" }}>Template registry</h2>
+          <p style={{ fontSize: 13, opacity: 0.7 }}>
+            Set env hint to promote stub → approved (ops Meta name).
+          </p>
+          <ul data-testid="wa-template-registry">
             {(status.templates ?? []).map((t) => (
               <li key={t.key}>
-                {t.key} → {t.templateName} ({t.status})
+                <strong>{t.key}</strong> → {t.templateName} ({t.status}
+                {t.vertical ? `, ${t.vertical}` : ""})
+                {t.envKeyHint ? (
+                  <code style={{ marginLeft: 6, fontSize: 12 }}>{t.envKeyHint}</code>
+                ) : null}
               </li>
             ))}
           </ul>

@@ -40,7 +40,7 @@ class DialGatewayClientTest {
                 HttpResponse(
                     statusCode = 200,
                     body =
-                        """{"q":"filter","currency":"USD","sessionRole":"b2c","hits":[{"offerId":"o1","title":"Oil filter","unitPriceUsdMinor":"1250","brand":"Bosch","oem":"OEM1","qualityTier":"OEM","offerSource":"MARKETPLACE","supplierFormality":"formal"}]}""",
+                        """{"q":"filter","currency":"USD","sessionRole":"b2c","hits":[{"offerId":"o1","title":"Oil filter","unitPriceUsdMinor":"1250","brand":"Bosch","oem":"OEM1","qualityTier":"OEM","offerSource":"MARKETPLACE","supplierFormality":"formal","soldBy":"Bosch Agency"}]}""",
                     setCookieHeaders = emptyList(),
                 )
             }
@@ -52,6 +52,7 @@ class DialGatewayClientTest {
         assertEquals(1, result.hits.size)
         assertEquals(1250L, result.hits[0].unitPriceUsdMinor)
         assertEquals("MARKETPLACE", result.hits[0].offerSource)
+        assertEquals("Bosch Agency", result.hits[0].soldBy)
     }
 
     @Test
@@ -135,7 +136,15 @@ class DialGatewayClientTest {
                         HttpResponse(
                             statusCode = 200,
                             body =
-                                """{"q":"mealie","currency":"USD","liquorSkus":false,"hits":[{"offerId":"g1","title":"Mealie meal","unitPriceUsdMinor":"500","brand":"Ngwena","unitLabel":"2kg","coldChain":false,"offerSource":"MARKETPLACE","supplierFormality":"formal"}]}""",
+                                """{"q":"mealie","currency":"USD","liquorSkus":false,"hits":[{"offerId":"g1","title":"Mealie meal","unitPriceUsdMinor":"500","brand":"Ngwena","unitLabel":"2kg","coldChain":false,"offerSource":"MARKETPLACE","supplierFormality":"formal","supplierDisplayName":"OK Express Agency"}]}""",
+                        )
+                    }
+                    method == "GET" && url.contains("/api/grocery/track") -> {
+                        step++
+                        HttpResponse(
+                            statusCode = 200,
+                            body =
+                                """{"orderId":"gord_1","status":"confirmed","statusFrom":"erp","currency":"USD","totalUsdMinor":"500","payChoice":"cod","soldBy":"OK Express Agency","liquorAllowed":false}""",
                         )
                     }
                     else -> error("unexpected $method $url")
@@ -154,7 +163,11 @@ class DialGatewayClientTest {
         val grocery = client.searchGrocery("mealie")
         assertEquals("USD", grocery.currency)
         assertEquals(false, grocery.liquorSkus)
-        assertEquals(5, step)
+        assertEquals("OK Express Agency", grocery.hits[0].supplierDisplayName)
+        val gTrack = client.trackGrocery("gord_1")
+        assertEquals("OK Express Agency", gTrack.soldBy)
+        assertEquals(false, gTrack.liquorAllowed)
+        assertEquals(6, step)
     }
 
     @Test

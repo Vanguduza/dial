@@ -559,6 +559,9 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | --- | --- |
 | Supplier heartbeat + confirm SLA harden | **PD38** |
 | ContiPay/PayPal sandbox deepen | **PD39** |
+| WA template registry admin polish (sandbox) | **PD40** |
+| FDMS day ops UX deepen | **PD41** |
+| iOS/Android customer parity holes | **PD42** |
 | Remote staging Playwright matrix | ENH-011 remainder (optional human URL) |
 | Liquor Build | counsel gate — not eng |
 
@@ -578,14 +581,36 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Issue | [#43](https://github.com/Vanguduza/dial/issues/43) |
 | Thin path | sandbox createPayment+verifyWebhook fail-closed without keys; fixture path unchanged |
 | Evidence | `runPd39ContiPayPaypalSandboxThinVertical` |
+| Green → | **PD40** WA template registry |
+
+### PD40 — WA template registry admin polish (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | env key hints; FLOW_SPARE_* + FLOW_GROCERY_*; sandbox template send; Cloud API only; no Baileys/liquor |
+| Evidence | `runPd40WaTemplateRegistryThinVertical`; `pd40WaTemplateRegistry.test.ts` |
+| Green → | **PD41** FDMS day ops |
+
+### PD41 — FDMS day ops UX deepen (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | day banner + agency receipt-class counts + drain-only + auto-refresh; Virtual Gateway (D-59) |
+| Evidence | `runPd41FdmsDayOpsThinVertical`; `pd41FdmsDayOps.test.ts` |
+| Green → | **PD42** mobile parity |
+
+### PD42 — iOS/Android customer parity (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | Spare `soldBy` on search; grocery `supplierDisplayName` + `trackGrocery`; USD EcoCash\|COD; C-5 |
+| Evidence | `pd42MobileParity.test.ts`; DialGatewayClient iOS/Android contract tests |
 | Green → | eng-safe continue ≠ S99 |
 
-### Pack / product gap audit (after PD39)
+### Pack / product gap audit (after PD42)
 
 | Gap | Stage |
 | --- | --- |
-| WA template registry admin polish (sandbox) | fold next |
-| FDMS day ops UX deepen | fold next |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 

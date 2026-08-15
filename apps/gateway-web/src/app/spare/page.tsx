@@ -139,7 +139,7 @@ export default async function SpareBrowsePage({
                 USD {(Number(h.unitPriceUsdMinor) / 100).toFixed(2)}
               </span>
               <span style={{ fontSize: 12, opacity: 0.55 }}>
-                Sold by agency supplier · {h.supplierFormality}
+                Sold by {h.brand} Agency · {h.supplierFormality}
               </span>
             </Link>
           </li>

@@ -132,6 +132,9 @@ struct RootView: View {
                         Text("\(offer.brand) · \(offer.qualityTier)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                        Text("Sold by \(offer.soldBy)")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                         Text(String(format: "USD %.2f", Double(offer.unitPriceUsdMinor) / 100))
                             .fontWeight(.semibold)
                     }
@@ -210,6 +213,9 @@ struct RootView: View {
                     VStack(alignment: .leading) {
                         Text(offer.title).font(.headline)
                         Text("\(offer.brand) · \(offer.unitLabel)")
+                        Text("Sold by \(offer.supplierDisplayName)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                         Text(String(format: "USD %.2f", Double(offer.unitPriceUsdMinor) / 100))
                     }
                 }
@@ -244,10 +250,20 @@ struct RootView: View {
             Button("← Grocery") { grocerySelected = nil }
             Text("Grocery cart (USD)").font(.title2.bold())
             Text(offer.title)
+            Text("Sold by \(offer.supplierDisplayName)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
             Button("Pay EcoCash") {
                 run {
                     let result = try client.checkoutGrocery(offerId: offer.offerId, choice: "ecocash")
-                    status = "Grocery EcoCash · \(result.currency) \(result.cartTotalUsdMinor)"
+                    var note = "Grocery EcoCash · \(result.currency) \(result.cartTotalUsdMinor)"
+                    if let soldBy = result.soldBy { note += " · \(soldBy)" }
+                    if let oid = result.groceryOrderId {
+                        let track = try client.trackGrocery(orderId: oid)
+                        precondition(track.liquorAllowed == false)
+                        note += " · track \(track.status)"
+                    }
+                    status = note
                     grocerySelected = nil
                     tab = .grocery
                 }

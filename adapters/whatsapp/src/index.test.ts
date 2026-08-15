@@ -287,10 +287,13 @@ test("S106 template registry + sendRegisteredTemplate fixture", async () => {
   const {
     listWaTemplateRegistry,
     resolveWaTemplate,
+    runPd40WaTemplateRegistryThinVertical,
   } = await import("./templateRegistry.js");
   const list = listWaTemplateRegistry();
   assert.ok(list.length >= 4);
   assert.equal(resolveWaTemplate("SPARE_ORDER_CONFIRMED").status, "stub");
+  assert.ok(list.every((t) => t.envKeyHint.startsWith("WA_TEMPLATE_")));
+  assert.ok(list.every((t) => t.payableFromAi === false));
   process.env.WA_TEMPLATE_SPARE_ORDER_CONFIRMED = "spare_order_confirmed_v2";
   assert.equal(resolveWaTemplate("SPARE_ORDER_CONFIRMED").status, "approved");
   assert.equal(
@@ -304,6 +307,11 @@ test("S106 template registry + sendRegisteredTemplate fixture", async () => {
   });
   assert.ok(sent.messageId.includes("spare_order_confirmed_v2"));
   delete process.env.WA_TEMPLATE_SPARE_ORDER_CONFIRMED;
+  const pd40 = runPd40WaTemplateRegistryThinVertical();
+  assert.ok(pd40.spareTemplateCount >= 2);
+  assert.ok(pd40.groceryTemplateCount >= 2);
+  assert.equal(pd40.baileysForbidden, true);
+  assert.equal(pd40.liquorTemplates, false);
 });
 
 test("PD12 grocery food Flows: home→search→cart→slot→COD; no liquor", async () => {
