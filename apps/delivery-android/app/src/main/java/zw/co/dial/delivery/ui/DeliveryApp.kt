@@ -30,7 +30,7 @@ import zw.co.dial.delivery.network.DialDeliveryClient
 import zw.co.dial.delivery.network.MemoryCookieStore
 
 /**
- * Pack §9.8 thin UI: offer Accept|Reject → transit → location → POD → COD.
+ * Pack §9.8 thin UI: offer Accept|Reject → transit → ETA/stops/VROOM → POD → COD.
  * MapLibre track is admin web; this app posts courier_locations for that SoR.
  */
 @Composable
@@ -42,6 +42,8 @@ fun DeliveryApp(baseUrl: String) {
     var password by remember { mutableStateOf("") }
     var offerId by remember { mutableStateOf<String?>(null) }
     var jobId by remember { mutableStateOf<String?>(null) }
+    var etaBanner by remember { mutableStateOf("ETA — start run") }
+    var stopList by remember { mutableStateOf("Stops — start run") }
     var status by remember { mutableStateOf("Go available, then seed/accept offer.") }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
@@ -76,7 +78,7 @@ fun DeliveryApp(baseUrl: String) {
             fontWeight = FontWeight.Bold,
         )
         Text(
-            "Compose · availability · MapLibre offline packs · packages/delivery",
+            "Compose · ETA · navigate stops · VROOM · MapLibre/OSRM",
             style = MaterialTheme.typography.bodySmall,
         )
 
@@ -107,6 +109,13 @@ fun DeliveryApp(baseUrl: String) {
                 Text("Sign in")
             }
         } else {
+            Text(
+                etaBanner,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Text(stopList, style = MaterialTheme.typography.bodySmall)
             Text(status, style = MaterialTheme.typography.bodyMedium)
             Button(
                 onClick = {
@@ -187,12 +196,42 @@ fun DeliveryApp(baseUrl: String) {
                     run {
                         client.startTransit(jid)
                         client.postLocation(-17.8292, 31.0522, jid)
-                        status = "In transit · location posted (MapLibre track)"
+                        val eta = client.getEtaBanner(jid)
+                        val stops = client.listNavigateStops(jid)
+                        etaBanner =
+                            "ETA ${eta.etaMinutes} min · ${eta.nextStopLabel} · ${eta.provider}"
+                        stopList =
+                            stops
+                                .sortedBy { it.sequence }
+                                .joinToString(" → ") { "${it.sequence}. ${it.label}" }
+                        status = "In transit · OSRM ETA + navigate stops (MapLibre SoR)"
                     }
                 },
                 enabled = jobId != null,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Start run + post location") }
+            ) { Text("Start run + ETA + stops") }
+            Button(
+                onClick = {
+                    val jid = jobId ?: return@Button
+                    run {
+                        val opt = client.reoptimiseStops(jid)
+                        etaBanner =
+                            "ETA ${opt.etaMinutes} min after VROOM · ${opt.provider}"
+                        stopList =
+                            opt.stopLabels
+                                .mapIndexed { i, l -> "${i + 1}. $l" }
+                                .joinToString(" → ")
+                        status =
+                            if (opt.orderChanged) {
+                                "Re-optimised remaining stops (VROOM) · MapLibre/OSRM"
+                            } else {
+                                "Re-optimise requested · order unchanged"
+                            }
+                    }
+                },
+                enabled = jobId != null,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Request VROOM re-optimise") }
             Button(
                 onClick = {
                     val jid = jobId ?: return@Button
@@ -214,7 +253,7 @@ fun DeliveryApp(baseUrl: String) {
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         Spacer(Modifier.height(8.dp))
         Text(
-            "PD28 · available|busy|offline · Harare/Bulawayo MapLibre packs · not Google",
+            "PD29 · OSRM ETA · navigate stops · VROOM re-optimise · not Google",
             style = MaterialTheme.typography.labelSmall,
         )
     }

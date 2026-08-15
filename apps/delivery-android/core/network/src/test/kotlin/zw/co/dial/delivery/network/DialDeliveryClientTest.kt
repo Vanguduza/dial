@@ -73,6 +73,52 @@ class DialDeliveryClientTest {
     }
 
     @Test
+    fun pd29_eta_stops_reoptimise_never_sends_identity() {
+        val bodies = mutableListOf<String>()
+        val transport =
+            HttpTransport { method, url, _, body, _ ->
+                if (method == "POST" && url.contains("/api/delivery/courier") && body != null) {
+                    bodies.add(body)
+                    assertTrue(!body.contains("userId"))
+                    assertTrue(!body.contains("\"role\""))
+                }
+                when {
+                    body?.contains("get_eta_banner") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"etaBanner":{"etaMinutes":12,"distanceMeters":4200,"provider":"fixture","nextStopLabel":"Supplier hub","remainingStopCount":3,"mapSor":"maplibre"},"mapSor":"maplibre"}""",
+                            emptyList(),
+                        )
+                    body?.contains("list_navigate_stops") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"stops":[{"id":"s1","sequence":1,"kind":"pickup","label":"Supplier hub","status":"pending"},{"id":"s2","sequence":2,"kind":"waypoint","label":"Borrowdale","status":"pending"}],"mapSor":"maplibre"}""",
+                            emptyList(),
+                        )
+                    body?.contains("reoptimise_stops") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"provider":"fixture","orderChanged":true,"etaBanner":{"etaMinutes":10,"distanceMeters":4000,"provider":"fixture","nextStopLabel":"Borrowdale","remainingStopCount":2,"mapSor":"maplibre"},"stops":[{"id":"s2","sequence":1,"kind":"waypoint","label":"Borrowdale","status":"pending"},{"id":"s1","sequence":2,"kind":"pickup","label":"Supplier hub","status":"pending"}],"mapSor":"maplibre","googleMapsSor":false}""",
+                            emptyList(),
+                        )
+                    else ->
+                        HttpResponse(200, """{"ok":true}""", emptyList())
+                }
+            }
+        val client = DialDeliveryClient("http://localhost:3000", MemoryCookieStore(), transport)
+        val eta = client.getEtaBanner("dj_1")
+        assertEquals(12, eta.etaMinutes)
+        assertEquals("maplibre", eta.mapSor)
+        val stops = client.listNavigateStops("dj_1")
+        assertEquals(2, stops.size)
+        val opt = client.reoptimiseStops("dj_1")
+        assertTrue(opt.orderChanged)
+        assertEquals("fixture", opt.provider)
+        assertEquals("maplibre", opt.mapSor)
+        assertTrue(bodies.all { !it.contains("userId") })
+    }
+
+    @Test
     fun reject_invalid_availability() {
         val client = DialDeliveryClient("http://localhost:3000")
         assertFailsWith<IllegalArgumentException> {

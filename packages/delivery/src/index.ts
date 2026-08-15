@@ -10,6 +10,14 @@ import {
   listCourierOfflinePacks,
   listOfflinePackDefinitions,
 } from "./offlinePacks.js";
+import {
+  __resetNavigateStopsForTests,
+  getEtaBanner,
+  listNavigateStops,
+  openNavigateRun,
+  reoptimiseRemainingStops,
+  refreshEtaBanner,
+} from "./navigateStops.js";
 
 export {
   activateOfflinePack,
@@ -21,6 +29,19 @@ export {
   type OfflinePackDefinition,
   type OfflinePackId,
 } from "./offlinePacks.js";
+
+export {
+  completeNavigateStop,
+  getEtaBanner,
+  getNavigateRun,
+  listNavigateStops,
+  openNavigateRun,
+  refreshEtaBanner,
+  reoptimiseRemainingStops,
+  type DeliveryNavigateRun,
+  type DeliveryNavigateStop,
+  type EtaBanner,
+} from "./navigateStops.js";
 
 export type CourierId = string;
 
@@ -647,6 +668,74 @@ export function runPd28AvailabilityOfflinePacksThinVertical(input?: {
   };
 }
 
+/**
+ * PD29 thin vertical: accept → navigate stops → OSRM ETA banner → VROOM re-optimise.
+ */
+export async function runPd29EtaStopsVroomThinVertical(input?: {
+  courierId?: string;
+}): Promise<{
+  stopCount: number;
+  etaMinutes: number;
+  etaProvider: string;
+  orderChanged: true;
+  optimiseProvider: "vroom" | "fixture";
+  mapSor: "maplibre";
+  googleMapsSor: false;
+  payableFromAi: false;
+}> {
+  process.env.DIAL_INTEGRATION_MODE = process.env.DIAL_INTEGRATION_MODE ?? "fixture";
+  const courierId = input?.courierId ?? "cour_pd29";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+  const job = createDeliveryJob({
+    orderId: "ord_pd29",
+    from: "supplier_hub_harare",
+    to: "customer_avondale",
+    codUsdMinor: 18_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offerId = getDeliveryJob(job.id)?.offerId;
+  if (!offerId) throw new Error("PD29 expected offer");
+  acceptOffer(offerId, courierId);
+  setCourierAvailabilityStatus(courierId, "busy");
+  startTransit(job.id);
+
+  const run = await openNavigateRun({
+    jobId: job.id,
+    courierId,
+    pickupAddress: "supplier_hub_harare",
+    waypointAddress: "waypoint_borrowdale",
+    dropoffAddress: "customer_avondale",
+  });
+  const stopsBefore = listNavigateStops(job.id);
+  if (stopsBefore.length < 3) {
+    throw new Error("PD29 expected multi-stop navigate list");
+  }
+  const banner = await refreshEtaBanner(job.id);
+  if (banner.etaMinutes < 1 || banner.mapSor !== "maplibre" || banner.googleMapsSor) {
+    throw new Error("PD29 ETA banner must be OSRM/fixture via MapLibre SoR");
+  }
+  const opt = await reoptimiseRemainingStops(job.id);
+  if (!opt.orderChanged || opt.googleMapsSor || opt.mapSor !== "maplibre") {
+    throw new Error("PD29 VROOM re-optimise must reorder remaining stops");
+  }
+  const afterBanner = getEtaBanner(job.id);
+  if (!afterBanner || afterBanner.remainingStopCount < 2) {
+    throw new Error("PD29 expected remaining stops after re-optimise");
+  }
+
+  return {
+    stopCount: run.stops.length,
+    etaMinutes: banner.etaMinutes,
+    etaProvider: banner.provider,
+    orderChanged: true,
+    optimiseProvider: opt.provider,
+    mapSor: "maplibre",
+    googleMapsSor: false,
+    payableFromAi: false,
+  };
+}
+
 export function __resetDeliveryForTests(): void {
   jobs.clear();
   offers.clear();
@@ -657,4 +746,5 @@ export function __resetDeliveryForTests(): void {
   courierAvailability.clear();
   courierLocations.clear();
   __resetOfflinePacksForTests();
+  __resetNavigateStopsForTests();
 }

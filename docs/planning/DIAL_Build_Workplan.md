@@ -98,7 +98,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 135 | `PD29` | **Delivery ETA + stops / VROOM re-optimise** — Pack §9.8 residual | new issue | ETA banner (OSRM); navigate stop list; request re-optimise | `PD30` |
 | 136 | `PD30` | **Technician mock-location / camera deepen** — Pack §9.7 residual | new issue | Mock-location detection; evidence camera polish | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD28 is **PD29**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD29 is **PD30**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -428,21 +428,25 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd28AvailabilityOfflinePacksThinVertical`; `pd28AvailabilityOffline.test.ts`; Compose client |
 | Green → | **PD29** Delivery ETA + stops / VROOM |
 
-### Pack §9 gap audit (after PD28)
+### PD29 — Delivery ETA + stops / VROOM (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | accept → start run → OSRM ETA banner → navigate stop list → VROOM re-optimise remaining |
+| Evidence | `runPd29EtaStopsVroomThinVertical`; `pd29EtaStopsVroom.test.ts`; Compose ETA/stops/VROOM |
+| Green → | **PD30** Technician mock-location / evidence-camera |
+
+### Pack §9 gap audit (after PD29)
 
 | § | Gap remaining | Stage |
 | --- | --- | --- |
-| 9.8 | ETA banner + navigate stops / VROOM re-optimise | **PD29** |
 | 9.7 | Mock-location / evidence camera deepen | **PD30** (optional) |
-| 9.1–9.6 | Primary surfaces covered by PD1–PD27 | defer polish — founder may prioritize |
+| 9.1–9.6 / 9.8 | Primary covered PD1–PD29 | defer polish — founder may prioritize |
 
 Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
 
-### PD29 — Delivery ETA + stops / VROOM (NEXT)
-
-Pack §9.8 residual — ETA banner (OSRM); navigate stop list; request re-optimise.
-
-### PD30 — Technician mock-location / camera deepen
+### PD30 — Technician mock-location / camera deepen (NEXT)
 
 Pack §9.7 residual — optional deepen after PD29.
 

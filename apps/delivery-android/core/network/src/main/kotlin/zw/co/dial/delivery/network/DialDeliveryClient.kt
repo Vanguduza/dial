@@ -44,6 +44,31 @@ data class OfflinePackInstallDto(
     val mapSor: String,
 )
 
+data class EtaBannerDto(
+    val etaMinutes: Int,
+    val distanceMeters: Int,
+    val provider: String,
+    val nextStopLabel: String,
+    val remainingStopCount: Int,
+    val mapSor: String,
+)
+
+data class NavigateStopDto(
+    val id: String,
+    val sequence: Int,
+    val kind: String,
+    val label: String,
+    val status: String,
+)
+
+data class ReoptimiseResultDto(
+    val provider: String,
+    val orderChanged: Boolean,
+    val etaMinutes: Int,
+    val stopLabels: List<String>,
+    val mapSor: String,
+)
+
 class DialDeliveryException(message: String, val statusCode: Int = 0) : Exception(message)
 
 interface CookieStore {
@@ -214,6 +239,27 @@ class DialDeliveryClient(
             ?: throw DialDeliveryException("activate_offline_pack missing install")
     }
 
+    /** PD29 — OSRM ETA banner (D-44). */
+    fun getEtaBanner(jobId: String): EtaBannerDto {
+        val body =
+            postAction("""{"action":"get_eta_banner","jobId":${jsonString(jobId)}}""")
+        return parseEtaBanner(body)
+            ?: throw DialDeliveryException("get_eta_banner missing banner")
+    }
+
+    fun listNavigateStops(jobId: String): List<NavigateStopDto> {
+        val body =
+            postAction("""{"action":"list_navigate_stops","jobId":${jsonString(jobId)}}""")
+        return parseNavigateStops(body)
+    }
+
+    fun reoptimiseStops(jobId: String): ReoptimiseResultDto {
+        val body =
+            postAction("""{"action":"reoptimise_stops","jobId":${jsonString(jobId)}}""")
+        return parseReoptimise(body)
+            ?: throw DialDeliveryException("reoptimise_stops missing result")
+    }
+
     private fun get(path: String): HttpResponse {
         val res =
             transport.request(
@@ -327,5 +373,69 @@ internal fun parseOfflineInstall(body: String): OfflinePackInstallDto? {
         packId = f("packId"),
         status = f("status"),
         mapSor = f("mapSor").ifEmpty { "maplibre" },
+    )
+}
+
+internal fun parseEtaBanner(body: String): EtaBannerDto? {
+    val chunk =
+        Regex(""""etaBanner"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun s(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    fun i(n: String) =
+        Regex(""""$n"\s*:\s*(\d+)""").find(chunk)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+    return EtaBannerDto(
+        etaMinutes = i("etaMinutes"),
+        distanceMeters = i("distanceMeters"),
+        provider = s("provider"),
+        nextStopLabel = s("nextStopLabel"),
+        remainingStopCount = i("remainingStopCount"),
+        mapSor = s("mapSor").ifEmpty { "maplibre" },
+    )
+}
+
+internal fun parseNavigateStops(body: String): List<NavigateStopDto> {
+    val block =
+        Regex(""""stops"\s*:\s*\[(.*?)]""", RegexOption.DOT_MATCHES_ALL)
+            .find(body)
+            ?.groupValues
+            ?.get(1)
+            .orEmpty()
+    return Regex("""\{[^{}]*"id"\s*:\s*"([^"]+)"[^{}]*\}""")
+        .findAll(block)
+        .map { m ->
+            val chunk = m.value
+            fun s(n: String) =
+                Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+            fun i(n: String) =
+                Regex(""""$n"\s*:\s*(\d+)""").find(chunk)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            NavigateStopDto(
+                id = s("id"),
+                sequence = i("sequence"),
+                kind = s("kind"),
+                label = s("label"),
+                status = s("status"),
+            )
+        }
+        .toList()
+}
+
+internal fun parseReoptimise(body: String): ReoptimiseResultDto? {
+    val provider =
+        Regex(""""provider"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1) ?: return null
+    val orderChanged =
+        body.contains("\"orderChanged\":true") || body.contains("\"orderChanged\": true")
+    val banner = parseEtaBanner(body)
+    val stops = parseNavigateStops(body)
+    return ReoptimiseResultDto(
+        provider = provider,
+        orderChanged = orderChanged,
+        etaMinutes = banner?.etaMinutes ?: 0,
+        stopLabels = stops.sortedBy { it.sequence }.map { it.label },
+        mapSor =
+            Regex(""""mapSor"\s*:\s*"([^"]+)"""").find(body)?.groupValues?.get(1)
+                ?: "maplibre",
     )
 }

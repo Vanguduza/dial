@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD29 Delivery ETA + navigate stops / VROOM** — OSRM ETA banner; multi-stop navigate list; courier request re-optimise remaining via VROOM (D-44 MapLibre/OSRM/VROOM SoR); Compose + `/api/delivery/courier` actions; eng next **PD30**.
 - **PD28 Delivery availability + offline packs** — `available`/`busy`/`offline` eligibility for offers; Harare + Bulawayo MapLibre offline tile packs (D-44); Compose UI + `/api/delivery/courier` actions; Pack §9 audit authored **PD29–PD30**.
 - **PD27 Spare Select Vehicle / Browse EPC** — dual entry `vehicle_master` cascade + `catalog_*` EPC browse; join on `chassis_code`; OpenCatalog/ACES fixtures (C-6, no reverse-engineered EPC); USD offers (D-57); B2B informal hide (D-49); `/spare/entry` + `/api/spare/entry`.
 - **PD26 Gateway home Shop|Services** — Welcome-back + Shop|Services primary lanes (Pack §9.1); session restore; responsive mobile-first stacked→dual at 768px; `/api/home` session SoR; B2B supplier under Shop; Rive deferred; payableFromAi=false.

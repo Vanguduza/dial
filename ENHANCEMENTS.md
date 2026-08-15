@@ -425,6 +425,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-441 | **PD27 Spare Select Vehicle / Browse EPC** — chassis join; USD; D-49 | `done` | Pack §9.2 / C-6; `/spare/entry` |
 | ENH-442 | **PD28 Delivery availability + offline packs** — MapLibre Harare/Bulawayo | `done` | Pack §9.8 / D-44; Compose |
 | ENH-443 | **Product-depth band PD29–PD30** authored (ETA/stops → tech camera) | `done` | Pack §9 gap audit after PD28; eng next ≠ S99 |
+| ENH-444 | **PD29 Delivery ETA + stops / VROOM** — OSRM banner; navigate; re-optimise | `done` | Pack §9.8 / D-44; Compose |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

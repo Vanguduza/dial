@@ -155,3 +155,16 @@ test("PD28 availability + Harare/Bulawayo offline packs; MapLibre SoR", () => {
   assert.equal(out.googleMapsSor, false);
   assert.equal(out.payableFromAi, false);
 });
+
+test("PD29 ETA banner + navigate stops + VROOM re-optimise", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { runPd29EtaStopsVroomThinVertical } = await import("./index.js");
+  const out = await runPd29EtaStopsVroomThinVertical({ courierId: "cour_pd29_t" });
+  assert.ok(out.stopCount >= 3);
+  assert.ok(out.etaMinutes >= 1);
+  assert.equal(out.orderChanged, true);
+  assert.equal(out.optimiseProvider, "fixture");
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.googleMapsSor, false);
+  assert.equal(out.payableFromAi, false);
+});

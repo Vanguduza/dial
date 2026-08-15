@@ -10,15 +10,21 @@ import {
   createDeliveryJob,
   getCourierAvailability,
   getDeliveryJob,
+  getEtaBanner,
+  getNavigateRun,
   getOffer,
   listCourierLocations,
   listCourierOfflinePacks,
   listJobsForCourier,
+  listNavigateStops,
   listOffersForCourier,
   listOfflinePackDefinitions,
+  openNavigateRun,
   postCourierLocation,
   reconcileCodAfterPod,
+  refreshEtaBanner,
   rejectOffer,
+  reoptimiseRemainingStops,
   setCourierAvailabilityStatus,
   startDeliveryDispatchWorkflow,
   startTransit,
@@ -72,16 +78,31 @@ export async function GET(req: Request) {
       note: "D-44 MapLibre — not Google/Mapbox",
     });
   }
+  const jobs = listJobsForCourier(courierId);
+  const activeJob = jobs.find(
+    (j) => j.status === "assigned" || j.status === "in_transit",
+  );
+  const navigate =
+    activeJob && getNavigateRun(activeJob.id)
+      ? {
+          jobId: activeJob.id,
+          etaBanner: getEtaBanner(activeJob.id),
+          stops: listNavigateStops(activeJob.id),
+          mapSor: "maplibre" as const,
+          note: "D-44 OSRM ETA + VROOM re-optimise — not Google/Mapbox",
+        }
+      : null;
   return NextResponse.json({
     courierId,
     availability: getCourierAvailability(courierId),
     offers: listOffersForCourier(courierId),
-    jobs: listJobsForCourier(courierId).map((j) => serializeJob(j)),
+    jobs: jobs.map((j) => serializeJob(j)),
     offlinePacks: {
       available: listOfflinePackDefinitions(),
       installed: listCourierOfflinePacks(courierId),
       mapSor: "maplibre",
     },
+    navigate,
   });
 }
 
@@ -184,7 +205,79 @@ export async function POST(req: Request) {
       }
       case "start_transit": {
         const job = startTransit(String(body.jobId ?? ""));
-        return NextResponse.json({ ok: true, job: serializeJob(job) });
+        if (job.assignedCourierId !== courierId) {
+          return NextResponse.json({ error: "Job not assigned to courier" }, { status: 403 });
+        }
+        let run = getNavigateRun(job.id);
+        if (!run) {
+          run = await openNavigateRun({
+            jobId: job.id,
+            courierId,
+          });
+        }
+        return NextResponse.json({
+          ok: true,
+          job: serializeJob(job),
+          navigate: {
+            etaBanner: run.etaBanner,
+            stops: run.stops,
+            mapSor: "maplibre",
+          },
+        });
+      }
+      case "get_eta_banner": {
+        const jobId = String(body.jobId ?? "");
+        const job = getDeliveryJob(jobId);
+        if (!job || job.assignedCourierId !== courierId) {
+          return NextResponse.json({ error: "Job not assigned to courier" }, { status: 403 });
+        }
+        if (!getNavigateRun(jobId)) {
+          await openNavigateRun({ jobId, courierId });
+        }
+        const etaBanner = await refreshEtaBanner(jobId);
+        return NextResponse.json({
+          ok: true,
+          etaBanner,
+          mapSor: "maplibre",
+          note: "OSRM duration → ETA minutes (D-44)",
+        });
+      }
+      case "list_navigate_stops": {
+        const jobId = String(body.jobId ?? "");
+        const job = getDeliveryJob(jobId);
+        if (!job || job.assignedCourierId !== courierId) {
+          return NextResponse.json({ error: "Job not assigned to courier" }, { status: 403 });
+        }
+        if (!getNavigateRun(jobId)) {
+          await openNavigateRun({ jobId, courierId });
+        }
+        return NextResponse.json({
+          ok: true,
+          stops: listNavigateStops(jobId),
+          etaBanner: getEtaBanner(jobId),
+          mapSor: "maplibre",
+        });
+      }
+      case "reoptimise_stops": {
+        const jobId = String(body.jobId ?? "");
+        const job = getDeliveryJob(jobId);
+        if (!job || job.assignedCourierId !== courierId) {
+          return NextResponse.json({ error: "Job not assigned to courier" }, { status: 403 });
+        }
+        if (!getNavigateRun(jobId)) {
+          await openNavigateRun({ jobId, courierId });
+        }
+        const result = await reoptimiseRemainingStops(jobId);
+        return NextResponse.json({
+          ok: true,
+          provider: result.provider,
+          orderChanged: result.orderChanged,
+          stops: result.run.stops,
+          etaBanner: result.run.etaBanner,
+          mapSor: result.mapSor,
+          googleMapsSor: result.googleMapsSor,
+          note: "VROOM re-optimise remaining — MapLibre/OSRM SoR (D-44)",
+        });
       }
       case "post_location": {
         const loc = postCourierLocation({
