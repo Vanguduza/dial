@@ -9,6 +9,7 @@ import {
   activateOfflinePack,
   capturePod,
   createDeliveryJob,
+  createJobsFromMultiStopPlan,
   evaluateCodCollect,
   getCourierAvailability,
   getCourierCodFloat,
@@ -192,6 +193,56 @@ export async function POST(req: Request) {
           workflowId: wf.workflowId,
           job: serializeJob(offered),
           offer: offered.offerId ? getOffer(offered.offerId) : null,
+        });
+      }
+      case "seed_multi_stop": {
+        // PD36: multi-vendor same band/slot → one job (grill Q15).
+        setCourierAvailabilityStatus(courierId, "available");
+        const vendorsRaw = Array.isArray(body.vendors) ? body.vendors : null;
+        if (!vendorsRaw || vendorsRaw.length < 1) {
+          return NextResponse.json(
+            { error: "vendors[] required for seed_multi_stop" },
+            { status: 400 },
+          );
+        }
+        const vendors = vendorsRaw.map((v) => {
+          const row = v as Record<string, unknown>;
+          return {
+            supplierId: String(row.supplierId ?? ""),
+            supplierDisplayName: String(row.supplierDisplayName ?? "Agency"),
+            pickupAddress: String(row.pickupAddress ?? "supplier_hub_harare"),
+            deliveryBandId: String(row.deliveryBandId ?? "harare_metro"),
+            slotId: String(row.slotId ?? "slot_harare_am"),
+            vertical: (String(row.vertical ?? "grocery") === "spare"
+              ? "spare"
+              : "grocery") as "grocery" | "spare",
+            ageGateRequired: false as const,
+            hasRestrictedSku: false as const,
+          };
+        });
+        const result = createJobsFromMultiStopPlan({
+          orderId: String(body.orderId ?? `ord_ms_${Date.now().toString(36)}`),
+          dropoffAddress: String(body.dropoffAddress ?? "customer_avondale"),
+          vendors,
+          ...(body.codUsdMinor
+            ? { codUsdMinor: BigInt(String(body.codUsdMinor)) }
+            : { codUsdMinor: 22_00n }),
+          createJob: createDeliveryJob,
+        });
+        const workflows = result.jobs.map((job) =>
+          startDeliveryDispatchWorkflow(job.id),
+        );
+        return NextResponse.json({
+          ok: true,
+          consolidated: result.consolidated,
+          jobCount: result.jobCount,
+          liquorAllowed: false,
+          podSpoilageRulesUnchanged: true,
+          payableFromAi: false,
+          plans: result.plans,
+          jobs: result.jobs.map((j) => serializeJob(getDeliveryJob(j.id)!)),
+          workflows: workflows.map((w) => w.workflowId),
+          note: "PD36 grill Q15 — one multi-stop job when same band/slot",
         });
       }
       case "accept_offer": {

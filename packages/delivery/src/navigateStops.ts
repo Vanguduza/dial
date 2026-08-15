@@ -166,6 +166,7 @@ async function computeEtaBanner(
 /**
  * Open a navigate run after accept — default 3-stop path (pickup → waypoint → dropoff)
  * so VROOM re-optimise can reorder remaining.
+ * PD36: pass `stops` for multi-pickup → dropoff (same band/slot consolidation).
  */
 export async function openNavigateRun(input: {
   jobId: string;
@@ -173,46 +174,71 @@ export async function openNavigateRun(input: {
   pickupAddress?: string;
   dropoffAddress?: string;
   waypointAddress?: string;
+  /** Explicit ordered stops (PD36 multi-vendor). Overrides default 3-stop path. */
+  stops?: Array<{
+    kind: DeliveryStopKind;
+    address: string;
+    label?: string;
+  }>;
 }): Promise<DeliveryNavigateRun> {
-  const pickup = pinFor(input.pickupAddress ?? "supplier_hub_harare");
-  const waypoint = pinFor(input.waypointAddress ?? "waypoint_borrowdale");
-  const dropoff = pinFor(input.dropoffAddress ?? "customer_avondale");
-  const stops: DeliveryNavigateStop[] = [
-    {
-      id: stopId("stp"),
-      jobId: input.jobId,
-      sequence: 1,
-      kind: pickup.kind,
-      label: pickup.label,
-      address: pickup.address,
-      lat: pickup.lat,
-      lng: pickup.lng,
-      status: "pending",
-    },
-    {
-      id: stopId("stp"),
-      jobId: input.jobId,
-      sequence: 2,
-      kind: waypoint.kind,
-      label: waypoint.label,
-      address: waypoint.address,
-      lat: waypoint.lat,
-      lng: waypoint.lng,
-      status: "pending",
-    },
-    {
-      id: stopId("stp"),
-      jobId: input.jobId,
-      sequence: 3,
-      kind: dropoff.kind,
-      label: dropoff.label,
-      address: dropoff.address,
-      lat: dropoff.lat,
-      lng: dropoff.lng,
-      status: "pending",
-    },
-  ];
-  const etaBanner = await computeEtaBanner(input.jobId, stops, pickup.address);
+  let stops: DeliveryNavigateStop[];
+  if (input.stops?.length) {
+    stops = input.stops.map((s, i) => {
+      const pin = pinFor(s.address);
+      return {
+        id: stopId("stp"),
+        jobId: input.jobId,
+        sequence: i + 1,
+        kind: s.kind,
+        label: s.label ?? pin.label,
+        address: s.address,
+        lat: pin.lat,
+        lng: pin.lng,
+        status: "pending" as const,
+      };
+    });
+  } else {
+    const pickup = pinFor(input.pickupAddress ?? "supplier_hub_harare");
+    const waypoint = pinFor(input.waypointAddress ?? "waypoint_borrowdale");
+    const dropoff = pinFor(input.dropoffAddress ?? "customer_avondale");
+    stops = [
+      {
+        id: stopId("stp"),
+        jobId: input.jobId,
+        sequence: 1,
+        kind: pickup.kind,
+        label: pickup.label,
+        address: pickup.address,
+        lat: pickup.lat,
+        lng: pickup.lng,
+        status: "pending",
+      },
+      {
+        id: stopId("stp"),
+        jobId: input.jobId,
+        sequence: 2,
+        kind: waypoint.kind,
+        label: waypoint.label,
+        address: waypoint.address,
+        lat: waypoint.lat,
+        lng: waypoint.lng,
+        status: "pending",
+      },
+      {
+        id: stopId("stp"),
+        jobId: input.jobId,
+        sequence: 3,
+        kind: dropoff.kind,
+        label: dropoff.label,
+        address: dropoff.address,
+        lat: dropoff.lat,
+        lng: dropoff.lng,
+        status: "pending",
+      },
+    ];
+  }
+  const firstAddress = stops[0]?.address ?? "supplier_hub_harare";
+  const etaBanner = await computeEtaBanner(input.jobId, stops, firstAddress);
   const run: DeliveryNavigateRun = {
     jobId: input.jobId,
     courierId: input.courierId,

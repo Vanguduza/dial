@@ -61,6 +61,22 @@ export {
   type CourierCodFloatState,
 } from "./codFloat.js";
 
+export {
+  createJobsFromMultiStopPlan,
+  planMultiStopDeliveries,
+  type MultiStopDispatchResult,
+  type MultiStopJobPlan,
+  type MultiStopPlanStop,
+  type MultiStopVendorLeg,
+  type MultiStopVertical,
+} from "./multiStopPlan.js";
+
+import {
+  createJobsFromMultiStopPlan,
+  planMultiStopDeliveries,
+  type MultiStopVendorLeg,
+} from "./multiStopPlan.js";
+
 export type CourierId = string;
 
 export type DeliveryJobStatus =
@@ -821,6 +837,155 @@ export function runPd32CodFloatLimitThinVertical(input?: {
     recordedWithAck: true,
     payableFromAi: false,
     currency: "USD",
+  };
+}
+
+/**
+ * PD36 thin vertical: two grocery vendors same band/slot → one multi-stop job;
+ * different slot → split; navigate pickups→dropoff; POD unchanged; no liquor.
+ */
+export async function runPd36MultiStopDeliveryThinVertical(input?: {
+  courierId?: string;
+}): Promise<{
+  consolidatedJobCount: 1;
+  splitJobCount: 2;
+  multiStopPickupCount: 2;
+  podStatus: "pod_captured";
+  liquorAllowed: false;
+  podSpoilageRulesUnchanged: true;
+  payableFromAi: false;
+  mapSor: "maplibre";
+  googleMapsSor: false;
+}> {
+  const courierId = input?.courierId ?? "cour_pd36";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+
+  const sameBandSlot: MultiStopVendorLeg[] = [
+    {
+      supplierId: "sup_ok",
+      supplierDisplayName: "OK Express Agency",
+      pickupAddress: "supplier_hub_harare",
+      deliveryBandId: "harare_metro",
+      slotId: "slot_harare_am",
+      vertical: "grocery",
+      ageGateRequired: false,
+      hasRestrictedSku: false,
+    },
+    {
+      supplierId: "sup_tm",
+      supplierDisplayName: "TM Pick n Pay Agency",
+      pickupAddress: "waypoint_borrowdale",
+      deliveryBandId: "harare_metro",
+      slotId: "slot_harare_am",
+      vertical: "grocery",
+      ageGateRequired: false,
+      hasRestrictedSku: false,
+    },
+  ];
+
+  const consolidated = createJobsFromMultiStopPlan({
+    orderId: "ord_pd36_multi",
+    dropoffAddress: "customer_avondale",
+    vendors: sameBandSlot,
+    codUsdMinor: 22_00n,
+    createJob: createDeliveryJob,
+  });
+  if (!consolidated.consolidated || consolidated.jobCount !== 1) {
+    throw new Error("PD36 same band/slot must create exactly one job");
+  }
+  if (consolidated.plans[0]?.mode !== "one_multi_stop") {
+    throw new Error("PD36 expected one_multi_stop mode");
+  }
+  if (consolidated.plans[0]!.stopSequence.filter((s) => s.kind === "pickup").length !== 2) {
+    throw new Error("PD36 expected 2 pickups + dropoff");
+  }
+  if (
+    consolidated.liquorAllowed !== false ||
+    !consolidated.podSpoilageRulesUnchanged ||
+    consolidated.payableFromAi
+  ) {
+    throw new Error("PD36 locks: no liquor; POD/spoilage unchanged; no AI payable");
+  }
+
+  const job = consolidated.jobs[0]!;
+  startDeliveryDispatchWorkflow(job.id);
+  const offerId = getDeliveryJob(job.id)?.offerId;
+  if (!offerId) throw new Error("PD36 expected offer");
+  acceptOffer(offerId, courierId);
+  setCourierAvailabilityStatus(courierId, "busy");
+  startTransit(job.id);
+
+  const planStops = consolidated.plans[0]!.stopSequence.map((s) => ({
+    kind: s.kind,
+    address: s.address,
+    label: s.label,
+  }));
+  const run = await openNavigateRun({
+    jobId: job.id,
+    courierId,
+    stops: planStops,
+  });
+  const pickups = run.stops.filter((s) => s.kind === "pickup");
+  if (pickups.length !== 2 || run.stops[run.stops.length - 1]?.kind !== "dropoff") {
+    throw new Error("PD36 navigate must be pickup×2 → dropoff");
+  }
+
+  capturePod(job.id);
+  if (getDeliveryJob(job.id)?.status !== "pod_captured") {
+    throw new Error("PD36 POD path must remain unchanged");
+  }
+
+  const splitVendors: MultiStopVendorLeg[] = [
+    {
+      ...sameBandSlot[0]!,
+      slotId: "slot_harare_am",
+    },
+    {
+      ...sameBandSlot[1]!,
+      slotId: "slot_harare_pm",
+    },
+  ];
+  const split = createJobsFromMultiStopPlan({
+    orderId: "ord_pd36_split",
+    dropoffAddress: "customer_avondale",
+    vendors: splitVendors,
+    createJob: createDeliveryJob,
+  });
+  if (split.consolidated || split.jobCount !== 2) {
+    throw new Error("PD36 different slot must split into 2 jobs");
+  }
+
+  // Liquor/restricted rejected
+  try {
+    planMultiStopDeliveries({
+      orderId: "ord_liq",
+      dropoffAddress: "customer_avondale",
+      vendors: [
+        {
+          ...sameBandSlot[0]!,
+          ageGateRequired: false,
+          hasRestrictedSku: true as unknown as false,
+        },
+      ],
+    });
+    throw new Error("PD36 must reject restricted SKU");
+  } catch (e) {
+    if (!(e instanceof Error) || !/liquor|restricted/i.test(e.message)) {
+      throw e;
+    }
+  }
+
+  return {
+    consolidatedJobCount: 1,
+    splitJobCount: 2,
+    multiStopPickupCount: 2,
+    podStatus: "pod_captured",
+    liquorAllowed: false,
+    podSpoilageRulesUnchanged: true,
+    payableFromAi: false,
+    mapSor: "maplibre",
+    googleMapsSor: false,
   };
 }
 

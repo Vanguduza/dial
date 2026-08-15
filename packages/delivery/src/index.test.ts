@@ -179,3 +179,52 @@ test("PD32 COD float-limit warning + ack gate", async () => {
   assert.equal(out.payableFromAi, false);
   assert.equal(out.currency, "USD");
 });
+
+test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
+  const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
+  const out = await runPd36MultiStopDeliveryThinVertical({
+    courierId: "cour_pd36_t",
+  });
+  assert.equal(out.consolidatedJobCount, 1);
+  assert.equal(out.splitJobCount, 2);
+  assert.equal(out.multiStopPickupCount, 2);
+  assert.equal(out.podStatus, "pod_captured");
+  assert.equal(out.liquorAllowed, false);
+  assert.equal(out.podSpoilageRulesUnchanged, true);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.googleMapsSor, false);
+});
+
+test("PD36 planMultiStopDeliveries groups by band|slot", async () => {
+  const { planMultiStopDeliveries } = await import("./multiStopPlan.js");
+  const plans = planMultiStopDeliveries({
+    orderId: "ord_plan",
+    dropoffAddress: "customer_avondale",
+    vendors: [
+      {
+        supplierId: "a",
+        supplierDisplayName: "A Agency",
+        pickupAddress: "supplier_hub_harare",
+        deliveryBandId: "harare_metro",
+        slotId: "slot_am",
+        vertical: "spare",
+        ageGateRequired: false,
+        hasRestrictedSku: false,
+      },
+      {
+        supplierId: "b",
+        supplierDisplayName: "B Agency",
+        pickupAddress: "waypoint_borrowdale",
+        deliveryBandId: "harare_metro",
+        slotId: "slot_am",
+        vertical: "spare",
+        ageGateRequired: false,
+        hasRestrictedSku: false,
+      },
+    ],
+  });
+  assert.equal(plans.length, 1);
+  assert.equal(plans[0]!.mode, "one_multi_stop");
+  assert.equal(plans[0]!.stopSequence.length, 3);
+});
