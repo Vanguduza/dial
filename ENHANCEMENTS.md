@@ -442,6 +442,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-458 | **PD48 Admin returns/refunds queue** — human refund\|replace | `done` | Pack §9.5; payableFromAi=false |
 | ENH-459 | **PD49 Escrow sandbox Job Reserve** — fail-closed + fixture; ≠ ENH-020 | `done` | `/admin/money/escrow` |
 | ENH-460 | **PD50 Vehicle Hub deepen** — consent audit + chassis browse | `done` | Pack §9.2 garage |
+| ENH-461 | **PD51 Delivery courier UX deepen** — POD photo + float banner ack | `done` | Pack §9.8; MapLibre |
+| ENH-462 | **PD52 Take-Home polish** — ITF263 upload/verify + breakdown | `done` | D-50; `/admin/tech/take-home` |
+| ENH-463 | **PD53 Admin disputes queue** — Value Score uphold\|reject | `done` | D-53; ≠ money |
+| ENH-464 | **PD54 Grocery Meili demand-gap admin** — food only | `done` | D-53; no liquor |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

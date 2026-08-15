@@ -91,6 +91,8 @@ export type SearchNoResultEvent = {
   eventId: string;
   query: string;
   sessionRole: SearchSessionRole;
+  /** PD54 — spare vs grocery demand-gap rollup. */
+  vertical: "spare" | "grocery";
   createdAt: string;
 };
 
@@ -283,19 +285,25 @@ export function searchHealthSnapshot(): {
 export function recordSearchNoResult(
   query: string,
   sessionRole: SearchSessionRole,
+  vertical: "spare" | "grocery" = "spare",
 ): SearchNoResultEvent {
   const event: SearchNoResultEvent = {
     eventId: `snr_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
     query,
     sessionRole,
+    vertical,
     createdAt: new Date().toISOString(),
   };
   searchNoResultEvents.push(event);
   return event;
 }
 
-export function listSearchNoResultEvents(): SearchNoResultEvent[] {
-  return searchNoResultEvents.map((e) => ({ ...e }));
+export function listSearchNoResultEvents(filter?: {
+  vertical?: "spare" | "grocery";
+}): SearchNoResultEvent[] {
+  return searchNoResultEvents
+    .filter((e) => (filter?.vertical ? e.vertical === filter.vertical : true))
+    .map((e) => ({ ...e }));
 }
 
 /** Catalogue Factory ingest stub (D-53) — human review before publish. */
@@ -453,15 +461,21 @@ function parseCatalogueCsvRow(line: string): CatalogueDraftOffer {
 }
 
 /** Demand-gap KPIs for Catalogue Factory admin (D-53). */
-export function getDemandGapSnapshot(): {
+export function getDemandGapSnapshot(filter?: {
+  vertical?: "spare" | "grocery";
+}): {
   noResultCount: number;
   topQueries: Array<{ query: string; count: number }>;
   informalB2bLeaks: number;
   pendingReview: number;
   approvedAwaitingPublish: number;
+  vertical: "spare" | "grocery" | "all";
 } {
+  const events = filter?.vertical
+    ? searchNoResultEvents.filter((e) => e.vertical === filter.vertical)
+    : searchNoResultEvents;
   const counts = new Map<string, number>();
-  for (const e of searchNoResultEvents) {
+  for (const e of events) {
     counts.set(e.query, (counts.get(e.query) ?? 0) + 1);
   }
   const topQueries = [...counts.entries()]
@@ -469,15 +483,68 @@ export function getDemandGapSnapshot(): {
     .sort((a, b) => b.count - a.count)
     .slice(0, 10);
   return {
-    noResultCount: searchNoResultEvents.length,
+    noResultCount: events.length,
     topQueries,
-  informalB2bLeaks: countInformalB2bLeaks() /* spare; grocery checked in PD15 runner */,
-  pendingReview: reviewQueue.filter((r) => r.status === "queued").length,
+    informalB2bLeaks: countInformalB2bLeaks() /* spare; grocery checked in PD15 runner */,
+    pendingReview: reviewQueue.filter(
+      (r) =>
+        r.status === "queued" &&
+        (filter?.vertical ? r.vertical === filter.vertical : true),
+    ).length,
     approvedAwaitingPublish: reviewQueue.filter(
       (r) =>
         r.status === "approved" &&
+        (filter?.vertical ? r.vertical === filter.vertical : true) &&
         ingestBatches.get(r.batchId)?.status === "approved",
     ).length,
+    vertical: filter?.vertical ?? "all",
+  };
+}
+
+/** PD54 — grocery-only Meili demand-gap admin snapshot. */
+export function getGroceryDemandGapSnapshot(): ReturnType<
+  typeof getDemandGapSnapshot
+> & { liquorAllowed: false; payableFromAi: false } {
+  return {
+    ...getDemandGapSnapshot({ vertical: "grocery" }),
+    liquorAllowed: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD54 thin vertical: grocery no-result events → demand-gap admin snapshot.
+ * Food only; liquorAllowed=false; no AI money.
+ */
+export function runPd54GroceryDemandGapThinVertical(): {
+  noResultCount: number;
+  topQuery: string;
+  liquorAllowed: false;
+  payableFromAi: false;
+  vertical: "grocery";
+} {
+  __resetCatalogueForTests();
+  recordSearchNoResult("exotic quinoa missing", "b2c", "grocery");
+  recordSearchNoResult("exotic quinoa missing", "b2c", "grocery");
+  recordSearchNoResult("frozen dragonfruit", "b2b", "grocery");
+  // spare noise must not pollute grocery gap
+  recordSearchNoResult("spare-only-noise", "b2c", "spare");
+  const gap = getGroceryDemandGapSnapshot();
+  if (gap.noResultCount !== 3) {
+    throw new Error(`PD54 expected 3 grocery no-results, got ${gap.noResultCount}`);
+  }
+  if (gap.topQueries[0]?.query !== "exotic quinoa missing") {
+    throw new Error("PD54 expected top grocery demand query");
+  }
+  if (gap.liquorAllowed !== false || gap.payableFromAi !== false) {
+    throw new Error("PD54 locks failed");
+  }
+  return {
+    noResultCount: gap.noResultCount,
+    topQuery: gap.topQueries[0]!.query,
+    liquorAllowed: false,
+    payableFromAi: false,
+    vertical: "grocery",
   };
 }
 

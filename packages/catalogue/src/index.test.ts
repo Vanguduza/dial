@@ -17,6 +17,7 @@ import {
   searchOffers,
   searchOffersByChassis,
   runPd27SpareDualEntryThinVertical,
+  runPd54GroceryDemandGapThinVertical,
 } from "./index.js";
 
 describe("catalogue", { concurrency: false }, () => {
@@ -291,6 +292,16 @@ test("PD50 Vehicle Hub consent revoke + chassis browse", async () => {
   assert.equal(out.auditHasRevoke, true);
   assert.match(out.browsePath, /chassis=KUN26/);
   assert.equal(out.payableFromAi, false);
+});
+
+test("PD54 grocery Meili demand-gap thin vertical", () => {
+  __resetCatalogueForTests();
+  const out = runPd54GroceryDemandGapThinVertical();
+  assert.equal(out.noResultCount, 3);
+  assert.equal(out.topQuery, "exotic quinoa missing");
+  assert.equal(out.liquorAllowed, false);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.vertical, "grocery");
 });
 
 test("PD27 dual entry Select Vehicle + Browse EPC join on chassis; USD; B2B hide informal", () => {

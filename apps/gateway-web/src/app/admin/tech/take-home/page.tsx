@@ -12,17 +12,30 @@ type Balance = {
   hasItf263: boolean;
 };
 
+type Breakdown = {
+  grossUsdMinor: string;
+  dialFeeUsdMinor: string;
+  taxableShareUsdMinor: string;
+  withholdMinor: string;
+  netPayoutMinor: string;
+  rateBps: number;
+  hasItf263: boolean;
+  itf263Status: string;
+  certificatePdfRef: string | null;
+  payableFromAi: false;
+};
+
 /**
- * PD10 Technician Take-Home — durable withholding_balances (D-50).
+ * PD10 / PD52 Technician Take-Home — ITF263 upload/verify + breakdown (D-50).
  * Draft economics only; AI never writes payable amounts.
  */
 export default function TechTakeHomePage() {
   const [secret, setSecret] = useState("");
-  const [technicianId, setTechnicianId] = useState("tech_pd10");
-  const [payoutUsdMinor, setPayoutUsdMinor] = useState("10000");
-  const [hasItf263, setHasItf263] = useState(false);
+  const [technicianId, setTechnicianId] = useState("tech_pd52");
+  const [grossUsdMinor, setGrossUsdMinor] = useState("12000");
+  const [dialFeeUsdMinor, setDialFeeUsdMinor] = useState("2000");
   const [balances, setBalances] = useState<Balance[]>([]);
-  const [last, setLast] = useState<string | null>(null);
+  const [breakdown, setBreakdown] = useState<Breakdown | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -52,21 +65,19 @@ export default function TechTakeHomePage() {
     }
   }
 
-  async function applyPayout() {
+  async function post(body: Record<string, unknown>) {
     setBusy(true);
     setMessage(null);
     try {
       const res = await fetch("/api/admin/tech/take-home", {
         method: "POST",
         headers: headers(),
-        body: JSON.stringify({
-          technicianId,
-          payoutUsdMinor,
-          hasItf263,
-        }),
+        body: JSON.stringify({ technicianId, ...body }),
       });
       const data = (await res.json()) as {
         error?: string;
+        breakdown?: Breakdown;
+        itf263?: { status?: string };
         netPayoutMinor?: string;
         withholdMinor?: string;
         rateBps?: number;
@@ -75,8 +86,13 @@ export default function TechTakeHomePage() {
         setMessage(data.error ?? `HTTP ${res.status}`);
         return;
       }
-      setLast(
-        `net ${data.netPayoutMinor} · WHT ${data.withholdMinor} (${data.rateBps} bps)`,
+      if (data.breakdown) setBreakdown(data.breakdown);
+      setMessage(
+        data.breakdown
+          ? `net ${data.breakdown.netPayoutMinor} · WHT ${data.breakdown.withholdMinor} (${data.breakdown.rateBps} bps) · ITF=${data.breakdown.itf263Status}`
+          : data.itf263
+            ? `ITF263 → ${data.itf263.status}`
+            : `net ${data.netPayoutMinor} · WHT ${data.withholdMinor}`,
       );
       await refreshAll();
     } finally {
@@ -86,6 +102,7 @@ export default function TechTakeHomePage() {
 
   return (
     <main
+      data-testid="admin-tech-take-home"
       style={{
         minHeight: "100vh",
         background: dialTokens.color.brand.surface,
@@ -97,7 +114,9 @@ export default function TechTakeHomePage() {
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         <Link href="/admin/command-centre">Command Centre</Link>
         {" · "}
-        <Link href="/home">Home</Link>
+        <Link href="/admin/compliance/wht">WHT remittance</Link>
+        {" · "}
+        <Link href="/admin/disputes">Disputes</Link>
         <h1
           style={{
             fontFamily: `${dialTokens.font.display}, Georgia, serif`,
@@ -108,8 +127,8 @@ export default function TechTakeHomePage() {
           Technician Take-Home
         </h1>
         <p style={{ fontSize: 14, opacity: 0.8 }}>
-          Durable <code>withholding_balances</code> via <code>@dial/payments</code> (D-50). Without
-          ITF263, 30% withhold. Draft only — human + pricing engine write payable amounts.
+          PD52 — gross → DIAL fee → ITF263|30% WHT → net. Upload/verify ITF263;
+          certificate PDF stub only. Draft — human + pricing engine write payables.
         </p>
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
@@ -130,61 +149,84 @@ export default function TechTakeHomePage() {
           />
         </label>
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 12 }}>
-          Gross payout USD minor
+          Gross USD minor
           <input
-            value={payoutUsdMinor}
-            onChange={(e) => setPayoutUsdMinor(e.target.value)}
+            value={grossUsdMinor}
+            onChange={(e) => setGrossUsdMinor(e.target.value)}
             inputMode="numeric"
             style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc" }}
           />
         </label>
-        <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12, fontSize: 14 }}>
+        <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 12 }}>
+          DIAL fee USD minor
           <input
-            type="checkbox"
-            checked={hasItf263}
-            onChange={(e) => setHasItf263(e.target.checked)}
+            value={dialFeeUsdMinor}
+            onChange={(e) => setDialFeeUsdMinor(e.target.value)}
+            inputMode="numeric"
+            style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc" }}
           />
-          Has valid ITF263
         </label>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
           <button
             type="button"
             disabled={busy || !secret}
-            onClick={() => void applyPayout()}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 8,
-              border: "none",
-              background: dialTokens.color.brand.primary,
-              color: "#fff",
-              fontWeight: 600,
-            }}
+            onClick={() =>
+              void post({
+                action: "breakdown",
+                grossUsdMinor,
+                dialFeeUsdMinor,
+              })
+            }
           >
-            Apply draft WHT
+            Compute Take-Home
+          </button>
+          <button
+            type="button"
+            disabled={busy || !secret}
+            onClick={() => void post({ action: "upload_itf263" })}
+          >
+            Upload ITF263
+          </button>
+          <button
+            type="button"
+            disabled={busy || !secret}
+            onClick={() =>
+              void post({ action: "verify_itf263", status: "verified" })
+            }
+          >
+            Verify ITF263
           </button>
           <button
             type="button"
             disabled={busy || !secret}
             onClick={() => void refreshAll()}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 8,
-              border: `1px solid ${dialTokens.color.brand.primary}`,
-              background: "transparent",
-              fontWeight: 600,
-            }}
           >
-            List durable balances
+            List balances
           </button>
         </div>
-        {last ? <p style={{ marginTop: 12 }}>{last}</p> : null}
+        {breakdown ? (
+          <section style={{ marginTop: 16, fontSize: 14 }}>
+            <h2 style={{ fontSize: 16 }}>Breakdown</h2>
+            <p>
+              taxable {breakdown.taxableShareUsdMinor} · withhold{" "}
+              {breakdown.withholdMinor} · net {breakdown.netPayoutMinor} ·{" "}
+              {breakdown.rateBps} bps · ITF {breakdown.itf263Status}
+            </p>
+            {breakdown.certificatePdfRef ? (
+              <p style={{ opacity: 0.75 }}>
+                Cert stub: {breakdown.certificatePdfRef}
+              </p>
+            ) : null}
+          </section>
+        ) : null}
         {message ? <p role="status">{message}</p> : null}
         <h2 style={{ fontSize: "1.1rem", marginTop: 24 }}>Durable balances</h2>
         <ul style={{ fontSize: 13, lineHeight: 1.6 }}>
           {balances.map((b) => (
             <li key={`${b.technicianId}-${b.yearOfAssessment}`}>
-              <code>{b.technicianId}</code> · Y{b.yearOfAssessment} · gross {b.grossPaidMinor} ·
-              withheld {b.withheldMinor} · ITF263={String(b.hasItf263)}
+              <code>{b.technicianId}</code> · Y{b.yearOfAssessment} · gross{" "}
+              {b.grossPaidMinor} · withheld {b.withheldMinor} · ITF263=
+              {String(b.hasItf263)}
             </li>
           ))}
         </ul>

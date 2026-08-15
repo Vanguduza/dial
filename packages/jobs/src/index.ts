@@ -544,6 +544,60 @@ export function runPd19AdminTradeValueScoreThinVertical(): {
   };
 }
 
+/**
+ * PD53 thin vertical: open Value Score dispute → admin open queue → resolve uphold.
+ * Append-only compensating event; never writes payable amounts.
+ */
+export function runPd53AdminDisputesThinVertical(): {
+  disputeId: string;
+  openQueueCount: number;
+  resolvedStatus: "upheld";
+  compensatingDelta: number;
+  payableFromAi: false;
+  moneyPathClean: true;
+} {
+  __resetJobsForTests();
+  setValueScoreSnapshot({
+    technicianId: "tech_pd53",
+    score: 55,
+    sampleN: 12,
+    factorContributions: [
+      { factor: "completion", weight: 0.5, contribution: 30 },
+      { factor: "punctuality", weight: 0.5, contribution: 25 },
+    ],
+  });
+  const dispute = openValueScoreDispute({
+    technicianId: "tech_pd53",
+    reason: "PD53 evidence credit miss",
+    openedBy: "ops_pd53",
+  });
+  const openQueue = listValueScoreDisputes().filter((d) => d.status === "open");
+  if (!openQueue.some((d) => d.disputeId === dispute.disputeId)) {
+    throw new Error("PD53 expected dispute in open queue");
+  }
+  const resolved = resolveValueScoreDispute({
+    disputeId: dispute.disputeId,
+    resolution: "upheld",
+    resolvedBy: "ops_pd53_lead",
+    compensatingDelta: 6,
+  });
+  if (resolved.dispute.status !== "upheld") {
+    throw new Error("PD53 expected upheld");
+  }
+  const money = assertValueScoreNotMoneyPath();
+  if (money.writesLedger || money.payableFromAi) {
+    throw new Error("PD53 disputes must not write money");
+  }
+  return {
+    disputeId: dispute.disputeId,
+    openQueueCount: openQueue.length,
+    resolvedStatus: "upheld",
+    compensatingDelta: resolved.dispute.compensatingDelta ?? 0,
+    payableFromAi: false,
+    moneyPathClean: true,
+  };
+}
+
 /** Rate-card quote only — not AI-authored payable. Replaces rate_card_stub path. */
 export function quoteFromRateCard(
   jobClassId: string,

@@ -97,6 +97,8 @@ export type DeliveryJob = {
   assignedCourierId?: string;
   offerId?: string;
   podAt?: string;
+  /** PD51 — optional POD photo evidence stub (not ZIMRA fiscal). */
+  podPhotoRef?: string;
   etaMinutes?: number;
   distanceMeters?: number;
   /** COD settle USD hook — amountMinor only; no float. */
@@ -403,7 +405,10 @@ export function startTransit(jobId: string): DeliveryJob {
   return { ...job };
 }
 
-export function capturePod(jobId: string): DeliveryJob {
+export function capturePod(
+  jobId: string,
+  opts?: { photoRef?: string },
+): DeliveryJob {
   const job = jobs.get(jobId);
   if (!job) throw new Error("Unknown job");
   if (job.status !== "assigned" && job.status !== "in_transit") {
@@ -411,6 +416,9 @@ export function capturePod(jobId: string): DeliveryJob {
   }
   job.status = "pod_captured";
   job.podAt = new Date().toISOString();
+  if (opts?.photoRef?.trim()) {
+    job.podPhotoRef = opts.photoRef.trim();
+  }
   const wf = [...workflows.values()].find((w) => w.jobId === jobId);
   if (wf) {
     wf.phase = "pod";
@@ -835,6 +843,95 @@ export function runPd32CodFloatLimitThinVertical(input?: {
     overLimitWarned: true,
     blockedWithoutAck: true,
     recordedWithAck: true,
+    payableFromAi: false,
+    currency: "USD",
+  };
+}
+
+/**
+ * PD51 thin vertical: offer → accept → transit → POD photo stub → COD float banner ack.
+ * Courier UX deepen — MapLibre SoR; payableFromAi=false.
+ */
+export function runPd51CourierUxThinVertical(input?: {
+  courierId?: string;
+}): {
+  offerAccepted: true;
+  podPhotoCaptured: true;
+  floatBannerShown: true;
+  codAckRecorded: true;
+  mapSor: "maplibre";
+  payableFromAi: false;
+  currency: "USD";
+} {
+  const courierId = input?.courierId ?? "cour_pd51";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+  setCourierCodFloatLimit(courierId, 50_00n);
+
+  const job = createDeliveryJob({
+    orderId: "ord_pd51",
+    from: "supplier_hub_harare",
+    to: "customer_avondale",
+    codUsdMinor: 40_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD51 expected offer");
+  acceptOffer(offered.offerId, courierId);
+  startTransit(job.id);
+  postCourierLocation({
+    courierId,
+    lat: -17.8292,
+    lng: 31.0522,
+    jobId: job.id,
+  });
+
+  const pod = capturePod(job.id, {
+    photoRef: `fixture://pod/${job.id}.jpg`,
+  });
+  if (!pod.podPhotoRef?.startsWith("fixture://pod/")) {
+    throw new Error("PD51 POD must store photo evidence stub");
+  }
+
+  // Seed held cash so $40 collect warns against $50 limit
+  recordCodCollectAttempt({
+    jobId: "dj_pd51_seed",
+    courierId,
+    collectUsdMinor: 25_00n,
+    acknowledgedWarning: true,
+  });
+  const evalWarn = evaluateCodCollect({
+    courierId,
+    collectUsdMinor: 40_00n,
+  });
+  if (!evalWarn.floatLimitWarning) {
+    throw new Error("PD51 expected float banner warning");
+  }
+  const blocked = recordCodCollectAttempt({
+    jobId: job.id,
+    courierId,
+    collectUsdMinor: 40_00n,
+    acknowledgedWarning: false,
+  });
+  if (blocked.status !== "blocked_unacked_warning") {
+    throw new Error("PD51 unacked float must block COD");
+  }
+  const acked = recordCodCollectAttempt({
+    jobId: job.id,
+    courierId,
+    collectUsdMinor: 40_00n,
+    acknowledgedWarning: true,
+  });
+  if (acked.status !== "recorded") {
+    throw new Error("PD51 acked float must record COD");
+  }
+
+  return {
+    offerAccepted: true,
+    podPhotoCaptured: true,
+    floatBannerShown: true,
+    codAckRecorded: true,
+    mapSor: "maplibre",
     payableFromAi: false,
     currency: "USD",
   };

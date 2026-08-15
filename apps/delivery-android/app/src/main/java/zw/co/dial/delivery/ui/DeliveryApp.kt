@@ -117,6 +117,15 @@ fun DeliveryApp(baseUrl: String) {
             )
             Text(stopList, style = MaterialTheme.typography.bodySmall)
             Text(status, style = MaterialTheme.typography.bodyMedium)
+            // PD51 — COD float banner surface (ops gate before collect)
+            if (status.contains("floatWarn=true") || status.contains("FLOAT_BANNER")) {
+                Text(
+                    "COD float limit warning — ack before collect",
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
             Button(
                 onClick = {
                     run {
@@ -236,32 +245,55 @@ fun DeliveryApp(baseUrl: String) {
                 onClick = {
                     val jid = jobId ?: return@Button
                     run {
-                        client.capturePod(jid)
+                        client.capturePod(jid, photoRef = "fixture://pod/$jid.jpg")
                         val cod = client.reconcileCod(jid)
                         client.setCodFloatLimit(5000)
                         val eval = client.evaluateCodFloat(cod.amountUsdMinor ?: 2500)
-                        val attempt =
-                            client.codCollectAttempt(
-                                jid,
-                                cod.amountUsdMinor ?: 2500,
-                                acknowledgedWarning = eval.floatLimitWarning,
-                            )
-                        status =
-                            "POD+COD ${(cod.amountUsdMinor ?: 0) / 100.0} · floatWarn=${eval.floatLimitWarning} · attempt=${attempt.status}"
+                        if (eval.floatLimitWarning) {
+                            status =
+                                "FLOAT_BANNER · ${eval.message} · ack required before COD"
+                        } else {
+                            val attempt =
+                                client.codCollectAttempt(
+                                    jid,
+                                    cod.amountUsdMinor ?: 2500,
+                                    acknowledgedWarning = false,
+                                )
+                            status =
+                                "POD+photo+COD ${(cod.amountUsdMinor ?: 0) / 100.0} · floatWarn=false · attempt=${attempt.status}"
+                        }
                     }
                 },
                 enabled = jobId != null,
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text("Capture POD + COD (float check)") }
+            ) { Text("Capture POD + photo (float check)") }
+            Button(
+                onClick = {
+                    val jid = jobId ?: return@Button
+                    run {
+                        val cod = client.reconcileCod(jid)
+                        val attempt =
+                            client.codCollectAttempt(
+                                jid,
+                                cod.amountUsdMinor ?: 2500,
+                                acknowledgedWarning = true,
+                            )
+                        status =
+                            "COD acked · floatWarn=${attempt.floatLimitWarning} · attempt=${attempt.status}"
+                    }
+                },
+                enabled = jobId != null,
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Ack float + COD collect") }
         }
 
         if (loading) {
             CircularProgressIndicator()
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        Spacer(Modifier.height(8.dp))
+        Spacer(modifier.height(8.dp))
         Text(
-            "PD32 · COD float-limit warn · OSRM/VROOM · MapLibre · not Google",
+            "PD51 · POD photo · COD float banner ack · MapLibre · not Google",
             style = MaterialTheme.typography.labelSmall,
         )
     }

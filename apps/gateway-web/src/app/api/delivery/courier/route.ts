@@ -59,6 +59,7 @@ function serializeJob(j: NonNullable<ReturnType<typeof getDeliveryJob>>) {
     ...rest,
     codAmountUsdMinor: j.codAmountUsd?.amountMinor.toString(),
     codCurrency: j.codAmountUsd?.currency,
+    podPhotoRef: j.podPhotoRef ?? null,
   };
 }
 
@@ -103,12 +104,22 @@ export async function GET(req: Request) {
     availability: getCourierAvailability(courierId),
     offers: listOffersForCourier(courierId),
     jobs: jobs.map((j) => serializeJob(j)),
+    float: (() => {
+      const f = getCourierCodFloat(courierId);
+      return {
+        floatLimitUsdMinor: f.floatLimitUsdMinor.toString(),
+        heldUsdMinor: f.heldUsdMinor.toString(),
+        currency: "USD" as const,
+      };
+    })(),
     offlinePacks: {
       available: listOfflinePackDefinitions(),
       installed: listCourierOfflinePacks(courierId),
       mapSor: "maplibre",
     },
     navigate,
+    mapSor: "maplibre",
+    payableFromAi: false,
   });
 }
 
@@ -345,8 +356,17 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, location: loc, mapSor: "maplibre" });
       }
       case "capture_pod": {
-        const job = capturePod(String(body.jobId ?? ""));
-        return NextResponse.json({ ok: true, job: serializeJob(job) });
+        const photoRef =
+          body.photoRef != null ? String(body.photoRef) : undefined;
+        const job = capturePod(String(body.jobId ?? ""), {
+          ...(photoRef ? { photoRef } : {}),
+        });
+        return NextResponse.json({
+          ok: true,
+          job: serializeJob(job),
+          podPhotoRef: job.podPhotoRef ?? null,
+          payableFromAi: false,
+        });
       }
       case "reconcile_cod": {
         const jobId = String(body.jobId ?? "");

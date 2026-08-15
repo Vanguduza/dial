@@ -180,6 +180,16 @@ test("PD32 COD float-limit warning + ack gate", async () => {
   assert.equal(out.currency, "USD");
 });
 
+test("PD51 courier UX: POD photo + float banner ack", async () => {
+  const { runPd51CourierUxThinVertical } = await import("./index.js");
+  const out = runPd51CourierUxThinVertical({ courierId: "cour_pd51_t" });
+  assert.equal(out.podPhotoCaptured, true);
+  assert.equal(out.floatBannerShown, true);
+  assert.equal(out.codAckRecorded, true);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

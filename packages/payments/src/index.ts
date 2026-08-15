@@ -626,6 +626,31 @@ export function runPd25Itf263TakeHomeThinVertical(input?: {
     payableFromAi: false,
   };
 }
+
+/**
+ * PD52 Take-Home polish: breakdown → upload ITF263 → verify → 0% WHT path.
+ * Same locks as PD25; surfaces admin ops actions.
+ */
+export function runPd52TakeHomePolishThinVertical(input?: {
+  technicianId?: string;
+  yearOfAssessment?: number;
+}): {
+  beforeRateBps: 3000;
+  afterRateBps: 0;
+  itfUploadedThenVerified: true;
+  certificatePdfStub: true;
+  payableFromAi: false;
+} {
+  const out = runPd25Itf263TakeHomeThinVertical(input);
+  return {
+    beforeRateBps: out.withoutItf263RateBps,
+    afterRateBps: out.withItf263RateBps,
+    itfUploadedThenVerified: true,
+    certificatePdfStub: out.certificatePdfStub,
+    payableFromAi: false,
+  };
+}
+
 /**
  * PD23 WHT remittance thin path: 30% withhold → draft remittance → submit → ack.
  */

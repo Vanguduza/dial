@@ -705,8 +705,49 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
-| Delivery courier UX deepen / Take-Home polish | PD51+ candidates |
-| Admin disputes / grocery Meili demand-gap admin | PD51+ candidates |
+| Delivery courier UX deepen | **PD51** |
+| Technician Take-Home polish | **PD52** |
+| Admin disputes queue | **PD53** |
+| Grocery Meili demand-gap admin | **PD54** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+
+### PD51 — Delivery courier UX deepen (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | offer→accept→transit→POD photo stub→COD float banner ack; web `/delivery/courier` + Android |
+| Evidence | `runPd51CourierUxThinVertical`; `pd51Pd54Ops.test.ts` |
+| Green → | **PD52** Take-Home polish |
+
+### PD52 — Technician Take-Home polish (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | breakdown → upload ITF263 → verify → 0% WHT; admin Take-Home UI |
+| Evidence | `runPd52TakeHomePolishThinVertical`; `pd51Pd54Ops.test.ts` |
+| Green → | **PD53** disputes |
+
+### PD53 — Admin disputes queue (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | open Value Score dispute → `/admin/disputes` → uphold|reject (append-only) |
+| Evidence | `runPd53AdminDisputesThinVertical`; `pd51Pd54Ops.test.ts` |
+| Green → | **PD54** grocery demand-gap |
+
+### PD54 — Grocery Meili demand-gap admin (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | grocery vertical no-result events → `/admin/grocery/demand-gap`; liquorAllowed=false |
+| Evidence | `runPd54GroceryDemandGapThinVertical`; `pd51Pd54Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD54)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 

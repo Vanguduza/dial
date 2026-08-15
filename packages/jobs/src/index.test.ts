@@ -134,6 +134,15 @@ test("PD19 Trade/JobClass lifecycle + Value Score dispute; no money writes", () 
   assert.equal(money.payableFromAi, false);
 });
 
+test("PD53 admin disputes thin vertical", async () => {
+  __resetJobsForTests();
+  const { runPd53AdminDisputesThinVertical } = await import("./index.js");
+  const out = runPd53AdminDisputesThinVertical();
+  assert.equal(out.resolvedStatus, "upheld");
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.moneyPathClean, true);
+});
+
 test("PD24 Projects toggle + legal hub; live gated; no money path", () => {
   __resetJobsForTests();
   const out = runPd24AdminProjectsLegalThinVertical();

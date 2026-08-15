@@ -1,12 +1,17 @@
 /**
- * Tech Take-Home / WHT economics (D-50 / D-53 / PD10 durable balances).
+ * Tech Take-Home / WHT economics (D-50 / D-53 / PD10 + PD52 polish).
  * Fail closed without INTERNAL_API_SECRET. AI never writes payable amounts.
  */
 import { NextResponse } from "next/server";
 import {
+  computeTakeHomeBreakdown,
   computeTechPayoutWithholding,
+  getItf263Record,
   getWithholdingBalance,
+  listItf263Records,
   listWithholdingBalances,
+  setItf263Status,
+  uploadItf263Document,
 } from "@dial/payments";
 
 export const runtime = "nodejs";
@@ -49,7 +54,9 @@ export async function GET(req: Request) {
       balances: listWithholdingBalances()
         .filter((b) => b.yearOfAssessment === year)
         .map(serializeBalance),
-      note: "Durable withholding_balances SoR (@dial/payments) — D-50",
+      itf263: listItf263Records().filter((r) => r.yearOfAssessment === year),
+      note: "PD52 — durable withholding_balances + ITF263 (D-50)",
+      payableFromAi: false,
     });
   }
 
@@ -58,10 +65,13 @@ export async function GET(req: Request) {
   }
 
   const bal = getWithholdingBalance(technicianId, year);
+  const itf = getItf263Record(technicianId, year);
   return NextResponse.json({
     technicianId,
     yearOfAssessment: year,
     balance: bal ? serializeBalance(bal) : null,
+    itf263: itf ?? null,
+    payableFromAi: false,
   });
 }
 
@@ -69,19 +79,77 @@ export async function POST(req: Request) {
   const denied = assertInternalSecret(req);
   if (denied) return denied;
   const body = (await req.json()) as {
+    action?: string;
     technicianId?: string;
     yearOfAssessment?: number;
     payoutUsdMinor?: string;
+    grossUsdMinor?: string;
+    dialFeeUsdMinor?: string;
     hasItf263?: boolean;
+    documentRef?: string;
+    status?: "verified" | "rejected" | "expired";
+    setBy?: string;
   };
-  if (!body.technicianId || body.payoutUsdMinor === undefined) {
-    return NextResponse.json(
-      { error: "technicianId and payoutUsdMinor required" },
-      { status: 400 },
-    );
+  if (!body.technicianId) {
+    return NextResponse.json({ error: "technicianId required" }, { status: 400 });
   }
+  const year = body.yearOfAssessment ?? new Date().getFullYear();
+  const action = body.action ?? "apply_wht";
+
   try {
-    const year = body.yearOfAssessment ?? new Date().getFullYear();
+    if (action === "upload_itf263") {
+      const uploaded = uploadItf263Document({
+        technicianId: body.technicianId,
+        yearOfAssessment: year,
+        documentRef:
+          body.documentRef ??
+          `fixture://itf263/${body.technicianId}/${year}.pdf`,
+      });
+      return NextResponse.json({
+        ok: true,
+        itf263: uploaded,
+        payableFromAi: false,
+        note: "PD52 — ITF263 uploaded pending verify",
+      });
+    }
+    if (action === "verify_itf263" || action === "set_itf263_status") {
+      const status = body.status ?? "verified";
+      const updated = setItf263Status({
+        technicianId: body.technicianId,
+        yearOfAssessment: year,
+        status,
+        setBy: body.setBy ?? "ops_take_home",
+      });
+      return NextResponse.json({
+        ok: true,
+        itf263: updated,
+        payableFromAi: false,
+      });
+    }
+    if (action === "breakdown") {
+      const gross = BigInt(body.grossUsdMinor ?? body.payoutUsdMinor ?? "0");
+      const fee = BigInt(body.dialFeeUsdMinor ?? "0");
+      const breakdown = computeTakeHomeBreakdown({
+        technicianId: body.technicianId,
+        yearOfAssessment: year,
+        grossUsdMinor: gross,
+        dialFeeUsdMinor: fee,
+      });
+      return NextResponse.json({
+        ok: true,
+        breakdown,
+        payableFromAi: false,
+        note: "PD52 — Take-Home breakdown draft only",
+      });
+    }
+
+    // default: apply_wht (PD10 path)
+    if (body.payoutUsdMinor === undefined) {
+      return NextResponse.json(
+        { error: "payoutUsdMinor required for apply_wht" },
+        { status: 400 },
+      );
+    }
     const result = computeTechPayoutWithholding({
       technicianId: body.technicianId,
       yearOfAssessment: year,
@@ -95,7 +163,9 @@ export async function POST(req: Request) {
       withholdMinor: result.withholdMinor.toString(),
       rateBps: result.rateBps,
       balance: bal ? serializeBalance(bal) : null,
+      itf263: getItf263Record(body.technicianId, year) ?? null,
       note: "Draft economics only — human + pricing engine write payable amounts",
+      payableFromAi: false,
     });
   } catch (e) {
     return NextResponse.json(

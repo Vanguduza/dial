@@ -222,8 +222,10 @@ class DialDeliveryClient(
         postAction("""{"action":"post_location","lat":$lat,"lng":$lng$jobPart}""")
     }
 
-    fun capturePod(jobId: String) {
-        postAction("""{"action":"capture_pod","jobId":${jsonString(jobId)}}""")
+    fun capturePod(jobId: String, photoRef: String? = null) {
+        val photoPart =
+            if (photoRef != null) ""","photoRef":${jsonString(photoRef)}""" else ""
+        postAction("""{"action":"capture_pod","jobId":${jsonString(jobId)}$photoPart}""")
     }
 
     fun reconcileCod(jobId: String): CodResult {

@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD54 Grocery Meili demand-gap admin** — grocery-vertical no-result rollup; `/admin/grocery/demand-gap`; food only; no liquor; no AI money.
+- **PD53 Admin disputes queue** — Value Score open→uphold|reject; append-only compensate; `/admin/disputes` (≠ money/ledger).
+- **PD52 Technician Take-Home polish** — ITF263 upload/verify + gross→fee→WHT breakdown on `/admin/tech/take-home` (D-50).
+- **PD51 Delivery courier UX deepen** — POD photo stub + COD float banner ack; web `/delivery/courier` + Android Compose; MapLibre SoR.
 - **PD50 Vehicle Hub deepen** — reminder consent grant/revoke + audit; garage → `/spare?chassis=` browse; `runPd50VehicleHubThinVertical`.
 - **PD49 Escrow sandbox Job Reserve** — sandbox fail-closed without `PSP_ESCROW_*`; fixture hold/release/webhook; `/admin/money/escrow` (≠ ENH-020 live partner).
 - **PD48 Admin returns/refunds queue** — `/admin/returns` list + human refund|replace; `payableFromAi=false`; `runPd48AdminReturnsThinVertical`.

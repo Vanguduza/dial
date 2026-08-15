@@ -20,6 +20,7 @@ import {
   runPd22AdminZigCostHealthThinVertical,
   runPd23WhtRemittanceThinVertical,
   runPd25Itf263TakeHomeThinVertical,
+  runPd52TakeHomePolishThinVertical,
   setDailyZigRate,
   toCanonicalPspCode,
   usdToZig,
@@ -241,6 +242,15 @@ test("PD25 ITF263 upload → verify → Take-Home 0% WHT", () => {
   assert.equal(out.withItf263RateBps, 0);
   assert.equal(out.uploadPendingThenVerified, true);
   assert.equal(out.certificatePdfStub, true);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD52 Take-Home polish thin vertical", () => {
+  __resetPaymentsForTests();
+  const out = runPd52TakeHomePolishThinVertical({ technicianId: "tech_pd52_t" });
+  assert.equal(out.beforeRateBps, 3000);
+  assert.equal(out.afterRateBps, 0);
+  assert.equal(out.itfUploadedThenVerified, true);
   assert.equal(out.payableFromAi, false);
 });
 
