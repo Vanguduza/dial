@@ -408,11 +408,16 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd26GatewayHomeThinVertical`; `pd26GatewayHome.test.ts`; `/home` + `/api/home` |
 | Green → | **PD27** Spare Select Vehicle / Browse EPC |
 
-### PD27 — Spare Select Vehicle / Browse EPC (NEXT)
+### PD27 — Spare Select Vehicle / Browse EPC (**GREEN** 2026-08-15)
 
-Pack §9.2 residual — dual entry vehicle + EPC.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Select Vehicle cascade → chassis → offers; Browse EPC groups → same chassis join; B2B informal hide; USD |
+| Evidence | `runPd27SpareDualEntryThinVertical`; `pd27DualEntry.test.ts`; `/spare/entry` + `/api/spare/entry` |
+| Green → | **PD28** Delivery Android availability + offline packs |
 
-### PD28 — Delivery Android availability + offline packs
+### PD28 — Delivery Android availability + offline packs (NEXT)
 
 Pack §9.8 residual — available/busy/offline + offline packs deepen.
 

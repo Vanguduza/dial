@@ -422,6 +422,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-438 | **PD25 Technician Android Value Score + ITF263** — factors; Take-Home; D-50 | `done` | Pack §9.7 / D-53; Compose |
 | ENH-439 | **Product-depth band PD26–PD28** authored (home → EPC → delivery deepen) | `done` | Pack §9 gap audit after PD25; eng next ≠ S99 |
 | ENH-440 | **PD26 Gateway home Shop\|Services** — Welcome-back; responsive lanes | `done` | Pack §9.1; `/home` + `/api/home` |
+| ENH-441 | **PD27 Spare Select Vehicle / Browse EPC** — chassis join; USD; D-49 | `done` | Pack §9.2 / C-6; `/spare/entry` |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |
