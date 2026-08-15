@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD11 FDMS Virtual Gateway sandbox** — day-gated open/close; agency `DIAL_FEE`/`GOODS_FORMAL`/`GOODS_INFORMAL` submit on money outbox (not fixture-only health); admin `/admin/fdms`; no physical printer (D-59); [#32](https://github.com/Vanguduza/dial/issues/32).
 - **PD10 Admin money / dispatch / Command Centre** — outbox ops UI + drain; live dispatch board (`getDispatchBoardSnapshot`); MetricContract tiles + Simulated never auto-pays (D-54); Take-Home durable `withholding_balances`; [#31](https://github.com/Vanguduza/dial/issues/31).
 - **PD9 Technician Android** — `apps/technician-android` Compose (C-5); `@dial/jobs` Cal.com slots + `rate_card` book (replaces `rate_card_stub`); checklist runner + evidence upload; Take-Home WHT preview (D-50); gateway `/api/tech/technician`; [#30](https://github.com/Vanguduza/dial/issues/30). Product-depth band extended **PD10–PD12**.
 - **PD8 Customer iOS** — `apps/customer-ios` SwiftUI Spare thin vertical (C-5); DialCustomerCore DialGatewayClient (cookie session, USD browse, EcoCash\|COD); Node contract + XCTest; [#29](https://github.com/Vanguduza/dial/issues/29).

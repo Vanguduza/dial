@@ -1,6 +1,6 @@
 /**
- * Agency FDMS outbox (D-40a / D-59) — virtual fiscalisation; in-house Gateway default.
- * AI never writes fiscal amounts.
+ * Agency FDMS outbox (D-40a / D-59 / PD11) — virtual fiscalisation; in-house Gateway default.
+ * AI never writes fiscal amounts. No physical printer required.
  */
 import { type Money } from "@dial/shared";
 
@@ -22,7 +22,11 @@ export type FiscalReceiptQueued = {
   submittedAt?: string;
 };
 
-const outbox: FiscalReceiptQueued[] = [];
+const outbox: FiscalReceiptQueued[] = (() => {
+  const g = globalThis as { __dialFdmsOutbox?: FiscalReceiptQueued[] };
+  if (!g.__dialFdmsOutbox) g.__dialFdmsOutbox = [];
+  return g.__dialFdmsOutbox;
+})();
 
 function id(): string {
   return `fdms_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -59,15 +63,29 @@ export function listQueuedFdmsReceipts(): FiscalReceiptQueued[] {
   return outbox.filter((r) => r.status === "queued").map((r) => ({ ...r }));
 }
 
+function integrationMode(): "fixture" | "sandbox" | "live" {
+  const m = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  if (m === "sandbox" || m === "live") return m;
+  return "fixture";
+}
+
 /**
  * Drain FDMS outbox through ZIMRA Virtual Gateway adapter (D-40a / D-59).
- * Enqueues side-effect jobs on @dial/queues when requested.
+ * Sandbox/live require an open fiscal day before submit.
  */
 export async function drainFdmsOutbox(input?: {
   enqueueSideEffects?: boolean;
 }): Promise<
   Array<{ id: string; status: "submitted" | "failed"; fiscalCode?: string }>
 > {
+  const mode = integrationMode();
+  if (mode !== "fixture" && !fiscalDay.fiscalDayId) {
+    throw new Error("FDMS fiscal day not open — openDay before draining receipts");
+  }
+  if (mode !== "fixture" && fiscalDay.closedAt) {
+    throw new Error("FDMS fiscal day already closed — open a new day before drain");
+  }
+
   const { ZimraVirtualGatewayAdapter } = await import("@dial/adapter-fdms");
   const gw = new ZimraVirtualGatewayAdapter();
   const results: Array<{
@@ -105,6 +123,7 @@ export async function drainFdmsOutbox(input?: {
             outboxId: row.id,
             fiscalCode: submitted.fiscalCode,
             orderId: row.orderId,
+            receiptClass: row.receiptClass,
           },
         });
       }
@@ -123,11 +142,17 @@ export type FiscalDayState = {
   closedAt: string | null;
 };
 
-let fiscalDay: FiscalDayState = {
-  fiscalDayId: null,
-  openedAt: null,
-  closedAt: null,
-};
+let fiscalDay: FiscalDayState = (() => {
+  const g = globalThis as { __dialFiscalDay?: FiscalDayState };
+  if (!g.__dialFiscalDay) {
+    g.__dialFiscalDay = {
+      fiscalDayId: null,
+      openedAt: null,
+      closedAt: null,
+    };
+  }
+  return g.__dialFiscalDay;
+})();
 
 export function getFiscalDayState(): FiscalDayState {
   return { ...fiscalDay };
@@ -135,7 +160,6 @@ export function getFiscalDayState(): FiscalDayState {
 
 /**
  * FDMS fiscal-day open worker (D-40a / D-59) — Virtual Gateway openDay.
- * Ops/admin schedules this; never auto-pays Simulated Command Centre.
  */
 export async function runFdmsOpenDay(input?: {
   enqueueSideEffects?: boolean;
@@ -143,11 +167,9 @@ export async function runFdmsOpenDay(input?: {
   const { ZimraVirtualGatewayAdapter } = await import("@dial/adapter-fdms");
   const gw = new ZimraVirtualGatewayAdapter();
   const { fiscalDayId } = await gw.openFiscalDay();
-  fiscalDay = {
-    fiscalDayId,
-    openedAt: new Date().toISOString(),
-    closedAt: null,
-  };
+  fiscalDay.fiscalDayId = fiscalDayId;
+  fiscalDay.openedAt = new Date().toISOString();
+  fiscalDay.closedAt = null;
   if (input?.enqueueSideEffects) {
     const { enqueueOutboxSideEffect } = await import("@dial/queues");
     await enqueueOutboxSideEffect({
@@ -170,17 +192,12 @@ export async function runFdmsCloseDay(input?: {
   const { ZimraVirtualGatewayAdapter } = await import("@dial/adapter-fdms");
   const gw = new ZimraVirtualGatewayAdapter();
   const { closedAt } = await gw.closeFiscalDay();
-  const fiscalDayId = fiscalDay.fiscalDayId;
-  fiscalDay = {
-    fiscalDayId,
-    openedAt: fiscalDay.openedAt,
-    closedAt,
-  };
+  fiscalDay.closedAt = closedAt;
   if (input?.enqueueSideEffects) {
     const { enqueueOutboxSideEffect } = await import("@dial/queues");
     await enqueueOutboxSideEffect({
       topic: "fdms.day.closed",
-      payload: { fiscalDayId, closedAt },
+      payload: { fiscalDayId: fiscalDay.fiscalDayId, closedAt },
     });
   }
   return getFiscalDayState();
@@ -192,13 +209,18 @@ export async function runFdmsCloseDay(input?: {
 export async function processFdmsDayJob(job: {
   action: "open" | "close";
 }): Promise<FiscalDayState> {
+  // Fixture always records side-effects in-memory; sandbox/live only when Redis present.
+  const sideEffects =
+    integrationMode() === "fixture" || Boolean(process.env.REDIS_URL?.trim());
   if (job.action === "open") {
-    return runFdmsOpenDay({ enqueueSideEffects: true });
+    return runFdmsOpenDay({ enqueueSideEffects: sideEffects });
   }
-  return runFdmsCloseDay({ enqueueSideEffects: true });
+  return runFdmsCloseDay({ enqueueSideEffects: sideEffects });
 }
 
 export function __resetTaxForTests(): void {
   outbox.length = 0;
-  fiscalDay = { fiscalDayId: null, openedAt: null, closedAt: null };
+  fiscalDay.fiscalDayId = null;
+  fiscalDay.openedAt = null;
+  fiscalDay.closedAt = null;
 }

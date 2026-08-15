@@ -1,7 +1,7 @@
 /**
- * Admin FDMS fiscal-day open/close (D-40a / D-59).
- * Fail closed without INTERNAL_API_SECRET. Enqueues @dial/queues FDMS day job
- * and runs fixture processor inline when DIAL_INTEGRATION_MODE=fixture.
+ * Admin FDMS fiscal-day open/close (D-40a / D-59 / PD11).
+ * Fail closed without INTERNAL_API_SECRET.
+ * Fixture + sandbox (with FDMS_* keys) process Virtual Gateway inline — no physical printer.
  */
 import { NextResponse } from "next/server";
 import {
@@ -30,6 +30,14 @@ function assertInternalSecret(req: Request): NextResponse | null {
   return null;
 }
 
+function hasFdmsSandboxKeys(): boolean {
+  return (
+    Boolean(process.env.FDMS_BASE_URL?.trim()) &&
+    Boolean(process.env.FDMS_DEVICE_ID?.trim()) &&
+    Boolean(process.env.FDMS_ACTIVATION_KEY?.trim())
+  );
+}
+
 export async function GET(req: Request) {
   const denied = assertInternalSecret(req);
   if (denied) return denied;
@@ -52,19 +60,38 @@ export async function POST(req: Request) {
     );
   }
 
-  const queued = await enqueueFdmsDayJob({
-    action: body.action,
-    ...(body.requestedBy ? { requestedBy: body.requestedBy } : {}),
-  });
+  const mode = integrationMode();
+  const sandboxReady = mode === "sandbox" && hasFdmsSandboxKeys();
+
+  // Fixture always queues in-memory. Sandbox without Redis processes Gateway inline (PD11 CI).
+  let jobId: string;
+  let queuedMode: string = mode;
+  if (mode === "fixture" || (sandboxReady && process.env.REDIS_URL?.trim())) {
+    const queued = await enqueueFdmsDayJob({
+      action: body.action,
+      ...(body.requestedBy ? { requestedBy: body.requestedBy } : {}),
+    });
+    jobId = queued.jobId;
+    queuedMode = queued.mode;
+  } else if (sandboxReady) {
+    jobId = `sb_inline_${body.action}_${Date.now().toString(36)}`;
+  } else {
+    const queued = await enqueueFdmsDayJob({
+      action: body.action,
+      ...(body.requestedBy ? { requestedBy: body.requestedBy } : {}),
+    });
+    jobId = queued.jobId;
+    queuedMode = queued.mode;
+  }
 
   let day = getFiscalDayState();
-  if (integrationMode() === "fixture") {
+  if (mode === "fixture" || sandboxReady) {
     day = await processFdmsDayJob({ action: body.action });
   }
 
   return NextResponse.json({
-    jobId: queued.jobId,
-    mode: queued.mode,
+    jobId,
+    mode: queuedMode,
     day,
   });
 }

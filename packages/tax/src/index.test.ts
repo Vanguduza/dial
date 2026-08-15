@@ -73,6 +73,31 @@ test("S97 processFdmsDayJob open then close", async () => {
   assert.ok(getFiscalDayState().closedAt);
 });
 
+test("PD11 sandbox drain requires open fiscal day", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.FDMS_BASE_URL = "https://fdms.sandbox.dial.local";
+  process.env.FDMS_DEVICE_ID = "dev_pd11";
+  process.env.FDMS_ACTIVATION_KEY = "act_pd11";
+  const { __resetFdmsSandboxForTests } = await import("@dial/adapter-fdms");
+  __resetFdmsSandboxForTests();
+  __resetTaxForTests();
+  const { enqueueFiscalReceipt, drainFdmsOutbox, runFdmsOpenDay } = await import(
+    "./index.js"
+  );
+  enqueueFiscalReceipt({
+    orderId: "ord_gate",
+    receiptClass: "DIAL_FEE",
+    amount: money(50n, "USD"),
+    channel: "web",
+  });
+  await assert.rejects(() => drainFdmsOutbox(), /not open/);
+  await runFdmsOpenDay();
+  const results = await drainFdmsOutbox();
+  assert.equal(results[0]?.status, "submitted");
+  assert.match(results[0]?.fiscalCode ?? "", /FISCAL_SB_DIAL_FEE/);
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
 test("S107 drain FDMS day queue then process", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   __resetTaxForTests();

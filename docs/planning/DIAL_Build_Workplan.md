@@ -77,7 +77,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 114 | `PD8` | **Customer iOS** — SwiftUI Spare parity | [#29](https://github.com/Vanguduza/dial/issues/29) | Same ERP APIs as PD5; tunacosgun patterns; USD + EcoCash\|COD | `PD9` |
 | 115 | `PD9` | **Technician Android** — Now in Android | [#30](https://github.com/Vanguduza/dial/issues/30) | Jobs/checklist/evidence/Cal.com book; `rate_card` (not stub); Take-Home WHT | `PD10` |
 | 116 | `PD10` | **Admin money / dispatch / Command Centre** | [#31](https://github.com/Vanguduza/dial/issues/31) | Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) | `PD11` |
-| 117 | `PD11` | **FDMS sandbox** — Virtual Gateway agency receipts | new issue | Agency receipt types (D-59); sandbox day open/close; fiscal outbox | `PD12` |
+| 117 | `PD11` | **FDMS sandbox** — Virtual Gateway agency receipts | [#32](https://github.com/Vanguduza/dial/issues/32) | Agency receipt types (D-59); sandbox day open/close; fiscal outbox | `PD12` |
 | 118 | `PD12` | **Meta WA Flows** — Spare + Tech critical Flows | new issue | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys | expand / next band |
 
 **Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD9 is **PD10**, not S99.
@@ -192,11 +192,17 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `pd10AdminOps.test.ts`; `@dial/ai` tiles; `@dial/delivery` `getDispatchBoardSnapshot` |
 | Green → | **PD11** FDMS sandbox |
 
-### PD11 — FDMS sandbox (NEXT)
+### PD11 — FDMS sandbox (**GREEN** 2026-08-15)
 
-Virtual Gateway agency receipts (D-59); sandbox fiscal day.
+| | |
+| --- | --- |
+| Issue | [#32](https://github.com/Vanguduza/dial/issues/32) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Sandbox Virtual Gateway open/close day → agency GOODS_*/DIAL_FEE on money outbox → fiscalCode; admin `/admin/fdms` |
+| Evidence | `runPd11FdmsSandboxThinVertical`; `pd11FdmsSandbox.test.ts`; adapter sandbox day-gated submit |
+| Green → | **PD12** Meta WA Flows |
 
-### PD12 — Meta WA Flows
+### PD12 — Meta WA Flows (NEXT)
 
 Official Cloud API Flows for Spare + Tech critical paths (D-40 / D-57).
 

@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD10** green → **PD11** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD11** green → **PD12** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD11** — FDMS sandbox (next eng) |
-| `current_issue` | _(open when starting PD11)_ |
+| `current_stage` | **PD12** — Meta WA Flows (next eng) |
+| `current_issue` | _(open when starting PD12)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD10** Admin money / dispatch / Command Centre — **green** ([#31](https://github.com/Vanguduza/dial/issues/31)) |
-| `next_stage` | **PD11** FDMS sandbox |
+| `prior_stage` | **PD11** FDMS Virtual Gateway sandbox — **green** ([#32](https://github.com/Vanguduza/dial/issues/32)) |
+| `next_stage` | **PD12** Meta WA Flows |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -30,12 +30,12 @@
 | **PD8** | 2026-08-15 | Customer iOS SwiftUI Spare thin vertical; [#29](https://github.com/Vanguduza/dial/issues/29) |
 | **PD9** | 2026-08-15 | Technician Android + Cal.com book/`rate_card`/checklist/evidence; [#30](https://github.com/Vanguduza/dial/issues/30) |
 | **PD10** | 2026-08-15 | Admin money outbox + dispatch board + CC MetricContracts + durable WHT; [#31](https://github.com/Vanguduza/dial/issues/31) |
+| **PD11** | 2026-08-15 | FDMS Virtual Gateway sandbox day + agency receipts on money outbox; [#32](https://github.com/Vanguduza/dial/issues/32) |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD11** | FDMS sandbox — Virtual Gateway agency receipts (D-59) |
 | **PD12** | Meta WA Flows — Spare + Tech critical paths |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 

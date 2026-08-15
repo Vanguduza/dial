@@ -268,4 +268,99 @@ export function __resetLedgerForTests(): void {
   moneyOutbox.length = 0;
 }
 
+/**
+ * PD11 thin vertical: sandbox open day → agency receipts on money outbox → drain → close.
+ * Not fixture-only health — requires DIAL_INTEGRATION_MODE=sandbox + FDMS_* keys.
+ */
+export async function runPd11FdmsSandboxThinVertical(input?: {
+  orderId?: string;
+}): Promise<{
+  mode: string;
+  dayOpened: { fiscalDayId: string | null; openedAt: string | null };
+  moneyDrain: Array<{ kind: string; status: string; refId: string }>;
+  fiscalCodes: string[];
+  dayClosed: { fiscalDayId: string | null; closedAt: string | null };
+}> {
+  const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  if (mode !== "sandbox") {
+    throw new Error("runPd11FdmsSandboxThinVertical requires DIAL_INTEGRATION_MODE=sandbox");
+  }
+  const {
+    __resetFdmsSandboxForTests,
+  } = await import("@dial/adapter-fdms");
+  const {
+    __resetTaxForTests,
+    enqueueFiscalReceipt,
+    listFdmsOutbox,
+    runFdmsOpenDay,
+    runFdmsCloseDay,
+  } = await import("@dial/tax");
+  const { money: moneyFn } = await import("@dial/shared");
+
+  __resetFdmsSandboxForTests();
+  __resetTaxForTests();
+  __resetLedgerForTests();
+
+  const orderId = input?.orderId ?? `ord_pd11_${Date.now().toString(36)}`;
+  const dayOpened = await runFdmsOpenDay({ enqueueSideEffects: false });
+
+  const goodsFormal = enqueueFiscalReceipt({
+    orderId,
+    receiptClass: "GOODS_FORMAL",
+    amount: moneyFn(4500n, "USD"),
+    channel: "web",
+  });
+  const goodsInformal = enqueueFiscalReceipt({
+    orderId,
+    receiptClass: "GOODS_INFORMAL",
+    amount: moneyFn(1200n, "USD"),
+    channel: "wa",
+  });
+  const fee = enqueueFiscalReceipt({
+    orderId,
+    receiptClass: "DIAL_FEE",
+    amount: moneyFn(300n, "USD"),
+    channel: "web",
+  });
+  for (const r of [goodsFormal, goodsInformal, fee]) {
+    enqueueMoneyOutbox({ kind: "fiscal_queued", refId: r.id });
+  }
+
+  const moneyDrain = await drainMoneyOutbox({ enqueueSideEffects: false });
+  const fiscal = listFdmsOutbox();
+  const fiscalCodes = fiscal.map((r) => r.fiscalCode ?? "");
+  if (!fiscal.every((r) => r.status === "submitted" && r.fiscalCode)) {
+    throw new Error("PD11 expected all agency receipts submitted with fiscalCode");
+  }
+  if (
+    !fiscalCodes.some((c) => c.includes("GOODS_FORMAL")) ||
+    !fiscalCodes.some((c) => c.includes("GOODS_INFORMAL")) ||
+    !fiscalCodes.some((c) => c.includes("DIAL_FEE"))
+  ) {
+    throw new Error("PD11 expected fiscal codes for all agency classes");
+  }
+  if (!moneyDrain.every((d) => d.status === "fiscal_submitted")) {
+    throw new Error("PD11 money outbox fiscal_queued rows must be fiscal_submitted");
+  }
+
+  const dayClosed = await runFdmsCloseDay({ enqueueSideEffects: false });
+  return {
+    mode,
+    dayOpened: {
+      fiscalDayId: dayOpened.fiscalDayId,
+      openedAt: dayOpened.openedAt,
+    },
+    moneyDrain: moneyDrain.map((d) => ({
+      kind: d.kind,
+      status: d.status,
+      refId: d.refId,
+    })),
+    fiscalCodes,
+    dayClosed: {
+      fiscalDayId: dayClosed.fiscalDayId,
+      closedAt: dayClosed.closedAt,
+    },
+  };
+}
+
 export { money };

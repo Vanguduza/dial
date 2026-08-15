@@ -304,6 +304,9 @@ importers:
 
   packages/ledger:
     dependencies:
+      '@dial/adapter-fdms':
+        specifier: workspace:*
+        version: link:../../adapters/fdms
       '@dial/queues':
         specifier: workspace:*
         version: link:../queues

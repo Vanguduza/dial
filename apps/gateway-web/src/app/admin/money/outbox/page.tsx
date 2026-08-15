@@ -84,6 +84,8 @@ export default function AdminMoneyOutboxPage() {
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         <Link href="/admin/command-centre">Command Centre</Link>
         {" · "}
+        <Link href="/admin/fdms">FDMS Gateway</Link>
+        {" · "}
         <Link href="/home">Home</Link>
         <h1
           style={{

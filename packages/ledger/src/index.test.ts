@@ -81,3 +81,21 @@ test("S114 money outbox drain links FiscalReceiptQueued side-effects", async () 
   assert.ok(side.some((j) => j.topic === "money.ledger_posted"));
   assert.ok(side.some((j) => j.topic === "fdms.submitted"));
 });
+
+test("PD11 sandbox thin vertical: money outbox agency receipts via Virtual Gateway", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.FDMS_BASE_URL = "https://fdms.sandbox.dial.local";
+  process.env.FDMS_DEVICE_ID = "dev_pd11";
+  process.env.FDMS_ACTIVATION_KEY = "act_pd11";
+  delete process.env.FDMS_SANDBOX_HTTP;
+  const { runPd11FdmsSandboxThinVertical } = await import("./index.js");
+  const out = await runPd11FdmsSandboxThinVertical({ orderId: "ord_pd11_ledger" });
+  assert.equal(out.mode, "sandbox");
+  assert.ok(out.dayOpened.fiscalDayId);
+  assert.ok(out.dayClosed.closedAt);
+  assert.equal(out.moneyDrain.length, 3);
+  assert.ok(out.fiscalCodes.some((c) => c.includes("GOODS_FORMAL")));
+  assert.ok(out.fiscalCodes.some((c) => c.includes("GOODS_INFORMAL")));
+  assert.ok(out.fiscalCodes.some((c) => c.includes("DIAL_FEE")));
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
