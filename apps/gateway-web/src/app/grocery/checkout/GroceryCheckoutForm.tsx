@@ -1,8 +1,14 @@
+/**
+ * PD44 grocery checkout — EcoCash | COD after CPA §7.5 disclosure review.
+ * Food only; no liquor. USD cart; ZiG only at pay (D-57).
+ */
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { dialTokens } from "@dial/design-tokens";
+import { EIGHTEEN_ITEM_DISCLOSURES } from "@dial/adapter-whatsapp";
+import { DisclosureReviewGate } from "../../../components/DisclosureReviewGate";
 
 export function GroceryCheckoutForm({ cartId }: { cartId: string }) {
   const router = useRouter();
@@ -41,40 +47,45 @@ export function GroceryCheckoutForm({ cartId }: { cartId: string }) {
   }
 
   return (
-    <div style={{ display: "grid", gap: dialTokens.space.sm, maxWidth: 320 }}>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void pay("ecocash")}
-        style={{
-          padding: `${dialTokens.space.sm} ${dialTokens.space.lg}`,
-          borderRadius: 8,
-          border: "none",
-          background: dialTokens.color.brand.primary,
-          color: "#fff",
-          fontWeight: 600,
-          fontSize: 16,
-        }}
-      >
-        EcoCash
-      </button>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void pay("cod")}
-        style={{
-          padding: `${dialTokens.space.sm} ${dialTokens.space.lg}`,
-          borderRadius: 8,
-          border: `1px solid ${dialTokens.color.brand.primary}`,
-          background: "#fff",
-          color: dialTokens.color.brand.ink,
-          fontWeight: 600,
-          fontSize: 16,
-        }}
-      >
-        Cash on delivery
-      </button>
-      {error ? <p style={{ color: "#a11", fontSize: 14 }}>{error}</p> : null}
-    </div>
+    <DisclosureReviewGate
+      disclosures={EIGHTEEN_ITEM_DISCLOSURES}
+      testId="grocery-cpa-disclosure-review"
+    >
+      <div style={{ display: "grid", gap: dialTokens.space.sm, maxWidth: 320 }}>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void pay("ecocash")}
+          style={{
+            padding: `${dialTokens.space.sm} ${dialTokens.space.lg}`,
+            borderRadius: 8,
+            border: "none",
+            background: dialTokens.color.brand.primary,
+            color: "#fff",
+            fontWeight: 600,
+            fontSize: 16,
+          }}
+        >
+          EcoCash
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void pay("cod")}
+          style={{
+            padding: `${dialTokens.space.sm} ${dialTokens.space.lg}`,
+            borderRadius: 8,
+            border: `1px solid ${dialTokens.color.brand.primary}`,
+            background: "#fff",
+            color: dialTokens.color.brand.ink,
+            fontWeight: 600,
+            fontSize: 16,
+          }}
+        >
+          Cash on delivery
+        </button>
+        {error ? <p style={{ color: "#a11", fontSize: 14 }}>{error}</p> : null}
+      </div>
+    </DisclosureReviewGate>
   );
 }

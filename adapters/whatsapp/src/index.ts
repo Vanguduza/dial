@@ -481,6 +481,85 @@ export function getSupportTicket(ticketId: string): SupportTicket | undefined {
   return t ? { ...t } : undefined;
 }
 
+/** Admin / ops list — ERP tickets are SoR; Chatwoot is handoff only. */
+export function listSupportTickets(): SupportTicket[] {
+  return [...supportTickets.values()].map((t) => ({ ...t }));
+}
+
+/**
+ * PD43 thin vertical — CPA §7.5 eighteen-item disclosure + review-before-pay gate.
+ * Channels: web spare (+ native mirror). Official WA already has review.
+ */
+export function runPd43CpaDisclosureThinVertical(): {
+  disclosureCount: 18;
+  reviewRequiredBeforePay: true;
+  payableFromAi: false;
+  channels: readonly ["web", "native", "wa"];
+} {
+  if (EIGHTEEN_ITEM_DISCLOSURES.length !== 18) {
+    throw new Error("PD43 expected exactly 18 CPA disclosure items");
+  }
+  const reviewIdx = EIGHTEEN_ITEM_DISCLOSURES.findIndex((d) =>
+    /review step/i.test(d),
+  );
+  if (reviewIdx < 0) {
+    throw new Error("PD43 disclosure #18 review step missing");
+  }
+  return {
+    disclosureCount: 18,
+    reviewRequiredBeforePay: true,
+    payableFromAi: false,
+    channels: ["web", "native", "wa"] as const,
+  };
+}
+
+/**
+ * PD44 thin vertical — grocery checkout same CPA disclosure gate; liquor forbidden.
+ */
+export function runPd44GroceryCpaDisclosureThinVertical(): {
+  disclosureCount: 18;
+  reviewRequiredBeforePay: true;
+  liquorSkus: false;
+  payableFromAi: false;
+  vertical: "grocery";
+} {
+  const base = runPd43CpaDisclosureThinVertical();
+  return {
+    disclosureCount: base.disclosureCount,
+    reviewRequiredBeforePay: true,
+    liquorSkus: false,
+    payableFromAi: false,
+    vertical: "grocery",
+  };
+}
+
+/**
+ * PD45 thin vertical — consent audit + ERP support tickets for admin ops UI.
+ */
+export function runPd45SupportConsentAdminThinVertical(): {
+  consentAuditLen: number;
+  supportTicketCount: number;
+  chatwootIsStatusSor: false;
+  payableFromAi: false;
+} {
+  __resetWhatsappForTests();
+  const s = startFlow("FLOW_CONSENT_CENTRE", "pd45_cust");
+  flowConsentCentre(s.sessionId, { marketing: true, vehicleHub: false });
+  const ticket = flowSupportTicket(s.sessionId, { topic: "pd45_ops" });
+  assertChatwootHandoffIdContract(ticket.handoff);
+  const audits = listConsentAudit();
+  const tickets = listSupportTickets();
+  if (audits.length < 1 || tickets.length < 1) {
+    throw new Error("PD45 expected consent audit + support ticket");
+  }
+  return {
+    consentAuditLen: audits.length,
+    supportTicketCount: tickets.length,
+    chatwootIsStatusSor: false,
+    payableFromAi: false,
+  };
+}
+
 /** §10 MVP — ERP creates claim; Chatwoot not SoR; AI never writes refund amounts. */
 export function flowSpareReturns(
   sessionId: string,

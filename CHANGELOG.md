@@ -11,6 +11,9 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD45 Support + consent admin** — `/admin/support` ERP tickets + consent audit; Chatwoot ≠ status SoR; fail-closed internal secret.
+- **PD44 Grocery CPA disclosure** — same eighteen-item review gate before EcoCash|COD; food only; no liquor.
+- **PD43 Spare CPA §7.5 disclosure** — web + native review-before-pay unlocks EcoCash|COD; shared `EIGHTEEN_ITEM_DISCLOSURES` with WA.
 - **PD42 iOS/Android customer parity** — Spare search `soldBy` agency disclosure; grocery `supplierDisplayName` + `trackGrocery` vs web; USD EcoCash|COD; C-5 no Expo.
 - **PD41 FDMS day ops UX deepen** — Virtual Gateway day banner, agency receipt-class counts, drain-only, auto-refresh; `runPd41FdmsDayOpsThinVertical` (D-59; no printer).
 - **PD40 WA template registry admin polish** — env key hints, FLOW_SPARE_* + FLOW_GROCERY_* badges, sandbox template send; Cloud API only; no Baileys/liquor; payableFromAi=false.

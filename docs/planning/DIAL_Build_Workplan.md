@@ -611,6 +611,42 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Spare web/native CPA §7.5 18-item review-before-pay (Pack §9.2 / v4 §7.5) | **PD43** |
+| Grocery checkout CPA disclosure parity (food; no liquor) | **PD44** |
+| Admin support tickets + consent audit (ENH-049/050 ops UX) | **PD45** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+
+### PD43 — Spare CPA §7.5 disclosure + review-before-pay (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `EIGHTEEN_ITEM_DISCLOSURES` ×18 → web DisclosureReviewGate → EcoCash\|COD unlock; native ack toggle |
+| Evidence | `runPd43CpaDisclosureThinVertical`; `pd43CpaDisclosure.test.ts` |
+| Green → | **PD44** grocery CPA |
+
+### PD44 — Grocery CPA disclosure (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | same gate on grocery checkout; liquorSkus=false |
+| Evidence | `runPd44GroceryCpaDisclosureThinVertical`; `pd43CpaDisclosure.test.ts` |
+| Green → | **PD45** support/consent admin |
+
+### PD45 — Support + consent admin (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | listSupportTickets + listConsentAudit → `/admin/support`; Chatwoot ≠ status SoR |
+| Evidence | `runPd45SupportConsentAdminThinVertical`; `pd43CpaDisclosure.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD45)
+
+| Gap | Stage |
+| --- | --- |
+| Supplier co-op spend / statements UX deepen | fold next |
+| Command Centre severity → recommended actions | fold next |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 

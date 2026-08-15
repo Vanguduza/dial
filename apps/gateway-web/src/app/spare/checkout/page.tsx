@@ -1,10 +1,11 @@
 /**
- * T3 pay-step mock — ZiG conversion only here (D-57).
- * Required CTAs: EcoCash | COD (same as WA FLOW_SPARE_CHECKOUT).
+ * T3 / PD43 pay-step — ZiG conversion only here (D-57).
+ * CPA §7.5 eighteen-item disclosure + review before EcoCash | COD.
  */
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { dialTokens } from "@dial/design-tokens";
+import { EIGHTEEN_ITEM_DISCLOSURES } from "@dial/adapter-whatsapp";
 import { getCart } from "@dial/catalogue";
 import {
   createCheckoutPayment,
@@ -12,6 +13,7 @@ import {
   setDailyZigRate,
   usdToZig,
 } from "@dial/payments";
+import { DisclosureReviewGate } from "../../../components/DisclosureReviewGate";
 
 export default async function SpareCheckoutPage({
   searchParams,
@@ -22,7 +24,6 @@ export default async function SpareCheckoutPage({
   const cart = cartId ? getCart(cartId) : undefined;
   let rate = getActiveFxRate();
   if (!rate) {
-    // Stub ops rate so local pay-step demos are not blocked (admin UI remains SoR).
     rate = setDailyZigRate({
       zigMinorPerUsd: 2500_00n,
       setBy: "spare_checkout_stub",
@@ -77,6 +78,7 @@ export default async function SpareCheckoutPage({
 
   return (
     <main
+      data-testid="spare-checkout-cpa"
       style={{
         minHeight: "100vh",
         background: dialTokens.color.brand.surface,
@@ -86,9 +88,22 @@ export default async function SpareCheckoutPage({
       }}
     >
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        <nav style={{ marginBottom: dialTokens.space.lg, display: "flex", gap: dialTokens.space.md, flexWrap: "wrap" }}>
+        <nav
+          style={{
+            marginBottom: dialTokens.space.lg,
+            display: "flex",
+            gap: dialTokens.space.md,
+            flexWrap: "wrap",
+          }}
+        >
           <Link href="/spare">Browse</Link>
-          <Link href={cartId ? `/spare/cart?cartId=${encodeURIComponent(cartId)}` : "/spare/cart"}>
+          <Link
+            href={
+              cartId
+                ? `/spare/cart?cartId=${encodeURIComponent(cartId)}`
+                : "/spare/cart"
+            }
+          >
             Cart
           </Link>
         </nav>
@@ -99,14 +114,16 @@ export default async function SpareCheckoutPage({
             fontSize: "clamp(1.5rem, 4vw, 2rem)",
           }}
         >
-          Checkout — pay
+          Checkout — review & pay
         </h1>
         <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Cart stays USD. ZiG appears only on this pay step from ops Daily ZiG rate (
-          {rate.fxRateId}). Sold by agency supplier (D-58).
+          Cart stays USD. ZiG appears only on this pay step from ops Daily ZiG
+          rate ({rate.fxRateId}). Sold by agency supplier (D-58).
         </p>
         {!cart || cart.lines.length === 0 ? (
-          <p>Cart missing — <Link href="/spare">return to browse</Link>.</p>
+          <p>
+            Cart missing — <Link href="/spare">return to browse</Link>.
+          </p>
         ) : (
           <>
             <p style={{ fontWeight: 700 }}>
@@ -120,54 +137,62 @@ export default async function SpareCheckoutPage({
                 {error}
               </p>
             ) : null}
-            <div
-              style={{
-                display: "grid",
-                gap: dialTokens.space.sm,
-                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                marginTop: dialTokens.space.lg,
-              }}
-            >
-              <form action={payEcoCash}>
-                <button
-                  type="submit"
-                  style={{
-                    width: "100%",
-                    padding: dialTokens.space.md,
-                    borderRadius: 8,
-                    border: "none",
-                    background: dialTokens.color.brand.primary,
-                    color: "#fff",
-                    fontWeight: 600,
-                    fontSize: 16,
-                    cursor: "pointer",
-                  }}
-                >
-                  EcoCash
-                </button>
-              </form>
-              <form action={payCod}>
-                <button
-                  type="submit"
-                  style={{
-                    width: "100%",
-                    padding: dialTokens.space.md,
-                    borderRadius: 8,
-                    border: "none",
-                    background: dialTokens.color.brand.accent,
-                    color: "#fff",
-                    fontWeight: 600,
-                    fontSize: 16,
-                    cursor: "pointer",
-                  }}
-                >
-                  COD
-                </button>
-              </form>
-            </div>
-            <p style={{ fontSize: 12, opacity: 0.6, marginTop: dialTokens.space.md }}>
-              Required pay CTAs only (D-57 / PD3) — EcoCash | COD; mirrors WA FLOW_SPARE_CHECKOUT.
-            </p>
+            <DisclosureReviewGate disclosures={EIGHTEEN_ITEM_DISCLOSURES}>
+              <div
+                style={{
+                  display: "grid",
+                  gap: dialTokens.space.sm,
+                  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                }}
+              >
+                <form action={payEcoCash}>
+                  <button
+                    type="submit"
+                    style={{
+                      width: "100%",
+                      padding: dialTokens.space.md,
+                      borderRadius: 8,
+                      border: "none",
+                      background: dialTokens.color.brand.primary,
+                      color: "#fff",
+                      fontWeight: 600,
+                      fontSize: 16,
+                      cursor: "pointer",
+                    }}
+                  >
+                    EcoCash
+                  </button>
+                </form>
+                <form action={payCod}>
+                  <button
+                    type="submit"
+                    style={{
+                      width: "100%",
+                      padding: dialTokens.space.md,
+                      borderRadius: 8,
+                      border: "none",
+                      background: dialTokens.color.brand.accent,
+                      color: "#fff",
+                      fontWeight: 600,
+                      fontSize: 16,
+                      cursor: "pointer",
+                    }}
+                  >
+                    COD
+                  </button>
+                </form>
+              </div>
+              <p
+                style={{
+                  fontSize: 12,
+                  opacity: 0.6,
+                  marginTop: dialTokens.space.md,
+                }}
+              >
+                Required pay CTAs only (D-57 / PD43) — EcoCash | COD after CPA
+                review.
+              </p>
+            </DisclosureReviewGate>
           </>
         )}
       </div>

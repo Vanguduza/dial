@@ -44,6 +44,8 @@ struct RootView: View {
     @State private var garageConsent = false
     @State private var promoCode = "SPARE10"
     @State private var referralCampaignId = ""
+    @State private var cpaReviewed = false
+    @State private var groceryCpaReviewed = false
 
     init(baseUrl: String) {
         self.baseUrl = baseUrl
@@ -125,6 +127,7 @@ struct RootView: View {
                 .foregroundStyle(Color(red: 11 / 255, green: 61 / 255, blue: 46 / 255))
             List(hits) { offer in
                 Button {
+                    cpaReviewed = false
                     selected = offer
                 } label: {
                     VStack(alignment: .leading) {
@@ -208,6 +211,7 @@ struct RootView: View {
             Text("No liquor").font(.caption).foregroundStyle(.secondary)
             List(groceryHits) { offer in
                 Button {
+                    groceryCpaReviewed = false
                     grocerySelected = offer
                 } label: {
                     VStack(alignment: .leading) {
@@ -230,15 +234,26 @@ struct RootView: View {
             Button("← Browse") { selected = nil }
             Text("Cart (USD)").font(.title2.bold())
             Text(offer.title).fontWeight(.semibold)
-            Text(String(format: "USD %.2f · qty 1", Double(offer.unitPriceUsdMinor) / 100))
-            Text("ZiG only at pay (D-57). Then ERP order + return.")
+            Text("Sold by \(offer.soldBy)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Text(String(format: "USD %.2f · qty 1", Double(offer.unitPriceUsdMinor) / 100))
+            Text("ZiG only at pay (D-57). CPA review before EcoCash|COD.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Toggle(isOn: $cpaReviewed) {
+                Text("I reviewed CPA disclosures (18 items)")
+                    .font(.caption)
+            }
+            .disabled(false)
+            .accessibilityIdentifier("cpa-review-ack")
             Button("Pay EcoCash") { paySpare(offer: offer, choice: "ecocash") }
                 .buttonStyle(.borderedProminent)
                 .tint(Color(red: 196 / 255, green: 163 / 255, blue: 90 / 255))
+                .disabled(!cpaReviewed)
             Button("Cash on delivery (USD)") { paySpare(offer: offer, choice: "cod") }
                 .buttonStyle(.bordered)
+                .disabled(!cpaReviewed)
             if !status.isEmpty { Text(status).font(.footnote) }
             if let error { Text(error).foregroundStyle(.red) }
             if busy { ProgressView() }
@@ -253,8 +268,15 @@ struct RootView: View {
             Text("Sold by \(offer.supplierDisplayName)")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            Toggle(isOn: $groceryCpaReviewed) {
+                Text("I reviewed CPA disclosures (18 items)")
+                    .font(.caption)
+            }
             Button("Pay EcoCash") {
                 run {
+                    guard groceryCpaReviewed else {
+                        throw DialGatewayError.http(status: 0, message: "CPA review required")
+                    }
                     let result = try client.checkoutGrocery(offerId: offer.offerId, choice: "ecocash")
                     var note = "Grocery EcoCash · \(result.currency) \(result.cartTotalUsdMinor)"
                     if let soldBy = result.soldBy { note += " · \(soldBy)" }
@@ -269,13 +291,18 @@ struct RootView: View {
                 }
             }
             .buttonStyle(.borderedProminent)
+            .disabled(!groceryCpaReviewed)
             Button("Cash on delivery (USD)") {
                 run {
+                    guard groceryCpaReviewed else {
+                        throw DialGatewayError.http(status: 0, message: "CPA review required")
+                    }
                     _ = try client.checkoutGrocery(offerId: offer.offerId, choice: "cod")
                     grocerySelected = nil
                 }
             }
             .buttonStyle(.bordered)
+            .disabled(!groceryCpaReviewed)
             if let error { Text(error).foregroundStyle(.red) }
         }
     }

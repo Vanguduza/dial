@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -392,6 +393,7 @@ private fun SpareCartCheckoutScreen(
 ) {
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+    var cpaReviewed by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun pay(choice: String) {
@@ -447,19 +449,27 @@ private fun SpareCartCheckoutScreen(
         )
         Spacer(modifier.height(16.dp))
         Text(offer.title, fontWeight = FontWeight.SemiBold)
+        Text("Sold by ${offer.soldBy}", style = MaterialTheme.typography.bodySmall)
         Text("USD ${"%.2f".format(offer.unitPriceUsdMinor / 100.0)} · qty 1")
         Text(
-            "ZiG conversion only at pay (D-57). IMTT not on lines. Then ERP order + return stub.",
+            "ZiG conversion only at pay (D-57). CPA review before EcoCash|COD.",
             style = MaterialTheme.typography.bodySmall,
             modifier = Modifier.padding(top = 12.dp),
         )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
+            Checkbox(checked = cpaReviewed, onCheckedChange = { cpaReviewed = it })
+            Text("I reviewed CPA disclosures (18 items)", style = MaterialTheme.typography.bodySmall)
+        }
         error?.let {
             Text(text = it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 12.dp))
         }
         Spacer(Modifier.height(24.dp))
         Button(
             onClick = { pay("ecocash") },
-            enabled = !loading,
+            enabled = !loading && cpaReviewed,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Pay EcoCash")
@@ -467,7 +477,7 @@ private fun SpareCartCheckoutScreen(
         Spacer(Modifier.height(12.dp))
         OutlinedButton(
             onClick = { pay("cod") },
-            enabled = !loading,
+            enabled = !loading && cpaReviewed,
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("Cash on delivery (USD)")
@@ -760,6 +770,7 @@ private fun GroceryCheckoutScreen(
 ) {
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
+    var cpaReviewed by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
     fun pay(choice: String) {
@@ -794,11 +805,26 @@ private fun GroceryCheckoutScreen(
         Text(offer.title, fontWeight = FontWeight.Bold)
         Text("Sold by ${offer.supplierDisplayName}", style = MaterialTheme.typography.bodySmall)
         Text("USD ${"%.2f".format(offer.unitPriceUsdMinor / 100.0)}")
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(top = 12.dp),
+        ) {
+            Checkbox(checked = cpaReviewed, onCheckedChange = { cpaReviewed = it })
+            Text("I reviewed CPA disclosures (18 items)", style = MaterialTheme.typography.bodySmall)
+        }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        Button(onClick = { pay("ecocash") }, enabled = !loading, modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+        Button(
+            onClick = { pay("ecocash") },
+            enabled = !loading && cpaReviewed,
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        ) {
             Text("Pay EcoCash")
         }
-        OutlinedButton(onClick = { pay("cod") }, enabled = !loading, modifier = Modifier.fillMaxWidth().padding(top = 8.dp)) {
+        OutlinedButton(
+            onClick = { pay("cod") },
+            enabled = !loading && cpaReviewed,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        ) {
             Text("Cash on delivery (USD)")
         }
     }

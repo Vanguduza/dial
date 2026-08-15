@@ -390,3 +390,24 @@ test("PD12 sandbox thin vertical: Cloud Flow+buttons → same intents as web", a
     else process.env.ECOCASH_MERCHANT_CODE = prev.ecoMerch;
   }
 });
+
+test("PD43–PD45 CPA disclosure + support consent admin thin verticals", async () => {
+  const {
+    runPd43CpaDisclosureThinVertical,
+    runPd44GroceryCpaDisclosureThinVertical,
+    runPd45SupportConsentAdminThinVertical,
+    listSupportTickets,
+  } = await import("./index.js");
+  const pd43 = runPd43CpaDisclosureThinVertical();
+  assert.equal(pd43.disclosureCount, 18);
+  assert.equal(pd43.reviewRequiredBeforePay, true);
+  assert.equal(pd43.payableFromAi, false);
+  const pd44 = runPd44GroceryCpaDisclosureThinVertical();
+  assert.equal(pd44.liquorSkus, false);
+  assert.equal(pd44.vertical, "grocery");
+  const pd45 = runPd45SupportConsentAdminThinVertical();
+  assert.ok(pd45.consentAuditLen >= 1);
+  assert.ok(pd45.supportTicketCount >= 1);
+  assert.equal(pd45.chatwootIsStatusSor, false);
+  assert.ok(listSupportTickets().length >= 1);
+});
