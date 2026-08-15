@@ -83,7 +83,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 120 | `PD14` | **Grocery web deepen** — slot + track + checkout (food) | [#35](https://github.com/Vanguduza/dial/issues/35) | Beyond G1 browse; USD; EcoCash\|COD; no liquor | `PD15` |
 | 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | [#36](https://github.com/Vanguduza/dial/issues/36) | CSV→approve→Meili spare+grocery; B2B leak=0 | `PD16` |
 | 122 | `PD16` | **Promotions & referrals admin** — Pack §9.5 | workplan | REFERRAL/PLATFORM/FLASH create; SUPPLIER_COOP approve; budgets; fraud holds; no cash-out | `PD17` |
-| 123 | `PD17` | **Intelligence Factory shadow/promote** — D-54 | new issue | Shadow eval → human+Promptfoo promote; AI drafts only; never payable | `PD18` |
+| 123 | `PD17` | **Intelligence Factory shadow/promote** — D-54 | workplan | Shadow eval → human+Promptfoo promote; AI drafts only; never payable | `PD18` |
 | 124 | `PD18` | **Spare-web deepen** — Pack §9.2 orders/returns/garage | new issue | Beyond PD3 browse; returns claim; garage vehicles; USD; EcoCash\|COD | expand / next band |
 
 **Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD15 is **PD16**, not S99.

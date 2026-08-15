@@ -408,6 +408,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-424 | **PD15 Catalogue Factory admin** — CSV→approve→Meili + demand-gap | `done` | [#36](https://github.com/Vanguduza/dial/issues/36); D-53/D-49; no AI auto-publish |
 | ENH-425 | **Product-depth band PD16–PD18** authored (promos → Intelligence → spare deepen) | `done` | Pack §9.5/§9.2/D-54 gaps; eng next ≠ S99 |
 | ENH-426 | **PD16 Promotions & referrals admin** — PLATFORM/FLASH/REFERRAL + SUPPLIER_COOP | `done` | D-42; no cash-out; `/admin/promotions` |
+| ENH-427 | **PD17 Intelligence Factory shadow/promote** — Promptfoo + human gates | `done` | D-54/D-56 audit; `/admin/intelligence/factory` |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

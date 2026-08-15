@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD16** green → **PD17** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD17** green → **PD18** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD17** — Intelligence Factory shadow/promote (next eng) |
-| `current_issue` | _(open when starting PD17)_ |
+| `current_stage` | **PD18** — Spare-web deepen (next eng) |
+| `current_issue` | _(open when starting PD18)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD16** Promotions & referrals admin — **green** |
-| `next_stage` | **PD17** Intelligence Factory shadow/promote |
+| `prior_stage` | **PD17** Intelligence Factory shadow/promote — **green** |
+| `next_stage` | **PD18** Spare-web deepen |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -36,12 +36,12 @@
 | **PD14** | 2026-08-15 | Grocery web deepen slot/cart/checkout/track (food); [#35](https://github.com/Vanguduza/dial/issues/35) |
 | **PD15** | 2026-08-15 | Catalogue Factory admin CSV→approve→Meili spare+grocery + demand-gap; [#36](https://github.com/Vanguduza/dial/issues/36) |
 | **PD16** | 2026-08-15 | Promotions & referrals admin PLATFORM/FLASH/REFERRAL + SUPPLIER_COOP; no cash-out |
+| **PD17** | 2026-08-15 | Intelligence Factory shadow→Promptfoo→human promote; Simulated never pays |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD17** | Intelligence Factory shadow/promote — D-54 (human+Promptfoo; no payable AI) |
 | **PD18** | Spare-web deepen — Pack §9.2 orders/returns/garage |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 

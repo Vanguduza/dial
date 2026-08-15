@@ -99,6 +99,38 @@ test("PD10 MetricContract tiles + Simulated never drives payout", async () => {
   );
 });
 
+test("PD17 shadow → Promptfoo → human → promote; no auto-publish / no payable", async () => {
+  const {
+    runPd17IntelligenceFactoryThinVertical,
+    createIntelligenceShadowRun,
+    promoteShadowRun,
+    __resetIntelligenceForTests: reset,
+  } = await import("./intelligence.js");
+  const out = runPd17IntelligenceFactoryThinVertical();
+  assert.ok(out.shadowId.startsWith("sh_"));
+  assert.ok(out.promotedDatasetVersionId.startsWith("ds_"));
+  assert.equal(out.autoPublishForbidden, true);
+  assert.equal(out.simulatedNeverPays, true);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.flashLiteSafetyOrgan, "p1");
+  assert.ok(out.autoPublishAttemptsBlocked >= 1);
+
+  reset();
+  const sh = createIntelligenceShadowRun({
+    title: "x",
+    body: "needs human quote only",
+  });
+  assert.throws(() => promoteShadowRun(sh.shadowId), /Promptfoo|human/i);
+  assert.throws(
+    () =>
+      createIntelligenceShadowRun({
+        title: "bad amountMinor draft",
+        body: "set amountMinor 100",
+      }),
+    /payable/,
+  );
+});
+
 test("LiteLLM fixture completion never requires keys", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const { completeViaLiteLlm, pingLiteLlm } = await import("./litellm.js");

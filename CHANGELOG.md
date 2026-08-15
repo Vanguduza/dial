@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD17 Intelligence Factory shadow/promote** — shadow draft → Promptfoo → human → outcome-weighted dataset; auto-publish blocked; Simulated never auto-pays; Flash-Lite P1; capability audit `docs/agent-audits/ai-capability-PD17-2026-08-15.md`; `/admin/intelligence/factory`.
 - **PD16 Promotions & referrals admin** — PLATFORM/FLASH/REFERRAL create, SUPPLIER_COOP ops approve, budgets, fraud holds; promo credit cash-out forbidden (D-42); `/admin/promotions`.
 - **PD15 Catalogue Factory admin** — CSV ingest → human approve → Meili spare + grocery publish; demand-gap KPIs; `/admin/catalogue/factory`; no AI auto-publish / no liquor / B2B informal leak=0; [#36](https://github.com/Vanguduza/dial/issues/36).
 - **PD14 Grocery web deepen** — USD cart → delivery slot (cold-chain; no liquor) → EcoCash\|COD checkout (ZiG only at pay) → ERP track; B2B informal hide; [#35](https://github.com/Vanguduza/dial/issues/35).

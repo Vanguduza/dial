@@ -88,6 +88,16 @@ export {
   listMetricTiles,
   recordOutcomeWeightedDataset,
   evaluateShadowPromote,
+  createIntelligenceShadowRun,
+  recordShadowPromptfooResult,
+  humanApproveShadowRun,
+  rejectShadowRun,
+  promoteShadowRun,
+  attemptAutoPublishShadow,
+  listIntelligenceShadowRuns,
+  listFactoryDatasets,
+  getIntelligenceFactorySnapshot,
+  runPd17IntelligenceFactoryThinVertical,
   commandCentreBanner,
   attemptCommandCentrePayout,
   __resetIntelligenceForTests,
@@ -96,6 +106,9 @@ export {
   type FactoryDatasetVersion,
   type ShadowPromoteGate,
   type CommandCentreMode,
+  type FactoryDraftArtifact,
+  type IntelligenceShadowRun,
+  type IntelligenceFactorySnapshot,
 } from "./intelligence.js";
 
 export { completeViaLiteLlm, pingLiteLlm, type LiteLlmCompletion } from "./litellm.js";
