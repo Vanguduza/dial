@@ -98,9 +98,11 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 135 | `PD29` | **Delivery ETA + stops / VROOM re-optimise** — Pack §9.8 residual | new issue | ETA banner (OSRM); navigate stop list; request re-optimise | `PD30` |
 | 136 | `PD30` | **Technician mock-location / camera deepen** — Pack §9.7 residual | new issue | Mock-location detection; evidence camera polish | `PD31` |
 | 137 | `PD31` | **Technician Bluetooth print hooks** — Pack §9.7 residual | workplan | Thermal print receipt/job ticket | `PD32` |
-| 138 | `PD32` | **Delivery COD float-limit warning** — Pack §9.8 residual | workplan | optional COD float warn | expand / next band |
+| 138 | `PD32` | **Delivery COD float-limit warning** — Pack §9.8 residual | workplan | optional COD float warn | `PD33` |
+| 139 | `PD33` | **Staging recon / dogfood harden** — Spare + grocery food + Meta WA | [#37](https://github.com/Vanguduza/dial/issues/37) | dial-webapp-recon; sandbox rails | `PD34` |
+| 140 | `PD34` | **B2B grocery polish + take-rate admin** — Wave 3 leftovers | workplan | formal-only UX deepen; take-rate scaffold | expand |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD32 = expand/polish (Pack §9 closed) — **not S99**. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD33 is **PD34**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -466,14 +468,30 @@ Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product
 | Evidence | `runPd32CodFloatLimitThinVertical`; `pd32CodFloatLimit.test.ts`; Compose COD float check |
 | Green → | Pack §9 residual band closed — expand/polish (not S99) |
 
-### Pack §9 gap audit (after PD32)
+### Pack §9 gap audit (after PD32) — **CLOSED**
 
-| § | Gap remaining | Stage |
-| --- | --- | --- |
-| 9.1–9.8 | Primary residuals covered PD1–PD32 | **closed** — polish/expand by founder priority |
-| — | Do not invent OpenAPI; S99 remains human launch-only | — |
+Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** staging dogfood.
 
-Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
+### PD33 — Staging recon / dogfood harden (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Issue | [#37](https://github.com/Vanguduza/dial/issues/37) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | recon Spare/grocery/WA surfaces → grocery+WA+FDMS sandbox rails → B2B informal cart 403 |
+| Evidence | `runPd33StagingDogfoodThinVertical`; `pd33StagingDogfood.test.ts` |
+| Green → | **PD34** B2B grocery polish + take-rate admin |
+
+### Pack / product gap audit (after PD33)
+
+| Gap | Stage |
+| --- | --- |
+| B2B grocery polish + take-rate admin scaffold (Wave 3) | **PD34** |
+| Playwright live staging networkidle (ENH-011) | defer until staging URL |
+
+### PD34 — B2B grocery polish + take-rate admin (NEXT)
+
+Wave 3 eng-safe leftovers — formal-only UX deepen; take-rate admin scaffold (bps from ops, not invented payables).
 
 ### S10 — E2a (historical)
 
