@@ -416,6 +416,8 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-432 | **Product-depth band PD21–PD23** authored (promo/tech mobile → ZiG/cost → WHT/sim) | `done` | Pack §9 gap audit after PD20; eng next ≠ S99 |
 | ENH-433 | **PD21 Customer mobile promo/referral + tech deep-link** — D-42 no cash-out | `done` | Pack §9.6; `/api/promo`; C-5 |
 | ENH-434 | **PD22 Admin Daily ZiG + Cost & health** — spend thresholds + kill-switch; IMTT opex | `done` | Pack §9.5; D-57/D-60 |
+| ENH-435 | **PD23 Admin Compliance/WHT + Commercial Simulation** — remittance; Simulated≠pay | `done` | Pack §9.5/D-53/D-54; D-50 |
+| ENH-436 | **Product-depth band PD24–PD25** authored (Projects/legal → tech Value Score) | `done` | Pack §9 gap audit after PD23; eng next ≠ S99 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

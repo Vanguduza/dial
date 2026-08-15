@@ -89,9 +89,11 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 126 | `PD20` | **Customer mobile deepen** — Pack §9.6 | workplan | Android/iOS orders/returns/garage + grocery parity vs PD18; USD; EcoCash\|COD; C-5 | `PD21` |
 | 127 | `PD21` | **Customer mobile promo/referral + tech deep-link** — Pack §9.6 remainder | workplan | Promo code + referral share; deep-link Tech critical paths; no cash-out | `PD22` |
 | 128 | `PD22` | **Admin Daily ZiG rate + Cost & health** — Pack §9.5 | workplan | Daily ZiG rate UI + audit; AI/cloud/SMS spend + kill-switch; IMTT opex | `PD23` |
-| 129 | `PD23` | **Admin Compliance/WHT + Commercial Simulation** — Pack §9.5 / D-53 | new issue | WHT remittance centre; Simulated never auto-pays | expand / next band |
+| 129 | `PD23` | **Admin Compliance/WHT + Commercial Simulation** — Pack §9.5 / D-53 | workplan | WHT remittance centre; Simulated never auto-pays | `PD24` |
+| 130 | `PD24` | **Admin Projects toggle + legal compliance hub** — Pack §9.5 residual | new issue | Projects feature toggle; legal/compliance hub screens | `PD25` |
+| 131 | `PD25` | **Technician Android Value Score + ITF263** — Pack §9.7 / D-53 | new issue | Value Score factors on device; ITF263 status/upload deepen | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD22 is **PD23**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD23 is **PD24**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -347,9 +349,32 @@ Do **not** treat S99 as eng-complete / product-finished.
 
 Do **not** treat S99 as eng-complete / product-finished.
 
-### PD23 — Admin Compliance/WHT + Commercial Simulation (NEXT)
+### PD23 — Admin Compliance/WHT + Commercial Simulation (**GREEN** 2026-08-15)
 
-Pack §9.5 / D-53 — WHT remittance centre; Commercial Simulation Actual vs Simulated (Simulated never auto-pays).
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | 30% WHT → remittance draft→submit→ack; Commercial Sim Actual/Simulated; Simulated payout blocked |
+| Evidence | `runPd23WhtRemittanceThinVertical`; `runPd23CommercialSimThinVertical`; `pd23ComplianceSim.test.ts`; capability audit PD23 |
+| Green → | **PD24** Admin Projects toggle + legal compliance hub |
+
+### Pack §9 gap audit (after PD23)
+
+| § | Gap remaining | Stage |
+| --- | --- | --- |
+| 9.5 | Projects toggle + legal compliance hub | **PD24** |
+| 9.7 / D-53 | Technician Android Value Score + ITF263 deepen | **PD25** |
+| 9.1–9.2 / 9.8 | Home polish / EPC facets / offline packs | defer — not blocking; founder may prioritize |
+
+Do **not** invent OpenAPI stages. Do **not** treat S99 as eng-complete / product-finished.
+
+### PD24 — Admin Projects toggle + legal compliance hub (NEXT)
+
+Pack §9.5 residual — Projects feature toggle; legal/compliance hub screens.
+
+### PD25 — Technician Android Value Score + ITF263
+
+Pack §9.7 / D-53 — Value Score factors on device; ITF263 status/upload deepen.
 
 ### S10 — E2a (historical)
 

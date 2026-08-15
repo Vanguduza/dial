@@ -11,6 +11,8 @@ import {
   recordOutcomeWeightedDataset,
   registerMetricContract,
   __resetIntelligenceForTests,
+  runPd23CommercialSimThinVertical,
+  __resetCommercialSimForTests,
 } from "./index.js";
 
 test("E4a guidedIntake: Zod assessment, no price, identity omitted from egress", () => {
@@ -129,6 +131,14 @@ test("PD17 shadow → Promptfoo → human → promote; no auto-publish / no paya
       }),
     /payable/,
   );
+});
+
+test("PD23 Commercial Simulation Simulated never auto-pays", () => {
+  __resetCommercialSimForTests();
+  const out = runPd23CommercialSimThinVertical();
+  assert.equal(out.simulatedNeverPays, true);
+  assert.equal(out.actualRefusesMoneySor, true);
+  assert.equal(out.autoPayAllowed, false);
 });
 
 test("LiteLLM fixture completion never requires keys", async () => {

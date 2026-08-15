@@ -111,4 +111,20 @@ export {
   type IntelligenceFactorySnapshot,
 } from "./intelligence.js";
 
+export {
+  __resetCommercialSimForTests,
+  attemptCommercialSimPayout,
+  commercialSimSnapshot,
+  completeCommercialSimRun,
+  createCommercialSimRun,
+  getCommercialSimRun,
+  listCommercialSimRuns,
+  runPd23CommercialSimThinVertical,
+  setCommercialSimMode,
+  startCommercialSimRun,
+  type CommercialSimMode,
+  type CommercialSimRun,
+  type CommercialSimRunStatus,
+} from "./commercialSim.js";
+
 export { completeViaLiteLlm, pingLiteLlm, type LiteLlmCompletion } from "./litellm.js";

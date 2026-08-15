@@ -18,6 +18,7 @@ import {
   runE1aMoneySpine,
   runPd4MoneySpine,
   runPd22AdminZigCostHealthThinVertical,
+  runPd23WhtRemittanceThinVertical,
   setDailyZigRate,
   toCanonicalPspCode,
   usdToZig,
@@ -38,6 +39,14 @@ test("PD22 Daily ZiG + cost health thin vertical", () => {
   assert.equal(out.costAnyAlert, true);
   assert.equal(out.killSwitchEngaged, true);
   assert.ok(out.fxRateId.startsWith("fx"));
+});
+
+test("PD23 WHT remittance thin vertical", () => {
+  const out = runPd23WhtRemittanceThinVertical();
+  assert.equal(out.rateBps, 3000);
+  assert.equal(out.withholdMinor, "3000");
+  assert.equal(out.remittanceStatus, "acknowledged");
+  assert.equal(out.payableFromAi, false);
 });
 
 test("checkout EcoCash button creates intent with ZWG display + fx_rate_id", async () => {

@@ -448,6 +448,104 @@ export function listWithholdingBalances(): WithholdingBalance[] {
   return [...withholding.values()].map((b) => ({ ...b }));
 }
 
+export {
+  __resetWhtRemittanceForTests,
+  acknowledgeWhtRemittance,
+  createWhtRemittanceDraft,
+  getWhtRemittance,
+  listWhtRemittances,
+  serializeWhtRemittance,
+  submitWhtRemittance,
+  type WhtRemittanceBatch,
+  type WhtRemittanceLine,
+  type WhtRemittanceStatus,
+} from "./whtRemittance.js";
+
+import {
+  __resetWhtRemittanceForTests,
+  createWhtRemittanceDraft,
+  listWhtRemittances,
+  serializeWhtRemittance,
+  submitWhtRemittance,
+  acknowledgeWhtRemittance,
+} from "./whtRemittance.js";
+
+/**
+ * PD23 WHT remittance thin path: 30% withhold → draft remittance → submit → ack.
+ */
+export function runPd23WhtRemittanceThinVertical(input?: {
+  technicianId?: string;
+  yearOfAssessment?: number;
+}): {
+  technicianId: string;
+  withholdMinor: string;
+  rateBps: 3000;
+  batchId: string;
+  remittanceStatus: "acknowledged";
+  payableFromAi: false;
+} {
+  __resetWhtRemittanceForTests();
+  const technicianId = input?.technicianId ?? "tech_pd23";
+  const year = input?.yearOfAssessment ?? new Date().getFullYear();
+  // Clear this tech's prior balance for deterministic thin vertical
+  withholding.delete(`${technicianId}:${year}`);
+
+  const taxed = computeTechPayoutWithholding({
+    technicianId,
+    yearOfAssessment: year,
+    payoutUsdMinor: 100_00n,
+    hasItf263: false,
+  });
+  if (taxed.rateBps !== 3000 || taxed.withholdMinor !== 30_00n) {
+    throw new Error("PD23 expected 30% WHT without ITF263");
+  }
+
+  const draft = createWhtRemittanceDraft({
+    yearOfAssessment: year,
+    balances: listWithholdingBalances(),
+  });
+  if (draft.payableFromAi !== false) {
+    throw new Error("PD23 remittance must forbid AI payable");
+  }
+  const submitted = submitWhtRemittance({
+    batchId: draft.batchId,
+    submittedBy: "ops_pd23",
+  });
+  const ack = acknowledgeWhtRemittance(submitted.batchId);
+  if (ack.status !== "acknowledged") {
+    throw new Error("PD23 expected acknowledged remittance");
+  }
+
+  return {
+    technicianId,
+    withholdMinor: taxed.withholdMinor.toString(),
+    rateBps: 3000,
+    batchId: ack.batchId,
+    remittanceStatus: "acknowledged",
+    payableFromAi: false,
+  };
+}
+
+export function complianceWhtSnapshot(yearOfAssessment: number) {
+  return {
+    yearOfAssessment,
+    balances: listWithholdingBalances()
+      .filter((b) => b.yearOfAssessment === yearOfAssessment)
+      .map((b) => ({
+        technicianId: b.technicianId,
+        yearOfAssessment: b.yearOfAssessment,
+        grossPaidMinor: b.grossPaidMinor.toString(),
+        withheldMinor: b.withheldMinor.toString(),
+        hasItf263: b.hasItf263,
+      })),
+    remittances: listWhtRemittances()
+      .filter((r) => r.yearOfAssessment === yearOfAssessment)
+      .map(serializeWhtRemittance),
+    whtRateWithoutItf263Bps: 3000 as const,
+    payableFromAi: false as const,
+  };
+}
+
 /**
  * Verified PSP webhook admission for gateway routes — signature + event idempotency.
  * Capture mutates intent only after both pass (webhook-as-truth).
@@ -996,6 +1094,7 @@ export function __resetPaymentsForTests(): void {
   jobReservesByIdem.clear();
   withholding.clear();
   __resetCostHealthForTests();
+  __resetWhtRemittanceForTests();
 }
 
 /**
