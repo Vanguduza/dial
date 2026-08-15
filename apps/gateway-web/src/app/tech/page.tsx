@@ -34,6 +34,7 @@ export default function TechHomePage() {
         <nav style={{ display: "flex", gap: dialTokens.space.md, flexWrap: "wrap", marginTop: dialTokens.space.sm }}>
           <Link href="/home">Home</Link>
           <Link href="/tech/book">Book</Link>
+          <Link href="/tech/guide">Guide</Link>
           <Link href="/tech/emergency">Emergency</Link>
           <Link href="/tech/jobs">My jobs</Link>
         </nav>

@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD138 Referral share UI** — `/account/promo` programs + share code/URL; promo_credit only (Pack §9.6 / D-42).
+- **PD137 Calm tech guide** — `/tech/guide` symptom → checklist via resolve API; never AI-priced (Pack §9.3).
+- **PD136 Checklist library tranche 3** — ≥24 catalogIds (clutch, breaker, fridge, …); still ≠ full 42 (Pack §9.3).
+- **PD135 Grocery search facets** — brand/availability/coldChain/collection; liquor hidden; B2B leak=0 (Pack §9.2).
 - **PD134 Grocery home collections** — categoryPath collections; liquor hidden; B2B informal leak=0 (Pack grocery / §9.2 parity).
 - **PD133 Checklist library tranche 2** — ≥16 catalogIds (warning light, HVAC AC, fluid leak, …); still ≠ full 42 (Pack §9.3).
 - **PD132 Supplier co-op funded SKUs** — live SUPPLIER_COOP offerIds on portal; draft hidden (Pack §9.4).

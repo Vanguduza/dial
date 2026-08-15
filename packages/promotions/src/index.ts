@@ -66,6 +66,7 @@ export {
   runPd70CustomerPromoBalanceThinVertical,
   runPd85ReferralStatusThinVertical,
   runPd96PromoCartCheckoutThinVertical,
+  runPd138ReferralShareThinVertical,
   getReferralStatus,
   shareReferral,
   validatePromoCode,

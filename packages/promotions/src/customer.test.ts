@@ -40,6 +40,15 @@ test("PD85 referral status thin vertical", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD138 referral share thin vertical", async () => {
+  const { runPd138ReferralShareThinVertical } = await import("./customer.js");
+  const out = runPd138ReferralShareThinVertical();
+  assert.equal(out.hasShareCode, true);
+  assert.equal(out.hasShareUrl, true);
+  assert.equal(out.cashOutAllowed, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD96 promo cart checkout thin vertical", async () => {
   const { runPd96PromoCartCheckoutThinVertical } = await import("./customer.js");
   const out = runPd96PromoCartCheckoutThinVertical();

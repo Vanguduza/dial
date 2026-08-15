@@ -146,3 +146,13 @@ test("PD134 grocery collections thin vertical", async () => {
   assert.equal(out.b2bInformalLeak, 0);
   assert.equal(out.payableFromAi, false);
 });
+
+test("PD135 grocery facets thin vertical", async () => {
+  const { runPd135GroceryFacetsThinVertical } = await import("./grocery.js");
+  const out = runPd135GroceryFacetsThinVertical();
+  assert.ok(out.hitCount >= 1);
+  assert.equal(out.facetsApplied, true);
+  assert.equal(out.liquorAllowed, false);
+  assert.equal(out.b2bInformalLeak, 0);
+  assert.equal(out.payableFromAi, false);
+});

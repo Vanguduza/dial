@@ -1,5 +1,5 @@
 /**
- * PD70 — Customer promo credit balance + referral share (Pack §9.6 / D-42).
+ * PD70 / PD138 — Customer promo credit balance + referral share UI (Pack §9.6 / D-42).
  * Session SoR; promo_credit never cash-outs.
  */
 "use client";
@@ -15,8 +15,25 @@ type Balance = {
   cashOutAllowed: false;
 };
 
+type Program = {
+  campaignId: string;
+  codePrefix: string;
+  rewardKind: "promo_credit";
+  cashOutAllowed: false;
+};
+
+type Share = {
+  shareCode: string;
+  shareUrl: string;
+  rewardKind: "promo_credit";
+  cashOutAllowed: false;
+};
+
 export default function AccountPromoPage() {
   const [balance, setBalance] = useState<Balance | null>(null);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [share, setShare] = useState<Share | null>(null);
+  const [campaignId, setCampaignId] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [code, setCode] = useState("");
@@ -43,6 +60,55 @@ export default function AccountPromoPage() {
       setBusy(false);
     }
   }, []);
+
+  const loadPrograms = useCallback(async () => {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/promo?view=referral_programs");
+      const data = (await res.json()) as {
+        error?: string;
+        programs?: Program[];
+      };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      const list = data.programs ?? [];
+      setPrograms(list);
+      if (list[0] && !campaignId) setCampaignId(list[0].campaignId);
+    } finally {
+      setBusy(false);
+    }
+  }, [campaignId]);
+
+  async function shareReferralCode() {
+    setBusy(true);
+    setMessage(null);
+    setShare(null);
+    try {
+      const res = await fetch("/api/promo", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          action: "share_referral",
+          campaignId,
+        }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        share?: Share;
+      };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setShare(data.share ?? null);
+      setMessage("Share code ready — promo_credit only (D-42)");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function validateCode() {
     setBusy(true);
@@ -109,7 +175,8 @@ export default function AccountPromoPage() {
           Promo & referrals
         </h1>
         <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD70 — promo credit balance and code validate. Never cash-out (D-42).
+          PD70 / PD138 — promo credit balance, code validate, referral share. Never cash-out
+          (D-42).
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
           <button
@@ -147,6 +214,58 @@ export default function AccountPromoPage() {
             cash-out {String(balance.cashOutAllowed)}
           </p>
         ) : null}
+        <section
+          data-testid="pd138-referral-share"
+          style={{ marginTop: 24, display: "grid", gap: 8 }}
+        >
+          <h2 style={{ fontSize: "1.05rem", margin: 0 }}>Referral share</h2>
+          <button type="button" disabled={busy} onClick={() => void loadPrograms()}>
+            Load referral programs
+          </button>
+          {programs.length > 0 ? (
+            <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
+              Campaign
+              <select
+                value={campaignId}
+                onChange={(e) => setCampaignId(e.target.value)}
+                style={{ padding: 10, borderRadius: 8, border: "1px solid #ccc" }}
+              >
+                {programs.map((p) => (
+                  <option key={p.campaignId} value={p.campaignId}>
+                    {p.codePrefix} · {p.campaignId}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          <button
+            type="button"
+            disabled={busy || !campaignId.trim()}
+            onClick={() => void shareReferralCode()}
+            style={{
+              padding: "10px 14px",
+              borderRadius: 8,
+              border: "none",
+              background: dialTokens.color.brand.primary,
+              color: "#fff",
+              fontWeight: 600,
+              width: "fit-content",
+            }}
+          >
+            Generate share code
+          </button>
+          {share ? (
+            <div data-testid="pd138-share-payload">
+              <p>
+                Code: <strong>{share.shareCode}</strong>
+              </p>
+              <p style={{ wordBreak: "break-all", fontSize: 13 }}>{share.shareUrl}</p>
+              <p style={{ fontSize: 13, opacity: 0.75 }}>
+                Reward: {share.rewardKind} · cash-out {String(share.cashOutAllowed)}
+              </p>
+            </div>
+          ) : null}
+        </section>
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 20 }}>
           Promo code
           <input

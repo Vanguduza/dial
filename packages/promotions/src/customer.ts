@@ -576,3 +576,56 @@ export function runPd85ReferralStatusThinVertical(): {
     payableFromAi: false,
   };
 }
+
+/**
+ * PD138 thin vertical: referral share payload for customer UI (code + URL; never cash-out).
+ */
+export function runPd138ReferralShareThinVertical(): {
+  hasShareCode: true;
+  hasShareUrl: true;
+  cashOutAllowed: false;
+  payableFromAi: false;
+} {
+  __resetPromoCustomerForTests();
+  const referral = createPromoCampaign({
+    type: "REFERRAL",
+    name: "PD138 Referral Share",
+    budgetSpendLimitMinor: 50_00n,
+    verticals: ["spare"],
+    referral: {
+      codePrefix: "PD138",
+      attributionWindowDays: 30,
+      referrerReward: {
+        kind: "promo_credit",
+        amountMinor: 3_00n,
+        currency: "USD",
+      },
+      refereeReward: {
+        kind: "promo_credit",
+        amountMinor: 3_00n,
+        currency: "USD",
+      },
+      maxReferralsPerReferrerMonth: 10,
+    },
+  });
+  activatePromoCampaign(referral.id);
+  const share = shareReferral({
+    customerId: "cust_pd138",
+    campaignId: referral.id,
+  });
+  if (!share.shareCode?.startsWith("PD138")) {
+    throw new Error("PD138 expected shareCode with prefix");
+  }
+  if (!share.shareUrl?.includes(encodeURIComponent(share.shareCode))) {
+    throw new Error("PD138 expected shareUrl containing code");
+  }
+  if (share.cashOutAllowed !== false || share.rewardKind !== "promo_credit") {
+    throw new Error("PD138 cash-out must stay forbidden");
+  }
+  return {
+    hasShareCode: true,
+    hasShareUrl: true,
+    cashOutAllowed: false,
+    payableFromAi: false,
+  };
+}

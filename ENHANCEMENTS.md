@@ -526,6 +526,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-542 | **PD132 Supplier co-op funded SKUs** | `done` | Pack §9.4 live-only |
 | ENH-543 | **PD133 Checklist library tranche 2** | `done` | Pack §9.3; ≠ full 42 |
 | ENH-544 | **PD134 Grocery home collections** | `done` | Pack grocery / §9.2 parity |
+| ENH-545 | **PD135 Grocery search facets** | `done` | Pack §9.2; liquor hidden |
+| ENH-546 | **PD136 Checklist library tranche 3** | `done` | Pack §9.3; ≠ full 42 |
+| ENH-547 | **PD137 Calm tech guide** | `done` | Pack §9.3 symptom→checklist |
+| ENH-548 | **PD138 Referral share UI** | `done` | Pack §9.6 / D-42 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

@@ -342,6 +342,17 @@ test("PD133 checklist library tranche 2", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD136 checklist library tranche 3", async () => {
+  const { runPd136ChecklistLibraryTranche3ThinVertical } = await import(
+    "./index.js"
+  );
+  const out = runPd136ChecklistLibraryTranche3ThinVertical();
+  assert.ok(out.catalogSeedCount >= 24);
+  assert.equal(out.tranche3Present, true);
+  assert.equal(out.trancheNotFullLibrary, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

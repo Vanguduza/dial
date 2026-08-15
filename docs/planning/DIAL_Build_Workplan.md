@@ -1632,7 +1632,53 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | --- | --- |
 | Thin path | `listGroceryCollections`; liquorAllowed false; B2B leak=0 |
 | Evidence | `runPd134GroceryCollectionsThinVertical` |
-| Green → | eng-safe Pack gap ≠ S99 (**PD135+**) |
+| Green → | **PD135** grocery facets |
+
+### Pack / product gap audit (after PD134 → PD135–PD138)
+
+| Gap | Stage |
+| --- | --- |
+| Grocery search + facets (Pack §9.2 parity with Spare PD95) | **PD135** |
+| Checklist library tranche 3 (Pack §9.3; ≠ full 42) | **PD136** |
+| Calm tech guide + symptom resolve UI (Pack §9.3) | **PD137** |
+| Referral share UI on `/account/promo` (Pack §9.6) | **PD138** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+| packages/ai missing-info deepen | deferred (D-56 capability review gate) |
+| Ballerine / Lago stitch-only | deferred — prefer Pack §9 product gaps |
+
+### PD135 — Grocery search facets (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `searchGroceryOffersWithFacets`; `/api/search/grocery`; `/grocery/search`; liquorAllowed false |
+| Evidence | `runPd135GroceryFacetsThinVertical` |
+| Green → | **PD136** checklist tranche 3 |
+
+### PD136 — Checklist library tranche 3 (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | ≥24 catalogIds incl. clutch / breaker / fridge; still ≠ 42 |
+| Evidence | `runPd136ChecklistLibraryTranche3ThinVertical` |
+| Green → | **PD137** tech guide |
+
+### PD137 — Calm tech guide (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `/tech/guide` → `resolve_checklist_by_symptom`; never AI payable |
+| Evidence | dogfood `pd135Pd138Ops` PD137 |
+| Green → | **PD138** referral share UI |
+
+### PD138 — Referral share UI (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `/account/promo` share code/URL; `share_referral`; cash-out forbidden |
+| Evidence | `runPd138ReferralShareThinVertical` |
+| Green → | eng-safe Pack gap ≠ S99 (**PD139+**) |
 
 ### S10 — E2a (historical)
 

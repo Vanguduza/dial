@@ -117,7 +117,16 @@ export type ChecklistId =
   | "auto_pulling_vibration"
   | "hvac_ac_not_cooling"
   | "hvac_ac_intermittent_smell"
-  | "auto_poor_fuel";
+  | "auto_poor_fuel"
+  | "auto_clutch_slip"
+  | "auto_transmission"
+  | "plumb_no_water"
+  | "plumb_blocked_drain"
+  | "elec_breaker_trips"
+  | "elec_no_power"
+  | "appliance_fridge_not_cooling"
+  | "appliance_washer_wont_spin"
+  | "hvac_heater_not_working";
 
 export type Checklist = {
   id: ChecklistId;
@@ -412,6 +421,106 @@ const CHECKLISTS: Checklist[] = [
       "Warning lights on?",
       "Tyre pressures checked recently?",
       "Recent long idle / short trips only?",
+    ],
+  },
+  /** PD136 — checklist library tranche 3 (Pack §9.3; still ≠ full 42). */
+  {
+    id: "auto_clutch_slip",
+    title: "Clutch slipping",
+    catalogId: "auto.clutch_slip.v1",
+    steps: [
+      "RPM rises without speed gain?",
+      "Burning smell under load?",
+      "Recent clutch work?",
+      "Safe to drive short distance only?",
+    ],
+  },
+  {
+    id: "auto_transmission",
+    title: "Transmission / gear issue",
+    catalogId: "auto.transmission.v1",
+    steps: [
+      "Hard shift, slip, or won't engage?",
+      "Auto or manual?",
+      "Fluid colour/smell if known?",
+      "Never AI-price gearbox rebuild",
+    ],
+  },
+  {
+    id: "plumb_no_water",
+    title: "No water / low pressure",
+    catalogId: "plumb.no_water.v1",
+    steps: [
+      "Whole property or single tap?",
+      "Municipal outage known?",
+      "Stopcock fully open?",
+      "Photo of meter/stopcock if safe",
+    ],
+  },
+  {
+    id: "plumb_blocked_drain",
+    title: "Blocked drain / slow waste",
+    catalogId: "plumb.blocked_drain.v1",
+    steps: [
+      "Sink, bath, or toilet?",
+      "Standing water now?",
+      "Chemicals already used?",
+      "Do not force chemical mix — book plumber",
+    ],
+  },
+  {
+    id: "elec_breaker_trips",
+    title: "Breaker keeps tripping",
+    catalogId: "elec.breaker_trips.v1",
+    steps: [
+      "Same breaker or multiple?",
+      "Trips immediately or after load?",
+      "Burning smell / heat at panel?",
+      "Do not reset repeatedly — book electrician",
+    ],
+  },
+  {
+    id: "elec_no_power",
+    title: "No power / partial blackout",
+    catalogId: "elec.no_power.v1",
+    steps: [
+      "Neighbours also out?",
+      "Main breaker position?",
+      "Any burning smell?",
+      "Life-safety devices on backup?",
+    ],
+  },
+  {
+    id: "appliance_fridge_not_cooling",
+    title: "Fridge not cooling",
+    catalogId: "appliance.fridge_not_cooling.v1",
+    steps: [
+      "Fridge, freezer, or both warm?",
+      "Door seal damage?",
+      "Recent move / power cut?",
+      "Food safety — discard if unsafe",
+    ],
+  },
+  {
+    id: "appliance_washer_wont_spin",
+    title: "Washer won't spin",
+    catalogId: "appliance.washer_wont_spin.v1",
+    steps: [
+      "Fills but won't spin?",
+      "Unbalanced load error?",
+      "Drain hose kinked?",
+      "Never AI-price appliance parts",
+    ],
+  },
+  {
+    id: "hvac_heater_not_working",
+    title: "Heater / warm air not working",
+    catalogId: "hvac.heater_not_working.v1",
+    steps: [
+      "Blows cold only?",
+      "Cabin or home HVAC?",
+      "Coolant level if vehicle heater?",
+      "Draft quote only — never AI payable",
     ],
   },
 ];
@@ -1239,6 +1348,24 @@ export function resolveChecklistBySymptom(input: {
     id = "auto_fluid_leak";
   } else if (s.includes("socket") || s.includes("outlet") || s.includes("circuit")) {
     id = "elec_socket_dead";
+  } else if (s.includes("clutch")) {
+    id = "auto_clutch_slip";
+  } else if (s.includes("transmission") || s.includes("gearbox") || s.includes("won't shift")) {
+    id = "auto_transmission";
+  } else if (s.includes("no water") || s.includes("low pressure") || s.includes("no pressure")) {
+    id = "plumb_no_water";
+  } else if (s.includes("blocked drain") || s.includes("slow drain") || s.includes("clogged")) {
+    id = "plumb_blocked_drain";
+  } else if (s.includes("breaker") || s.includes("trips")) {
+    id = "elec_breaker_trips";
+  } else if (s.includes("no power") || s.includes("blackout") || s.includes("power out")) {
+    id = "elec_no_power";
+  } else if (s.includes("fridge") || s.includes("refrigerator")) {
+    id = "appliance_fridge_not_cooling";
+  } else if (s.includes("washer") || s.includes("washing machine") || s.includes("won't spin")) {
+    id = "appliance_washer_wont_spin";
+  } else if (s.includes("heater") || s.includes("no heat") || s.includes("warm air")) {
+    id = "hvac_heater_not_working";
   } else if (s.includes("leak") || s.includes("pipe") || s.includes("tap")) {
     id = "plumb_leak";
   } else {
@@ -1338,6 +1465,50 @@ export function runPd133ChecklistLibraryTranche2ThinVertical(): {
   return {
     catalogSeedCount: withCatalog.length,
     tranche2Present: true,
+    trancheNotFullLibrary: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD136 thin vertical: checklist library tranche 3 (≥24 catalogIds; still ≠ 42).
+ */
+export function runPd136ChecklistLibraryTranche3ThinVertical(): {
+  catalogSeedCount: number;
+  tranche3Present: true;
+  trancheNotFullLibrary: true;
+  payableFromAi: false;
+} {
+  const withCatalog = listChecklists().filter((c) => c.catalogId);
+  if (withCatalog.length < 24) {
+    throw new Error("PD136 expected ≥24 catalogId seeds");
+  }
+  if (withCatalog.length >= 42) {
+    throw new Error("PD136 must not claim full 42 library");
+  }
+  const need = [
+    "auto.clutch_slip.v1",
+    "elec.breaker_trips.v1",
+    "appliance.fridge_not_cooling.v1",
+  ];
+  for (const cat of need) {
+    if (!withCatalog.some((c) => c.catalogId === cat)) {
+      throw new Error(`PD136 missing catalogId ${cat}`);
+    }
+  }
+  const clutch = resolveChecklistBySymptom({ symptom: "clutch slipping under load" });
+  if (clutch.catalogId !== "auto.clutch_slip.v1") {
+    throw new Error("PD136 expected clutch resolve");
+  }
+  const breaker = resolveChecklistBySymptom({
+    symptom: "breaker keeps trips after load",
+  });
+  if (breaker.catalogId !== "elec.breaker_trips.v1") {
+    throw new Error("PD136 expected breaker_trips resolve");
+  }
+  return {
+    catalogSeedCount: withCatalog.length,
+    tranche3Present: true,
     trancheNotFullLibrary: true,
     payableFromAi: false,
   };

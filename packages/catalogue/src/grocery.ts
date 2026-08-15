@@ -528,6 +528,92 @@ export function searchGroceryOffers(
   return hits.map((o) => ({ ...o }));
 }
 
+/** PD135 — Grocery search facets (Pack grocery / §9.2 parity with Spare PD95). */
+export type GroceryFacetFilters = {
+  brand?: string;
+  availability?: GroceryAvailability;
+  coldChain?: GroceryColdChain;
+  collection?: string;
+};
+
+export function searchGroceryOffersWithFacets(
+  query: string,
+  opts?: {
+    sessionRole?: "b2c" | "b2b";
+    facets?: GroceryFacetFilters;
+  },
+): {
+  hits: GroceryOffer[];
+  facetsApplied: GroceryFacetFilters;
+  collections: GroceryCollection[];
+  liquorAllowed: false;
+  payableFromAi: false;
+} {
+  const role = opts?.sessionRole ?? "b2c";
+  const facets = opts?.facets ?? {};
+  let hits = searchGroceryOffers(query, { sessionRole: role });
+  if (facets.brand?.trim()) {
+    const b = facets.brand.trim().toLowerCase();
+    hits = hits.filter((h) => h.brand.toLowerCase() === b);
+  }
+  if (facets.availability) {
+    hits = hits.filter((h) => h.availability === facets.availability);
+  }
+  if (facets.coldChain) {
+    hits = hits.filter((h) => h.coldChain === facets.coldChain);
+  }
+  if (facets.collection?.trim()) {
+    const col = facets.collection.trim().toLowerCase();
+    hits = hits.filter((h) =>
+      h.categoryPath.some((p) => p.toLowerCase() === col),
+    );
+  }
+  return {
+    hits,
+    facetsApplied: { ...facets },
+    collections: listGroceryCollections(role),
+    liquorAllowed: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD135 thin vertical: brand/availability/coldChain facets; liquorAllowed false; B2B leak=0.
+ */
+export function runPd135GroceryFacetsThinVertical(): {
+  hitCount: number;
+  facetsApplied: true;
+  liquorAllowed: false;
+  b2bInformalLeak: 0;
+  payableFromAi: false;
+} {
+  __resetGroceryForTests();
+  const all = searchGroceryOffersWithFacets("");
+  if (all.hits.length < 1) throw new Error("PD135 expected grocery hits");
+  const branded = searchGroceryOffersWithFacets("", {
+    facets: { brand: all.hits[0]!.brand },
+  });
+  if (branded.hits.length < 1 || branded.liquorAllowed !== false) {
+    throw new Error("PD135 brand facet / liquor checks failed");
+  }
+  if (countGroceryInformalB2bLeaks("") !== 0) {
+    throw new Error("PD135 B2B informal leak must be 0");
+  }
+  const chilled = searchGroceryOffersWithFacets("", {
+    facets: { coldChain: "chilled" },
+  });
+  if (chilled.facetsApplied.coldChain !== "chilled") {
+    throw new Error("PD135 expected coldChain facet applied");
+  }
+  return {
+    hitCount: branded.hits.length,
+    facetsApplied: true,
+    liquorAllowed: false,
+    b2bInformalLeak: 0,
+    payableFromAi: false,
+  };
+}
+
 /** PD134 — Pack grocery home collections (parity PD95 spare). */
 export type GroceryCollection = {
   id: string;
