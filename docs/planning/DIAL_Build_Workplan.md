@@ -257,13 +257,18 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd16PromotionsAdminThinVertical`; `pd16PromotionsAdmin.test.ts`; `/admin/promotions` |
 | Green → | **PD17** Intelligence Factory shadow/promote |
 
-### PD17 — Intelligence Factory shadow/promote (NEXT)
+### PD17 — Intelligence Factory shadow/promote (**GREEN** 2026-08-15)
 
-D-54 — shadow eval → human + Promptfoo promote; AI drafts only; never auto-publish payable amounts.
+| | |
+| --- | --- |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Shadow checklist draft → Promptfoo → human approve → promote dataset; auto-publish blocked; Simulated never pays |
+| Evidence | `runPd17IntelligenceFactoryThinVertical`; `pd17IntelligenceFactory.test.ts`; capability audit PD17; `/admin/intelligence/factory` |
+| Green → | **PD18** Spare-web deepen |
 
-### PD18 — Spare-web deepen (Pack §9.2)
+### PD18 — Spare-web deepen (NEXT)
 
-Orders / returns / garage beyond PD3 browse; USD; EcoCash\|COD; returns ERP stub.
+Orders / returns / garage beyond PD3 browse; USD; EcoCash\|COD; returns ERP stub (Pack §9.2).
 
 ### S10 — E2a (historical)
 
