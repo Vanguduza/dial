@@ -1,5 +1,6 @@
 /**
- * PD18 / PD50 Garage / Vehicle Hub API — reminders need consent (Pack §9.2).
+ * PD18 / PD50 / PD75 Garage / Vehicle Hub API — reminders need consent (Pack §9.2).
+ * Pack §10 set active vehicle.
  */
 import { NextResponse } from "next/server";
 import {
@@ -7,6 +8,7 @@ import {
   browsePathForGarageVehicle,
   listGarageConsentAudit,
   listGarageVehicles,
+  setActiveGarageVehicle,
   setGarageReminderConsent,
 } from "@dial/catalogue";
 
@@ -62,19 +64,32 @@ export async function POST(req: Request) {
   }
 }
 
-/** PD50 — grant/revoke reminder consent + return browse path + audit. */
+/** PD50 consent + PD75 set active. */
 export async function PATCH(req: Request) {
   const body = (await req.json()) as {
     vehicleId?: string;
     reminderConsent?: boolean;
+    setActive?: boolean;
   };
-  if (!body.vehicleId || typeof body.reminderConsent !== "boolean") {
-    return NextResponse.json(
-      { error: "vehicleId and reminderConsent required" },
-      { status: 400 },
-    );
+  if (!body.vehicleId) {
+    return NextResponse.json({ error: "vehicleId required" }, { status: 400 });
   }
   try {
+    if (body.setActive === true) {
+      const vehicle = setActiveGarageVehicle(body.vehicleId);
+      return NextResponse.json({
+        ok: true,
+        vehicle,
+        browsePath: browsePathForGarageVehicle(vehicle.vehicleId),
+        note: "PD75 — active vehicle set (Pack §10)",
+      });
+    }
+    if (typeof body.reminderConsent !== "boolean") {
+      return NextResponse.json(
+        { error: "reminderConsent or setActive required" },
+        { status: 400 },
+      );
+    }
     const vehicle = setGarageReminderConsent({
       vehicleId: body.vehicleId,
       reminderConsent: body.reminderConsent,
@@ -87,7 +102,7 @@ export async function PATCH(req: Request) {
     });
   } catch (e) {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "consent update failed" },
+      { error: e instanceof Error ? e.message : "garage update failed" },
       { status: 400 },
     );
   }

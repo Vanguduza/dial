@@ -5,6 +5,7 @@
  */
 
 import { __resetStepUpForTests } from "./stepUp.js";
+import { __resetMarketingConsentForTests } from "./marketingConsent.js";
 
 export type ProfileRole = "customer" | "technician" | "supplier" | "admin";
 export type BuyerSegment = "b2c" | "b2b";
@@ -51,6 +52,7 @@ export function __resetIdentityForTests(): void {
   s.profiles.clear();
   s.emailIndex.clear();
   __resetStepUpForTests();
+  __resetMarketingConsentForTests();
 }
 
 function putProfile(profile: Profile): Profile {
@@ -294,6 +296,16 @@ export {
   __resetStepUpForTests,
   type StepUpChallenge,
 } from "./stepUp.js";
+
+export {
+  getMarketingConsent,
+  listMarketingConsentAudit,
+  runPd78MarketingConsentThinVertical,
+  setMarketingConsent,
+  __resetMarketingConsentForTests,
+  type MarketingConsentEvent,
+  type MarketingConsentState,
+} from "./marketingConsent.js";
 
 export {
   getSupabasePublicConfig,

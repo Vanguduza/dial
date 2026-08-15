@@ -270,6 +270,17 @@ test("PD74 active run polyline MapLibre", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD77 complete stop completes delivery_run", async () => {
+  const { runPd77CompleteStopThinVertical } = await import("./index.js");
+  const out = await runPd77CompleteStopThinVertical({
+    courierId: "cour_pd77_t",
+  });
+  assert.equal(out.allStopsCompleted, true);
+  assert.equal(out.runCompleted, true);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

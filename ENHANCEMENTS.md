@@ -466,6 +466,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-482 | **PD72 Promo approve queue** SUPPLIER_COOP | `done` | Pack §10; D-42 |
 | ENH-483 | **PD73 Identity step-up** session gate | `done` | Pack §10; D-47 |
 | ENH-484 | **PD74 Active run polyline** MapLibre LineString | `done` | Pack §9.8; D-44 |
+| ENH-485 | **PD75 Garage set active vehicle** one active/customer | `done` | Pack §10 Vehicles |
+| ENH-486 | **PD76 WHT YTD certificate download** Take-Home stub | `done` | Pack §9.7; D-50 |
+| ENH-487 | **PD77 Complete navigate stop → delivery_run** | `done` | Pack §9.8 / §10 |
+| ENH-488 | **PD78 Customer marketing consent** centre | `done` | Pack Matrix B; session SoR |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

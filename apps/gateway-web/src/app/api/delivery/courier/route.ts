@@ -42,6 +42,7 @@ import {
   startDeliveryRun,
   startTransit,
   timeoutOffer,
+  completeStopAndMaybeRun,
   type CourierAvailability,
   type OfflinePackId,
 } from "@dial/delivery";
@@ -537,6 +538,30 @@ export async function POST(req: Request) {
           run,
           mapSor: "maplibre",
           payableFromAi: false,
+        });
+      }
+      case "complete_stop": {
+        const jobId = String(body.jobId ?? "");
+        const stopId = String(body.stopId ?? "");
+        const job = getDeliveryJob(jobId);
+        if (!job || job.assignedCourierId !== courierId) {
+          return NextResponse.json(
+            { error: "Job not assigned to courier" },
+            { status: 403 },
+          );
+        }
+        if (!getNavigateRun(jobId)) {
+          await openNavigateRun({ jobId, courierId });
+        }
+        const result = completeStopAndMaybeRun({
+          jobId,
+          stopId,
+          courierId,
+        });
+        return NextResponse.json({
+          ok: true,
+          ...result,
+          note: "PD77 — complete stop; last stop completes delivery_run",
         });
       }
       default:

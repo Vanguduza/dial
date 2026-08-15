@@ -12,6 +12,7 @@ import {
 } from "./offlinePacks.js";
 import {
   __resetNavigateStopsForTests,
+  completeNavigateStop,
   getActiveRunPolyline,
   getEtaBanner,
   listNavigateStops,
@@ -33,6 +34,8 @@ import {
 } from "./assignmentEvents.js";
 import {
   __resetDeliveryRunsForTests,
+  completeDeliveryRun,
+  getActiveRunForJob,
   listRunsForCourier,
   openDeliveryRun,
   startDeliveryRun,
@@ -97,6 +100,47 @@ export {
   type DeliveryRun,
   type DeliveryRunStatus,
 } from "./deliveryRuns.js";
+
+/**
+ * PD77 — Pack §10 complete stop; when last stop done, complete delivery_run.
+ */
+export function completeStopAndMaybeRun(input: {
+  jobId: string;
+  stopId: string;
+  courierId: string;
+}): {
+  stop: ReturnType<typeof completeNavigateStop>;
+  allStopsCompleted: boolean;
+  deliveryRun: ReturnType<typeof completeDeliveryRun> | null;
+  runCompleted: boolean;
+  mapSor: "maplibre";
+  payableFromAi: false;
+} {
+  const stop = completeNavigateStop(input.jobId, input.stopId);
+  let deliveryRun: ReturnType<typeof completeDeliveryRun> | null = null;
+  let runCompleted = false;
+  if (stop.allStopsCompleted) {
+    const active = getActiveRunForJob(input.jobId);
+    if (active) {
+      if (active.courierId !== input.courierId) {
+        throw new Error("Run not for this courier");
+      }
+      if (active.status === "assigned") {
+        startDeliveryRun(active.runId, input.courierId);
+      }
+      deliveryRun = completeDeliveryRun(active.runId, input.courierId);
+      runCompleted = true;
+    }
+  }
+  return {
+    stop,
+    allStopsCompleted: stop.allStopsCompleted,
+    deliveryRun,
+    runCompleted,
+    mapSor: "maplibre",
+    payableFromAi: false,
+  };
+}
 
 export {
   createJobsFromMultiStopPlan,
@@ -1477,6 +1521,57 @@ export async function runPd74ActiveRunPolylineThinVertical(input?: {
     coordinateCount: poly.coordinates.length,
     mapSor: "maplibre",
     googleMapsSor: false,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD77 thin vertical: complete each navigate stop → last stop completes delivery_run.
+ */
+export async function runPd77CompleteStopThinVertical(input?: {
+  courierId?: string;
+}): Promise<{
+  stopCount: number;
+  allStopsCompleted: true;
+  runCompleted: true;
+  mapSor: "maplibre";
+  payableFromAi: false;
+}> {
+  const courierId = input?.courierId ?? "cour_pd77";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+  const job = createDeliveryJob({
+    orderId: "ord_pd77",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 9_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD77 expected offer");
+  acceptOffer(offered.offerId, courierId);
+  await openNavigateRun({ jobId: job.id, courierId });
+  const stops = listNavigateStops(job.id);
+  if (stops.length < 2) throw new Error("PD77 expected multi-stop navigate");
+  let last: ReturnType<typeof completeStopAndMaybeRun> | null = null;
+  for (const s of stops) {
+    last = completeStopAndMaybeRun({
+      jobId: job.id,
+      stopId: s.id,
+      courierId,
+    });
+  }
+  if (!last?.allStopsCompleted || !last.runCompleted || !last.deliveryRun) {
+    throw new Error("PD77 last stop must complete delivery_run");
+  }
+  if (last.deliveryRun.status !== "completed") {
+    throw new Error("PD77 delivery_run must be completed");
+  }
+  return {
+    stopCount: stops.length,
+    allStopsCompleted: true,
+    runCompleted: true,
+    mapSor: "maplibre",
     payableFromAi: false,
   };
 }

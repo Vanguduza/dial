@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD78 Customer marketing consent** — `/account/consent` grant/revoke + audit (Pack Matrix B; session SoR).
+- **PD77 Complete navigate stop → run** — last stop completes `delivery_run` (Pack §9.8 / §10).
+- **PD76 WHT YTD certificate download** — Take-Home stub PDF download (Pack §9.7; ≠ fiscal SoR).
+- **PD75 Garage set active vehicle** — one active per customer (Pack §10 Vehicles).
 - **PD74 Active run polyline** — GeoJSON LineString from navigate stops; MapLibre SoR (Pack §9.8).
 - **PD73 Identity step-up** — session-bound challenge/verify gate for money-sensitive admin (Pack §10 / D-47).
 - **PD72 Promo approve queue** — SUPPLIER_COOP pending ops approve on `/admin/promotions/approve` (Pack §10).

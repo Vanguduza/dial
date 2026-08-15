@@ -54,6 +54,8 @@ export type GarageVehicle = {
   label: string;
   chassisHint: string;
   reminderConsent: boolean;
+  /** Pack §10 Vehicles — at most one active per customer. */
+  isActive: boolean;
   createdAt: string;
 };
 
@@ -320,12 +322,14 @@ export function addGarageVehicle(input: {
 }): GarageVehicle {
   if (!input.customerId.trim()) throw new Error("customerId required");
   if (!input.label.trim()) throw new Error("label required");
+  const existing = listGarageVehicles(input.customerId);
   const vehicle: GarageVehicle = {
     vehicleId: `veh_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
     customerId: input.customerId,
     label: input.label.trim(),
     chassisHint: input.chassisHint.trim() || "unknown",
     reminderConsent: input.reminderConsent === true,
+    isActive: existing.length === 0,
     createdAt: new Date().toISOString(),
   };
   store().vehicles.set(vehicle.vehicleId, vehicle);
@@ -343,6 +347,24 @@ export function listGarageVehicles(customerId: string): GarageVehicle[] {
   return [...store().vehicles.values()]
     .filter((v) => v.customerId === customerId)
     .map((v) => ({ ...v }));
+}
+
+export function getActiveGarageVehicle(
+  customerId: string,
+): GarageVehicle | undefined {
+  return listGarageVehicles(customerId).find((v) => v.isActive);
+}
+
+/** PD75 — Pack §10 set active vehicle (one active per customer). */
+export function setActiveGarageVehicle(vehicleId: string): GarageVehicle {
+  const v = store().vehicles.get(vehicleId);
+  if (!v) throw new Error(`Unknown garage vehicle ${vehicleId}`);
+  for (const other of store().vehicles.values()) {
+    if (other.customerId === v.customerId) {
+      other.isActive = other.vehicleId === vehicleId;
+    }
+  }
+  return { ...v, isActive: true };
 }
 
 function appendGarageConsentEvent(input: {
@@ -436,6 +458,49 @@ export function runPd50VehicleHubThinVertical(): {
     browsePath,
     consentRevoked: true,
     auditHasRevoke: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD75 thin vertical: add two vehicles → set second active → only one active (Pack §10).
+ */
+export function runPd75SetActiveGarageVehicleThinVertical(): {
+  activeVehicleId: string;
+  activeCount: 1;
+  switched: true;
+  payableFromAi: false;
+} {
+  __resetSpareCustomerForTests();
+  const first = addGarageVehicle({
+    customerId: "cust_pd75",
+    label: "PD75 Hilux",
+    chassisHint: "KUN26",
+    reminderConsent: false,
+  });
+  if (!first.isActive) throw new Error("PD75 first vehicle must be active");
+  const second = addGarageVehicle({
+    customerId: "cust_pd75",
+    label: "PD75 Prado",
+    chassisHint: "KDJ150",
+    reminderConsent: false,
+  });
+  if (second.isActive) throw new Error("PD75 second vehicle must start inactive");
+  const active = setActiveGarageVehicle(second.vehicleId);
+  if (!active.isActive || active.vehicleId !== second.vehicleId) {
+    throw new Error("PD75 setActive must activate second");
+  }
+  const list = listGarageVehicles("cust_pd75");
+  const activeCount = list.filter((v) => v.isActive).length;
+  if (activeCount !== 1) throw new Error("PD75 expected exactly one active");
+  const got = getActiveGarageVehicle("cust_pd75");
+  if (!got || got.vehicleId !== second.vehicleId) {
+    throw new Error("PD75 getActive mismatch");
+  }
+  return {
+    activeVehicleId: second.vehicleId,
+    activeCount: 1,
+    switched: true,
     payableFromAi: false,
   };
 }

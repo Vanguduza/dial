@@ -9,6 +9,7 @@ type Vehicle = {
   label: string;
   chassisHint: string;
   reminderConsent: boolean;
+  isActive?: boolean;
   browsePath?: string;
 };
 
@@ -104,6 +105,27 @@ export default function SpareGaragePage() {
     }
   }
 
+  async function setActive(vehicleId: string) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/spare/garage", {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ vehicleId, setActive: true }),
+      });
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage("Active vehicle set (PD75)");
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main
       data-testid="spare-garage-hub"
@@ -187,10 +209,20 @@ export default function SpareGaragePage() {
           {vehicles.map((v) => (
             <li key={v.vehicleId} style={{ marginBottom: 12 }}>
               {v.label} · {v.chassisHint} · consent={String(v.reminderConsent)}
+              {v.isActive ? " · ACTIVE" : ""}
               <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
                 <Link href={v.browsePath ?? `/spare?chassis=${encodeURIComponent(v.chassisHint)}`}>
                   Browse parts
                 </Link>
+                {!v.isActive ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void setActive(v.vehicleId)}
+                  >
+                    Set active
+                  </button>
+                ) : null}
                 {v.reminderConsent ? (
                   <button
                     type="button"

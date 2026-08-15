@@ -39,6 +39,15 @@ test("PD73 identity step-up thin vertical", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD78 marketing consent thin vertical", async () => {
+  const { runPd78MarketingConsentThinVertical } = await import("./index.js");
+  const out = runPd78MarketingConsentThinVertical();
+  assert.equal(out.granted, true);
+  assert.equal(out.revoked, true);
+  assert.ok(out.auditLen >= 2);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("T1 RLS profiles: own CRUD; cross-tenant deny; admin all", () => {
   __resetIdentityForTests();
   const alice = signUp({ email: "alice@dial.test", displayName: "Alice" });

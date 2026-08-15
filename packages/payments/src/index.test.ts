@@ -23,6 +23,7 @@ import {
   runPd52TakeHomePolishThinVertical,
   runPd57DailyZigFourEyesThinVertical,
   runPd62FourEyesQueueThinVertical,
+  runPd76WhtCertificateDownloadThinVertical,
   setDailyZigRate,
   toCanonicalPspCode,
   usdToZig,
@@ -253,6 +254,17 @@ test("PD52 Take-Home polish thin vertical", () => {
   assert.equal(out.beforeRateBps, 3000);
   assert.equal(out.afterRateBps, 0);
   assert.equal(out.itfUploadedThenVerified, true);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD76 WHT certificate download thin vertical", () => {
+  __resetPaymentsForTests();
+  const out = runPd76WhtCertificateDownloadThinVertical({
+    technicianId: "tech_pd76_t",
+  });
+  assert.equal(out.certificateDownloaded, true);
+  assert.equal(out.contentType, "application/pdf");
+  assert.equal(out.withholdingYtdMinor, "3000");
   assert.equal(out.payableFromAi, false);
 });
 

@@ -960,9 +960,53 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | --- | --- |
 | Thin path | navigate stops → GeoJSON LineString; MapLibre SoR; not Google |
 | Evidence | `runPd74ActiveRunPolylineThinVertical`; `pd71Pd74Ops.test.ts` |
-| Green → | eng-safe continue ≠ S99 |
+| Green → | **PD75** set active vehicle |
 
 ### Pack / product gap audit (after PD74)
+
+| Gap | Stage |
+| --- | --- |
+| Garage set active vehicle | **PD75** |
+| WHT YTD certificate download | **PD76** |
+| Complete navigate stop → run | **PD77** |
+| Customer marketing consent | **PD78** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD75 — Garage set active vehicle (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | add vehicles → `setActiveGarageVehicle` → exactly one active (Pack §10) |
+| Evidence | `runPd75SetActiveGarageVehicleThinVertical`; `pd75Pd78Ops.test.ts` |
+| Green → | **PD76** WHT cert |
+
+### PD76 — WHT YTD certificate download (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | 30% WHT → YTD → stub PDF download on Take-Home (Pack §9.7; ≠ fiscal SoR) |
+| Evidence | `runPd76WhtCertificateDownloadThinVertical`; `pd75Pd78Ops.test.ts` |
+| Green → | **PD77** complete stop |
+
+### PD77 — Complete navigate stop → run (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | complete each stop → last stop completes `delivery_run` (Pack §10 / §9.8) |
+| Evidence | `runPd77CompleteStopThinVertical`; `pd75Pd78Ops.test.ts` |
+| Green → | **PD78** marketing consent |
+
+### PD78 — Customer marketing consent (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | grant → revoke → audit on `/account/consent` (Pack Matrix B; session SoR) |
+| Evidence | `runPd78MarketingConsentThinVertical`; `pd75Pd78Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD78)
 
 | Gap | Stage |
 | --- | --- |

@@ -741,6 +741,102 @@ export function computeTakeHomeBreakdown(input: {
 }
 
 /**
+ * PD76 — Pack §9.7 withholding YTD + certificate PDF stub download.
+ * Not a fiscal SoR — stub bytes for tech Take-Home UI.
+ */
+export function downloadWithholdingCertificateYtd(input: {
+  technicianId: string;
+  yearOfAssessment: number;
+}): {
+  technicianId: string;
+  yearOfAssessment: number;
+  withholdingYtdMinor: string;
+  certificatePdfRef: string;
+  contentType: "application/pdf";
+  stubPdfBase64: string;
+  payableFromAi: false;
+} {
+  if (!input.technicianId.trim()) throw new Error("technicianId required");
+  const bal = getWithholdingBalance(
+    input.technicianId,
+    input.yearOfAssessment,
+  );
+  const itf = getItf263Record(input.technicianId, input.yearOfAssessment);
+  let certificatePdfRef = itf?.certificatePdfRef ?? null;
+  if (!certificatePdfRef) {
+    certificatePdfRef = `fixture://wht-cert/${input.technicianId}/${input.yearOfAssessment}.pdf`;
+    attachWithholdingCertificatePdf({
+      technicianId: input.technicianId,
+      yearOfAssessment: input.yearOfAssessment,
+      certificatePdfRef,
+    });
+  }
+  const ytd = (bal?.withheldMinor ?? 0n).toString();
+  const stubText = [
+    "%PDF-1.4 DIAL WHT certificate stub",
+    `technicianId=${input.technicianId}`,
+    `yearOfAssessment=${input.yearOfAssessment}`,
+    `withholdingYtdMinor=${ytd}`,
+    "payableFromAi=false",
+  ].join("\n");
+  return {
+    technicianId: input.technicianId,
+    yearOfAssessment: input.yearOfAssessment,
+    withholdingYtdMinor: ytd,
+    certificatePdfRef,
+    contentType: "application/pdf",
+    stubPdfBase64: Buffer.from(stubText, "utf8").toString("base64"),
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD76 thin vertical: apply WHT → YTD → download certificate stub.
+ */
+export function runPd76WhtCertificateDownloadThinVertical(input?: {
+  technicianId?: string;
+  yearOfAssessment?: number;
+}): {
+  withholdingYtdMinor: string;
+  certificateDownloaded: true;
+  contentType: "application/pdf";
+  payableFromAi: false;
+} {
+  __resetItf263ForTests();
+  const technicianId = input?.technicianId ?? "tech_pd76";
+  const year = input?.yearOfAssessment ?? new Date().getFullYear();
+  withholding.delete(`${technicianId}:${year}`);
+  const taxed = computeTechPayoutWithholding({
+    technicianId,
+    yearOfAssessment: year,
+    payoutUsdMinor: 100_00n,
+    hasItf263: false,
+  });
+  if (taxed.rateBps !== 3000 || taxed.withholdMinor !== 30_00n) {
+    throw new Error("PD76 expected 30% WHT without ITF263");
+  }
+  const dl = downloadWithholdingCertificateYtd({
+    technicianId,
+    yearOfAssessment: year,
+  });
+  if (dl.withholdingYtdMinor !== "3000") {
+    throw new Error(`PD76 expected YTD 3000 got ${dl.withholdingYtdMinor}`);
+  }
+  if (!dl.stubPdfBase64 || dl.contentType !== "application/pdf") {
+    throw new Error("PD76 expected PDF stub download");
+  }
+  if (dl.payableFromAi !== false) {
+    throw new Error("PD76 payableFromAi must be false");
+  }
+  return {
+    withholdingYtdMinor: dl.withholdingYtdMinor,
+    certificateDownloaded: true,
+    contentType: "application/pdf",
+    payableFromAi: false,
+  };
+}
+
+/**
  * PD25 thin vertical (payments): no ITF → 30% WHT → upload → verify → 0% WHT.
  */
 export function runPd25Itf263TakeHomeThinVertical(input?: {

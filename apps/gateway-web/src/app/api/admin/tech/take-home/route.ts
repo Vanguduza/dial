@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import {
   computeTakeHomeBreakdown,
   computeTechPayoutWithholding,
+  downloadWithholdingCertificateYtd,
   getItf263Record,
   getWithholdingBalance,
   listItf263Records,
@@ -140,6 +141,18 @@ export async function POST(req: Request) {
         breakdown,
         payableFromAi: false,
         note: "PD52 — Take-Home breakdown draft only",
+      });
+    }
+    if (action === "download_certificate") {
+      const cert = downloadWithholdingCertificateYtd({
+        technicianId: body.technicianId,
+        yearOfAssessment: year,
+      });
+      return NextResponse.json({
+        ok: true,
+        certificate: cert,
+        payableFromAi: false,
+        note: "PD76 — WHT YTD certificate stub download (not fiscal SoR)",
       });
     }
 

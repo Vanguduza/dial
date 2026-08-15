@@ -297,6 +297,16 @@ test("PD50 Vehicle Hub consent revoke + chassis browse", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD75 set active garage vehicle", async () => {
+  const { runPd75SetActiveGarageVehicleThinVertical } = await import(
+    "./spareCustomer.js"
+  );
+  const out = runPd75SetActiveGarageVehicleThinVertical();
+  assert.equal(out.activeCount, 1);
+  assert.equal(out.switched, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD54 grocery Meili demand-gap thin vertical", () => {
   __resetCatalogueForTests();
   const out = runPd54GroceryDemandGapThinVertical();

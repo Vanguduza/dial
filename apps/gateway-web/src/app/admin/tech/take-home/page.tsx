@@ -81,18 +81,37 @@ export default function TechTakeHomePage() {
         netPayoutMinor?: string;
         withholdMinor?: string;
         rateBps?: number;
+        certificate?: {
+          certificatePdfRef?: string;
+          withholdingYtdMinor?: string;
+          stubPdfBase64?: string;
+        };
       };
       if (!res.ok) {
         setMessage(data.error ?? `HTTP ${res.status}`);
         return;
       }
       if (data.breakdown) setBreakdown(data.breakdown);
+      if (data.certificate?.stubPdfBase64) {
+        const bin = atob(data.certificate.stubPdfBase64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        const blob = new Blob([bytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `wht-cert-${technicianId}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
       setMessage(
-        data.breakdown
-          ? `net ${data.breakdown.netPayoutMinor} · WHT ${data.breakdown.withholdMinor} (${data.breakdown.rateBps} bps) · ITF=${data.breakdown.itf263Status}`
-          : data.itf263
-            ? `ITF263 → ${data.itf263.status}`
-            : `net ${data.netPayoutMinor} · WHT ${data.withholdMinor}`,
+        data.certificate
+          ? `PD76 cert ${data.certificate.certificatePdfRef} · YTD ${data.certificate.withholdingYtdMinor}`
+          : data.breakdown
+            ? `net ${data.breakdown.netPayoutMinor} · WHT ${data.breakdown.withholdMinor} (${data.breakdown.rateBps} bps) · ITF=${data.breakdown.itf263Status}`
+            : data.itf263
+              ? `ITF263 → ${data.itf263.status}`
+              : `net ${data.netPayoutMinor} · WHT ${data.withholdMinor}`,
       );
       await refreshAll();
     } finally {
@@ -195,6 +214,13 @@ export default function TechTakeHomePage() {
             }
           >
             Verify ITF263
+          </button>
+          <button
+            type="button"
+            disabled={busy || !secret}
+            onClick={() => void post({ action: "download_certificate" })}
+          >
+            Download WHT cert (PD76)
           </button>
           <button
             type="button"

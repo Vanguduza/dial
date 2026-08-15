@@ -332,14 +332,16 @@ export async function reoptimiseRemainingStops(jobId: string): Promise<{
 export function completeNavigateStop(
   jobId: string,
   stopId: string,
-): DeliveryNavigateStop {
+): DeliveryNavigateStop & { allStopsCompleted: boolean } {
   const run = runs.get(jobId);
   if (!run) throw new Error(`No navigate run for job ${jobId}`);
   const stop = run.stops.find((s) => s.id === stopId);
   if (!stop) throw new Error("Unknown stop");
-  if (stop.status === "completed") return { ...stop };
-  stop.status = "completed";
-  return { ...stop };
+  if (stop.status !== "completed") {
+    stop.status = "completed";
+  }
+  const allStopsCompleted = run.stops.every((s) => s.status === "completed");
+  return { ...stop, allStopsCompleted };
 }
 
 /** GeoJSON LineString coordinates [lng, lat] for MapLibre (D-44). */
