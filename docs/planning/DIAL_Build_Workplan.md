@@ -1361,6 +1361,50 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd110ReturnClaimEvidenceThinVertical`; returns API |
 | Green → | eng-safe Pack gap ≠ S99 (**PD111+**) |
 
+### Pack / product gap audit (after PD110 → PD111–PD114)
+
+| Gap | Stage |
+| --- | --- |
+| Intake → book conversion | **PD111** |
+| Web Paynow URL checkout button | **PD112** |
+| Formbricks + PostHog T8 stubs | **PD113** |
+| Checklist catalog seed expand | **PD114** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD111 — Intake → book (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `bookJobFromIntake` + `action=book_intake`; same job id |
+| Evidence | `runPd111IntakeBookThinVertical`; TechJobDetail CTA |
+| Green → | **PD112** Paynow URL |
+
+### PD112 — Web Paynow URL checkout (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `choice=paynow` → `hostedUrl`; EcoCash\|COD remain required (D-57) |
+| Evidence | `runPd112PaynowUrlCheckoutThinVertical`; spare checkout CTA |
+| Green → | **PD113** Formbricks/PostHog |
+
+### PD113 — Formbricks + PostHog stubs (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `/api/experience`; fail-closed without keys; not money |
+| Evidence | `runPd113FormbricksPosthogStubThinVertical` |
+| Green → | **PD114** checklist seed |
+
+### PD114 — Checklist catalog seed expand (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | Library `catalogId` tranche (≠ full 42); symptom resolve |
+| Evidence | `runPd114ChecklistCatalogSeedThinVertical` |
+| Green → | eng-safe Pack gap ≠ S99 (**PD115+**) |
+
 ### S10 — E2a (historical)
 
 | | |

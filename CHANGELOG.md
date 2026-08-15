@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD114 Checklist catalog seed** — library `catalogId` tranche (≥8; ≠ full 42) + symptom resolve (Pack checklist library).
+- **PD113 Formbricks + PostHog stubs** — `/api/experience` fail-closed without keys; not money (T8).
+- **PD112 Web Paynow URL checkout** — optional hosted rail; EcoCash|COD remain required CTAs (D-57).
+- **PD111 Intake → book** — `bookJobFromIntake` / `action=book_intake`; same job id (Pack §10).
 - **PD110 Return claim evidence** — photo/note attach on spare returns; not payable (Pack §9.2).
 - **PD109 Web Chatwoot handoff** — `/api/support/handoff`; ERP ticket SoR; Chatwoot ≠ status (Matrix B).
 - **PD108 Vehicle Hub reminders** — consent-gated schedule + due list (Pack vehicles.expiry_reminders).

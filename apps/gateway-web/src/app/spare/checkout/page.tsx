@@ -76,6 +76,31 @@ export default async function SpareCheckoutPage({
     }
   }
 
+  async function payPaynow() {
+    "use server";
+    if (!cartId) redirect("/spare/cart");
+    const c = getCart(cartId);
+    if (!c || c.lines.length === 0) redirect("/spare/cart");
+    try {
+      const { intent } = await createCheckoutPayment({
+        choice: "paynow",
+        orderId: `ord_${cartId}`,
+        amountUsdMinor: c.total.amountMinor,
+        idempotencyKey: `web-paynow-${cartId}`,
+      });
+      if (intent?.hostedUrl) {
+        redirect(intent.hostedUrl);
+      }
+      redirect(
+        `/spare/checkout/done?method=paynow&intentId=${encodeURIComponent(intent?.id ?? "")}&cartId=${encodeURIComponent(cartId)}`,
+      );
+    } catch (e) {
+      redirect(
+        `/spare/checkout?cartId=${encodeURIComponent(cartId)}&error=${encodeURIComponent(e instanceof Error ? e.message : "pay failed")}`,
+      );
+    }
+  }
+
   return (
     <main
       data-testid="spare-checkout-cpa"
@@ -181,6 +206,25 @@ export default async function SpareCheckoutPage({
                     COD
                   </button>
                 </form>
+                <form action={payPaynow}>
+                  <button
+                    type="submit"
+                    data-testid="pd112-paynow"
+                    style={{
+                      width: "100%",
+                      padding: dialTokens.space.md,
+                      borderRadius: 8,
+                      border: `1px solid ${dialTokens.color.brand.ink}`,
+                      background: "transparent",
+                      color: dialTokens.color.brand.ink,
+                      fontWeight: 600,
+                      fontSize: 16,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Paynow
+                  </button>
+                </form>
               </div>
               <p
                 style={{
@@ -189,8 +233,8 @@ export default async function SpareCheckoutPage({
                   marginTop: dialTokens.space.md,
                 }}
               >
-                Required pay CTAs only (D-57 / PD43) — EcoCash | COD after CPA
-                review.
+                Required pay CTAs (D-57 / PD43) — EcoCash | COD after CPA review.
+                Paynow is optional hosted rail (PD112).
               </p>
             </DisclosureReviewGate>
           </>

@@ -283,6 +283,24 @@ test("PD107 credential expiry thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD111 intake → book thin vertical", async () => {
+  const { runPd111IntakeBookThinVertical } = await import("./index.js");
+  const out = runPd111IntakeBookThinVertical();
+  assert.equal(out.sameJobId, true);
+  assert.equal(out.status, "booked");
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.jobId);
+});
+
+test("PD114 checklist catalog seed thin vertical", async () => {
+  const { runPd114ChecklistCatalogSeedThinVertical } = await import("./index.js");
+  const out = runPd114ChecklistCatalogSeedThinVertical();
+  assert.ok(out.catalogSeedCount >= 8);
+  assert.equal(out.libraryIdsPresent, true);
+  assert.equal(out.trancheNotFullLibrary, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

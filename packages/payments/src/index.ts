@@ -91,6 +91,8 @@ export type PaymentIntent = {
   createdAt: string;
   /** Vendor session ref from @dial/adapter-psp (PD4). */
   providerRef?: string;
+  /** PD112 — Paynow hosted browser URL (optional rail; EcoCash|COD still required). */
+  hostedUrl?: string;
 };
 
 export type CodOrder = {
@@ -1309,7 +1311,8 @@ export async function runPd4MoneySpine(input: {
   };
 }
 
-export type CheckoutPayChoice = "ecocash" | "cod";
+/** EcoCash|COD required (D-57). Paynow is optional hosted rail (PD112). */
+export type CheckoutPayChoice = "ecocash" | "cod" | "paynow";
 
 /**
  * PD97 — Pack §10: Idempotency-Key required on pay paths (header SoR).
@@ -1461,8 +1464,8 @@ export function runPd105PayoutIdempotencyKeyThinVertical(): {
 }
 
 /**
- * FLOW_SPARE_CHECKOUT pay step — required EcoCash | COD buttons only (D-57).
- * Not free-text method selection.
+ * FLOW_SPARE_CHECKOUT pay step — required EcoCash | COD (D-57).
+ * Optional Paynow hosted URL (PD112) — never replaces required CTAs.
  */
 export async function createCheckoutPayment(input: {
   choice: CheckoutPayChoice;
@@ -1517,6 +1520,40 @@ export async function createCheckoutPayment(input: {
     return { intent };
   }
 
+  if (input.choice === "paynow") {
+    const psp = new PaynowPspStub();
+    const initiated = await psp.initiate({
+      amount: amountUsd,
+      orderId: input.orderId,
+      idempotencyKey: input.idempotencyKey,
+    });
+    const vendor = await createVendorPaymentSession({
+      method: "paynow_hosted",
+      reference: input.orderId,
+      amount: amountUsd,
+      metadata: { fx_rate_id: rate.fxRateId },
+    });
+    const hostedUrl =
+      vendor.redirectUrl ??
+      `https://www.paynow.co.zw/Payment/ConfirmPayment?fixture=${encodeURIComponent(input.orderId)}`;
+    const intent: PaymentIntent = {
+      id: id("pi"),
+      method: "paynow_hosted",
+      amount: amountUsd,
+      displayPayable: zig,
+      fxRateId: rate.fxRateId,
+      status: initiated.status,
+      orderId: input.orderId,
+      idempotencyKey: input.idempotencyKey,
+      createdAt: new Date().toISOString(),
+      providerRef: vendor.providerRef,
+      hostedUrl,
+    };
+    intentStore().set(intent.id, intent);
+    intentIdemStore().set(input.idempotencyKey, intent.id);
+    return { intent };
+  }
+
   const cod: CodOrder = {
     id: id("cod"),
     amountUsd,
@@ -1548,6 +1585,54 @@ export async function createCheckoutPayment(input: {
   intentStore().set(intent.id, intent);
   intentIdemStore().set(input.idempotencyKey, intent.id);
   return { intent, codOrder: cod };
+}
+
+/**
+ * PD112 thin vertical: web Paynow hosted URL; EcoCash|COD still available.
+ */
+export async function runPd112PaynowUrlCheckoutThinVertical(): Promise<{
+  hostedUrlPresent: true;
+  requiredRailsPresent: true;
+  paynowOptional: true;
+  payableFromAi: false;
+  hostedUrl: string;
+}> {
+  __resetPaymentsForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "pd112" });
+  const paynow = await createCheckoutPayment({
+    choice: "paynow",
+    orderId: "ord_pd112",
+    amountUsdMinor: 25_00n,
+    idempotencyKey: "pd112-paynow-1",
+  });
+  if (!paynow.intent?.hostedUrl) {
+    throw new Error("PD112 expected Paynow hostedUrl");
+  }
+  if (paynow.intent.method !== "paynow_hosted") {
+    throw new Error("PD112 expected paynow_hosted method");
+  }
+  const eco = await createCheckoutPayment({
+    choice: "ecocash",
+    orderId: "ord_pd112_eco",
+    amountUsdMinor: 25_00n,
+    idempotencyKey: "pd112-eco-1",
+  });
+  const cod = await createCheckoutPayment({
+    choice: "cod",
+    orderId: "ord_pd112_cod",
+    amountUsdMinor: 25_00n,
+    idempotencyKey: "pd112-cod-1",
+  });
+  if (!eco.intent || !cod.codOrder) {
+    throw new Error("PD112 expected EcoCash|COD rails still work");
+  }
+  return {
+    hostedUrlPresent: true,
+    requiredRailsPresent: true,
+    paynowOptional: true,
+    payableFromAi: false,
+    hostedUrl: paynow.intent.hostedUrl,
+  };
 }
 
 export function getPaymentIntent(id: string): PaymentIntent | undefined {

@@ -4,6 +4,7 @@
  */
 import { NextResponse } from "next/server";
 import {
+  bookJobFromIntake,
   bookTechJob,
   createJobIntake,
   draftTechQuote,
@@ -218,6 +219,35 @@ export async function POST(req: Request) {
         needsHumanQuote: true,
         payableFromAi: false,
         note: "PD100 — Pack §10 create intake (pre-book); draft quote only",
+      });
+    }
+
+    if (action === "book_intake") {
+      const jobId = String(body.jobId ?? "").trim();
+      if (!jobId) {
+        return NextResponse.json({ error: "jobId required" }, { status: 400 });
+      }
+      const existing = getTechJob(jobId);
+      if (!existing || existing.customerId !== customerId) {
+        return NextResponse.json({ error: "Job not found" }, { status: 404 });
+      }
+      const slotId =
+        body.slotId != null && String(body.slotId).trim()
+          ? String(body.slotId)
+          : null;
+      const job = bookJobFromIntake({
+        jobId,
+        ...(slotId != null ? { slotId } : {}),
+        ...(body.technicianId != null
+          ? { technicianId: String(body.technicianId) }
+          : {}),
+      });
+      return NextResponse.json({
+        ok: true,
+        job: serializeJob(job),
+        sameJobId: true,
+        payableFromAi: false,
+        note: "PD111 — intake → booked/assigned; same job id",
       });
     }
 

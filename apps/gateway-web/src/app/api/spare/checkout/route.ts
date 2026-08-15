@@ -55,7 +55,13 @@ export async function POST(req: Request) {
     }
     offerId = (body.offerId ?? "").trim();
     qty = typeof body.qty === "number" && body.qty >= 1 ? body.qty : 1;
-    if (body.choice === "cod" || body.choice === "ecocash") choice = body.choice;
+    if (
+      body.choice === "cod" ||
+      body.choice === "ecocash" ||
+      body.choice === "paynow"
+    ) {
+      choice = body.choice;
+    }
     cartId = body.cartId;
   } else {
     return NextResponse.json({ error: "application/json required" }, { status: 415 });
@@ -126,6 +132,7 @@ export async function POST(req: Request) {
       soldBy: snapshot.soldBy,
       intentId: pay.intent?.id,
       codOrderId: pay.codOrder?.id,
+      hostedUrl: pay.intent?.hostedUrl ?? null,
       fxRateId: pay.intent?.fxRateId ?? pay.codOrder?.fxRateId,
       displayPayableCurrency: pay.intent?.displayPayable?.currency,
       choice,
@@ -140,6 +147,10 @@ export async function POST(req: Request) {
         : null,
       idempotencyKey,
       payableFromAi: false,
+      note:
+        choice === "paynow"
+          ? "PD112 — optional Paynow hosted URL; EcoCash|COD remain required CTAs (D-57)"
+          : undefined,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "checkout failed";

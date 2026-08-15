@@ -101,7 +101,15 @@ export type BookingSlot = {
 export type ChecklistId =
   | "automotive_basic"
   | "emergency_roadside"
-  | "emergency_triage";
+  | "emergency_triage"
+  | "auto_wont_start"
+  | "auto_overheating"
+  | "auto_brake_noise"
+  | "auto_flat_tyre"
+  | "auto_stalling"
+  | "autoelec_battery"
+  | "elec_socket_dead"
+  | "plumb_leak";
 
 export type Checklist = {
   id: ChecklistId;
@@ -212,6 +220,94 @@ const CHECKLISTS: Checklist[] = [
       "Scene safe for tech arrival?",
       "Triage priority: P1|P2|P3",
       "Bypass AI price; rate_card emergency only",
+    ],
+  },
+  {
+    id: "auto_wont_start",
+    title: "Engine won't start",
+    catalogId: "auto.wont_start.v1",
+    steps: [
+      "Dashboard lights on when key/start pressed?",
+      "Engine cranks but won't start?",
+      "Fuel tank empty or near-empty?",
+      "Never jump-start near fuel smell/smoke",
+    ],
+  },
+  {
+    id: "auto_overheating",
+    title: "Engine overheating",
+    catalogId: "auto.overheating.v1",
+    steps: [
+      "Gauge hot or steam/smoke right now?",
+      "Coolant checked only when cold?",
+      "Coolant puddle under vehicle?",
+      "Driven since overheating? (urgent if yes)",
+    ],
+  },
+  {
+    id: "auto_brake_noise",
+    title: "Brake noise / pulls when braking",
+    catalogId: "auto.brake_noise.v1",
+    steps: [
+      "Noise only under braking?",
+      "Vehicle pulls left/right when braking?",
+      "Brake warning light on?",
+      "Photo of pad/disc if safe",
+    ],
+  },
+  {
+    id: "auto_flat_tyre",
+    title: "Flat tyre / puncture (roadside)",
+    catalogId: "auto.flat_tyre.v1",
+    steps: [
+      "Safe location off road with hazards?",
+      "Nail/sidewall damage visible?",
+      "Spare + jack present?",
+      "Confirm tyre size from sidewall photo",
+    ],
+  },
+  {
+    id: "auto_stalling",
+    title: "Stalling / rough idle",
+    catalogId: "auto.stalling.v1",
+    steps: [
+      "Stalls at idle, under load, or both?",
+      "Happens in traffic? (urgent)",
+      "Warning lights with stall?",
+      "Recent fuel / battery work?",
+    ],
+  },
+  {
+    id: "autoelec_battery",
+    title: "Battery won't hold charge",
+    catalogId: "autoelec.battery.v1",
+    steps: [
+      "Fails every time or after sitting unused?",
+      "Battery age if known?",
+      "Accessory left on before sit?",
+      "Dim headlights / slow crank before death?",
+    ],
+  },
+  {
+    id: "elec_socket_dead",
+    title: "Socket/circuit not working",
+    catalogId: "elec.socket_dead.v1",
+    steps: [
+      "Single socket or whole circuit?",
+      "Breaker tripped?",
+      "Burning smell or heat at outlet?",
+      "Do not open live panels — book electrician",
+    ],
+  },
+  {
+    id: "plumb_leak",
+    title: "Leaking tap or pipe",
+    catalogId: "plumb.leak.v1",
+    steps: [
+      "Active drip or puddle now?",
+      "Shut-off valve known/accessible?",
+      "Water near electrics?",
+      "Photo of leak source",
     ],
   },
 ];
@@ -983,26 +1079,91 @@ export function resolveChecklistBySymptom(input: {
   const s = input.symptom.trim().toLowerCase();
   if (!s) throw new Error("symptom required");
   const emergencyHints = [
-    "battery",
     "stranded",
     "roadside",
     "highway",
     "breakdown",
     "tow",
-    "flat tyre",
-    "flat tire",
+    "unsafe",
   ];
   const isEmergency = emergencyHints.some((h) => s.includes(h));
   const wantsTriage =
     s.includes("triage") || s.includes("life-threatening") || s.includes("p1");
-  const id: ChecklistId = wantsTriage
-    ? "emergency_triage"
-    : isEmergency
-      ? "emergency_roadside"
-      : "automotive_basic";
+  let id: ChecklistId;
+  if (wantsTriage) {
+    id = "emergency_triage";
+  } else if (isEmergency) {
+    id = "emergency_roadside";
+  } else if (s.includes("won't start") || s.includes("wont start") || s.includes("no start")) {
+    id = "auto_wont_start";
+  } else if (s.includes("overheat") || s.includes("steam")) {
+    id = "auto_overheating";
+  } else if (s.includes("brake")) {
+    id = "auto_brake_noise";
+  } else if (s.includes("stall") || s.includes("rough idle")) {
+    id = "auto_stalling";
+  } else if (s.includes("flat tyre") || s.includes("flat tire") || s.includes("puncture")) {
+    id = "auto_flat_tyre";
+  } else if (s.includes("battery")) {
+    id = "autoelec_battery";
+  } else if (s.includes("socket") || s.includes("outlet") || s.includes("circuit")) {
+    id = "elec_socket_dead";
+  } else if (s.includes("leak") || s.includes("pipe") || s.includes("tap")) {
+    id = "plumb_leak";
+  } else {
+    id = "automotive_basic";
+  }
   const checklist = getChecklist(id);
   if (!checklist) throw new Error(`Missing checklist ${id}`);
   return checklist;
+}
+
+/**
+ * PD114 thin vertical: catalogue seed expands library catalogIds (tranche ≠ all 42).
+ */
+export function runPd114ChecklistCatalogSeedThinVertical(): {
+  catalogSeedCount: number;
+  libraryIdsPresent: true;
+  trancheNotFullLibrary: true;
+  payableFromAi: false;
+} {
+  const withCatalog = listChecklists().filter((c) => c.catalogId);
+  if (withCatalog.length < 8) {
+    throw new Error("PD114 expected ≥8 catalogId seeds");
+  }
+  const need = [
+    "auto.wont_start.v1",
+    "auto.overheating.v1",
+    "auto.brake_noise.v1",
+    "auto.flat_tyre.v1",
+    "auto.stalling.v1",
+    "autoelec.battery.v1",
+    "elec.socket_dead.v1",
+    "plumb.leak.v1",
+    "emergency.triage.v1",
+  ];
+  for (const cat of need) {
+    if (!withCatalog.some((c) => c.catalogId === cat)) {
+      throw new Error(`PD114 missing catalogId ${cat}`);
+    }
+  }
+  if (withCatalog.length >= 42) {
+    throw new Error("PD114 tranche must not claim full 42-library seed");
+  }
+  const resolved = resolveChecklistBySymptom({ symptom: "engine won't start" });
+  if (resolved.catalogId !== "auto.wont_start.v1") {
+    throw new Error("PD114 expected wont_start resolve");
+  }
+  const flat = resolveChecklistBySymptom({ symptom: "puncture nail in tyre" });
+  if (flat.catalogId !== "auto.flat_tyre.v1") {
+    throw new Error("PD114 expected flat_tyre resolve without emergency context");
+  }
+  return {
+    catalogSeedCount: withCatalog.length,
+    libraryIdsPresent: true,
+    trancheNotFullLibrary: true,
+    payableFromAi: false,
+  };
 }
 
 function fixtureSlots(): BookingSlot[] {
@@ -1109,6 +1270,72 @@ export function bookTechJob(input: {
   };
   jobs.set(job.id, job);
   return { ...job };
+}
+
+/**
+ * PD111 — convert intake job → booked/assigned (same job id; Pack §10).
+ */
+export function bookJobFromIntake(input: {
+  jobId: string;
+  slotId?: string | null;
+  technicianId?: string;
+}): TechJob {
+  const job = jobs.get(input.jobId);
+  if (!job) throw new Error(`Unknown job ${input.jobId}`);
+  if (job.status !== "intake") {
+    throw new Error(`book from intake requires status intake (got ${job.status})`);
+  }
+  const emergency = job.emergency;
+  if (!emergency && !input.slotId) {
+    throw new Error("Non-emergency book from intake requires Cal.com slotId");
+  }
+  if (input.slotId) {
+    if (bookedSlotIds.has(input.slotId)) {
+      throw new Error(`Slot ${input.slotId} already booked`);
+    }
+    bookedSlotIds.add(input.slotId);
+    job.slotId = input.slotId;
+  }
+  if (input.technicianId) {
+    job.technicianId = input.technicianId;
+    job.status = "assigned";
+  } else {
+    job.status = "booked";
+  }
+  return { ...job };
+}
+
+/**
+ * PD111 thin vertical: create intake → book same job id → booked.
+ */
+export function runPd111IntakeBookThinVertical(): {
+  sameJobId: true;
+  status: "booked";
+  payableFromAi: false;
+  jobId: string;
+} {
+  __resetJobsForTests();
+  const intake = createJobIntake({
+    customerId: "cust_pd111",
+    customerText: "check engine light on cold mornings",
+  });
+  const slots = [{ slotId: "cal_pd111_slot" }];
+  bookedSlotIds.delete(slots[0]!.slotId);
+  const booked = bookJobFromIntake({
+    jobId: intake.id,
+    slotId: slots[0]!.slotId,
+  });
+  if (booked.id !== intake.id) throw new Error("PD111 expected same job id");
+  if (booked.status !== "booked") throw new Error("PD111 expected booked");
+  if (booked.slotId !== slots[0]!.slotId) {
+    throw new Error("PD111 expected slot attached");
+  }
+  return {
+    sameJobId: true,
+    status: "booked",
+    payableFromAi: false,
+    jobId: booked.id,
+  };
 }
 
 /**

@@ -293,6 +293,16 @@ test("PD105 payout Idempotency-Key thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD112 Paynow URL checkout thin vertical", async () => {
+  const { runPd112PaynowUrlCheckoutThinVertical } = await import("./index.js");
+  const out = await runPd112PaynowUrlCheckoutThinVertical();
+  assert.equal(out.hostedUrlPresent, true);
+  assert.equal(out.requiredRailsPresent, true);
+  assert.equal(out.paynowOptional, true);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.hostedUrl.includes("paynow"));
+});
+
 test("PD57 Daily ZiG four-eyes thin vertical", () => {
   const out = runPd57DailyZigFourEyesThinVertical();
   assert.equal(out.fourEyesEnforced, true);

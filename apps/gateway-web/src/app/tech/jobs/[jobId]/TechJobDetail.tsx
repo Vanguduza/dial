@@ -23,31 +23,63 @@ export function TechJobDetail({ jobId }: { jobId: string }) {
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [evidence, setEvidence] = useState<EvidenceRow[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [booking, setBooking] = useState(false);
+
+  async function refresh() {
+    const res = await fetch(
+      `/api/tech/services?view=job&jobId=${encodeURIComponent(jobId)}`,
+    );
+    const json = (await res.json()) as {
+      error?: string;
+      job?: JobRow;
+      statusLabel?: string;
+      timeline?: TimelineEvent[];
+      evidence?: EvidenceRow[];
+    };
+    if (!res.ok) {
+      setError(json.error ?? `HTTP ${res.status}`);
+      return;
+    }
+    setJob(json.job ?? null);
+    setStatusLabel(json.statusLabel ?? null);
+    setTimeline(json.timeline ?? []);
+    setEvidence(json.evidence ?? []);
+  }
 
   useEffect(() => {
-    void (async () => {
-      const res = await fetch(
-        `/api/tech/services?view=job&jobId=${encodeURIComponent(jobId)}`,
-      );
-      const json = (await res.json()) as {
-        error?: string;
-        job?: JobRow;
-        statusLabel?: string;
-        timeline?: TimelineEvent[];
-        evidence?: EvidenceRow[];
+    void refresh();
+  }, [jobId]);
+
+  async function bookFromIntake() {
+    setBooking(true);
+    setError(null);
+    try {
+      const slotsRes = await fetch("/api/tech/services?view=slots");
+      const slotsJson = (await slotsRes.json()) as {
+        slots?: { slotId: string }[];
       };
+      const slotId = slotsJson.slots?.[0]?.slotId;
+      const res = await fetch("/api/tech/services", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          action: "book_intake",
+          jobId,
+          ...(slotId ? { slotId } : {}),
+        }),
+      });
+      const json = (await res.json()) as { error?: string };
       if (!res.ok) {
         setError(json.error ?? `HTTP ${res.status}`);
         return;
       }
-      setJob(json.job ?? null);
-      setStatusLabel(json.statusLabel ?? null);
-      setTimeline(json.timeline ?? []);
-      setEvidence(json.evidence ?? []);
-    })();
-  }, [jobId]);
+      await refresh();
+    } finally {
+      setBooking(false);
+    }
+  }
 
-  if (error) return <p style={{ color: "#a11", fontSize: 14 }}>{error}</p>;
+  if (error && !job) return <p style={{ color: "#a11", fontSize: 14 }}>{error}</p>;
   if (!job) return <p style={{ fontSize: 14 }}>Loading…</p>;
 
   return (
@@ -62,6 +94,31 @@ export function TechJobDetail({ jobId }: { jobId: string }) {
       <p style={{ fontSize: 14 }}>Class: {job.jobClassId}</p>
       {job.intakeSummary ? (
         <p style={{ fontSize: 14 }}>Intake: {job.intakeSummary}</p>
+      ) : null}
+      {job.status === "intake" ? (
+        <button
+          type="button"
+          data-testid="pd111-book-intake"
+          disabled={booking}
+          onClick={() => void bookFromIntake()}
+          style={{
+            justifySelf: "start",
+            padding: `${dialTokens.space.sm} ${dialTokens.space.md}`,
+            borderRadius: 8,
+            border: "none",
+            background: dialTokens.color.brand.primary,
+            color: "#fff",
+            fontWeight: 600,
+            cursor: booking ? "wait" : "pointer",
+          }}
+        >
+          {booking ? "Booking…" : "Book from intake"}
+        </button>
+      ) : null}
+      {error ? (
+        <p style={{ color: "#a11", fontSize: 14 }} role="alert">
+          {error}
+        </p>
       ) : null}
       {job.slotId ? (
         <p style={{ fontSize: 14 }}>

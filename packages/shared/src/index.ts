@@ -20,3 +20,10 @@ export {
   type DomainModule,
   type DomainModuleCert,
 } from "./domainRegistry.js";
+export {
+  evaluatePostHogFlag,
+  queueFormbricksSurvey,
+  runPd113FormbricksPosthogStubThinVertical,
+  type FormbricksSurveyStub,
+  type PostHogFlagStub,
+} from "./experienceStubs.js";
