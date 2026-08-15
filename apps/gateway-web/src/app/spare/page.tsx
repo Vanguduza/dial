@@ -55,6 +55,7 @@ export default async function SpareBrowsePage({
           }}
         >
           <Link href="/home">Home</Link>
+          <Link href="/spare/entry">Select Vehicle / EPC</Link>
           <Link href="/spare/cart">Cart</Link>
           <Link href="/spare/orders">Orders</Link>
           <Link href="/spare/garage">Garage</Link>

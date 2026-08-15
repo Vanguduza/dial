@@ -15,6 +15,8 @@ import {
   publishApprovedBatchToMeiliStub,
   rejectCatalogueReview,
   searchOffers,
+  searchOffersByChassis,
+  runPd27SpareDualEntryThinVertical,
 } from "./index.js";
 
 describe("catalogue", { concurrency: false }, () => {
@@ -271,5 +273,29 @@ test("PD20 customer mobile: same ERP orders/returns/garage path", async () => {
   assert.equal(out.returnPayableFromAi, false);
   assert.deepEqual(out.channels, ["android", "ios"]);
   assert.equal(out.noExpo, true);
+});
+
+test("PD27 dual entry Select Vehicle + Browse EPC join on chassis; USD; B2B hide informal", () => {
+  __resetCatalogueForTests();
+  const out = runPd27SpareDualEntryThinVertical();
+  assert.equal(out.selectVehicleChassis, "KUN26");
+  assert.equal(out.joinKey, "chassis_code");
+  assert.equal(out.sameJoin, true);
+  assert.equal(out.displayCurrencyUsd, true);
+  assert.equal(out.reverseEngineeredEpc, false);
+  assert.equal(out.payableFromAi, false);
+  const hits = searchOffersByChassis({
+    chassisCode: "KUN26",
+    sessionRole: "b2c",
+    entryPath: "select_vehicle",
+  });
+  assert.ok(hits.some((h) => h.offerId === "off_filter_oil_kun26"));
+  assert.ok(hits.every((h) => h.displayCurrency === "USD"));
+  const b2b = searchOffersByChassis({
+    chassisCode: "KUN26",
+    sessionRole: "b2b",
+    entryPath: "browse_epc",
+  });
+  assert.ok(b2b.every((h) => h.supplierFormality === "formal"));
 });
 });

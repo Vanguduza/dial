@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD26** green → **PD27** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD27** green → **PD28** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD27** — Spare Select Vehicle / Browse EPC (next eng) |
-| `current_issue` | _(open when starting PD27)_ |
+| `current_stage` | **PD28** — Delivery Android availability + offline packs (next eng) |
+| `current_issue` | _(open when starting PD28)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD26** Gateway home Shop\|Services — **green** |
-| `next_stage` | **PD27** Spare Select Vehicle / Browse EPC dual entry |
+| `prior_stage` | **PD27** Spare Select Vehicle / Browse EPC — **green** |
+| `next_stage` | **PD28** Delivery Android availability + offline packs |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -46,17 +46,17 @@
 | **PD24** | 2026-08-15 | Projects client toggle (C-3) + legal compliance hub (§3.8); no money path |
 | **PD25** | 2026-08-15 | Tech Android Value Score factors + ITF263 upload/verify + Take-Home (D-50/D-53) |
 | **PD26** | 2026-08-15 | Gateway auth home Welcome-back + Shop\|Services; responsive; `/api/home` |
+| **PD27** | 2026-08-15 | Spare dual entry Select Vehicle + Browse EPC; chassis join; USD; B2B hide informal |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD27** | Spare Select Vehicle / Browse EPC dual entry — Pack §9.2 residual |
 | **PD28** | Delivery Android availability + offline packs deepen — Pack §9.8 residual |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note
 
-Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Eng next after PD26 is **PD27**, not S99. Product is **not** finished at S99.
+Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Eng next after PD27 is **PD28**, not S99. Product is **not** finished at S99.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

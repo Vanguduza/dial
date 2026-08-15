@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD27 Spare Select Vehicle / Browse EPC** — dual entry `vehicle_master` cascade + `catalog_*` EPC browse; join on `chassis_code`; OpenCatalog/ACES fixtures (C-6, no reverse-engineered EPC); USD offers (D-57); B2B informal hide (D-49); `/spare/entry` + `/api/spare/entry`.
 - **PD26 Gateway home Shop|Services** — Welcome-back + Shop|Services primary lanes (Pack §9.1); session restore; responsive mobile-first stacked→dual at 768px; `/api/home` session SoR; B2B supplier under Shop; Rive deferred; payableFromAi=false.
 - **PD25 Technician Android Value Score + ITF263** — Compose Value Score factor breakdown; ITF263 upload→verify; Your DIAL Take-Home gross→fee→WHT→net (`amountMinor`); 30% without clearance / 0% with ITF263 (D-50/D-53); `pd25TechnicianValueScoreItf263.test.ts`. Pack §9 audit authored **PD26–PD28**.
 - **PD24 Admin Projects toggle + legal compliance hub** — C-3 client Projects soft-launch (`coming_soon` → live gated on labour-law + working-capital acks); staff internal drafts; §3.8 education/checklists/versioned T&Cs + acceptance log; `/admin/projects` + `/admin/compliance/legal`; no money path.

@@ -134,6 +134,8 @@ const ingestBatches = new Map<string, CatalogueIngestBatch>();
 const reviewQueue: CatalogueReviewItem[] = [];
 const searchNoResultEvents: SearchNoResultEvent[] = [];
 
+import { chassisCodesForOffer } from "./dualEntry.js";
+
 function toMeiliDoc(offer: StubOffer): SpareOfferDocument {
   return {
     id: offer.offerId,
@@ -144,7 +146,7 @@ function toMeiliDoc(offer: StubOffer): SpareOfferDocument {
     brand: offer.brand,
     qualityTier: offer.qualityTier,
     availability: "available",
-    chassis_codes: [],
+    chassis_codes: chassisCodesForOffer(offer),
     engine_codes: [],
     categoryPath: ["spares"],
     priceMinor: Number(offer.unitPriceUsdMinor),
@@ -856,3 +858,37 @@ export {
   type SpareReturnClaim,
   type SpareReturnPath,
 } from "./spareCustomer.js";
+
+export {
+  chassisCodesForOffer,
+  dualEntrySnapshot,
+  getVehicleByChassis,
+  listCatalogAssemblies,
+  listCatalogGroups,
+  listCatalogParts,
+  listVehicleMakes,
+  listVehicleModels,
+  offersForChassis,
+  runPd27SpareDualEntryThinVertical,
+  selectVehicles,
+  type CatalogAssembly,
+  type CatalogGroup,
+  type CatalogPart,
+  type DualEntryOfferHit,
+  type VehicleMasterRow,
+} from "./dualEntry.js";
+
+import { offersForChassis as offersForChassisJoin } from "./dualEntry.js";
+import type { SearchSessionRole as DualRole } from "./dualEntry.js";
+
+/** PD27 — join live stub offers on chassis after dual entry. */
+export function searchOffersByChassis(input: {
+  chassisCode: string;
+  sessionRole: DualRole;
+  entryPath: "select_vehicle" | "browse_epc";
+}) {
+  return offersForChassisJoin({
+    ...input,
+    offers: OFFERS.filter((o) => o.offerSource === "MARKETPLACE"),
+  });
+}
