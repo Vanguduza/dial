@@ -10,6 +10,7 @@ import {
   getDeliveryJob,
   listCourierLocations,
   listFifoQueue,
+  getDispatchBoardSnapshot,
   reconcileCodAfterPod,
   rejectOffer,
   runPd7DeliveryThinVertical,
@@ -123,4 +124,19 @@ test("PD7 thin: available → offer → accept → POD → COD + courier locatio
   assert.equal(result.codUsdMinor, "2500");
   assert.equal(result.location.courierId, "cour_pd7_t");
   assert.ok(listCourierLocations().some((l) => l.courierId === "cour_pd7_t"));
+});
+
+test("PD10 dispatch board snapshot exposes FIFO + jobs", () => {
+  __resetDeliveryForTests();
+  const job = createDeliveryJob({
+    orderId: "ord_pd10_board",
+    from: "a",
+    to: "b",
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const board = getDispatchBoardSnapshot();
+  assert.equal(board.mapSor, "maplibre");
+  assert.equal(board.jobEngine, "packages/delivery");
+  assert.ok(board.fifoJobIds.includes(job.id) || board.jobs.some((j) => j.id === job.id));
+  assert.ok(board.jobs.length >= 1);
 });

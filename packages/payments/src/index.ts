@@ -399,6 +399,11 @@ export function getWithholdingBalance(
   return withholding.get(whKey(technicianId, yearOfAssessment));
 }
 
+/** PD10 — durable withholding_balances listing for admin Take-Home. */
+export function listWithholdingBalances(): WithholdingBalance[] {
+  return [...withholding.values()].map((b) => ({ ...b }));
+}
+
 /**
  * Verified PSP webhook admission for gateway routes — signature + event idempotency.
  * Capture mutates intent only after both pass (webhook-as-truth).

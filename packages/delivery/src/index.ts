@@ -437,6 +437,43 @@ export function getOffer(offerId: string): DeliveryOffer | undefined {
   return o ? { ...o } : undefined;
 }
 
+/** PD10 admin dispatch board — FIFO + live offers/jobs (D-45). */
+export function listAllDeliveryJobs(): DeliveryJob[] {
+  return [...jobs.values()].map((j) => ({ ...j }));
+}
+
+export function listAllDeliveryOffers(): DeliveryOffer[] {
+  return [...offers.values()].map((o) => ({ ...o }));
+}
+
+export function listAllWorkflows(): DeliveryDispatchWorkflowState[] {
+  return [...workflows.values()].map((w) => ({ ...w }));
+}
+
+export type DispatchBoardSnapshot = {
+  mapSor: "maplibre";
+  jobEngine: "packages/delivery";
+  availableCouriers: CourierId[];
+  fifoJobIds: string[];
+  jobs: DeliveryJob[];
+  offers: DeliveryOffer[];
+  workflows: DeliveryDispatchWorkflowState[];
+  locations: CourierLocation[];
+};
+
+export function getDispatchBoardSnapshot(): DispatchBoardSnapshot {
+  return {
+    mapSor: "maplibre",
+    jobEngine: "packages/delivery",
+    availableCouriers: listAvailableCouriers(),
+    fifoJobIds: listFifoQueue(),
+    jobs: listAllDeliveryJobs(),
+    offers: listAllDeliveryOffers(),
+    workflows: listAllWorkflows(),
+    locations: listCourierLocations(),
+  };
+}
+
 /**
  * PD7 thin vertical: available → offer → accept → transit → POD → COD USD.
  */

@@ -399,6 +399,7 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-415 | **PD8 Customer iOS** — SwiftUI Spare browse/cart/EcoCash\|COD | `done` | [#29](https://github.com/Vanguduza/dial/issues/29); DialCustomerCore |
 | ENH-416 | **PD9 Technician Android** — jobs/checklist/evidence/Cal.com/`rate_card`/WHT | `done` | [#30](https://github.com/Vanguduza/dial/issues/30); `@dial/jobs` |
 | ENH-417 | **Product-depth band PD10–PD12** authored (admin CC → FDMS → WA Flows) | `done` | Workplan §1b; eng next ≠ S99 |
+| ENH-418 | **PD10 Admin money / dispatch / Command Centre** | `done` | [#31](https://github.com/Vanguduza/dial/issues/31); D-54 Simulated≠pay |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

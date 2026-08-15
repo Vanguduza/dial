@@ -4,25 +4,16 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
 
-type Balance = {
-  technicianId: string;
-  yearOfAssessment: number;
-  grossPaidMinor: string;
-  withheldMinor: string;
-  hasItf263: boolean;
-};
-
 /**
- * PD10 Technician Take-Home — durable withholding_balances (D-50).
- * Draft economics only; AI never writes payable amounts.
+ * PD10 Admin money outbox ops — drain ledger/fiscal outbox (@dial/ledger).
+ * Fail-closed INTERNAL_API_SECRET (same pattern as Daily ZiG).
  */
-export default function TechTakeHomePage() {
+export default function AdminMoneyOutboxPage() {
   const [secret, setSecret] = useState("");
-  const [technicianId, setTechnicianId] = useState("tech_pd10");
-  const [payoutUsdMinor, setPayoutUsdMinor] = useState("10000");
-  const [hasItf263, setHasItf263] = useState(false);
-  const [balances, setBalances] = useState<Balance[]>([]);
-  const [last, setLast] = useState<string | null>(null);
+  const [depth, setDepth] = useState<number | null>(null);
+  const [pending, setPending] = useState<
+    Array<{ id: string; kind: string; refId: string; createdAt: string }>
+  >([]);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -34,51 +25,47 @@ export default function TechTakeHomePage() {
     [secret],
   );
 
-  async function refreshAll() {
+  async function refresh() {
     setBusy(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/admin/tech/take-home?view=all", {
-        headers: headers(),
-      });
-      const data = (await res.json()) as { error?: string; balances?: Balance[] };
-      if (!res.ok) {
-        setMessage(data.error ?? `HTTP ${res.status}`);
-        return;
-      }
-      setBalances(data.balances ?? []);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function applyPayout() {
-    setBusy(true);
-    setMessage(null);
-    try {
-      const res = await fetch("/api/admin/tech/take-home", {
-        method: "POST",
-        headers: headers(),
-        body: JSON.stringify({
-          technicianId,
-          payoutUsdMinor,
-          hasItf263,
-        }),
-      });
+      const res = await fetch("/api/admin/money/outbox", { headers: headers() });
       const data = (await res.json()) as {
         error?: string;
-        netPayoutMinor?: string;
-        withholdMinor?: string;
-        rateBps?: number;
+        depth?: number;
+        pending?: typeof pending;
       };
       if (!res.ok) {
         setMessage(data.error ?? `HTTP ${res.status}`);
         return;
       }
-      setLast(
-        `net ${data.netPayoutMinor} · WHT ${data.withholdMinor} (${data.rateBps} bps)`,
-      );
-      await refreshAll();
+      setDepth(data.depth ?? 0);
+      setPending(data.pending ?? []);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function drain() {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/money/outbox", {
+        method: "POST",
+        headers: headers(),
+        body: JSON.stringify({ enqueueSideEffects: true }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        drained?: unknown[];
+        remaining?: number;
+      };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage(`Drained ${data.drained?.length ?? 0} · remaining ${data.remaining ?? 0}`);
+      await refresh();
     } finally {
       setBusy(false);
     }
@@ -105,11 +92,11 @@ export default function TechTakeHomePage() {
             fontSize: "clamp(1.5rem, 4vw, 2rem)",
           }}
         >
-          Technician Take-Home
+          Money outbox
         </h1>
         <p style={{ fontSize: 14, opacity: 0.8 }}>
-          Durable <code>withholding_balances</code> via <code>@dial/payments</code> (D-50). Without
-          ITF263, 30% withhold. Draft only — human + pricing engine write payable amounts.
+          Ops drain of <code>@dial/ledger</code> money outbox (ledger_posted / fiscal_queued). Not
+          Command Centre Simulated — live money path only.
         </p>
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
@@ -121,36 +108,11 @@ export default function TechTakeHomePage() {
             style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc" }}
           />
         </label>
-        <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 12 }}>
-          Technician id
-          <input
-            value={technicianId}
-            onChange={(e) => setTechnicianId(e.target.value)}
-            style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc" }}
-          />
-        </label>
-        <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 12 }}>
-          Gross payout USD minor
-          <input
-            value={payoutUsdMinor}
-            onChange={(e) => setPayoutUsdMinor(e.target.value)}
-            inputMode="numeric"
-            style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc" }}
-          />
-        </label>
-        <label style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 12, fontSize: 14 }}>
-          <input
-            type="checkbox"
-            checked={hasItf263}
-            onChange={(e) => setHasItf263(e.target.checked)}
-          />
-          Has valid ITF263
-        </label>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 12 }}>
           <button
             type="button"
             disabled={busy || !secret}
-            onClick={() => void applyPayout()}
+            onClick={() => void refresh()}
             style={{
               padding: "10px 14px",
               borderRadius: 8,
@@ -160,12 +122,12 @@ export default function TechTakeHomePage() {
               fontWeight: 600,
             }}
           >
-            Apply draft WHT
+            Refresh depth
           </button>
           <button
             type="button"
             disabled={busy || !secret}
-            onClick={() => void refreshAll()}
+            onClick={() => void drain()}
             style={{
               padding: "10px 14px",
               borderRadius: 8,
@@ -174,17 +136,19 @@ export default function TechTakeHomePage() {
               fontWeight: 600,
             }}
           >
-            List durable balances
+            Drain outbox
           </button>
         </div>
-        {last ? <p style={{ marginTop: 12 }}>{last}</p> : null}
+        {depth !== null ? (
+          <p style={{ marginTop: 12 }}>
+            Depth: <strong>{depth}</strong>
+          </p>
+        ) : null}
         {message ? <p role="status">{message}</p> : null}
-        <h2 style={{ fontSize: "1.1rem", marginTop: 24 }}>Durable balances</h2>
         <ul style={{ fontSize: 13, lineHeight: 1.6 }}>
-          {balances.map((b) => (
-            <li key={`${b.technicianId}-${b.yearOfAssessment}`}>
-              <code>{b.technicianId}</code> · Y{b.yearOfAssessment} · gross {b.grossPaidMinor} ·
-              withheld {b.withheldMinor} · ITF263={String(b.hasItf263)}
+          {pending.map((r) => (
+            <li key={r.id}>
+              <code>{r.id}</code> · {r.kind} · {r.refId} · {r.createdAt}
             </li>
           ))}
         </ul>

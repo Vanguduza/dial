@@ -76,7 +76,7 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 113 | `PD7` | **Delivery Android** — foodhub-compose patterns + MapLibre | [#28](https://github.com/Vanguduza/dial/issues/28) | Offer accept/reject → POD/COD vs `@dial/delivery`; admin MapLibre track | `PD8` |
 | 114 | `PD8` | **Customer iOS** — SwiftUI Spare parity | [#29](https://github.com/Vanguduza/dial/issues/29) | Same ERP APIs as PD5; tunacosgun patterns; USD + EcoCash\|COD | `PD9` |
 | 115 | `PD9` | **Technician Android** — Now in Android | [#30](https://github.com/Vanguduza/dial/issues/30) | Jobs/checklist/evidence/Cal.com book; `rate_card` (not stub); Take-Home WHT | `PD10` |
-| 116 | `PD10` | **Admin money / dispatch / Command Centre** | new issue | Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) | `PD11` |
+| 116 | `PD10` | **Admin money / dispatch / Command Centre** | [#31](https://github.com/Vanguduza/dial/issues/31) | Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) | `PD11` |
 | 117 | `PD11` | **FDMS sandbox** — Virtual Gateway agency receipts | new issue | Agency receipt types (D-59); sandbox day open/close; fiscal outbox | `PD12` |
 | 118 | `PD12` | **Meta WA Flows** — Spare + Tech critical Flows | new issue | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys | expand / next band |
 
@@ -182,11 +182,17 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd9TechThinVertical`; `pd9TechnicianApi.test.ts`; `:core:network` DialTechnicianClient tests; `/tech/book` slots UI |
 | Green → | **PD10** Admin money / dispatch / Command Centre |
 
-### PD10 — Admin money / dispatch / Command Centre (NEXT)
+### PD10 — Admin money / dispatch / Command Centre (**GREEN** 2026-08-15)
 
-Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) — eng next after PD9 (not S99).
+| | |
+| --- | --- |
+| Issue | [#31](https://github.com/Vanguduza/dial/issues/31) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Money outbox ops UI + drain; dispatch board FIFO/offers; Command Centre MetricContract tiles; Take-Home durable WHT; Simulated never auto-pays |
+| Evidence | `pd10AdminOps.test.ts`; `@dial/ai` tiles; `@dial/delivery` `getDispatchBoardSnapshot` |
+| Green → | **PD11** FDMS sandbox |
 
-### PD11 — FDMS sandbox
+### PD11 — FDMS sandbox (NEXT)
 
 Virtual Gateway agency receipts (D-59); sandbox fiscal day.
 

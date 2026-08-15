@@ -77,6 +77,28 @@ test("E6a/T8 MetricContract + shadow promote + Simulated never auto-pays", () =>
   assert.equal(actual.refused, true);
 });
 
+test("PD10 MetricContract tiles + Simulated never drives payout", async () => {
+  const {
+    __resetIntelligenceForTests: reset,
+    ensureDefaultMetricContracts,
+    listMetricTiles,
+    setMetricObservedValue,
+    attemptCommandCentrePayout: attemptPay,
+  } = await import("./intelligence.js");
+  reset();
+  const contracts = ensureDefaultMetricContracts();
+  assert.ok(contracts.length >= 3);
+  setMetricObservedValue("metric.money_outbox_depth", 2);
+  setMetricObservedValue("metric.dispatch_fifo_depth", 0);
+  setMetricObservedValue("metric.on_time_pod", 0.95);
+  const tiles = listMetricTiles("actual");
+  assert.equal(tiles.every((t) => t.canDrivePayout === false), true);
+  assert.ok(tiles.some((t) => t.id === "metric.money_outbox_depth" && t.status === "ok"));
+  assert.throws(() =>
+    attemptPay({ mode: "simulated", amountMinor: 50_00n }),
+  );
+});
+
 test("LiteLLM fixture completion never requires keys", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const { completeViaLiteLlm, pingLiteLlm } = await import("./litellm.js");
