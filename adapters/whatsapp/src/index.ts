@@ -1,8 +1,18 @@
 /**
- * Official WhatsApp Cloud API adapter surface (D-40) — no Baileys / whatsapp-web.js.
- * E2a expand: Matrix B — disclosure, tech intake/emergency, §10 stubs, Chatwoot, Paynow URL.
+ * Official WhatsApp Cloud API adapter surface (D-40 / PD12) — no Baileys / whatsapp-web.js.
+ * E2a expand + PD12: FLOW_SPARE_* + FLOW_GROCERY_* food wired to sandbox Cloud API.
  */
-import { addToCart, createCart, getCart, searchOffers } from "@dial/catalogue";
+import {
+  addToCart,
+  addToGroceryCart,
+  createCart,
+  createGroceryCart,
+  getCart,
+  getGroceryCart,
+  searchGroceryOffers,
+  searchOffers,
+  __resetGroceryForTests,
+} from "@dial/catalogue";
 import {
   type CheckoutPayChoice,
   createCheckoutPayment,
@@ -20,6 +30,15 @@ import {
   claimProcessedEvent,
 } from "@dial/shared";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import {
+  bindWaSessionPhone,
+  listWaSandboxOutbound,
+  MetaCloudApiAdapter,
+  parseWaInboundInteractive,
+  resolveWaSessionByPhone,
+  __resetWaCloudSandboxForTests,
+} from "./cloudApi.js";
+import type { WaFlowKey } from "./flowRegistry.js";
 
 export type FlowId =
   | "FLOW_SPARE_SEARCH"
@@ -30,7 +49,15 @@ export type FlowId =
   | "FLOW_SPARE_RETURNS"
   | "FLOW_REFERRAL_HOME"
   | "FLOW_CONSENT_CENTRE"
-  | "FLOW_SUPPORT_TICKET";
+  | "FLOW_SUPPORT_TICKET"
+  | "FLOW_GROCERY_HOME"
+  | "FLOW_GROCERY_SEARCH"
+  | "FLOW_GROCERY_CART"
+  | "FLOW_GROCERY_SLOT"
+  | "FLOW_GROCERY_CHECKOUT"
+  | "FLOW_GROCERY_TRACK";
+
+export type CheckoutVertical = "spare" | "grocery";
 
 export type CheckoutButton = {
   id: CheckoutPayChoice | "paynow";
@@ -73,6 +100,7 @@ export type FlowSession = {
   sessionId: string;
   flowId: FlowId;
   cartId?: string;
+  groceryCartId?: string;
   orderId?: string;
   jobId?: string;
   customerId?: string;
@@ -80,6 +108,9 @@ export type FlowSession = {
   lastSearchQuery?: string;
   techIntake?: TechIntakeDraft;
   consents?: ConsentState;
+  vertical?: CheckoutVertical;
+  grocerySlotId?: string;
+  toE164?: string;
 };
 
 export type TechIntakeDraft = {
@@ -571,6 +602,453 @@ export function getChatwootHandoff(key: string): ChatwootHandoff | undefined {
   return handoffs.get(key);
 }
 
+/** FLOW_GROCERY_HOME — food/pantry entry (no liquor tile). */
+export function flowGroceryHome(sessionId: string) {
+  const session = requireSession(sessionId);
+  session.flowId = "FLOW_GROCERY_HOME";
+  session.vertical = "grocery";
+  session.lastScreen = "home";
+  return {
+    session,
+    menu: {
+      title: "Shop groceries",
+      actions: ["search", "track"] as const,
+      liquorForbidden: true,
+    },
+  };
+}
+
+/** FLOW_GROCERY_SEARCH — USD list; liquor/age-gate never surfaced. */
+export function flowGrocerySearch(
+  sessionId: string,
+  query: string,
+): {
+  session: FlowSession;
+  offers: Array<{
+    offerId: string;
+    title: string;
+    displayPriceUsdMinor: string;
+    displayCurrency: "USD";
+    coldChain: string;
+    supplierDisplayName: string;
+    ageGateRequired: boolean;
+  }>;
+} {
+  const session = requireSession(sessionId);
+  session.flowId = "FLOW_GROCERY_SEARCH";
+  session.vertical = "grocery";
+  session.lastScreen = "search_results";
+  session.lastSearchQuery = query;
+  const offers = searchGroceryOffers(query, { sessionRole: "b2c" }).map((o) => ({
+    offerId: o.offerId,
+    title: o.title,
+    displayPriceUsdMinor: o.unitPriceUsdMinor.toString(),
+    displayCurrency: "USD" as const,
+    coldChain: o.coldChain,
+    supplierDisplayName: o.supplierDisplayName,
+    ageGateRequired: o.ageGateRequired,
+  }));
+  if (offers.some((o) => o.ageGateRequired)) {
+    throw new Error("Liquor/age-gate offers forbidden on FLOW_GROCERY_* (counsel gate)");
+  }
+  return { session, offers };
+}
+
+export function flowGroceryCartAdd(
+  sessionId: string,
+  offerId: string,
+  qty = 1,
+) {
+  const session = requireSession(sessionId);
+  if (!session.groceryCartId) {
+    session.groceryCartId = createGroceryCart().id;
+  }
+  session.flowId = "FLOW_GROCERY_CART";
+  session.vertical = "grocery";
+  session.lastScreen = "cart";
+  const cart = addToGroceryCart(session.groceryCartId, offerId, qty, {
+    buyerSegment: "b2c",
+  });
+  return {
+    session,
+    cart: {
+      cartId: cart.id,
+      currency: cart.currency,
+      totalUsdMinor: cart.total.amountMinor.toString(),
+      lines: cart.lines.map((l) => ({
+        offerId: l.offerId,
+        title: l.title,
+        qty: l.qty,
+        lineUsdMinor: l.lineTotal.amountMinor.toString(),
+        soldBy: l.supplierDisplayName,
+      })),
+    },
+  };
+}
+
+/** FLOW_GROCERY_SLOT — delivery window + cold-chain notes (no liquorAllowed surface). */
+export function flowGrocerySlot(
+  sessionId: string,
+  slotId = "slot_harare_am",
+) {
+  const session = requireSession(sessionId);
+  if (!session.groceryCartId) throw new Error("Grocery cart required before slot");
+  session.flowId = "FLOW_GROCERY_SLOT";
+  session.vertical = "grocery";
+  session.grocerySlotId = slotId;
+  session.lastScreen = "slot";
+  return {
+    session,
+    slot: {
+      slotId,
+      window: "Today 10:00–13:00",
+      coldChainNotes: "Chilled lines keep cold-chain band until POD",
+      liquorAllowed: false,
+    },
+  };
+}
+
+export function flowGroceryCheckoutReview(sessionId: string): {
+  session: FlowSession;
+  review: {
+    orderId: string;
+    currency: "USD";
+    totalUsdMinor: string;
+    lines: Array<{
+      offerId: string;
+      title: string;
+      qty: number;
+      supplierDisplayName: string;
+    }>;
+    slotId: string;
+    liquorTermsForbidden: true;
+  };
+  payButtons: typeof CHECKOUT_PAY_BUTTONS;
+} {
+  const session = requireSession(sessionId);
+  if (!session.groceryCartId) throw new Error("Grocery cart required before checkout");
+  if (!session.grocerySlotId) throw new Error("Slot required before grocery checkout");
+  const cart = getGroceryCart(session.groceryCartId);
+  if (!cart || cart.lines.length === 0) throw new Error("Grocery cart empty");
+  session.flowId = "FLOW_GROCERY_CHECKOUT";
+  session.vertical = "grocery";
+  session.lastScreen = "review";
+  session.orderId = session.orderId ?? `gord_${session.sessionId}`;
+  return {
+    session,
+    review: {
+      orderId: session.orderId,
+      currency: "USD" as const,
+      totalUsdMinor: cart.total.amountMinor.toString(),
+      lines: cart.lines.map((l) => ({
+        offerId: l.offerId,
+        title: l.title,
+        qty: l.qty,
+        supplierDisplayName: l.supplierDisplayName,
+      })),
+      slotId: session.grocerySlotId,
+      liquorTermsForbidden: true,
+    },
+    payButtons: CHECKOUT_PAY_BUTTONS,
+  };
+}
+
+export async function flowGroceryCheckoutPay(
+  sessionId: string,
+  choice: CheckoutPayChoice | "paynow",
+  idempotencyKey: string,
+): Promise<{
+  session: FlowSession;
+  intent?: PaymentIntent;
+  codOrder?: CodOrder;
+  paynowUrl?: string;
+}> {
+  const session = requireSession(sessionId);
+  if (!session.groceryCartId || !session.orderId) {
+    throw new Error("Grocery checkout review required before pay");
+  }
+  const cart = getGroceryCart(session.groceryCartId);
+  if (!cart) throw new Error("Missing grocery cart");
+
+  if (choice === "paynow") {
+    session.lastScreen = "pay_paynow_url";
+    const rate = getActiveFxRate();
+    const zig = rate ? usdToZig(cart.total.amountMinor, rate) : undefined;
+    return {
+      session,
+      paynowUrl: `https://paynow.stub/hosted?orderId=${encodeURIComponent(session.orderId)}&usdMinor=${cart.total.amountMinor.toString()}&fx=${rate?.fxRateId ?? "none"}&zigMinor=${zig?.amountMinor.toString() ?? "n/a"}&vertical=grocery`,
+    };
+  }
+  if (choice !== "ecocash" && choice !== "cod") {
+    throw new Error("Pay choice must be EcoCash, COD, or Paynow button");
+  }
+  session.lastScreen = "pay_result";
+  const result = await createCheckoutPayment({
+    choice,
+    orderId: session.orderId,
+    amountUsdMinor: cart.total.amountMinor,
+    idempotencyKey,
+  });
+  return { session, ...result };
+}
+
+export function flowGroceryTrack(sessionId: string) {
+  const session = requireSession(sessionId);
+  session.flowId = "FLOW_GROCERY_TRACK";
+  session.vertical = "grocery";
+  session.lastScreen = "track";
+  return {
+    session,
+    track: {
+      orderId: session.orderId ?? null,
+      statusFrom: "erp" as const,
+      status: session.orderId ? "confirmed" : "none",
+    },
+  };
+}
+
+/**
+ * PD12 — send registered Flow invite + D-57 pay buttons via Cloud API sandbox/live.
+ * Binds phone → session for inbound button routing.
+ */
+export async function sendCheckoutPayButtonsViaCloud(input: {
+  sessionId: string;
+  toE164: string;
+  vertical: CheckoutVertical;
+}): Promise<{
+  flowMessageId: string;
+  buttonsMessageId: string;
+  flowId: string;
+  buttons: CheckoutButton[];
+}> {
+  const session = requireSession(input.sessionId);
+  session.toE164 = input.toE164;
+  session.vertical = input.vertical;
+  bindWaSessionPhone(input.toE164, session.sessionId);
+
+  const flowKey: WaFlowKey =
+    input.vertical === "grocery"
+      ? "FLOW_GROCERY_CHECKOUT"
+      : "FLOW_SPARE_CHECKOUT";
+  const api = new MetaCloudApiAdapter();
+  const flow = await api.sendFlowMessage({
+    toE164: input.toE164,
+    flowKey,
+    bodyText:
+      input.vertical === "grocery"
+        ? "Review grocery order (USD). Choose EcoCash or COD below."
+        : "Review spare order (USD). Choose EcoCash or COD below.",
+    flowToken: session.sessionId,
+    cta: "Review",
+  });
+  const buttons = await api.sendInteractiveButtons({
+    toE164: input.toE164,
+    bodyText: "Pay with:",
+    buttons: CHECKOUT_PAY_BUTTONS.map((b) => ({
+      id: b.id,
+      title: b.title.slice(0, 20),
+    })),
+  });
+  session.lastScreen = "pay_buttons_sent";
+  return {
+    flowMessageId: flow.messageId,
+    buttonsMessageId: buttons.messageId,
+    flowId: flow.flowId,
+    buttons: [...CHECKOUT_PAY_BUTTONS],
+  };
+}
+
+/** Inbound Cloud API interactive → same createCheckoutPayment as web (D-57). */
+export async function handleWaInboundPayButton(input: {
+  fromE164: string;
+  buttonId: string;
+  idempotencyKey: string;
+  sessionId?: string;
+}): Promise<{
+  session: FlowSession;
+  intent?: PaymentIntent;
+  codOrder?: CodOrder;
+  paynowUrl?: string;
+  templateMessageId?: string;
+}> {
+  const sessionId =
+    input.sessionId ?? resolveWaSessionByPhone(input.fromE164);
+  if (!sessionId) throw new Error("No WA session bound for phone");
+  const session = requireSession(sessionId);
+  const choice = input.buttonId as CheckoutPayChoice | "paynow";
+  const vertical = session.vertical ?? "spare";
+  const paid =
+    vertical === "grocery"
+      ? await flowGroceryCheckoutPay(sessionId, choice, input.idempotencyKey)
+      : await flowSpareCheckoutPay(sessionId, choice, input.idempotencyKey);
+
+  const api = new MetaCloudApiAdapter();
+  const tplKey =
+    vertical === "grocery" ? "GROCERY_ORDER_CONFIRMED" : "SPARE_ORDER_CONFIRMED";
+  const tpl = await api.sendRegisteredTemplate({
+    toE164: input.fromE164,
+    key: tplKey,
+  });
+  return { ...paid, templateMessageId: tpl.messageId };
+}
+
+/** Process Meta webhook body after signature+idempotency (PD12). */
+export async function processWaWebhookPayload(
+  body: unknown,
+  idempotencyKey: string,
+): Promise<
+  | { handled: false }
+  | {
+      handled: true;
+      kind: "button_reply";
+      result: Awaited<ReturnType<typeof handleWaInboundPayButton>>;
+    }
+> {
+  const inbound = parseWaInboundInteractive(body);
+  if (!inbound || inbound.kind !== "button_reply" || !inbound.buttonId) {
+    return { handled: false };
+  }
+  const result = await handleWaInboundPayButton({
+    fromE164: inbound.fromE164,
+    buttonId: inbound.buttonId,
+    idempotencyKey,
+  });
+  return { handled: true, kind: "button_reply", result };
+}
+
+/**
+ * PD12 thin vertical: sandbox Cloud API FLOW_SPARE_* + FLOW_GROCERY_* food
+ * → interactive EcoCash|COD → same payment intents as web. No liquor / no Baileys.
+ */
+export async function runPd12WaFlowsSandboxThinVertical(input?: {
+  sparePhone?: string;
+  groceryPhone?: string;
+}): Promise<{
+  mode: string;
+  spare: {
+    flowId: string;
+    buttonsMessageId: string;
+    intentMethod: string | undefined;
+    templateMessageId: string | undefined;
+  };
+  grocery: {
+    flowId: string;
+    buttonsMessageId: string;
+    codCurrency: string | undefined;
+    templateMessageId: string | undefined;
+    liquorForbidden: true;
+  };
+  outboundKinds: string[];
+}> {
+  const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  if (mode !== "sandbox") {
+    throw new Error("runPd12WaFlowsSandboxThinVertical requires DIAL_INTEGRATION_MODE=sandbox");
+  }
+  if (
+    !process.env.WHATSAPP_TOKEN?.trim() ||
+    !process.env.WHATSAPP_PHONE_NUMBER_ID?.trim()
+  ) {
+    throw new Error("PD12 sandbox requires WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID");
+  }
+  if (
+    !process.env.ECOCASH_API_KEY?.trim() ||
+    !process.env.ECOCASH_MERCHANT_CODE?.trim()
+  ) {
+    throw new Error(
+      "PD12 sandbox EcoCash path requires ECOCASH_API_KEY + ECOCASH_MERCHANT_CODE",
+    );
+  }
+
+  const { __resetCatalogueForTests } = await import("@dial/catalogue");
+  const { __resetPaymentsForTests, setDailyZigRate } = await import(
+    "@dial/payments"
+  );
+
+  __resetWhatsappForTests();
+  __resetWaCloudSandboxForTests();
+  __resetCatalogueForTests();
+  __resetGroceryForTests();
+  __resetPaymentsForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_pd12" });
+
+  const sparePhone = input?.sparePhone ?? "+263771000012";
+  const groceryPhone = input?.groceryPhone ?? "+263771000013";
+
+  // Spare: search → cart → review → Cloud Flow+buttons → EcoCash
+  const spareSession = startFlow("FLOW_SPARE_SEARCH", "cust_pd12_spare");
+  const search = flowSpareSearch(spareSession.sessionId, "oil");
+  if (search.offers.length < 1) throw new Error("PD12 spare search empty");
+  flowSpareCartAdd(spareSession.sessionId, search.offers[0]!.offerId, 1);
+  flowSpareCheckoutReview(spareSession.sessionId);
+  const spareSend = await sendCheckoutPayButtonsViaCloud({
+    sessionId: spareSession.sessionId,
+    toE164: sparePhone,
+    vertical: "spare",
+  });
+  const sparePay = await handleWaInboundPayButton({
+    fromE164: sparePhone,
+    buttonId: "ecocash",
+    idempotencyKey: "pd12-spare-eco-1",
+  });
+  if (sparePay.intent?.method !== "ecocash_direct") {
+    throw new Error("PD12 spare expected ecocash_direct intent (same as web)");
+  }
+
+  // Grocery food: home → search → cart → slot → checkout → COD
+  const grocSession = startFlow("FLOW_GROCERY_HOME", "cust_pd12_groc");
+  const home = flowGroceryHome(grocSession.sessionId);
+  if (!home.menu.liquorForbidden) throw new Error("PD12 grocery must forbid liquor");
+  const gSearch = flowGrocerySearch(grocSession.sessionId, "milk");
+  if (gSearch.offers.length < 1) throw new Error("PD12 grocery search empty");
+  if (gSearch.offers.some((o) => o.ageGateRequired)) {
+    throw new Error("PD12 grocery must not surface age-gate/liquor");
+  }
+  flowGroceryCartAdd(grocSession.sessionId, gSearch.offers[0]!.offerId, 1);
+  flowGrocerySlot(grocSession.sessionId);
+  flowGroceryCheckoutReview(grocSession.sessionId);
+  const grocSend = await sendCheckoutPayButtonsViaCloud({
+    sessionId: grocSession.sessionId,
+    toE164: groceryPhone,
+    vertical: "grocery",
+  });
+  const grocPay = await handleWaInboundPayButton({
+    fromE164: groceryPhone,
+    buttonId: "cod",
+    idempotencyKey: "pd12-groc-cod-1",
+  });
+  if (grocPay.codOrder?.amountUsd.currency !== "USD") {
+    throw new Error("PD12 grocery COD must settle USD (same as web)");
+  }
+  flowGroceryTrack(grocSession.sessionId);
+
+  const outbound = listWaSandboxOutbound();
+  const outboundKinds = outbound.map((m) => m.kind);
+  if (!outboundKinds.includes("flow") || !outboundKinds.includes("buttons")) {
+    throw new Error("PD12 expected sandbox Cloud API flow + buttons outbound");
+  }
+  if (!outboundKinds.includes("template")) {
+    throw new Error("PD12 expected registered confirmation templates");
+  }
+
+  return {
+    mode,
+    spare: {
+      flowId: spareSend.flowId,
+      buttonsMessageId: spareSend.buttonsMessageId,
+      intentMethod: sparePay.intent?.method,
+      templateMessageId: sparePay.templateMessageId,
+    },
+    grocery: {
+      flowId: grocSend.flowId,
+      buttonsMessageId: grocSend.buttonsMessageId,
+      codCurrency: grocPay.codOrder?.amountUsd.currency,
+      templateMessageId: grocPay.templateMessageId,
+      liquorForbidden: true,
+    },
+    outboundKinds,
+  };
+}
+
 /** Evidence helper — tree must not depend on unofficial WA clients. */
 export function assertNoUnofficialWhatsAppDeps(pkgJsonTexts: string[]): void {
   for (const text of pkgJsonTexts) {
@@ -588,6 +1066,7 @@ export function __resetWhatsappForTests(): void {
   returnClaims.clear();
   referrals.clear();
   consentAudit.length = 0;
+  __resetWaCloudSandboxForTests();
 }
 
 export {
@@ -596,7 +1075,14 @@ export {
   resolveWhatsAppAppSecret,
   verifyMetaSignature as verifyMetaSignatureCloud,
   pingWhatsAppHealth,
+  parseWaInboundInteractive,
+  listWaSandboxOutbound,
+  bindWaSessionPhone,
+  resolveWaSessionByPhone,
+  __resetWaCloudSandboxForTests,
   type WhatsAppCloudAdapter,
+  type InteractiveButton,
+  type SandboxOutboundMessage,
 } from "./cloudApi.js";
 
 export {
@@ -605,3 +1091,10 @@ export {
   type WaTemplateBinding,
   type WaTemplateKey,
 } from "./templateRegistry.js";
+
+export {
+  listWaFlowRegistry,
+  resolveWaFlow,
+  type WaFlowBinding,
+  type WaFlowKey,
+} from "./flowRegistry.js";

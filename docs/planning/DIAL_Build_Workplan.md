@@ -78,9 +78,12 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 115 | `PD9` | **Technician Android** — Now in Android | [#30](https://github.com/Vanguduza/dial/issues/30) | Jobs/checklist/evidence/Cal.com book; `rate_card` (not stub); Take-Home WHT | `PD10` |
 | 116 | `PD10` | **Admin money / dispatch / Command Centre** | [#31](https://github.com/Vanguduza/dial/issues/31) | Money ops + delivery dispatch board + MetricContract Actual vs Simulated (D-54) | `PD11` |
 | 117 | `PD11` | **FDMS sandbox** — Virtual Gateway agency receipts | [#32](https://github.com/Vanguduza/dial/issues/32) | Agency receipt types (D-59); sandbox day open/close; fiscal outbox | `PD12` |
-| 118 | `PD12` | **Meta WA Flows** — Spare + Tech critical Flows | new issue | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys | expand / next band |
+| 118 | `PD12` | **Meta WA Flows** — Spare + grocery food Cloud API | [#33](https://github.com/Vanguduza/dial/issues/33) | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys / no liquor | `PD13` |
+| 119 | `PD13` | **tech-web** — Pack §9.3 FixItNow patterns | new issue | Guide / emergency / diagnose / book vs `@dial/jobs`; no AI payable | `PD14` |
+| 120 | `PD14` | **Grocery web deepen** — slot + track + checkout (food) | new issue | Beyond G1 browse; USD; EcoCash\|COD; no liquor | `PD15` |
+| 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | new issue | Ingest/review/approve → Meili; B2B informal leak=0 | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD9 is **PD10**, not S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD12 is **PD13**, not S99.
 
 ---
 
@@ -202,9 +205,27 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd11FdmsSandboxThinVertical`; `pd11FdmsSandbox.test.ts`; adapter sandbox day-gated submit |
 | Green → | **PD12** Meta WA Flows |
 
-### PD12 — Meta WA Flows (NEXT)
+### PD12 — Meta WA Flows (**GREEN** 2026-08-15)
 
-Official Cloud API Flows for Spare + Tech critical paths (D-40 / D-57).
+| | |
+| --- | --- |
+| Issue | [#33](https://github.com/Vanguduza/dial/issues/33) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | Sandbox Cloud API `FLOW_SPARE_*` + `FLOW_GROCERY_*` food → interactive EcoCash\|COD → same payment intents as web; registered templates; webhook button_reply |
+| Evidence | `runPd12WaFlowsSandboxThinVertical`; `pd12WaFlows.test.ts`; no Baileys / no liquor |
+| Green → | **PD13** tech-web |
+
+### PD13 — tech-web (NEXT)
+
+Pack §9.3 FixItNow-patterned guide / emergency / diagnose / Cal.com book against `@dial/jobs` (no AI payable amounts).
+
+### PD14 — Grocery web deepen
+
+Food/pantry slot + track + checkout beyond G1 browse (USD; EcoCash\|COD; no liquor).
+
+### PD15 — Catalogue Factory admin
+
+D-53 ingest/review/approve queues + demand-gap KPIs → Meili; B2B informal leak=0.
 
 ### S10 — E2a (historical)
 

@@ -1,10 +1,11 @@
 /**
- * Meta WhatsApp Cloud API webhook — signature + durable idempotency (D-40 / D-47 / S120).
+ * Meta WhatsApp webhook — signature + durable idempotency + PD12 interactive pay (D-40 / D-47).
  * GET: hub challenge with WHATSAPP_VERIFY_TOKEN.
- * POST: HMAC with WHATSAPP_APP_SECRET (alias META_WA_APP_SECRET).
+ * POST: HMAC with WHATSAPP_APP_SECRET; button_reply → createCheckoutPayment (same as web).
  */
 import { NextResponse } from "next/server";
 import {
+  processWaWebhookPayload,
   resolveWhatsAppAppSecret,
   verifyMetaSignature,
   verifyWebhookChallenge,
@@ -62,6 +63,28 @@ export async function POST(req: Request) {
     })) === "duplicate"
   ) {
     return NextResponse.json({ ok: true, duplicate: true });
+  }
+
+  let body: unknown = {};
+  try {
+    body = JSON.parse(rawBody) as unknown;
+  } catch {
+    body = {};
+  }
+
+  const processed = await processWaWebhookPayload(body, deliveryId);
+  if (processed.handled) {
+    return NextResponse.json({
+      ok: true,
+      admitted: true,
+      handled: "button_reply",
+      intentMethod: processed.result.intent?.method ?? null,
+      cod: processed.result.codOrder
+        ? {
+            currency: processed.result.codOrder.amountUsd.currency,
+          }
+        : null,
+    });
   }
 
   return NextResponse.json({ ok: true, admitted: true });

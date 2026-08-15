@@ -45,6 +45,19 @@ export class EcoCashDirectAdapter implements PspAdapter {
         customerAction: "approve_on_handset",
       };
     }
+    // Sandbox: keys required; inline session unless ECOCASH_SANDBOX_HTTP=1 (PD12 WA checkout).
+    if (
+      integrationMode() === "sandbox" &&
+      process.env.ECOCASH_SANDBOX_HTTP?.trim() !== "1"
+    ) {
+      requireSecret("ECOCASH_API_KEY");
+      requireSecret("ECOCASH_MERCHANT_CODE");
+      return {
+        providerRef: `eco_sb_${input.reference}`,
+        status: "awaiting_customer",
+        customerAction: "approve_on_handset",
+      };
+    }
     const apiKey = requireSecret("ECOCASH_API_KEY");
     const merchant = requireSecret("ECOCASH_MERCHANT_CODE");
     const res = await fetch(`${baseUrl()}/v1/transactions/charge`, {

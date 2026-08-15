@@ -86,6 +86,8 @@ export default function AdminMoneyOutboxPage() {
         {" · "}
         <Link href="/admin/fdms">FDMS Gateway</Link>
         {" · "}
+        <Link href="/admin/wa">WA Flows</Link>
+        {" · "}
         <Link href="/home">Home</Link>
         <h1
           style={{

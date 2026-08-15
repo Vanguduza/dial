@@ -401,6 +401,8 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-417 | **Product-depth band PD10–PD12** authored (admin CC → FDMS → WA Flows) | `done` | Workplan §1b; eng next ≠ S99 |
 | ENH-418 | **PD10 Admin money / dispatch / Command Centre** | `done` | [#31](https://github.com/Vanguduza/dial/issues/31); D-54 Simulated≠pay |
 | ENH-419 | **PD11 FDMS Virtual Gateway sandbox** — day + agency receipts | `done` | [#32](https://github.com/Vanguduza/dial/issues/32); D-59 no printer |
+| ENH-420 | **PD12 Meta WA Flows sandbox** — Spare + grocery food Cloud API | `done` | [#33](https://github.com/Vanguduza/dial/issues/33); D-40/D-57; no Baileys/liquor |
+| ENH-421 | **Product-depth band PD13–PD15** authored (tech-web → grocery web deepen → Catalogue Factory admin) | `done` | Pack §9 gaps; eng next ≠ S99 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

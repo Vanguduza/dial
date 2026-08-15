@@ -305,3 +305,80 @@ test("S106 template registry + sendRegisteredTemplate fixture", async () => {
   assert.ok(sent.messageId.includes("spare_order_confirmed_v2"));
   delete process.env.WA_TEMPLATE_SPARE_ORDER_CONFIRMED;
 });
+
+test("PD12 grocery food Flows: home→search→cart→slot→COD; no liquor", async () => {
+  __resetWhatsappForTests();
+  __resetCatalogueForTests();
+  const { __resetGroceryForTests } = await import("@dial/catalogue");
+  __resetGroceryForTests();
+  __resetPaymentsForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_pd12" });
+
+  const {
+    flowGroceryCartAdd,
+    flowGroceryCheckoutPay,
+    flowGroceryCheckoutReview,
+    flowGroceryHome,
+    flowGrocerySearch,
+    flowGrocerySlot,
+    flowGroceryTrack,
+  } = await import("./index.js");
+
+  const s = startFlow("FLOW_GROCERY_HOME", "cust_groc");
+  const home = flowGroceryHome(s.sessionId);
+  assert.equal(home.menu.liquorForbidden, true);
+
+  const search = flowGrocerySearch(s.sessionId, "milk");
+  assert.ok(search.offers.length >= 1);
+  assert.ok(search.offers.every((o) => o.displayCurrency === "USD"));
+  assert.ok(search.offers.every((o) => o.ageGateRequired === false));
+
+  flowGroceryCartAdd(s.sessionId, search.offers[0]!.offerId, 1);
+  flowGrocerySlot(s.sessionId);
+  const review = flowGroceryCheckoutReview(s.sessionId);
+  assert.equal(review.review.liquorTermsForbidden, true);
+  assert.ok(review.payButtons.some((b) => b.id === "ecocash"));
+  assert.ok(review.payButtons.some((b) => b.id === "cod"));
+
+  const cod = await flowGroceryCheckoutPay(s.sessionId, "cod", "pd12-groc-cod");
+  assert.equal(cod.codOrder?.amountUsd.currency, "USD");
+  const track = flowGroceryTrack(s.sessionId);
+  assert.equal(track.track.statusFrom, "erp");
+});
+
+test("PD12 sandbox thin vertical: Cloud Flow+buttons → same intents as web", async () => {
+  const prev = {
+    mode: process.env.DIAL_INTEGRATION_MODE,
+    token: process.env.WHATSAPP_TOKEN,
+    phone: process.env.WHATSAPP_PHONE_NUMBER_ID,
+    ecoKey: process.env.ECOCASH_API_KEY,
+    ecoMerch: process.env.ECOCASH_MERCHANT_CODE,
+  };
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.WHATSAPP_TOKEN = "wa_token_pd12_test";
+  process.env.WHATSAPP_PHONE_NUMBER_ID = "phone_pd12_test";
+  process.env.ECOCASH_API_KEY = "eco_key_pd12";
+  process.env.ECOCASH_MERCHANT_CODE = "eco_merch_pd12";
+  try {
+    const { runPd12WaFlowsSandboxThinVertical } = await import("./index.js");
+    const result = await runPd12WaFlowsSandboxThinVertical();
+    assert.equal(result.mode, "sandbox");
+    assert.equal(result.spare.intentMethod, "ecocash_direct");
+    assert.equal(result.grocery.codCurrency, "USD");
+    assert.equal(result.grocery.liquorForbidden, true);
+    assert.ok(result.outboundKinds.includes("flow"));
+    assert.ok(result.outboundKinds.includes("buttons"));
+    assert.ok(result.outboundKinds.includes("template"));
+  } finally {
+    if (prev.mode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
+    else process.env.DIAL_INTEGRATION_MODE = prev.mode;
+    if (prev.token === undefined) delete process.env.WHATSAPP_TOKEN;
+    else process.env.WHATSAPP_TOKEN = prev.token;
+    if (prev.phone === undefined) delete process.env.WHATSAPP_PHONE_NUMBER_ID;
+    else process.env.WHATSAPP_PHONE_NUMBER_ID = prev.phone;
+    if (prev.ecoKey === undefined) delete process.env.ECOCASH_API_KEY;
+    else process.env.ECOCASH_API_KEY = prev.ecoKey;
+    if (prev.ecoMerch === undefined) delete process.env.ECOCASH_MERCHANT_CODE;
+    else process.env.ECOCASH_MERCHANT_CODE = prev.ecoMerch;
+  }
+});

@@ -70,14 +70,35 @@ export interface PspAdapter {
   }): Promise<{ externalRef: string; status: PaymentIntentStatus }>;
 }
 
-const fxStore: FxDailyRate[] = [];
-const intents = new Map<string, PaymentIntent>();
-const intentsByIdem = new Map<string, string>();
-const codOrders = new Map<string, CodOrder>();
-
 function id(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
+
+/** Cross-module store (gateway + adapter copies share one SoR in sandbox tests). */
+function fxStore(): FxDailyRate[] {
+  const g = globalThis as { __dialFxStore?: FxDailyRate[] };
+  if (!g.__dialFxStore) g.__dialFxStore = [];
+  return g.__dialFxStore;
+}
+
+function intentStore(): Map<string, PaymentIntent> {
+  const g = globalThis as { __dialPaymentIntents?: Map<string, PaymentIntent> };
+  if (!g.__dialPaymentIntents) g.__dialPaymentIntents = new Map();
+  return g.__dialPaymentIntents;
+}
+
+function intentIdemStore(): Map<string, string> {
+  const g = globalThis as { __dialPaymentIntentIdem?: Map<string, string> };
+  if (!g.__dialPaymentIntentIdem) g.__dialPaymentIntentIdem = new Map();
+  return g.__dialPaymentIntentIdem;
+}
+
+function codOrderStore(): Map<string, CodOrder> {
+  const g = globalThis as { __dialCodOrders?: Map<string, CodOrder> };
+  if (!g.__dialCodOrders) g.__dialCodOrders = new Map();
+  return g.__dialCodOrders;
+}
+
 
 /**
  * Ops Daily ZiG rate (D-57) — audited store.
@@ -100,17 +121,17 @@ export function setDailyZigRate(input: {
     effectiveAt: input.effectiveAt ?? new Date().toISOString(),
     setBy: input.setBy.trim(),
   };
-  fxStore.unshift(row);
+  fxStore().unshift(row);
   return row;
 }
 
 export function getActiveFxRate(): FxDailyRate | undefined {
-  return fxStore[0];
+  return fxStore()[0];
 }
 
 /** Audit trail (who / when / effective / rate) — newest first. */
 export function listFxRateAudit(): readonly FxDailyRate[] {
-  return fxStore;
+  return fxStore();
 }
 
 /** Convert USD minor → ZiG minor using active daily rate (integer math only). */
@@ -290,8 +311,8 @@ export async function authorizeJobReserve(input: {
     idempotencyKey: input.idempotencyKey,
     createdAt: new Date().toISOString(),
   };
-  intents.set(intent.id, intent);
-  intentsByIdem.set(input.idempotencyKey, intent.id);
+  intentStore().set(intent.id, intent);
+  intentIdemStore().set(input.idempotencyKey, intent.id);
 
   const reserve: JobReserve = {
     id: id("jr"),
@@ -325,13 +346,13 @@ export function applyJobReserveWebhook(input: {
   if (input.action === "capture") {
     reserve.status = "captured";
     if (reserve.intentId) {
-      const intent = intents.get(reserve.intentId);
+      const intent = intentStore().get(reserve.intentId);
       if (intent) intent.status = "captured";
     }
   } else {
     reserve.status = "released";
     if (reserve.intentId) {
-      const intent = intents.get(reserve.intentId);
+      const intent = intentStore().get(reserve.intentId);
       if (intent) intent.status = "cancelled";
     }
   }
@@ -423,7 +444,7 @@ export function admitPspWebhookEvent(input: {
   }
   processedPspEvents.add(input.eventId);
   if (input.action === "ignore") return "ignored";
-  const intent = intents.get(input.intentId);
+  const intent = intentStore().get(input.intentId);
   if (!intent) throw new Error("Unknown intent");
   intent.status = "captured";
   return "captured";
@@ -453,7 +474,7 @@ export async function completePspCaptureSettlement(input: {
   if (settledPspCaptures.has(input.pspEventId)) {
     return { journalId: "", fiscalIds: [], duplicate: true };
   }
-  const intent = intents.get(input.intentId);
+  const intent = intentStore().get(input.intentId);
   if (!intent) throw new Error("Unknown intent");
   if (intent.status !== "captured") {
     throw new Error("Intent must be captured before settlement");
@@ -558,8 +579,8 @@ export async function runPd4MoneySpine(input: {
   });
 
   const authorizeKey = `pd4_auth_${input.rail}_${input.orderId}`;
-  let intentId = intentsByIdem.get(authorizeKey);
-  let intent = intentId ? intents.get(intentId) : undefined;
+  let intentId = intentIdemStore().get(authorizeKey);
+  let intent = intentId ? intentStore().get(intentId) : undefined;
   if (!intent) {
     intent = {
       id: id("pi"),
@@ -572,8 +593,8 @@ export async function runPd4MoneySpine(input: {
       createdAt: new Date().toISOString(),
       providerRef: vendorSession.providerRef,
     };
-    intents.set(intent.id, intent);
-    intentsByIdem.set(authorizeKey, intent.id);
+    intentStore().set(intent.id, intent);
+    intentIdemStore().set(authorizeKey, intent.id);
   }
 
   if (input.signatureValid === false) {
@@ -694,9 +715,9 @@ export async function createCheckoutPayment(input: {
   amountUsdMinor: bigint;
   idempotencyKey: string;
 }): Promise<{ intent?: PaymentIntent; codOrder?: CodOrder }> {
-  const existingId = intentsByIdem.get(input.idempotencyKey);
+  const existingId = intentIdemStore().get(input.idempotencyKey);
   if (existingId) {
-    const existing = intents.get(existingId);
+    const existing = intentStore().get(existingId);
     if (existing) return { intent: existing };
   }
 
@@ -736,8 +757,8 @@ export async function createCheckoutPayment(input: {
       createdAt: new Date().toISOString(),
       providerRef: vendor.providerRef,
     };
-    intents.set(intent.id, intent);
-    intentsByIdem.set(input.idempotencyKey, intent.id);
+    intentStore().set(intent.id, intent);
+    intentIdemStore().set(input.idempotencyKey, intent.id);
     return { intent };
   }
 
@@ -749,7 +770,7 @@ export async function createCheckoutPayment(input: {
     status: "placed",
     createdAt: new Date().toISOString(),
   };
-  codOrders.set(cod.id, cod);
+  codOrderStore().set(cod.id, cod);
 
   const psp = new CodPspStub();
   await psp.initiate({
@@ -769,13 +790,13 @@ export async function createCheckoutPayment(input: {
     idempotencyKey: input.idempotencyKey,
     createdAt: new Date().toISOString(),
   };
-  intents.set(intent.id, intent);
-  intentsByIdem.set(input.idempotencyKey, intent.id);
+  intentStore().set(intent.id, intent);
+  intentIdemStore().set(input.idempotencyKey, intent.id);
   return { intent, codOrder: cod };
 }
 
 export function getPaymentIntent(id: string): PaymentIntent | undefined {
-  return intents.get(id);
+  return intentStore().get(id);
 }
 
 /** Frozen offer at checkout — AI cannot set payable (C-1). */
@@ -867,8 +888,8 @@ export async function runE1aMoneySpine(input: {
   });
 
   const authorizeKey = `auth_${input.orderId}`;
-  let intentId = intentsByIdem.get(authorizeKey);
-  let intent = intentId ? intents.get(intentId) : undefined;
+  let intentId = intentIdemStore().get(authorizeKey);
+  let intent = intentId ? intentStore().get(intentId) : undefined;
   if (!intent) {
     intent = {
       id: id("pi"),
@@ -879,8 +900,8 @@ export async function runE1aMoneySpine(input: {
       idempotencyKey: authorizeKey,
       createdAt: new Date().toISOString(),
     };
-    intents.set(intent.id, intent);
-    intentsByIdem.set(authorizeKey, intent.id);
+    intentStore().set(intent.id, intent);
+    intentIdemStore().set(authorizeKey, intent.id);
   }
 
   if (!input.signatureValid) {
@@ -940,10 +961,10 @@ export async function runE1aMoneySpine(input: {
 
 /** Test helper — wipe in-memory stores. */
 export function __resetPaymentsForTests(): void {
-  fxStore.length = 0;
-  intents.clear();
-  intentsByIdem.clear();
-  codOrders.clear();
+  fxStore().length = 0;
+  intentStore().clear();
+  intentIdemStore().clear();
+  codOrderStore().clear();
   offerSnapshots.clear();
   processedPspEvents.clear();
   settledPspCaptures.clear();

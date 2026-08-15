@@ -8,7 +8,9 @@ export type WaTemplateKey =
   | "SPARE_PAYMENT_LINK"
   | "TECH_JOB_RECEIVED"
   | "TECH_EMERGENCY_ACK"
-  | "SPARE_DELIVERED";
+  | "SPARE_DELIVERED"
+  | "GROCERY_ORDER_CONFIRMED"
+  | "GROCERY_PAYMENT_LINK";
 
 export type WaTemplateBinding = {
   key: WaTemplateKey;
@@ -46,6 +48,18 @@ const FIXTURE_REGISTRY: Record<WaTemplateKey, WaTemplateBinding> = {
   SPARE_DELIVERED: {
     key: "SPARE_DELIVERED",
     templateName: "spare_delivered",
+    language: "en",
+    status: "stub",
+  },
+  GROCERY_ORDER_CONFIRMED: {
+    key: "GROCERY_ORDER_CONFIRMED",
+    templateName: "grocery_order_confirmed",
+    language: "en",
+    status: "stub",
+  },
+  GROCERY_PAYMENT_LINK: {
+    key: "GROCERY_PAYMENT_LINK",
+    templateName: "grocery_payment_link",
     language: "en",
     status: "stub",
   },
