@@ -244,3 +244,19 @@ test("PD4 Paynow/EcoCash sandbox createPayment + verifyWebhook fail-closed witho
   );
   process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
+
+test("PD39 ContiPay/PayPal sandbox createPayment + verifyWebhook fail-closed without keys", async () => {
+  const { runPd39ContiPayPaypalSandboxThinVertical } = await import(
+    "./pd39Sandbox.js"
+  );
+  const out = await runPd39ContiPayPaypalSandboxThinVertical();
+  assert.equal(out.sandboxFailClosed, true);
+  assert.equal(out.fixtureOk, true);
+  assert.equal(out.payableFromAi, false);
+
+  // Explicit fixture redirect still sandbox.paypal.com shape
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const fxRegistry = createPspRegistry();
+  const pp = await fxRegistry.paypal.createPayment(baseInput("paypal"));
+  assert.equal(pp.redirectUrl?.includes("sandbox.paypal.com"), true);
+});

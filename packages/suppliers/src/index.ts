@@ -43,6 +43,17 @@ export type Heartbeat = {
   createdAt: string;
 };
 
+export type HeartbeatHealth = "healthy" | "stale" | "missing";
+
+export type HeartbeatSlaSnapshot = {
+  supplierId: string;
+  health: HeartbeatHealth;
+  lastHeartbeatAt: string | null;
+  windowMs: number;
+  escalate: boolean;
+  channel: "dashboard" | "whatsapp" | null;
+};
+
 export type ConfirmOrderStatus = "awaiting_confirm" | "confirmed" | "sla_breached";
 
 export type ConfirmOrder = {
@@ -53,6 +64,19 @@ export type ConfirmOrder = {
   status: ConfirmOrderStatus;
   slaDeadlineAt: number;
   confirmedAt?: string;
+};
+
+export type SlaEscalationKind = "confirm_sla_breach" | "heartbeat_stale";
+
+export type SlaEscalation = {
+  escalationId: string;
+  supplierId: string;
+  kind: SlaEscalationKind;
+  orderId: string | null;
+  createdAt: string;
+  status: "open" | "acked";
+  /** Ops ticket only — never a payable write. */
+  payableFromAi: false;
 };
 
 export type StatementLine = {
@@ -70,6 +94,7 @@ type Store = {
   heartbeats: Heartbeat[];
   confirms: Map<string, ConfirmOrder>;
   statements: StatementLine[];
+  escalations: SlaEscalation[];
 };
 
 function store(): Store {
@@ -81,7 +106,11 @@ function store(): Store {
       heartbeats: [],
       confirms: new Map(),
       statements: [],
+      escalations: [],
     };
+  }
+  if (!g.__dialSupplierStore.escalations) {
+    g.__dialSupplierStore.escalations = [];
   }
   return g.__dialSupplierStore;
 }
@@ -93,6 +122,7 @@ export function __resetSuppliersForTests(): void {
   s.heartbeats.length = 0;
   s.confirms.clear();
   s.statements.length = 0;
+  s.escalations.length = 0;
 }
 
 function id(prefix: string): string {
@@ -198,6 +228,135 @@ export function listHeartbeats(supplierId: string): Heartbeat[] {
 }
 
 const DEFAULT_SLA_MS = 2 * 60 * 60 * 1000; // 2h confirm SLA
+/** PD38 — heartbeat freshness window (default 4h). */
+export const DEFAULT_HEARTBEAT_WINDOW_MS = 4 * 60 * 60 * 1000;
+
+/**
+ * PD38 — evaluate heartbeat freshness for ops / portal badge.
+ * Missing or older than window → escalate (ops ticket; not money).
+ */
+export function evaluateHeartbeatSla(
+  supplierId: string,
+  opts?: { now?: number; windowMs?: number },
+): HeartbeatSlaSnapshot {
+  if (!store().profiles.has(supplierId)) {
+    throw new Error("Supplier not onboarded");
+  }
+  const now = opts?.now ?? Date.now();
+  const windowMs = opts?.windowMs ?? DEFAULT_HEARTBEAT_WINDOW_MS;
+  const latest = store().heartbeats.find((h) => h.supplierId === supplierId);
+  if (!latest) {
+    return {
+      supplierId,
+      health: "missing",
+      lastHeartbeatAt: null,
+      windowMs,
+      escalate: true,
+      channel: null,
+    };
+  }
+  const age = now - Date.parse(latest.createdAt);
+  const stale = !Number.isFinite(age) || age > windowMs;
+  return {
+    supplierId,
+    health: stale ? "stale" : "healthy",
+    lastHeartbeatAt: latest.createdAt,
+    windowMs,
+    escalate: stale,
+    channel: latest.channel,
+  };
+}
+
+function pushEscalation(input: {
+  supplierId: string;
+  kind: SlaEscalationKind;
+  orderId?: string | null;
+}): SlaEscalation {
+  const existing = store().escalations.find(
+    (e) =>
+      e.supplierId === input.supplierId &&
+      e.kind === input.kind &&
+      e.status === "open" &&
+      (input.orderId == null
+        ? e.orderId == null
+        : e.orderId === input.orderId),
+  );
+  if (existing) return { ...existing };
+  const esc: SlaEscalation = {
+    escalationId: id("escl"),
+    supplierId: input.supplierId,
+    kind: input.kind,
+    orderId: input.orderId ?? null,
+    createdAt: new Date().toISOString(),
+    status: "open",
+    payableFromAi: false,
+  };
+  store().escalations.unshift(esc);
+  return { ...esc };
+}
+
+/**
+ * PD38 — scan confirm queue + heartbeat; open escalations (idempotent per open key).
+ */
+export function syncSupplierSlaEscalations(
+  supplierId: string,
+  opts?: { now?: number; heartbeatWindowMs?: number },
+): SlaEscalation[] {
+  const now = opts?.now ?? Date.now();
+  const opened: SlaEscalation[] = [];
+  const hb = evaluateHeartbeatSla(supplierId, {
+    now,
+    ...(opts?.heartbeatWindowMs !== undefined
+      ? { windowMs: opts.heartbeatWindowMs }
+      : {}),
+  });
+  if (hb.escalate) {
+    opened.push(
+      pushEscalation({
+        supplierId,
+        kind: "heartbeat_stale",
+      }),
+    );
+  }
+  for (const o of listConfirmQueue(supplierId, now)) {
+    if (o.status === "sla_breached") {
+      opened.push(
+        pushEscalation({
+          supplierId,
+          kind: "confirm_sla_breach",
+          orderId: o.orderId,
+        }),
+      );
+    }
+  }
+  return opened.map((e) => ({ ...e }));
+}
+
+export function listSlaEscalations(
+  supplierId: string,
+  opts?: { status?: "open" | "acked" | "all" },
+): SlaEscalation[] {
+  const status = opts?.status ?? "all";
+  return store()
+    .escalations.filter((e) => e.supplierId === supplierId)
+    .filter((e) => (status === "all" ? true : e.status === status))
+    .map((e) => ({ ...e }));
+}
+
+export function ackSlaEscalation(input: {
+  supplierId: string;
+  escalationId: string;
+}): SlaEscalation {
+  const esc = store().escalations.find(
+    (e) =>
+      e.escalationId === input.escalationId &&
+      e.supplierId === input.supplierId,
+  );
+  if (!esc) throw new Error("Unknown escalation for supplier");
+  if (esc.payableFromAi) throw new Error("payableFromAi must stay false");
+  esc.status = "acked";
+  return { ...esc };
+}
 
 /** Seed / enqueue order awaiting supplier confirm (SLA clock). */
 export function enqueueConfirmOrder(input: {
@@ -352,6 +511,86 @@ export function runPd6SupplierThinVertical(input?: {
     confirmOrderId: confirmed.orderId,
     confirmStatus: confirmed.status,
     statementLineIds: [settlement.lineId, coop.lineId],
+    currency: "USD",
+  };
+}
+
+/**
+ * PD38 thin vertical: stale heartbeat + confirm SLA breach → escalations;
+ * ack; healthy after fresh heartbeat; never AI payable.
+ */
+export function runPd38HeartbeatSlaThinVertical(input?: {
+  supplierId?: string;
+}): {
+  heartbeatMissingEscalate: true;
+  confirmBreachEscalate: true;
+  acked: true;
+  healthyAfterHeartbeat: true;
+  payableFromAi: false;
+  currency: "USD";
+} {
+  __resetSuppliersForTests();
+  const supplierId = input?.supplierId ?? "sup_pd38";
+  onboardSupplier({
+    supplierId,
+    displayName: "PD38 Agency",
+    formality: "formal",
+    tier: "bronze",
+  });
+
+  const missing = evaluateHeartbeatSla(supplierId, {
+    now: Date.now(),
+    windowMs: 60_000,
+  });
+  if (missing.health !== "missing" || !missing.escalate) {
+    throw new Error("PD38 expected missing heartbeat escalate");
+  }
+  const syncMissing = syncSupplierSlaEscalations(supplierId, {
+    heartbeatWindowMs: 60_000,
+  });
+  if (!syncMissing.some((e) => e.kind === "heartbeat_stale" && e.status === "open")) {
+    throw new Error("PD38 expected heartbeat_stale escalation");
+  }
+
+  const order = enqueueConfirmOrder({
+    supplierId,
+    amountUsdMinor: 12_00n,
+    slaMs: 1,
+  });
+  const nowPast = Date.now() + 50;
+  listConfirmQueue(supplierId, nowPast);
+  const syncBreach = syncSupplierSlaEscalations(supplierId, {
+    now: nowPast,
+    heartbeatWindowMs: 60_000,
+  });
+  const breach = syncBreach.find(
+    (e) => e.kind === "confirm_sla_breach" && e.orderId === order.orderId,
+  );
+  if (!breach || breach.payableFromAi !== false) {
+    throw new Error("PD38 expected confirm_sla_breach escalation");
+  }
+
+  const acked = ackSlaEscalation({
+    supplierId,
+    escalationId: breach.escalationId,
+  });
+  if (acked.status !== "acked") throw new Error("PD38 ack failed");
+
+  postHeartbeat({ supplierId, channel: "whatsapp", note: "back online" });
+  const healthy = evaluateHeartbeatSla(supplierId, {
+    now: Date.now(),
+    windowMs: 60_000,
+  });
+  if (healthy.health !== "healthy" || healthy.escalate) {
+    throw new Error("PD38 expected healthy after fresh heartbeat");
+  }
+
+  return {
+    heartbeatMissingEscalate: true,
+    confirmBreachEscalate: true,
+    acked: true,
+    healthyAfterHeartbeat: true,
+    payableFromAi: false,
     currency: "USD",
   };
 }

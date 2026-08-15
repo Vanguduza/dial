@@ -7,11 +7,14 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { dialTokens } from "@dial/design-tokens";
 import {
+  evaluateHeartbeatSla,
   getSupplier,
   listConfirmQueue,
   listCostUploads,
   listHeartbeats,
+  listSlaEscalations,
   listStatements,
+  syncSupplierSlaEscalations,
 } from "@dial/suppliers";
 import {
   getSessionFromToken,
@@ -29,6 +32,9 @@ export default async function SupplierPortalPage() {
 
   const supplierId = supplierIdFromEmail(session.email);
   const profile = getSupplier(supplierId);
+  if (profile) syncSupplierSlaEscalations(supplierId);
+  const heartbeatSla = profile ? evaluateHeartbeatSla(supplierId) : null;
+  const escalations = listSlaEscalations(supplierId, { status: "open" });
   const heartbeats = listHeartbeats(supplierId);
   const queue = listConfirmQueue(supplierId);
   const uploads = listCostUploads(supplierId);
@@ -36,6 +42,7 @@ export default async function SupplierPortalPage() {
 
   return (
     <main
+      data-testid="supplier-portal"
       style={{
         minHeight: "100vh",
         background: `linear-gradient(165deg, ${dialTokens.color.brand.surface} 0%, #e6ebe8 50%, ${dialTokens.color.brand.primary}18 100%)`,
@@ -58,11 +65,30 @@ export default async function SupplierPortalPage() {
         <p style={{ opacity: 0.7, fontSize: 14 }}>
           Vendor panel · {session.email} · agency marketplace · USD costs
         </p>
+        {heartbeatSla ? (
+          <p
+            role="status"
+            data-testid="supplier-heartbeat-health"
+            style={{
+              marginTop: 8,
+              fontSize: 14,
+              fontWeight: 600,
+              color:
+                heartbeatSla.health === "healthy"
+                  ? dialTokens.color.brand.primary
+                  : dialTokens.color.brand.ink,
+            }}
+          >
+            Heartbeat: {heartbeatSla.health}
+            {heartbeatSla.escalate ? " · escalate to ops" : ""}
+          </p>
+        ) : null}
         <nav style={{ display: "flex", gap: 16, flexWrap: "wrap", marginTop: 8 }}>
           <Link href="/home">Home</Link>
           <a href="#onboard">Onboarding</a>
           <a href="#costs">Costs</a>
           <a href="#heartbeat">Heartbeat</a>
+          <a href="#sla">SLA escalations</a>
           <a href="#confirm">Confirm SLA</a>
           <a href="#statements">Statements</a>
         </nav>
@@ -154,6 +180,54 @@ export default async function SupplierPortalPage() {
         </ul>
       </section>
 
+      <section id="sla" style={sectionStyle} data-testid="supplier-sla-escalations">
+        <h2 style={h2}>SLA escalations (ops)</h2>
+        <p style={{ fontSize: 13, opacity: 0.7 }}>
+          Heartbeat stale / confirm breach → open tickets · payableFromAi=false
+        </p>
+        <form action="/api/supplier/portal" method="post" style={formRow}>
+          <input type="hidden" name="action" value="sync_sla" />
+          <button type="submit" style={btnPrimary}>
+            Sync SLA now
+          </button>
+        </form>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {escalations.length === 0 ? (
+            <li style={{ opacity: 0.65 }}>No open escalations</li>
+          ) : (
+            escalations.map((e) => (
+              <li
+                key={e.escalationId}
+                style={{
+                  padding: 12,
+                  marginBottom: 8,
+                  background: "#fff",
+                  borderRadius: 8,
+                }}
+              >
+                <strong>{e.kind}</strong> · {e.escalationId}
+                {e.orderId ? ` · ${e.orderId}` : ""}
+                <form
+                  action="/api/supplier/portal"
+                  method="post"
+                  style={{ display: "inline", marginLeft: 12 }}
+                >
+                  <input type="hidden" name="action" value="ack_escalation" />
+                  <input
+                    type="hidden"
+                    name="escalationId"
+                    value={e.escalationId}
+                  />
+                  <button type="submit" style={btnAccent}>
+                    Ack
+                  </button>
+                </form>
+              </li>
+            ))
+          )}
+        </ul>
+      </section>
+
       <section id="confirm" style={sectionStyle}>
         <h2 style={h2}>Orders to confirm · SLA</h2>
         <form action="/api/supplier/portal" method="post" style={formRow}>
@@ -233,8 +307,8 @@ export default async function SupplierPortalPage() {
       </section>
 
       <p style={{ maxWidth: 960, margin: "24px auto 0", fontSize: 11, opacity: 0.45 }}>
-        PD6 · Pack §9.4 · Mercur patterns only · money SoR stays DIAL packages · supplierId=
-        {supplierId}
+        PD38 · Pack §9.4 heartbeat/confirm SLA · Mercur patterns only · money SoR stays
+        DIAL packages · supplierId={supplierId}
       </p>
     </main>
   );

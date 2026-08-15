@@ -19,6 +19,7 @@ export { EcoCashDirectAdapter } from "./EcoCashDirectAdapter.js";
 export { PayPalAdapter } from "./PayPalAdapter.js";
 export { CodAdapter } from "./CodAdapter.js";
 export { EscrowPspAdapter } from "./EscrowPspAdapter.js";
+export { runPd39ContiPayPaypalSandboxThinVertical } from "./pd39Sandbox.js";
 
 /** Stitch §2 registry — one adapter per PaymentMethodCode. */
 export function createPspRegistry(): Record<PaymentMethodCode, PspAdapter> {

@@ -103,9 +103,11 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 140 | `PD34` | **B2B grocery polish + take-rate admin** — Wave 3 leftovers | [#38](https://github.com/Vanguduza/dial/issues/38) | formal-only UX deepen; take-rate scaffold | `PD35` |
 | 141 | `PD35` | **Grocery brand polish + KYC cert badge** — Wave 3 leftover | [#39](https://github.com/Vanguduza/dial/issues/39) | formal cert display; brand polish | `PD36` |
 | 142 | `PD36` | **Grocery/Spare multi-stop delivery** — one job same band/slot | [#40](https://github.com/Vanguduza/dial/issues/40) | multi-vendor consolidate; POD unchanged | `PD37` |
-| 143 | `PD37` | **Local Playwright recon** — Spare+grocery+WA localhost | [#41](https://github.com/Vanguduza/dial/issues/41) | dial-webapp-recon ENH-011 local | expand |
+| 143 | `PD37` | **Local Playwright recon** — Spare+grocery+WA localhost | [#41](https://github.com/Vanguduza/dial/issues/41) | dial-webapp-recon ENH-011 local | `PD38` |
+| 144 | `PD38` | **Supplier heartbeat + confirm SLA harden** | [#42](https://github.com/Vanguduza/dial/issues/42) | stale/missing heartbeat + confirm breach escalations | `PD39` |
+| 145 | `PD39` | **ContiPay + PayPal sandbox deepen** | [#43](https://github.com/Vanguduza/dial/issues/43) | sandbox fail-closed without keys; fixture unchanged | expand |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD37 ≠ S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD39 ≠ S99. Product ≠ finished at S99.
 
 
 ---
@@ -549,13 +551,42 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Issue | [#41](https://github.com/Vanguduza/dial/issues/41) |
 | Thin path | Playwright Chromium → Spare/grocery/WA (live localhost or harness); networkidle wait; spare-browse testid fix |
 | Evidence | `runPd37LocalPlaywrightReconThinVertical`; `pd37LocalRecon.test.ts` |
-| Green → | eng product-depth continue / human gates ≠ idle S99 |
+| Green → | **PD38** supplier heartbeat SLA |
 
 ### Pack / product gap audit (after PD37)
 
 | Gap | Stage |
 | --- | --- |
+| Supplier heartbeat + confirm SLA harden | **PD38** |
+| ContiPay/PayPal sandbox deepen | **PD39** |
 | Remote staging Playwright matrix | ENH-011 remainder (optional human URL) |
+| Liquor Build | counsel gate — not eng |
+
+### PD38 — Supplier heartbeat + confirm SLA harden (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Issue | [#42](https://github.com/Vanguduza/dial/issues/42) |
+| Thin path | missing/stale heartbeat → escalate; confirm SLA breach → escalate; ack; healthy after heartbeat |
+| Evidence | `runPd38HeartbeatSlaThinVertical`; `pd38HeartbeatSla.test.ts` |
+| Green → | **PD39** ContiPay/PayPal sandbox |
+
+### PD39 — ContiPay + PayPal sandbox deepen (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Issue | [#43](https://github.com/Vanguduza/dial/issues/43) |
+| Thin path | sandbox createPayment+verifyWebhook fail-closed without keys; fixture path unchanged |
+| Evidence | `runPd39ContiPayPaypalSandboxThinVertical` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD39)
+
+| Gap | Stage |
+| --- | --- |
+| WA template registry admin polish (sandbox) | fold next |
+| FDMS day ops UX deepen | fold next |
+| Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 
 ### S10 — E2a (historical)

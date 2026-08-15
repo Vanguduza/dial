@@ -5,15 +5,19 @@
 import { NextResponse } from "next/server";
 import {
   addStatementLine,
+  ackSlaEscalation,
   confirmOrder,
   enqueueConfirmOrder,
+  evaluateHeartbeatSla,
   getSupplier,
   listConfirmQueue,
   listCostUploads,
   listHeartbeats,
+  listSlaEscalations,
   listStatements,
   onboardSupplier,
   postHeartbeat,
+  syncSupplierSlaEscalations,
   uploadSupplierCosts,
   type SupplierTier,
 } from "@dial/suppliers";
@@ -117,9 +121,17 @@ export async function GET(req: Request) {
   }
   const supplierId = supplierIdFromSession(session.email);
   const profile = getSupplier(supplierId);
+  if (profile) {
+    syncSupplierSlaEscalations(supplierId);
+  }
+  const heartbeatSla = profile
+    ? evaluateHeartbeatSla(supplierId)
+    : null;
   return NextResponse.json({
     supplierId,
     profile: profile ?? null,
+    heartbeatSla,
+    escalations: listSlaEscalations(supplierId),
     heartbeats: listHeartbeats(supplierId),
     confirmQueue: listConfirmQueue(supplierId).map((o) => ({
       ...o,
@@ -141,6 +153,7 @@ export async function GET(req: Request) {
       currency: l.amount.currency,
       createdAt: l.createdAt,
     })),
+    payableFromAi: false,
   });
 }
 
@@ -203,8 +216,32 @@ export async function POST(req: Request) {
             parsed.fields.channel === "whatsapp" ? "whatsapp" : "dashboard",
           note: parsed.fields.note ?? "ok",
         });
+        syncSupplierSlaEscalations(supplierId);
         if (wantsHtml) return redirectSupplier(req, "#heartbeat");
-        return NextResponse.json({ ok: true, heartbeat: hb });
+        return NextResponse.json({
+          ok: true,
+          heartbeat: hb,
+          heartbeatSla: evaluateHeartbeatSla(supplierId),
+        });
+      }
+      case "sync_sla": {
+        const opened = syncSupplierSlaEscalations(supplierId);
+        if (wantsHtml) return redirectSupplier(req, "#sla");
+        return NextResponse.json({
+          ok: true,
+          opened,
+          heartbeatSla: evaluateHeartbeatSla(supplierId),
+          escalations: listSlaEscalations(supplierId),
+          payableFromAi: false,
+        });
+      }
+      case "ack_escalation": {
+        const esc = ackSlaEscalation({
+          supplierId,
+          escalationId: parsed.fields.escalationId ?? "",
+        });
+        if (wantsHtml) return redirectSupplier(req, "#sla");
+        return NextResponse.json({ ok: true, escalation: esc });
       }
       case "enqueue_confirm": {
         const order = enqueueConfirmOrder({

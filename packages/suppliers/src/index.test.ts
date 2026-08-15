@@ -10,6 +10,7 @@ import {
   onboardSupplier,
   postHeartbeat,
   runPd6SupplierThinVertical,
+  runPd38HeartbeatSlaThinVertical,
   uploadSupplierCosts,
 } from "./index.js";
 
@@ -83,4 +84,13 @@ test("PD6 heartbeat channels dashboard|whatsapp", () => {
   });
   postHeartbeat({ supplierId: "sup_c", channel: "whatsapp", note: "ping" });
   assert.equal(listHeartbeats("sup_c")[0]?.channel, "whatsapp");
+});
+
+test("PD38 heartbeat SLA + confirm breach escalations", () => {
+  const out = runPd38HeartbeatSlaThinVertical();
+  assert.equal(out.heartbeatMissingEscalate, true);
+  assert.equal(out.confirmBreachEscalate, true);
+  assert.equal(out.acked, true);
+  assert.equal(out.healthyAfterHeartbeat, true);
+  assert.equal(out.payableFromAi, false);
 });
