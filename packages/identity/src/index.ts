@@ -7,6 +7,7 @@
 import { __resetStepUpForTests } from "./stepUp.js";
 import { __resetMarketingConsentForTests } from "./marketingConsent.js";
 import { __resetCustomerAddressesForTests } from "./customerAddresses.js";
+import { __resetNotificationPrefsForTests } from "./notificationPrefs.js";
 
 export type ProfileRole = "customer" | "technician" | "supplier" | "admin";
 export type BuyerSegment = "b2c" | "b2b";
@@ -55,6 +56,7 @@ export function __resetIdentityForTests(): void {
   __resetStepUpForTests();
   __resetMarketingConsentForTests();
   __resetCustomerAddressesForTests();
+  __resetNotificationPrefsForTests();
 }
 
 function putProfile(profile: Profile): Profile {
@@ -356,6 +358,18 @@ export {
   type MarketingConsentEvent,
   type MarketingConsentState,
 } from "./marketingConsent.js";
+
+export {
+  getNotificationPrefMatrix,
+  setNotificationPref,
+  runPd131NotificationPrefsThinVertical,
+  __resetNotificationPrefsForTests,
+  type NotificationChannel,
+  type NotificationCostClass,
+  type NotificationPrefCell,
+  type NotificationPrefMatrix,
+  type NotificationTopic,
+} from "./notificationPrefs.js";
 
 export {
   addCustomerAddress,

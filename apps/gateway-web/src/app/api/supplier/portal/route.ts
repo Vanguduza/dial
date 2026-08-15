@@ -29,6 +29,7 @@ import {
 import {
   acceptSupplierCoop,
   listCoopAgreementsForSupplier,
+  listFundedCoopSkus,
   proposeSupplierCoop,
 } from "@dial/promotions";
 import {
@@ -175,6 +176,7 @@ export async function GET(req: Request) {
       createdAt: l.createdAt,
     })),
     coopAgreements: listCoopAgreementsForSupplier(supplierId),
+    fundedSkus: listFundedCoopSkus(supplierId),
     payableFromAi: false,
   });
 }

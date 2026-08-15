@@ -137,3 +137,12 @@ test("PD119 grocery order track timeline", async () => {
   assert.equal(out.liquorAllowed, false);
   assert.equal(out.payableFromAi, false);
 });
+
+test("PD134 grocery collections thin vertical", async () => {
+  const { runPd134GroceryCollectionsThinVertical } = await import("./grocery.js");
+  const out = runPd134GroceryCollectionsThinVertical();
+  assert.ok(out.collectionCount >= 1);
+  assert.equal(out.liquorAllowed, false);
+  assert.equal(out.b2bInformalLeak, 0);
+  assert.equal(out.payableFromAi, false);
+});

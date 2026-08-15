@@ -522,6 +522,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-538 | **PD128 Plane ops triage** | `done` | AGPL pattern only; Chatwoot ≠ SoR |
 | ENH-539 | **PD129 SolidInvoice statement layout** | `done` | D-46 backlog; DIAL amounts |
 | ENH-540 | **PD130 Langfuse trace stub** | `done` | T8 fail-closed; ≠ packages/ai |
+| ENH-541 | **PD131 Notification preference centre** | `done` | Pack Matrix B channel×topic |
+| ENH-542 | **PD132 Supplier co-op funded SKUs** | `done` | Pack §9.4 live-only |
+| ENH-543 | **PD133 Checklist library tranche 2** | `done` | Pack §9.3; ≠ full 42 |
+| ENH-544 | **PD134 Grocery home collections** | `done` | Pack grocery / §9.2 parity |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

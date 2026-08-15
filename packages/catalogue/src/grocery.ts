@@ -528,6 +528,63 @@ export function searchGroceryOffers(
   return hits.map((o) => ({ ...o }));
 }
 
+/** PD134 — Pack grocery home collections (parity PD95 spare). */
+export type GroceryCollection = {
+  id: string;
+  title: string;
+  count: number;
+};
+
+export function listGroceryCollections(
+  sessionRole: "b2c" | "b2b" = "b2c",
+): GroceryCollection[] {
+  const counts = new Map<string, number>();
+  for (const o of searchGroceryOffers("", { sessionRole })) {
+    const leaf =
+      o.categoryPath[o.categoryPath.length - 1] ??
+      o.coldChain ??
+      "pantry";
+    counts.set(leaf, (counts.get(leaf) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([id, count]) => ({
+      id,
+      title: id.charAt(0).toUpperCase() + id.slice(1),
+      count,
+    }))
+    .sort((a, b) => a.id.localeCompare(b.id));
+}
+
+/**
+ * PD134 thin vertical: grocery collections from categoryPath; liquorAllowed false; B2B leak=0.
+ */
+export function runPd134GroceryCollectionsThinVertical(): {
+  collectionCount: number;
+  liquorAllowed: false;
+  b2bInformalLeak: 0;
+  payableFromAi: false;
+} {
+  __resetGroceryForTests();
+  // Seed via existing store bootstrap — searchGroceryOffers uses store offers.
+  const collections = listGroceryCollections("b2c");
+  if (collections.length < 1) {
+    throw new Error("PD134 expected ≥1 grocery collection");
+  }
+  if (countGroceryInformalB2bLeaks("") !== 0) {
+    throw new Error("PD134 B2B informal leak must be 0");
+  }
+  const liquorHit = searchGroceryOffers("liquor").length;
+  if (liquorHit !== 0) {
+    throw new Error("PD134 liquor must stay hidden");
+  }
+  return {
+    collectionCount: collections.length,
+    liquorAllowed: false,
+    b2bInformalLeak: 0,
+    payableFromAi: false,
+  };
+}
+
 export function countGroceryInformalB2bLeaks(query = ""): number {
   return searchGroceryOffers(query, { sessionRole: "b2b" }).filter(
     (o) => o.supplierFormality === "informal",

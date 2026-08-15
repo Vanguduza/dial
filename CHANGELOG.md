@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD134 Grocery home collections** — categoryPath collections; liquor hidden; B2B informal leak=0 (Pack grocery / §9.2 parity).
+- **PD133 Checklist library tranche 2** — ≥16 catalogIds (warning light, HVAC AC, fluid leak, …); still ≠ full 42 (Pack §9.3).
+- **PD132 Supplier co-op funded SKUs** — live SUPPLIER_COOP offerIds on portal; draft hidden (Pack §9.4).
+- **PD131 Notification preference centre** — channel×topic matrix; utility vs marketing (Pack Matrix B).
 - **PD130 Langfuse trace stub** — T8 fail-closed without keys; not money; not `packages/ai` schema expand.
 - **PD129 SolidInvoice statement layout** — HTML table layout sibling to PDF stub; DIAL amounts SoR (D-46 backlog).
 - **PD128 Plane ops triage** — claim→resolve inbox + SLA badges; Chatwoot ≠ status SoR (AGPL pattern only).

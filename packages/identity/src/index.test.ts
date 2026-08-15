@@ -48,6 +48,16 @@ test("PD78 marketing consent thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD131 notification prefs thin vertical", async () => {
+  const { runPd131NotificationPrefsThinVertical } = await import("./index.js");
+  const out = runPd131NotificationPrefsThinVertical();
+  assert.ok(out.cellCount >= 15);
+  assert.equal(out.marketingWasOff, true);
+  assert.equal(out.marketingOptIn, true);
+  assert.equal(out.utilityRemainsOn, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD82 account profile thin vertical", async () => {
   const { runPd82AccountProfileThinVertical } = await import("./index.js");
   const out = runPd82AccountProfileThinVertical();

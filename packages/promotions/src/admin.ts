@@ -485,6 +485,86 @@ export function listCoopAgreementsForSupplier(
     .map((a) => ({ ...a, offerIds: [...a.offerIds] }));
 }
 
+/** PD132 — Pack §9.4 co-op campaigns: supplier sees funded SKUs on live agreements. */
+export type FundedCoopSku = {
+  offerId: string;
+  campaignId: string;
+  campaignName: string;
+  agreementStatus: SupplierCoopAgreement["status"];
+  supplierFundShareBps: number;
+  dialFundShareBps: number;
+  payableFromAi: false;
+};
+
+/**
+ * List offerIds funded by live SUPPLIER_COOP for a supplier (Pack §9.4).
+ */
+export function listFundedCoopSkus(supplierId: string): FundedCoopSku[] {
+  if (!supplierId.trim()) throw new Error("supplierId required");
+  const out: FundedCoopSku[] = [];
+  for (const a of store().coopAgreements.values()) {
+    if (a.supplierId !== supplierId) continue;
+    if (a.status !== "live") continue;
+    const c = store().campaigns.get(a.campaignId);
+    if (!c || c.status !== "active") continue;
+    for (const offerId of a.offerIds) {
+      out.push({
+        offerId,
+        campaignId: a.campaignId,
+        campaignName: c.name,
+        agreementStatus: a.status,
+        supplierFundShareBps: a.supplierFundShareBps,
+        dialFundShareBps: a.dialFundShareBps,
+        payableFromAi: false,
+      });
+    }
+  }
+  return out.sort((x, y) => x.offerId.localeCompare(y.offerId));
+}
+
+/**
+ * PD132 thin vertical: propose→accept→ops live → funded SKUs visible; draft hidden.
+ */
+export function runPd132FundedCoopSkusThinVertical(): {
+  fundedCount: number;
+  draftHidden: true;
+  cashOutForbidden: true;
+  payableFromAi: false;
+} {
+  __resetPromoAdminForTests();
+  const supplierId = "sup_pd132";
+  const { campaign } = proposeSupplierCoop({
+    name: "PD132 Pad Co-op",
+    supplierId,
+    offerIds: ["off_pd132_pad", "off_pd132_filter"],
+    supplierFundShareBps: 6000,
+    dialFundShareBps: 4000,
+    budgetSpendLimitMinor: 50_00n,
+  });
+  if (listFundedCoopSkus(supplierId).length !== 0) {
+    throw new Error("PD132 draft must not expose funded SKUs");
+  }
+  acceptSupplierCoop(campaign.id);
+  approveSupplierCoop(campaign.id);
+  const funded = listFundedCoopSkus(supplierId);
+  if (funded.length !== 2) {
+    throw new Error(`PD132 expected 2 funded SKUs got ${funded.length}`);
+  }
+  if (
+    funded.some(
+      (f) => f.payableFromAi !== false || f.agreementStatus !== "live",
+    )
+  ) {
+    throw new Error("PD132 funded SKU checks failed");
+  }
+  return {
+    fundedCount: funded.length,
+    draftHidden: true,
+    cashOutForbidden: true,
+    payableFromAi: false,
+  };
+}
+
 /**
  * PD46 thin vertical: propose→accept→ops approve→record coop spend;
  * cash-out blocked; payableFromAi=false.

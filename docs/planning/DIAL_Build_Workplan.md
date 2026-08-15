@@ -1588,6 +1588,52 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | Evidence | `runPd130LangfuseTraceStubThinVertical` |
 | Green → | eng-safe Pack gap ≠ S99 (**PD131+**) |
 
+### Pack / product gap audit (after PD130 → PD131–PD134)
+
+| Gap | Stage |
+| --- | --- |
+| Notification prefs channel×topic (Pack Matrix B) | **PD131** |
+| Supplier co-op funded SKUs (Pack §9.4) | **PD132** |
+| Checklist library tranche 2 (Pack §9.3; ≠ full 42) | **PD133** |
+| Grocery home collections (Pack grocery / §9.2 parity) | **PD134** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+| packages/ai missing-info deepen | deferred (D-56 capability review gate) |
+| Ballerine / Lago stitch-only | deferred — prefer Pack §9 product gaps |
+
+### PD131 — Notification preference centre (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | channel×topic matrix; utility default on; marketing opt-in; `/account/notifications` |
+| Evidence | `runPd131NotificationPrefsThinVertical` |
+| Green → | **PD132** funded co-op SKUs |
+
+### PD132 — Supplier co-op funded SKUs (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `listFundedCoopSkus` live-only; draft hidden; supplier portal GET |
+| Evidence | `runPd132FundedCoopSkusThinVertical` |
+| Green → | **PD133** checklist tranche 2 |
+
+### PD133 — Checklist library tranche 2 (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | ≥16 catalogIds incl. warning_light / HVAC AC; still ≠ 42 |
+| Evidence | `runPd133ChecklistLibraryTranche2ThinVertical` |
+| Green → | **PD134** grocery collections |
+
+### PD134 — Grocery home collections (**GREEN** 2026-08-16)
+
+| | |
+| --- | --- |
+| Thin path | `listGroceryCollections`; liquorAllowed false; B2B leak=0 |
+| Evidence | `runPd134GroceryCollectionsThinVertical` |
+| Green → | eng-safe Pack gap ≠ S99 (**PD135+**) |
+
 ### S10 — E2a (historical)
 
 | | |

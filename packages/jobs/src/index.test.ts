@@ -331,6 +331,17 @@ test("PD127 PicPeak evidence gallery thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD133 checklist library tranche 2", async () => {
+  const { runPd133ChecklistLibraryTranche2ThinVertical } = await import(
+    "./index.js"
+  );
+  const out = runPd133ChecklistLibraryTranche2ThinVertical();
+  assert.ok(out.catalogSeedCount >= 16);
+  assert.equal(out.tranche2Present, true);
+  assert.equal(out.trancheNotFullLibrary, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

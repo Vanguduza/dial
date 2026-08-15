@@ -109,7 +109,15 @@ export type ChecklistId =
   | "auto_stalling"
   | "autoelec_battery"
   | "elec_socket_dead"
-  | "plumb_leak";
+  | "plumb_leak"
+  | "auto_warning_light"
+  | "auto_unusual_noise"
+  | "auto_exhaust_smoke"
+  | "auto_fluid_leak"
+  | "auto_pulling_vibration"
+  | "hvac_ac_not_cooling"
+  | "hvac_ac_intermittent_smell"
+  | "auto_poor_fuel";
 
 export type Checklist = {
   id: ChecklistId;
@@ -315,6 +323,95 @@ const CHECKLISTS: Checklist[] = [
       "Shut-off valve known/accessible?",
       "Water near electrics?",
       "Photo of leak source",
+    ],
+  },
+  /** PD133 — checklist library tranche 2 (Pack §9.3; still ≠ full 42). */
+  {
+    id: "auto_warning_light",
+    title: "Dashboard warning light on",
+    catalogId: "auto.warning_light.v1",
+    steps: [
+      "Red or amber light?",
+      "Which symbol (battery/oil/temp/brake/check-engine)?",
+      "Safe to continue driving short distance?",
+      "Photo of cluster with light on",
+    ],
+  },
+  {
+    id: "auto_unusual_noise",
+    title: "Unusual noise while driving",
+    catalogId: "auto.unusual_noise.v1",
+    steps: [
+      "Noise under braking, acceleration, or constant?",
+      "Wheel-area grind?",
+      "Dashboard warning with noise?",
+      "Safe roadside location for inspection?",
+    ],
+  },
+  {
+    id: "auto_exhaust_smoke",
+    title: "Smoke from exhaust",
+    catalogId: "auto.exhaust_smoke.v1",
+    steps: [
+      "Smoke colour white/blue/black?",
+      "Thick white + overheating?",
+      "Loss of power or sweet smell?",
+      "Do not continue if steam/smoke intensifies",
+    ],
+  },
+  {
+    id: "auto_fluid_leak",
+    title: "Fluid leak under vehicle",
+    catalogId: "auto.fluid_leak.v1",
+    steps: [
+      "Fluid colour / smell (fuel?)",
+      "Active drip or dried stain?",
+      "Near exhaust heat?",
+      "Photo under vehicle if safe",
+    ],
+  },
+  {
+    id: "auto_pulling_vibration",
+    title: "Vehicle pulls or vibrates",
+    catalogId: "auto.pulling_vibration.v1",
+    steps: [
+      "Constant, under braking, or under acceleration?",
+      "Speed when vibration starts?",
+      "Recent tyre/wheel work?",
+      "Brake-related? → brake checklist",
+    ],
+  },
+  {
+    id: "hvac_ac_not_cooling",
+    title: "AC not cooling",
+    catalogId: "hvac.ac_not_cooling.v1",
+    steps: [
+      "Blows air but not cold?",
+      "Recent refrigerant work / smell?",
+      "Only certified tech for refrigerant (restricted)",
+      "Never AI-price refrigerant SKUs",
+    ],
+  },
+  {
+    id: "hvac_ac_intermittent_smell",
+    title: "AC intermittent / vent smell",
+    catalogId: "hvac.ac_intermittent_smell.v1",
+    steps: [
+      "Cuts in/out or never cold?",
+      "Burning or chemical smell?",
+      "Cabin filter age if known?",
+      "Escalate burning smell immediately",
+    ],
+  },
+  {
+    id: "auto_poor_fuel",
+    title: "Poor fuel economy",
+    catalogId: "auto.poor_fuel_economy.v1",
+    steps: [
+      "Sudden change or gradual?",
+      "Warning lights on?",
+      "Tyre pressures checked recently?",
+      "Recent long idle / short trips only?",
     ],
   },
 ];
@@ -1113,6 +1210,33 @@ export function resolveChecklistBySymptom(input: {
     id = "auto_flat_tyre";
   } else if (s.includes("battery")) {
     id = "autoelec_battery";
+  } else if (
+    s.includes("warning light") ||
+    s.includes("check engine") ||
+    s.includes("dashboard light")
+  ) {
+    id = "auto_warning_light";
+  } else if (s.includes("exhaust smoke") || s.includes("smoke from exhaust")) {
+    id = "auto_exhaust_smoke";
+  } else if (
+    (s.includes("ac ") || s.includes("air con") || s.includes("a/c")) &&
+    (s.includes("smell") || s.includes("intermittent"))
+  ) {
+    id = "hvac_ac_intermittent_smell";
+  } else if (
+    s.includes("ac not") ||
+    s.includes("not cooling") ||
+    s.includes("air conditioning")
+  ) {
+    id = "hvac_ac_not_cooling";
+  } else if (s.includes("fuel economy") || s.includes("poor mileage")) {
+    id = "auto_poor_fuel";
+  } else if (s.includes("vibration") || s.includes("pulls")) {
+    id = "auto_pulling_vibration";
+  } else if (s.includes("unusual noise") || s.includes("grinding noise")) {
+    id = "auto_unusual_noise";
+  } else if (s.includes("fluid leak") || s.includes("oil leak under")) {
+    id = "auto_fluid_leak";
   } else if (s.includes("socket") || s.includes("outlet") || s.includes("circuit")) {
     id = "elec_socket_dead";
   } else if (s.includes("leak") || s.includes("pipe") || s.includes("tap")) {
@@ -1168,6 +1292,52 @@ export function runPd114ChecklistCatalogSeedThinVertical(): {
   return {
     catalogSeedCount: withCatalog.length,
     libraryIdsPresent: true,
+    trancheNotFullLibrary: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD133 thin vertical: checklist library tranche 2 (≥16 catalogIds; still ≠ 42).
+ */
+export function runPd133ChecklistLibraryTranche2ThinVertical(): {
+  catalogSeedCount: number;
+  tranche2Present: true;
+  trancheNotFullLibrary: true;
+  payableFromAi: false;
+} {
+  const withCatalog = listChecklists().filter((c) => c.catalogId);
+  if (withCatalog.length < 16) {
+    throw new Error("PD133 expected ≥16 catalogId seeds");
+  }
+  if (withCatalog.length >= 42) {
+    throw new Error("PD133 must not claim full 42 library");
+  }
+  const need = [
+    "auto.warning_light.v1",
+    "hvac.ac_not_cooling.v1",
+    "auto.fluid_leak.v1",
+  ];
+  for (const cat of need) {
+    if (!withCatalog.some((c) => c.catalogId === cat)) {
+      throw new Error(`PD133 missing catalogId ${cat}`);
+    }
+  }
+  const ac = resolveChecklistBySymptom({
+    symptom: "air conditioning not cooling",
+  });
+  if (ac.catalogId !== "hvac.ac_not_cooling.v1") {
+    throw new Error("PD133 expected hvac AC resolve");
+  }
+  const warn = resolveChecklistBySymptom({
+    symptom: "dashboard warning light check engine",
+  });
+  if (warn.catalogId !== "auto.warning_light.v1") {
+    throw new Error("PD133 expected warning_light resolve");
+  }
+  return {
+    catalogSeedCount: withCatalog.length,
+    tranche2Present: true,
     trancheNotFullLibrary: true,
     payableFromAi: false,
   };
