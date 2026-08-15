@@ -11,6 +11,8 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD47 Command Centre recommended actions** — MetricContract severity→permissioned actions (`autoPay=false`); Simulated never auto-pays (D-54).
+- **PD46 Supplier co-op spend UX** — live SUPPLIER_COOP `record_coop_spend` → budget + `coop_spend` statement; supplier co-op panel; cash-out blocked (D-42).
 - **PD45 Support + consent admin** — `/admin/support` ERP tickets + consent audit; Chatwoot ≠ status SoR; fail-closed internal secret.
 - **PD44 Grocery CPA disclosure** — same eighteen-item review gate before EcoCash|COD; food only; no liquor.
 - **PD43 Spare CPA §7.5 disclosure** — web + native review-before-pay unlocks EcoCash|COD; shared `EIGHTEEN_ITEM_DISCLOSURES` with WA.

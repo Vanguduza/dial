@@ -86,6 +86,7 @@ test("PD10 MetricContract tiles + Simulated never drives payout", async () => {
     listMetricTiles,
     setMetricObservedValue,
     attemptCommandCentrePayout: attemptPay,
+    runPd47CommandCentreActionsThinVertical,
   } = await import("./intelligence.js");
   reset();
   const contracts = ensureDefaultMetricContracts();
@@ -99,6 +100,10 @@ test("PD10 MetricContract tiles + Simulated never drives payout", async () => {
   assert.throws(() =>
     attemptPay({ mode: "simulated", amountMinor: 50_00n }),
   );
+  const pd47 = runPd47CommandCentreActionsThinVertical();
+  assert.equal(pd47.everyActionAutoPayFalse, true);
+  assert.equal(pd47.simulatedNeverPays, true);
+  assert.ok(pd47.warnActions + pd47.criticalActions >= 2);
 });
 
 test("PD17 shadow → Promptfoo → human → promote; no auto-publish / no payable", async () => {

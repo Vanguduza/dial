@@ -342,6 +342,92 @@ export function recordBudgetUsage(
   return { ...budget };
 }
 
+/** PD46 — record live SUPPLIER_COOP spend against campaign budget (ops). */
+export function recordCoopSpend(input: {
+  campaignId: string;
+  spendMinor: bigint;
+}): {
+  budget: CampaignBudget;
+  agreement: SupplierCoopAgreement;
+  cashOutForbidden: true;
+  payableFromAi: false;
+} {
+  if (typeof input.spendMinor !== "bigint" || input.spendMinor <= 0n) {
+    throw new Error("spendMinor must be positive bigint");
+  }
+  const a = store().coopAgreements.get(input.campaignId);
+  if (!a) throw new Error(`Unknown coop ${input.campaignId}`);
+  if (a.status !== "live") {
+    throw new Error(`coop_spend_requires_live_got_${a.status}`);
+  }
+  const budget = recordBudgetUsage(input.campaignId, input.spendMinor);
+  return {
+    budget: { ...budget },
+    agreement: { ...a, offerIds: [...a.offerIds] },
+    cashOutForbidden: true,
+    payableFromAi: false,
+  };
+}
+
+export function listCoopAgreementsForSupplier(
+  supplierId: string,
+): SupplierCoopAgreement[] {
+  return [...store().coopAgreements.values()]
+    .filter((a) => a.supplierId === supplierId)
+    .map((a) => ({ ...a, offerIds: [...a.offerIds] }));
+}
+
+/**
+ * PD46 thin vertical: propose→accept→ops approve→record coop spend;
+ * cash-out blocked; payableFromAi=false.
+ */
+export function runPd46SupplierCoopSpendThinVertical(): {
+  coopCampaignId: string;
+  coopStatus: "live";
+  spendRecordedMinor: string;
+  budgetUsedMinor: string;
+  cashOutForbidden: true;
+  payableFromAi: false;
+} {
+  __resetPromoAdminForTests();
+  const { campaign } = proposeSupplierCoop({
+    name: "PD46 Co-op pads spend",
+    supplierId: "sup_pd46",
+    offerIds: ["off_pd46_pad"],
+    supplierFundShareBps: 6500,
+    dialFundShareBps: 3500,
+    budgetSpendLimitMinor: 100_00n,
+  });
+  acceptSupplierCoop(campaign.id);
+  approveSupplierCoop(campaign.id);
+  const spent = recordCoopSpend({
+    campaignId: campaign.id,
+    spendMinor: 15_00n,
+  });
+  let cashOutForbidden = false;
+  try {
+    attemptPromoCreditCashOut({ customerId: "cust_pd46", amountMinor: 1_00n });
+  } catch (e) {
+    if (e instanceof Error && e.message === "promo_credit_cash_out_forbidden") {
+      cashOutForbidden = true;
+    } else {
+      throw e;
+    }
+  }
+  if (!cashOutForbidden) throw new Error("PD46 expected cash-out block");
+  if (spent.agreement.status !== "live") {
+    throw new Error("PD46 expected live coop");
+  }
+  return {
+    coopCampaignId: campaign.id,
+    coopStatus: "live",
+    spendRecordedMinor: "1500",
+    budgetUsedMinor: spent.budget.used.toString(),
+    cashOutForbidden: true,
+    payableFromAi: false,
+  };
+}
+
 export function listPromoAdminSnapshot(): PromoAdminSnapshot {
   const s = store();
   return {

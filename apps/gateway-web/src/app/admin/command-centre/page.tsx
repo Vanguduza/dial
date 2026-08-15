@@ -1,8 +1,21 @@
+/**
+ * PD10 / PD47 Command Centre — MetricContract tiles + recommended actions (D-54).
+ * Simulated never auto-pays. Actions never auto-pay.
+ */
 "use client";
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
+
+type RecommendedAction = {
+  id: string;
+  label: string;
+  permissionRole: string;
+  href: string;
+  severity: string;
+  autoPay: boolean;
+};
 
 type Tile = {
   id: string;
@@ -12,12 +25,9 @@ type Tile = {
   mode: string;
   canDrivePayout: boolean;
   ownerRole: string;
+  recommendedActions?: RecommendedAction[];
 };
 
-/**
- * PD10 Command Centre — MetricContract tiles + Actual vs Simulated (D-54).
- * Simulated never auto-pays.
- */
 export default function CommandCentrePage() {
   const [secret, setSecret] = useState("");
   const [mode, setMode] = useState<"actual" | "simulated">("actual");
@@ -91,6 +101,7 @@ export default function CommandCentrePage() {
 
   return (
     <main
+      data-testid="admin-command-centre"
       style={{
         minHeight: "100vh",
         background: dialTokens.color.brand.surface,
@@ -106,6 +117,8 @@ export default function CommandCentrePage() {
         {" · "}
         <Link href="/admin/delivery/dispatch">Dispatch</Link>
         {" · "}
+        <Link href="/admin/promotions">Promotions</Link>
+        {" · "}
         <Link href="/admin/tech/take-home">Take-Home</Link>
         <h1
           style={{
@@ -117,8 +130,8 @@ export default function CommandCentrePage() {
           Command Centre
         </h1>
         <p style={{ fontSize: 14, opacity: 0.8 }}>
-          Every KPI registers a MetricContract. Simulated never auto-pays (D-54). CC is not money
-          SoR.
+          Every KPI registers a MetricContract. Severity→recommended permissioned
+          actions (PD47). Simulated never auto-pays (D-54). CC is not money SoR.
         </p>
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
@@ -189,6 +202,7 @@ export default function CommandCentrePage() {
         ) : null}
         {message ? <p role="status">{message}</p> : null}
         <div
+          data-testid="cc-metric-tiles"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
@@ -214,7 +228,25 @@ export default function CommandCentrePage() {
                 {t.status} · owner {t.ownerRole}
               </div>
               <div style={{ fontSize: 11, opacity: 0.65, marginTop: 4 }}>{t.calculation}</div>
-              <div style={{ fontSize: 11, marginTop: 6 }}>canDrivePayout={String(t.canDrivePayout)}</div>
+              <div style={{ fontSize: 11, marginTop: 6 }}>
+                canDrivePayout={String(t.canDrivePayout)}
+              </div>
+              {(t.recommendedActions ?? []).length > 0 ? (
+                <ul
+                  data-testid={`cc-actions-${t.id}`}
+                  style={{ margin: "10px 0 0", paddingLeft: 16, fontSize: 12 }}
+                >
+                  {(t.recommendedActions ?? []).map((a) => (
+                    <li key={a.id}>
+                      <Link href={a.href}>{a.label}</Link>
+                      {" · "}
+                      {a.severity} · autoPay={String(a.autoPay)} · {a.permissionRole}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p style={{ fontSize: 11, opacity: 0.55, marginTop: 8 }}>No actions (ok)</p>
+              )}
             </div>
           ))}
         </div>

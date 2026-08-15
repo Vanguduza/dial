@@ -13,12 +13,14 @@ import {
   listPromoAdminSnapshot,
   placeFraudHold,
   proposeSupplierCoop,
+  recordCoopSpend,
   rejectSupplierCoop,
   releaseFraudHold,
   type PromoCampaignType,
   type ReferralReward,
   type Vertical,
 } from "@dial/promotions";
+import { addStatementLine } from "@dial/suppliers";
 
 export const runtime = "nodejs";
 
@@ -148,6 +150,7 @@ export async function POST(req: Request) {
     reason?: string;
     customerId?: string;
     amountMinor?: string | number;
+    spendMinor?: string | number;
   };
 
   try {
@@ -242,6 +245,34 @@ export async function POST(req: Request) {
         snapshot: serializeSnapshot(),
       });
     }
+    if (body.action === "record_coop_spend") {
+      if (!body.campaignId || body.spendMinor === undefined) {
+        return NextResponse.json(
+          { error: "campaignId and spendMinor required" },
+          { status: 400 },
+        );
+      }
+      const spendMinor = BigInt(String(body.spendMinor));
+      const spent = recordCoopSpend({
+        campaignId: body.campaignId,
+        spendMinor,
+      });
+      const line = addStatementLine({
+        supplierId: spent.agreement.supplierId,
+        kind: "coop_spend",
+        amountUsdMinor: spendMinor,
+        label: `SUPPLIER_COOP spend ${body.campaignId}`,
+      });
+      return NextResponse.json({
+        ok: true,
+        agreementStatus: spent.agreement.status,
+        budgetUsedMinor: spent.budget.used.toString(),
+        statementLineId: line.lineId,
+        cashOutForbidden: true,
+        payableFromAi: false,
+        snapshot: serializeSnapshot(),
+      });
+    }
     if (body.action === "reject_coop") {
       if (!body.campaignId) {
         return NextResponse.json({ error: "campaignId required" }, { status: 400 });
@@ -308,7 +339,7 @@ export async function POST(req: Request) {
     return NextResponse.json(
       {
         error:
-          "action must be create_campaign|activate|propose_coop|accept_coop|approve_coop|reject_coop|attach_referral|fraud_hold|fraud_release|attempt_cash_out",
+          "action must be create_campaign|activate|propose_coop|accept_coop|approve_coop|record_coop_spend|reject_coop|attach_referral|fraud_hold|fraud_release|attempt_cash_out",
       },
       { status: 400 },
     );

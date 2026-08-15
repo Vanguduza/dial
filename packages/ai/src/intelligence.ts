@@ -12,12 +12,24 @@ export type MetricContract = {
   ownerRole: string;
 };
 
+/** Severity→permissioned recommended action (D-54). Never auto-pays. */
+export type RecommendedAction = {
+  id: string;
+  label: string;
+  permissionRole: string;
+  href: string;
+  severity: "warn" | "critical";
+  /** Locked — Command Centre actions never auto-pay. */
+  autoPay: false;
+};
+
 export type MetricTile = MetricContract & {
   mode: CommandCentreMode;
   value: number | null;
   status: "ok" | "warn" | "critical" | "unknown";
   /** Simulated tiles never drive payouts. */
   canDrivePayout: false;
+  recommendedActions: RecommendedAction[];
 };
 
 export type FactoryDatasetVersion = {
@@ -167,17 +179,72 @@ function statusFor(
   return "ok";
 }
 
+/** Build severity→recommended permissioned actions (D-54). autoPay always false. */
+export function recommendedActionsForTile(
+  tile: Pick<MetricTile, "id" | "status" | "ownerRole">,
+): RecommendedAction[] {
+  if (tile.status !== "warn" && tile.status !== "critical") return [];
+  const severity = tile.status;
+  const actions: RecommendedAction[] = [];
+  if (tile.id.includes("money_outbox") || tile.id.includes("outbox")) {
+    actions.push({
+      id: "open_money_outbox",
+      label: "Review / drain money outbox",
+      permissionRole: tile.ownerRole,
+      href: "/admin/money/outbox",
+      severity,
+      autoPay: false,
+    });
+  }
+  if (tile.id.includes("dispatch") || tile.id.includes("fifo")) {
+    actions.push({
+      id: "open_dispatch_board",
+      label: "Open dispatch board",
+      permissionRole: tile.ownerRole,
+      href: "/admin/delivery/dispatch",
+      severity,
+      autoPay: false,
+    });
+  }
+  if (tile.id.includes("on_time_pod") || tile.id.includes("pod")) {
+    actions.push({
+      id: "open_delivery_track",
+      label: "Review delivery track",
+      permissionRole: tile.ownerRole,
+      href: "/admin/delivery/track",
+      severity,
+      autoPay: false,
+    });
+  }
+  if (actions.length === 0) {
+    actions.push({
+      id: "ack_metric_alert",
+      label: "Acknowledge alert (ops)",
+      permissionRole: tile.ownerRole,
+      href: "/admin/command-centre",
+      severity,
+      autoPay: false,
+    });
+  }
+  return actions;
+}
+
 /** Build tiles for Command Centre — every KPI has a MetricContract (D-54). */
 export function listMetricTiles(mode: CommandCentreMode): MetricTile[] {
   ensureDefaultMetricContracts();
   return listMetricContracts().map((c) => {
     const value = metricValues.has(c.id) ? metricValues.get(c.id)! : null;
-    return {
+    const status = statusFor(c, value);
+    const base = {
       ...c,
       mode,
       value,
-      status: statusFor(c, value),
-      canDrivePayout: false,
+      status,
+      canDrivePayout: false as const,
+    };
+    return {
+      ...base,
+      recommendedActions: recommendedActionsForTile(base),
     };
   });
 }
@@ -466,6 +533,55 @@ function assertThrowsSimulatedPayout(): void {
       throw e;
     }
   }
+}
+
+/**
+ * PD47 thin vertical: MetricContract warn/critical → recommended actions;
+ * Simulated never auto-pays; actions autoPay=false.
+ */
+export function runPd47CommandCentreActionsThinVertical(): {
+  warnActions: number;
+  criticalActions: number;
+  everyActionAutoPayFalse: true;
+  simulatedNeverPays: true;
+  canDrivePayout: false;
+} {
+  __resetIntelligenceForTests();
+  ensureDefaultMetricContracts();
+  setMetricObservedValue("metric.money_outbox_depth", 55);
+  setMetricObservedValue("metric.dispatch_fifo_depth", 8);
+  setMetricObservedValue("metric.on_time_pod", 0.75);
+  const tiles = listMetricTiles("actual");
+  const warn = tiles.filter((t) => t.status === "warn");
+  const critical = tiles.filter((t) => t.status === "critical");
+  if (warn.length + critical.length < 2) {
+    throw new Error("PD47 expected warn/critical tiles with observations");
+  }
+  const actions = tiles.flatMap((t) => t.recommendedActions);
+  if (actions.length < 2) {
+    throw new Error("PD47 expected recommended actions on alert tiles");
+  }
+  if (actions.some((a) => a.autoPay !== false)) {
+    throw new Error("PD47 recommended actions must keep autoPay=false");
+  }
+  if (tiles.some((t) => t.canDrivePayout !== false)) {
+    throw new Error("PD47 tiles must keep canDrivePayout=false");
+  }
+  assertThrowsSimulatedPayout();
+  const simTiles = listMetricTiles("simulated");
+  if (simTiles.some((t) => t.canDrivePayout !== false)) {
+    throw new Error("PD47 simulated tiles must not drive payout");
+  }
+  return {
+    warnActions: warn.reduce((n, t) => n + t.recommendedActions.length, 0),
+    criticalActions: critical.reduce(
+      (n, t) => n + t.recommendedActions.length,
+      0,
+    ),
+    everyActionAutoPayFalse: true,
+    simulatedNeverPays: true,
+    canDrivePayout: false,
+  };
 }
 
 export function __resetIntelligenceForTests(): void {

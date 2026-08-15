@@ -59,3 +59,12 @@ test("PD16 cash-out always forbidden", () => {
     /promo_credit_cash_out_forbidden/,
   );
 });
+
+test("PD46 coop spend thin vertical — live spend + cash-out blocked", async () => {
+  const { runPd46SupplierCoopSpendThinVertical } = await import("./admin.js");
+  const out = runPd46SupplierCoopSpendThinVertical();
+  assert.equal(out.coopStatus, "live");
+  assert.equal(out.cashOutForbidden, true);
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.budgetUsedMinor, "1500");
+});

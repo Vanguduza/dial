@@ -645,8 +645,31 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
-| Supplier co-op spend / statements UX deepen | fold next |
-| Command Centre severity → recommended actions | fold next |
+| Supplier co-op spend / statements UX deepen | **PD46** |
+| Command Centre severity → recommended actions | **PD47** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+
+### PD46 — Supplier co-op spend / promo co-op UX (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | propose→accept→ops approve→`record_coop_spend` → budget + statement `coop_spend`; cash-out blocked |
+| Evidence | `runPd46SupplierCoopSpendThinVertical`; `pd46Pd47Ops.test.ts` |
+| Green → | **PD47** Command Centre actions |
+
+### PD47 — Command Centre recommended actions (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | MetricContract warn/critical → recommendedActions (`autoPay=false`); Simulated never pays |
+| Evidence | `runPd47CommandCentreActionsThinVertical`; `pd46Pd47Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD47)
+
+| Gap | Stage |
+| --- | --- |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
 

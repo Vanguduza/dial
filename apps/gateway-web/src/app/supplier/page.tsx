@@ -16,6 +16,7 @@ import {
   listStatements,
   syncSupplierSlaEscalations,
 } from "@dial/suppliers";
+import { listCoopAgreementsForSupplier } from "@dial/promotions";
 import {
   getSessionFromToken,
   sessionCookieName,
@@ -39,6 +40,8 @@ export default async function SupplierPortalPage() {
   const queue = listConfirmQueue(supplierId);
   const uploads = listCostUploads(supplierId);
   const statements = listStatements(supplierId);
+  const coopAgreements = listCoopAgreementsForSupplier(supplierId);
+  const coopSpendLines = statements.filter((l) => l.kind === "coop_spend");
 
   return (
     <main
@@ -90,6 +93,7 @@ export default async function SupplierPortalPage() {
           <a href="#heartbeat">Heartbeat</a>
           <a href="#sla">SLA escalations</a>
           <a href="#confirm">Confirm SLA</a>
+          <a href="#coop">Co-op</a>
           <a href="#statements">Statements</a>
         </nav>
       </header>
@@ -274,6 +278,40 @@ export default async function SupplierPortalPage() {
               </li>
             );
           })}
+        </ul>
+      </section>
+
+      <section id="coop" data-testid="supplier-coop-panel" style={sectionStyle}>
+        <h2 style={h2}>SUPPLIER_COOP / co-op spend</h2>
+        <p style={{ fontSize: 13, opacity: 0.75, marginTop: 0 }}>
+          Propose→accept→ops approve (admin). Live spend appears as{" "}
+          <code>coop_spend</code> statement lines. Promo credit never cash-outs
+          (D-42).
+        </p>
+        {coopAgreements.length === 0 ? (
+          <p style={{ opacity: 0.7 }}>No co-op agreements for this supplier yet.</p>
+        ) : (
+          <ul style={{ paddingLeft: 18 }}>
+            {coopAgreements.map((a) => (
+              <li key={a.campaignId}>
+                {a.campaignId} · {a.status} · fund{" "}
+                {a.supplierFundShareBps}/{a.dialFundShareBps} bps · offers{" "}
+                {a.offerIds.join(", ")}
+              </li>
+            ))}
+          </ul>
+        )}
+        <h3 style={{ fontSize: "1rem", marginTop: 12 }}>Co-op spend lines</h3>
+        <ul style={{ paddingLeft: 18 }} data-testid="coop-spend-lines">
+          {coopSpendLines.length === 0 ? (
+            <li>None yet</li>
+          ) : (
+            coopSpendLines.map((l) => (
+              <li key={l.lineId}>
+                USD {(Number(l.amount.amountMinor) / 100).toFixed(2)} · {l.label}
+              </li>
+            ))
+          )}
         </ul>
       </section>
 

@@ -359,10 +359,31 @@ export default function AdminPromotionsPage() {
                           Ops approve
                         </button>
                       ) : null}
+                      {a.status === "live" ? (
+                        <button
+                          type="button"
+                          disabled={busy}
+                          data-testid="record-coop-spend"
+                          style={{ marginLeft: 8 }}
+                          onClick={() =>
+                            void post({
+                              action: "record_coop_spend",
+                              campaignId: a.campaignId,
+                              spendMinor: "500",
+                            })
+                          }
+                        >
+                          Record co-op spend ($5)
+                        </button>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
               )}
+              <p style={{ fontSize: 12, opacity: 0.7 }}>
+                PD46 · live SUPPLIER_COOP spend posts statement coop_spend · cash-out
+                always blocked (D-42)
+              </p>
             </section>
 
             <section style={{ marginTop: dialTokens.space.md }}>
