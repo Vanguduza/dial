@@ -48,6 +48,24 @@ export default async function GroceryBrowsePage({
           Food & pantry · USD browse · agency marketplace ·{" "}
           {sessionRole === "b2b" ? "B2B formal only" : "B2C"} · no liquor
         </p>
+        {sessionRole === "b2b" ? (
+          <p
+            role="status"
+            data-testid="b2b-formal-only-banner"
+            style={{
+              marginTop: dialTokens.space.sm,
+              padding: dialTokens.space.sm,
+              borderRadius: 8,
+              background: `${dialTokens.color.brand.primary}14`,
+              border: `1px solid ${dialTokens.color.brand.primary}44`,
+              fontSize: 14,
+              maxWidth: 640,
+            }}
+          >
+            B2B session: formal suppliers only (D-49). Informal stock is hidden
+            from search and blocked at cart — not checkout-only.
+          </p>
+        ) : null}
         <nav
           style={{
             display: "flex",

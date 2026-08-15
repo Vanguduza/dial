@@ -878,6 +878,19 @@ export {
   type VehicleMasterRow,
 } from "./dualEntry.js";
 
+export {
+  __resetTakeRateForTests,
+  createGroceryTakeRateDraft,
+  getPublishedGroceryTakeRate,
+  getTakeRateLadder,
+  listTakeRateLadders,
+  publishTakeRateLadder,
+  resolveTakeRateBps,
+  runPd34B2bTakeRateThinVertical,
+  type TakeRateLadder,
+  type TakeRateTier,
+} from "./takeRate.js";
+
 import { offersForChassis as offersForChassisJoin } from "./dualEntry.js";
 import type { SearchSessionRole as DualRole } from "./dualEntry.js";
 

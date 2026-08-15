@@ -100,9 +100,10 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 137 | `PD31` | **Technician Bluetooth print hooks** — Pack §9.7 residual | workplan | Thermal print receipt/job ticket | `PD32` |
 | 138 | `PD32` | **Delivery COD float-limit warning** — Pack §9.8 residual | workplan | optional COD float warn | `PD33` |
 | 139 | `PD33` | **Staging recon / dogfood harden** — Spare + grocery food + Meta WA | [#37](https://github.com/Vanguduza/dial/issues/37) | dial-webapp-recon; sandbox rails | `PD34` |
-| 140 | `PD34` | **B2B grocery polish + take-rate admin** — Wave 3 leftovers | workplan | formal-only UX deepen; take-rate scaffold | expand |
+| 140 | `PD34` | **B2B grocery polish + take-rate admin** — Wave 3 leftovers | [#38](https://github.com/Vanguduza/dial/issues/38) | formal-only UX deepen; take-rate scaffold | `PD35` |
+| 141 | `PD35` | **Grocery brand polish + KYC cert badge** — Wave 3 leftover | workplan | formal cert display; brand polish | expand |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD33 is **PD34**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD34 is **PD35**, not S99. Product ≠ finished at S99.
 
 
 ---
@@ -489,9 +490,26 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | B2B grocery polish + take-rate admin scaffold (Wave 3) | **PD34** |
 | Playwright live staging networkidle (ENH-011) | defer until staging URL |
 
-### PD34 — B2B grocery polish + take-rate admin (NEXT)
+### PD34 — B2B grocery polish + take-rate admin (**GREEN** 2026-08-15)
 
-Wave 3 eng-safe leftovers — formal-only UX deepen; take-rate admin scaffold (bps from ops, not invented payables).
+| | |
+| --- | --- |
+| Issue | [#38](https://github.com/Vanguduza/dial/issues/38) |
+| Thin path | B2B formal-only banner; take-rate draft→publish→resolve bps; admin UI |
+| Evidence | `runPd34B2bTakeRateThinVertical`; `takeRate.test.ts`; `pd34B2bTakeRate.test.ts` |
+| Green → | **PD35** grocery brand polish + KYC cert badge |
+
+### Pack / product gap audit (after PD34)
+
+| Gap | Stage |
+| --- | --- |
+| Grocery brand polish + formal KYC cert badge (display) | **PD35** |
+| Multi-stop delivery detail deepen | defer / fold later |
+| Playwright live staging networkidle (ENH-011) | defer until staging URL |
+
+### PD35 — Grocery brand polish + KYC cert badge (NEXT)
+
+Wave 3 leftover — formal supplier KYC cert badge on grocery browse; light brand polish. Display only — not a money path.
 
 ### S10 — E2a (historical)
 
