@@ -5,14 +5,17 @@
 import { NextResponse } from "next/server";
 import {
   acceptOffer,
+  activateOfflinePack,
   capturePod,
   createDeliveryJob,
   getCourierAvailability,
   getDeliveryJob,
   getOffer,
   listCourierLocations,
+  listCourierOfflinePacks,
   listJobsForCourier,
   listOffersForCourier,
+  listOfflinePackDefinitions,
   postCourierLocation,
   reconcileCodAfterPod,
   rejectOffer,
@@ -21,6 +24,7 @@ import {
   startTransit,
   timeoutOffer,
   type CourierAvailability,
+  type OfflinePackId,
 } from "@dial/delivery";
 import {
   getSessionFromToken,
@@ -73,6 +77,11 @@ export async function GET(req: Request) {
     availability: getCourierAvailability(courierId),
     offers: listOffersForCourier(courierId),
     jobs: listJobsForCourier(courierId).map((j) => serializeJob(j)),
+    offlinePacks: {
+      available: listOfflinePackDefinitions(),
+      installed: listCourierOfflinePacks(courierId),
+      mapSor: "maplibre",
+    },
   });
 }
 
@@ -111,6 +120,32 @@ export async function POST(req: Request) {
           ok: true,
           courierId,
           availability: getCourierAvailability(courierId),
+          eligibleForOffers: status === "available",
+        });
+      }
+      case "list_offline_packs": {
+        return NextResponse.json({
+          ok: true,
+          mapSor: "maplibre",
+          packs: listOfflinePackDefinitions(),
+          installed: listCourierOfflinePacks(courierId),
+        });
+      }
+      case "activate_offline_pack": {
+        const packId = String(body.packId ?? "") as OfflinePackId;
+        if (packId !== "harare_metro" && packId !== "bulawayo_metro") {
+          return NextResponse.json(
+            { error: "packId must be harare_metro|bulawayo_metro" },
+            { status: 400 },
+          );
+        }
+        const installed = activateOfflinePack({ courierId, packId });
+        return NextResponse.json({
+          ok: true,
+          installed,
+          installedPacks: listCourierOfflinePacks(courierId),
+          mapSor: "maplibre",
+          note: "D-44 MapLibre offline tiles — not Google/Mapbox",
         });
       }
       case "seed_offer": {

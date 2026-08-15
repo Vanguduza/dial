@@ -37,6 +37,18 @@ class DialDeliveryClientTest {
                             """{"ok":true,"reconciled":true,"amountUsdMinor":"2500","currency":"USD"}""",
                             emptyList(),
                         )
+                    body?.contains("list_offline_packs") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"mapSor":"maplibre","packs":[{"packId":"harare_metro","label":"Harare","city":"Harare","mapSor":"maplibre"},{"packId":"bulawayo_metro","label":"Bulawayo","city":"Bulawayo","mapSor":"maplibre"}]}""",
+                            emptyList(),
+                        )
+                    body?.contains("activate_offline_pack") == true ->
+                        HttpResponse(
+                            200,
+                            """{"ok":true,"installed":{"packId":"harare_metro","status":"installed","mapSor":"maplibre"}}""",
+                            emptyList(),
+                        )
                     else ->
                         HttpResponse(200, """{"ok":true}""", emptyList())
                 }
@@ -52,6 +64,11 @@ class DialDeliveryClientTest {
         val cod = client.reconcileCod(jobId)
         assertTrue(cod.reconciled)
         assertEquals(2500L, cod.amountUsdMinor)
+        val packs = client.listOfflinePacks()
+        assertEquals(2, packs.size)
+        assertTrue(packs.all { it.mapSor == "maplibre" })
+        val install = client.activateOfflinePack("harare_metro")
+        assertEquals("installed", install.status)
         assertTrue(bodies.all { !it.contains("userId") })
     }
 

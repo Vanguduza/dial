@@ -94,9 +94,11 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 131 | `PD25` | **Technician Android Value Score + ITF263** — Pack §9.7 / D-53 | workplan | Value Score factors on device; ITF263 status/upload deepen | `PD26` |
 | 132 | `PD26` | **Gateway home Shop\|Services** — Pack §9.1 residual | workplan | Auth home Welcome-back + Shop \| Services | `PD27` |
 | 133 | `PD27` | **Spare Select Vehicle / Browse EPC** — Pack §9.2 residual | workplan | Dual entry vehicle + EPC browse | `PD28` |
-| 134 | `PD28` | **Delivery Android availability + offline packs** — Pack §9.8 residual | new issue | available/busy/offline + offline packs deepen | expand / next band |
+| 134 | `PD28` | **Delivery Android availability + offline packs** — Pack §9.8 residual | workplan | available/busy/offline + offline packs deepen | `PD29` |
+| 135 | `PD29` | **Delivery ETA + stops / VROOM re-optimise** — Pack §9.8 residual | new issue | ETA banner (OSRM); navigate stop list; request re-optimise | `PD30` |
+| 136 | `PD30` | **Technician mock-location / camera deepen** — Pack §9.7 residual | new issue | Mock-location detection; evidence camera polish | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD27 is **PD28**, not S99. Product ≠ finished at S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD28 is **PD29**, not S99. Product ≠ finished at S99.
 
 
 ---

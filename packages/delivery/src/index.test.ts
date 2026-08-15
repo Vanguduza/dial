@@ -14,6 +14,7 @@ import {
   reconcileCodAfterPod,
   rejectOffer,
   runPd7DeliveryThinVertical,
+  runPd28AvailabilityOfflinePacksThinVertical,
   setCourierAvailable,
   startDeliveryDispatchWorkflow,
   startTransit,
@@ -139,4 +140,18 @@ test("PD10 dispatch board snapshot exposes FIFO + jobs", () => {
   assert.equal(board.jobEngine, "packages/delivery");
   assert.ok(board.fifoJobIds.includes(job.id) || board.jobs.some((j) => j.id === job.id));
   assert.ok(board.jobs.length >= 1);
+});
+
+test("PD28 availability + Harare/Bulawayo offline packs; MapLibre SoR", () => {
+  const out = runPd28AvailabilityOfflinePacksThinVertical({
+    courierId: "cour_pd28_t",
+  });
+  assert.equal(out.offlineIneligible, true);
+  assert.equal(out.availableEligible, true);
+  assert.equal(out.hararePackInstalled, true);
+  assert.equal(out.bulawayoPackInstalled, true);
+  assert.equal(out.busyAfterAccept, true);
+  assert.equal(out.mapSor, "maplibre");
+  assert.equal(out.googleMapsSor, false);
+  assert.equal(out.payableFromAi, false);
 });

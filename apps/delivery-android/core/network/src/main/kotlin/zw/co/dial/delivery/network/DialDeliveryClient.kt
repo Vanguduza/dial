@@ -31,6 +31,19 @@ data class CodResult(
     val amountUsdMinor: Long?,
 )
 
+data class OfflinePackDto(
+    val packId: String,
+    val label: String,
+    val city: String,
+    val mapSor: String,
+)
+
+data class OfflinePackInstallDto(
+    val packId: String,
+    val status: String,
+    val mapSor: String,
+)
+
 class DialDeliveryException(message: String, val statusCode: Int = 0) : Exception(message)
 
 interface CookieStore {
@@ -185,6 +198,22 @@ class DialDeliveryClient(
         return CodResult(reconciled, amount)
     }
 
+    /** PD28 — list MapLibre offline tile packs (Harare/Bulawayo). */
+    fun listOfflinePacks(): List<OfflinePackDto> {
+        val body = postAction("""{"action":"list_offline_packs"}""")
+        return parseOfflinePacks(body)
+    }
+
+    fun activateOfflinePack(packId: String): OfflinePackInstallDto {
+        require(packId == "harare_metro" || packId == "bulawayo_metro")
+        val body =
+            postAction(
+                """{"action":"activate_offline_pack","packId":${jsonString(packId)}}""",
+            )
+        return parseOfflineInstall(body)
+            ?: throw DialDeliveryException("activate_offline_pack missing install")
+    }
+
     private fun get(path: String): HttpResponse {
         val res =
             transport.request(
@@ -261,4 +290,42 @@ internal fun parseSnapshot(body: String): CourierSnapshot {
         )
     }
     return CourierSnapshot(courierId, availability, offers, emptyList())
+}
+
+internal fun parseOfflinePacks(body: String): List<OfflinePackDto> {
+    val block =
+        Regex(""""packs"\s*:\s*\[(.*?)]""", RegexOption.DOT_MATCHES_ALL)
+            .find(body)
+            ?.groupValues
+            ?.get(1)
+            .orEmpty()
+    return Regex("""\{[^{}]*"packId"\s*:\s*"([^"]+)"[^{}]*\}""")
+        .findAll(block)
+        .map { m ->
+            val chunk = m.value
+            fun f(n: String) =
+                Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+            OfflinePackDto(
+                packId = f("packId"),
+                label = f("label"),
+                city = f("city"),
+                mapSor = f("mapSor").ifEmpty { "maplibre" },
+            )
+        }
+        .toList()
+}
+
+internal fun parseOfflineInstall(body: String): OfflinePackInstallDto? {
+    val chunk =
+        Regex(""""installed"\s*:\s*(\{[^{}]*\})""")
+            .find(body)
+            ?.groupValues
+            ?.get(1) ?: return null
+    fun f(n: String) =
+        Regex(""""$n"\s*:\s*"([^"]*)"""").find(chunk)?.groupValues?.get(1).orEmpty()
+    return OfflinePackInstallDto(
+        packId = f("packId"),
+        status = f("status"),
+        mapSor = f("mapSor").ifEmpty { "maplibre" },
+    )
 }

@@ -75,7 +75,10 @@ fun DeliveryApp(baseUrl: String) {
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
         )
-        Text("Compose rider · packages/delivery SoR · MapLibre via admin track", style = MaterialTheme.typography.bodySmall)
+        Text(
+            "Compose · availability · MapLibre offline packs · packages/delivery",
+            style = MaterialTheme.typography.bodySmall,
+        )
 
         if (!signedIn) {
             OutlinedTextField(
@@ -114,6 +117,36 @@ fun DeliveryApp(baseUrl: String) {
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text("Go available") }
+            OutlinedButton(
+                onClick = {
+                    run {
+                        client.setAvailability("busy")
+                        status = "Busy — ineligible for new offers"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Set busy") }
+            OutlinedButton(
+                onClick = {
+                    run {
+                        client.setAvailability("offline")
+                        status = "Offline — ineligible for offers"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Go offline") }
+            Button(
+                onClick = {
+                    run {
+                        val packs = client.listOfflinePacks()
+                        client.activateOfflinePack("harare_metro")
+                        client.activateOfflinePack("bulawayo_metro")
+                        status =
+                            "Offline packs: ${packs.joinToString { it.city }} · MapLibre installed"
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text("Install Harare + Bulawayo offline packs") }
             Button(
                 onClick = {
                     run {
@@ -180,6 +213,9 @@ fun DeliveryApp(baseUrl: String) {
         }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         Spacer(Modifier.height(8.dp))
-        Text("PD7 · no Expo · not Fleetbase · COD amountMinor USD", style = MaterialTheme.typography.labelSmall)
+        Text(
+            "PD28 · available|busy|offline · Harare/Bulawayo MapLibre packs · not Google",
+            style = MaterialTheme.typography.labelSmall,
+        )
     }
 }

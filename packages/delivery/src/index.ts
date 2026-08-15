@@ -3,6 +3,24 @@
  * Not Fleetbase. Distance/ETA: OSRM/VROOM stubs (D-44) — never Google/Mapbox SoR.
  */
 import { type Money, money } from "@dial/shared";
+import {
+  __resetOfflinePacksForTests,
+  activateOfflinePack,
+  courierHasOfflinePack,
+  listCourierOfflinePacks,
+  listOfflinePackDefinitions,
+} from "./offlinePacks.js";
+
+export {
+  activateOfflinePack,
+  courierHasOfflinePack,
+  getOfflinePackDefinition,
+  listCourierOfflinePacks,
+  listOfflinePackDefinitions,
+  type CourierOfflinePackInstall,
+  type OfflinePackDefinition,
+  type OfflinePackId,
+} from "./offlinePacks.js";
 
 export type CourierId = string;
 
@@ -142,8 +160,15 @@ export function estimateRouteStub(input: {
 }
 
 export function setCourierAvailable(courierId: CourierId, available: boolean): void {
-  if (available) availableCouriers.add(courierId);
-  else availableCouriers.delete(courierId);
+  if (available) {
+    availableCouriers.add(courierId);
+    // Keep busy if already mid-job; otherwise mark available for offer eligibility (PD28).
+    if (courierAvailability.get(courierId) !== "busy") {
+      courierAvailability.set(courierId, "available");
+    }
+  } else {
+    availableCouriers.delete(courierId);
+  }
   if (available) drainFifo();
 }
 
@@ -232,7 +257,9 @@ function offerToNextCourier(jobId: string): DeliveryOffer | undefined {
     seen = new Set();
     offeredCouriersByJob.set(jobId, seen);
   }
-  const courierId = [...availableCouriers].find((c) => !seen!.has(c));
+  const courierId = [...availableCouriers].find(
+    (c) => !seen!.has(c) && isCourierEligibleForOffers(c),
+  );
   if (!courierId) return undefined;
   seen.add(courierId);
   const offer: DeliveryOffer = {
@@ -450,6 +477,11 @@ export function listAllWorkflows(): DeliveryDispatchWorkflowState[] {
   return [...workflows.values()].map((w) => ({ ...w }));
 }
 
+/** Only `available` couriers receive new offers (busy/offline ineligible). */
+export function isCourierEligibleForOffers(courierId: CourierId): boolean {
+  return getCourierAvailability(courierId) === "available";
+}
+
 export type DispatchBoardSnapshot = {
   mapSor: "maplibre";
   jobEngine: "packages/delivery";
@@ -529,6 +561,92 @@ export function runPd7DeliveryThinVertical(input?: {
   };
 }
 
+/**
+ * PD28 thin vertical: offline ineligible → available eligible → Harare/Bulawayo
+ * offline packs (MapLibre) → accept → busy.
+ */
+export function runPd28AvailabilityOfflinePacksThinVertical(input?: {
+  courierId?: string;
+}): {
+  offlineIneligible: true;
+  availableEligible: true;
+  hararePackInstalled: true;
+  bulawayoPackInstalled: true;
+  busyAfterAccept: true;
+  mapSor: "maplibre";
+  googleMapsSor: false;
+  payableFromAi: false;
+} {
+  const courierId = input?.courierId ?? "cour_pd28";
+  __resetDeliveryForTests();
+
+  setCourierAvailabilityStatus(courierId, "offline");
+  if (isCourierEligibleForOffers(courierId)) {
+    throw new Error("PD28 offline courier must be ineligible for offers");
+  }
+  const jobOffline = createDeliveryJob({
+    orderId: "ord_pd28_offline",
+    from: "supplier_hub_harare",
+    to: "customer_avondale",
+  });
+  const wfOffline = startDeliveryDispatchWorkflow(jobOffline.id);
+  if (getDeliveryJob(jobOffline.id)?.offerId) {
+    throw new Error("PD28 offline must not receive offer");
+  }
+  if (wfOffline.phase !== "fifo" && getDeliveryJob(jobOffline.id)?.status !== "queued_fifo") {
+    throw new Error("PD28 expected FIFO when courier offline");
+  }
+
+  setCourierAvailabilityStatus(courierId, "available");
+  if (!isCourierEligibleForOffers(courierId)) {
+    throw new Error("PD28 available courier must be eligible");
+  }
+  const job = createDeliveryJob({
+    orderId: "ord_pd28",
+    from: "supplier_hub_harare",
+    to: "customer_avondale",
+    codUsdMinor: 15_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offerId = getDeliveryJob(job.id)?.offerId;
+  if (!offerId) {
+    throw new Error("PD28 available courier must receive offer");
+  }
+
+  const packs = listOfflinePackDefinitions();
+  if (packs.length < 2 || packs.some((p) => p.mapSor !== "maplibre")) {
+    throw new Error("PD28 requires Harare+Bulawayo MapLibre offline packs");
+  }
+  activateOfflinePack({ courierId, packId: "harare_metro" });
+  activateOfflinePack({ courierId, packId: "bulawayo_metro" });
+  if (
+    !courierHasOfflinePack(courierId, "harare_metro") ||
+    !courierHasOfflinePack(courierId, "bulawayo_metro")
+  ) {
+    throw new Error("PD28 offline packs must install");
+  }
+
+  acceptOffer(offerId, courierId);
+  setCourierAvailabilityStatus(courierId, "busy");
+  if (isCourierEligibleForOffers(courierId)) {
+    throw new Error("PD28 busy courier must be ineligible");
+  }
+  if (getCourierAvailability(courierId) !== "busy") {
+    throw new Error("PD28 expected busy after accept");
+  }
+
+  return {
+    offlineIneligible: true,
+    availableEligible: true,
+    hararePackInstalled: true,
+    bulawayoPackInstalled: true,
+    busyAfterAccept: true,
+    mapSor: "maplibre",
+    googleMapsSor: false,
+    payableFromAi: false,
+  };
+}
+
 export function __resetDeliveryForTests(): void {
   jobs.clear();
   offers.clear();
@@ -538,4 +656,5 @@ export function __resetDeliveryForTests(): void {
   fifoQueue.length = 0;
   courierAvailability.clear();
   courierLocations.clear();
+  __resetOfflinePacksForTests();
 }
