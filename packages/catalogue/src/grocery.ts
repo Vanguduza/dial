@@ -197,6 +197,59 @@ export function __resetGroceryForTests(): void {
   s.orders.clear();
 }
 
+/**
+ * PD15 Catalogue Factory — human-approved draft → grocery SoR (then Meili upsert).
+ * Never accepts liquor/ageGate or non-MARKETPLACE.
+ */
+export function publishGroceryOfferFromFactory(input: {
+  offerId: string;
+  title: string;
+  brand: string;
+  unitPriceUsdMinor: bigint;
+  unitLabel: string;
+  coldChain: GroceryColdChain;
+  supplierFormality: "formal" | "informal";
+  supplierDisplayName: string;
+  description?: string;
+  categoryPath?: string[];
+}): GroceryOffer {
+  assertGroceryPublishAllowed({
+    offerSource: "MARKETPLACE",
+    vertical: "grocery",
+    ageGateRequired: false,
+  });
+  if (input.unitPriceUsdMinor <= 0n) {
+    throw new Error("unitPriceUsdMinor must be positive integer minor units");
+  }
+  const existing = store().offers.findIndex((o) => o.offerId === input.offerId);
+  const offer: GroceryOffer = {
+    offerId: input.offerId,
+    title: input.title,
+    description: input.description ?? input.title,
+    brand: input.brand,
+    categoryPath: input.categoryPath ?? ["pantry", "factory"],
+    vertical: "grocery",
+    pricingMode: "unit",
+    unitPriceUsdMinor: input.unitPriceUsdMinor,
+    unitLabel: input.unitLabel,
+    availability: "available",
+    coldChain: input.coldChain,
+    ageGateRequired: false,
+    hasRestrictedSku: false,
+    deliveryBandId: "band_harare_central",
+    stockValidUntil: Date.now() + 7 * 24 * 60 * 60 * 1000,
+    offerSource: "MARKETPLACE",
+    supplierFormality: input.supplierFormality,
+    supplierDisplayName: input.supplierDisplayName,
+  };
+  if (existing >= 0) {
+    store().offers[existing] = offer;
+  } else {
+    store().offers.push(offer);
+  }
+  return { ...offer };
+}
+
 export type GroceryCartLine = {
   offerId: string;
   title: string;

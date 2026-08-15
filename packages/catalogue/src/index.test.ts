@@ -243,4 +243,15 @@ test("PD2 Factory approve→Meili publish + searchOffersAsync fixture path", asy
   );
   process.env.DIAL_INTEGRATION_MODE = "fixture";
 });
+
+test("PD15 CSV Factory → Meili spare+grocery + demand-gap", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { runPd15CatalogueFactoryThinVertical } = await import("./index.js");
+  const out = await runPd15CatalogueFactoryThinVertical();
+  assert.equal(out.informalB2bLeaks, 0);
+  assert.equal(out.payableFromAi, false);
+  assert.ok(out.demandGap.noResultCount >= 1);
+  assert.equal(out.spareOfferId, "off_pd15_formal");
+  assert.equal(out.groceryOfferId, "groc_pd15_oats");
+});
 });

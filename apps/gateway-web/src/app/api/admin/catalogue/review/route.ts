@@ -1,13 +1,17 @@
 /**
- * Catalogue Factory review queue (D-53 / PD2) — human approve/reject + Meili publish.
- * Fail closed without INTERNAL_API_SECRET. No AI auto-publish (D-54).
+ * Catalogue Factory review queue (D-53 / PD15) — CSV ingest, human approve/reject,
+ * Meili publish (spare + grocery). Fail closed without INTERNAL_API_SECRET.
+ * No AI auto-publish (D-54). AI never writes payable amounts.
  */
 import { NextResponse } from "next/server";
 import {
   approveCatalogueReview,
   enqueueCatalogueIngest,
+  getDemandGapSnapshot,
+  ingestCatalogueCsv,
   listCatalogueReviewQueue,
   publishApprovedBatchToMeili,
+  publishApprovedGroceryToMeili,
   rejectCatalogueReview,
   type StubOffer,
 } from "@dial/catalogue";
@@ -29,10 +33,29 @@ function assertInternalSecret(req: Request): NextResponse | null {
   return null;
 }
 
+function serializeQueueItem(r: ReturnType<typeof listCatalogueReviewQueue>[number]) {
+  return {
+    ...r,
+    draft: r.draft
+      ? {
+          ...r.draft,
+          unitPriceUsdMinor: r.draft.unitPriceUsdMinor.toString(),
+        }
+      : undefined,
+  };
+}
+
 export async function GET(req: Request) {
   const denied = assertInternalSecret(req);
   if (denied) return denied;
-  return NextResponse.json({ queue: listCatalogueReviewQueue() });
+  const url = new URL(req.url);
+  if (url.searchParams.get("view") === "demand_gap") {
+    return NextResponse.json({ demandGap: getDemandGapSnapshot() });
+  }
+  return NextResponse.json({
+    queue: listCatalogueReviewQueue().map(serializeQueueItem),
+    demandGap: getDemandGapSnapshot(),
+  });
 }
 
 export async function POST(req: Request) {
@@ -40,20 +63,46 @@ export async function POST(req: Request) {
   if (denied) return denied;
 
   const body = (await req.json()) as {
-    action?: "enqueue" | "approve" | "reject" | "publish";
+    action?:
+      | "enqueue"
+      | "ingest_csv"
+      | "approve"
+      | "reject"
+      | "publish"
+      | "publish_grocery"
+      | "demand_gap";
     rowCount?: number;
+    csvText?: string;
     reviewId?: string;
     batchId?: string;
     offer?: StubOffer & { unitPriceUsdMinor?: string | number | bigint };
   };
 
   try {
+    if (body.action === "demand_gap") {
+      return NextResponse.json({ demandGap: getDemandGapSnapshot() });
+    }
     if (body.action === "enqueue") {
       const batch = enqueueCatalogueIngest(body.rowCount ?? 1);
       return NextResponse.json({
         ok: true,
         batch,
-        queue: listCatalogueReviewQueue(),
+        queue: listCatalogueReviewQueue().map(serializeQueueItem),
+        demandGap: getDemandGapSnapshot(),
+      });
+    }
+    if (body.action === "ingest_csv") {
+      if (!body.csvText || typeof body.csvText !== "string") {
+        return NextResponse.json({ error: "csvText required" }, { status: 400 });
+      }
+      const ingested = ingestCatalogueCsv(body.csvText);
+      return NextResponse.json({
+        ok: true,
+        batches: ingested.batches,
+        reviews: ingested.reviews.map(serializeQueueItem),
+        rejectedRows: ingested.rejectedRows,
+        queue: listCatalogueReviewQueue().map(serializeQueueItem),
+        demandGap: getDemandGapSnapshot(),
       });
     }
     if (body.action === "approve") {
@@ -61,19 +110,38 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "reviewId required" }, { status: 400 });
       }
       const item = approveCatalogueReview(body.reviewId);
-      return NextResponse.json({ ok: true, item });
+      return NextResponse.json({
+        ok: true,
+        item: serializeQueueItem(item),
+        demandGap: getDemandGapSnapshot(),
+      });
     }
     if (body.action === "reject") {
       if (!body.reviewId) {
         return NextResponse.json({ error: "reviewId required" }, { status: 400 });
       }
       const item = rejectCatalogueReview(body.reviewId);
-      return NextResponse.json({ ok: true, item });
+      return NextResponse.json({ ok: true, item: serializeQueueItem(item) });
+    }
+    if (body.action === "publish_grocery") {
+      if (!body.batchId) {
+        return NextResponse.json({ error: "batchId required" }, { status: 400 });
+      }
+      const published = await publishApprovedGroceryToMeili({
+        batchId: body.batchId,
+      });
+      return NextResponse.json({
+        ok: true,
+        offerId: published.offerId,
+        taskUid: published.taskUid,
+        indexUid: published.indexUid,
+        demandGap: getDemandGapSnapshot(),
+      });
     }
     if (body.action === "publish") {
       if (!body.batchId || !body.offer) {
         return NextResponse.json(
-          { error: "batchId and offer required for publish" },
+          { error: "batchId and offer required for spare publish" },
           { status: 400 },
         );
       }
@@ -107,10 +175,14 @@ export async function POST(req: Request) {
         doc: published.doc,
         taskUid: published.taskUid,
         indexUid: published.indexUid,
+        demandGap: getDemandGapSnapshot(),
       });
     }
     return NextResponse.json(
-      { error: "action must be enqueue | approve | reject | publish" },
+      {
+        error:
+          "action must be enqueue | ingest_csv | approve | reject | publish | publish_grocery | demand_gap",
+      },
       { status: 400 },
     );
   } catch (e) {

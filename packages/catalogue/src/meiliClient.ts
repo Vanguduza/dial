@@ -1,5 +1,5 @@
 /**
- * Meilisearch HTTP client — Pack §6.3 / §8 / PD2.
+ * Meilisearch HTTP client — Pack §6.3 / §8 / PD2 + PD15 grocery.
  * Fixture mode skips network; sandbox/live requires MEILI_HOST + MEILI_MASTER_KEY.
  */
 import {
@@ -7,6 +7,11 @@ import {
   MEILI_SPARE_OFFERS_V1_SETTINGS,
   type SpareOfferDocument,
 } from "./meiliSettings.js";
+import {
+  MEILI_GROCERY_INDEX_DEFAULT,
+  MEILI_GROCERY_OFFERS_V1_SETTINGS,
+  type GroceryOfferDocument,
+} from "./grocery.js";
 
 export type IntegrationMode = "fixture" | "sandbox" | "live";
 
@@ -78,6 +83,64 @@ export async function upsertSpareOfferDocuments(
     body: JSON.stringify(docs),
   });
   if (!res.ok) throw new Error(`Meili documents HTTP ${res.status}`);
+  const data = (await res.json()) as { taskUid?: number };
+  return { taskUid: String(data.taskUid ?? "unknown"), indexUid: uid };
+}
+
+export function groceryOffersIndexName(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
+  return env.MEILI_GROCERY_INDEX?.trim() || MEILI_GROCERY_INDEX_DEFAULT;
+}
+
+export async function ensureGroceryOffersIndex(): Promise<{
+  indexUid: string;
+  applied: boolean;
+}> {
+  const uid = groceryOffersIndexName();
+  if (integrationMode() === "fixture") {
+    return { indexUid: uid, applied: true };
+  }
+  const host = requireSecret("MEILI_HOST").replace(/\/$/, "");
+  const key = requireSecret("MEILI_MASTER_KEY");
+  const headers = {
+    Authorization: `Bearer ${key}`,
+    "Content-Type": "application/json",
+  };
+  await fetch(`${host}/indexes`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ uid, primaryKey: "id" }),
+  }).catch(() => undefined);
+  const settingsRes = await fetch(`${host}/indexes/${uid}/settings`, {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify(MEILI_GROCERY_OFFERS_V1_SETTINGS),
+  });
+  if (!settingsRes.ok) {
+    throw new Error(`Meili grocery settings HTTP ${settingsRes.status}`);
+  }
+  return { indexUid: uid, applied: true };
+}
+
+export async function upsertGroceryOfferDocuments(
+  docs: GroceryOfferDocument[],
+): Promise<{ taskUid: string | "fixture"; indexUid: string }> {
+  const uid = groceryOffersIndexName();
+  if (integrationMode() === "fixture") {
+    return { taskUid: "fixture", indexUid: uid };
+  }
+  const host = requireSecret("MEILI_HOST").replace(/\/$/, "");
+  const key = requireSecret("MEILI_MASTER_KEY");
+  const res = await fetch(`${host}/indexes/${uid}/documents`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(docs),
+  });
+  if (!res.ok) throw new Error(`Meili grocery documents HTTP ${res.status}`);
   const data = (await res.json()) as { taskUid?: number };
   return { taskUid: String(data.taskUid ?? "unknown"), indexUid: uid };
 }

@@ -11,6 +11,7 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD15 Catalogue Factory admin** — CSV ingest → human approve → Meili spare + grocery publish; demand-gap KPIs; `/admin/catalogue/factory`; no AI auto-publish / no liquor / B2B informal leak=0; [#36](https://github.com/Vanguduza/dial/issues/36).
 - **PD14 Grocery web deepen** — USD cart → delivery slot (cold-chain; no liquor) → EcoCash\|COD checkout (ZiG only at pay) → ERP track; B2B informal hide; [#35](https://github.com/Vanguduza/dial/issues/35).
 - **PD13 tech-web Pack §9.3** — guide / diagnose / emergency / Cal.com book / customer job status vs `@dial/jobs` rate_card (no AI payable); `/api/tech/services` + IDOR; responsive design-tokens; [#34](https://github.com/Vanguduza/dial/issues/34).
 - **PD12 Meta WA Flows sandbox** — `FLOW_SPARE_*` + `FLOW_GROCERY_*` food on Cloud API (Flow invite + EcoCash\|COD buttons); registered templates; webhook `button_reply` → same `createCheckoutPayment` as web; admin `/admin/wa`; no Baileys / no liquor; [#33](https://github.com/Vanguduza/dial/issues/33).

@@ -53,6 +53,26 @@ export type CatalogueIngestBatch = {
   createdAt: string;
   /** Set after human approve + explicit publish to Meili stub index. */
   publishedOfferId?: string;
+  vertical?: "spare" | "grocery";
+};
+
+export type CatalogueDraftOffer = {
+  vertical: "spare" | "grocery";
+  offerId: string;
+  title: string;
+  unitPriceUsdMinor: bigint;
+  offerSource: OfferSource;
+  supplierFormality: SupplierFormality;
+  brand: string;
+  /** Spare fields */
+  qualityTier?: "OEM" | "OES" | "Aftermarket";
+  oem?: string;
+  /** Grocery fields */
+  unitLabel?: string;
+  coldChain?: "ambient" | "chilled" | "frozen" | "fragile";
+  ageGateRequired: false;
+  /** Locked — AI never writes payable amounts into Factory drafts. */
+  payableFromAi: false;
 };
 
 export type CatalogueReviewItem = {
@@ -60,6 +80,8 @@ export type CatalogueReviewItem = {
   batchId: string;
   offerId: string;
   status: "queued" | "approved" | "rejected";
+  vertical: "spare" | "grocery";
+  draft?: CatalogueDraftOffer;
 };
 
 export type SearchNoResultEvent = {
@@ -279,6 +301,7 @@ export function enqueueCatalogueIngest(rowCount: number): CatalogueIngestBatch {
     status: "pending_review",
     rowCount,
     createdAt: new Date().toISOString(),
+    vertical: "spare",
   };
   ingestBatches.set(batch.batchId, batch);
   const review: CatalogueReviewItem = {
@@ -286,9 +309,171 @@ export function enqueueCatalogueIngest(rowCount: number): CatalogueIngestBatch {
     batchId: batch.batchId,
     offerId: "pending",
     status: "queued",
+    vertical: "spare",
   };
   reviewQueue.push(review);
   return { ...batch };
+}
+
+/**
+ * PD15 CSV ingest — one review row per data line.
+ * Columns: vertical,offerId,title,unitPriceUsdMinor,supplierFormality,brand[,oem,qualityTier|unitLabel,coldChain]
+ * Rejects liquor / ageGate / DIAL_OWNED / float prices. AI never supplies payable amounts.
+ */
+export function ingestCatalogueCsv(csvText: string): {
+  batches: CatalogueIngestBatch[];
+  reviews: CatalogueReviewItem[];
+  rejectedRows: Array<{ line: number; reason: string }>;
+} {
+  const lines = csvText
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith("#"));
+  if (lines.length === 0) throw new Error("CSV empty");
+  const header = lines[0]!.toLowerCase();
+  const dataLines = header.includes("offerid") || header.includes("vertical")
+    ? lines.slice(1)
+    : lines;
+  if (dataLines.length === 0) throw new Error("CSV has no data rows");
+
+  const batches: CatalogueIngestBatch[] = [];
+  const reviews: CatalogueReviewItem[] = [];
+  const rejectedRows: Array<{ line: number; reason: string }> = [];
+
+  dataLines.forEach((line, idx) => {
+    const lineNo = idx + (header.includes("offerid") ? 2 : 1);
+    try {
+      const draft = parseCatalogueCsvRow(line);
+      const batch: CatalogueIngestBatch = {
+        batchId: `cib_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}_${idx}`,
+        status: "pending_review",
+        rowCount: 1,
+        createdAt: new Date().toISOString(),
+        vertical: draft.vertical,
+      };
+      ingestBatches.set(batch.batchId, batch);
+      const review: CatalogueReviewItem = {
+        reviewId: `crq_${batch.batchId}`,
+        batchId: batch.batchId,
+        offerId: draft.offerId,
+        status: "queued",
+        vertical: draft.vertical,
+        draft,
+      };
+      reviewQueue.push(review);
+      batches.push({ ...batch });
+      reviews.push({ ...review, draft: { ...draft } });
+    } catch (e) {
+      rejectedRows.push({
+        line: lineNo,
+        reason: e instanceof Error ? e.message : "invalid row",
+      });
+    }
+  });
+
+  if (batches.length === 0) {
+    throw new Error(
+      `No valid CSV rows (${rejectedRows.length} rejected) — liquor/DIAL_OWNED/floats blocked`,
+    );
+  }
+  return { batches, reviews, rejectedRows };
+}
+
+function parseCatalogueCsvRow(line: string): CatalogueDraftOffer {
+  const cols = line.split(",").map((c) => c.trim());
+  if (cols.length < 6) {
+    throw new Error("CSV row needs vertical,offerId,title,unitPriceUsdMinor,supplierFormality,brand");
+  }
+  const [verticalRaw, offerId, title, priceRaw, formalityRaw, brand, col6, col7] =
+    cols;
+  const vertical = (verticalRaw ?? "").toLowerCase();
+  if (vertical === "liquor") {
+    throw new Error("Liquor vertical forbidden until counsel gate");
+  }
+  if (vertical !== "spare" && vertical !== "grocery") {
+    throw new Error("vertical must be spare|grocery");
+  }
+  if (!offerId || !title || !brand) throw new Error("offerId/title/brand required");
+  if (/\.|e/i.test(priceRaw ?? "") && !/^\d+$/.test(priceRaw ?? "")) {
+    throw new Error("unitPriceUsdMinor must be integer string (no float)");
+  }
+  const unitPriceUsdMinor = BigInt(priceRaw ?? "0");
+  if (unitPriceUsdMinor <= 0n) throw new Error("unitPriceUsdMinor must be positive");
+  const supplierFormality = (formalityRaw ?? "").toLowerCase();
+  if (supplierFormality !== "formal" && supplierFormality !== "informal") {
+    throw new Error("supplierFormality must be formal|informal");
+  }
+
+  if (vertical === "spare") {
+    const qualityTier = (col7 ?? "OES") as "OEM" | "OES" | "Aftermarket";
+    if (!["OEM", "OES", "Aftermarket"].includes(qualityTier)) {
+      throw new Error("qualityTier must be OEM|OES|Aftermarket");
+    }
+    return {
+      vertical: "spare",
+      offerId,
+      title,
+      unitPriceUsdMinor,
+      offerSource: "MARKETPLACE",
+      supplierFormality,
+      brand,
+      oem: col6 || offerId,
+      qualityTier,
+      ageGateRequired: false,
+      payableFromAi: false,
+    };
+  }
+
+  const coldChain = (col7 ?? "ambient") as
+    | "ambient"
+    | "chilled"
+    | "frozen"
+    | "fragile";
+  if (!["ambient", "chilled", "frozen", "fragile"].includes(coldChain)) {
+    throw new Error("coldChain invalid");
+  }
+  return {
+    vertical: "grocery",
+    offerId,
+    title,
+    unitPriceUsdMinor,
+    offerSource: "MARKETPLACE",
+    supplierFormality,
+    brand,
+    unitLabel: col6 || "each",
+    coldChain,
+    ageGateRequired: false,
+    payableFromAi: false,
+  };
+}
+
+/** Demand-gap KPIs for Catalogue Factory admin (D-53). */
+export function getDemandGapSnapshot(): {
+  noResultCount: number;
+  topQueries: Array<{ query: string; count: number }>;
+  informalB2bLeaks: number;
+  pendingReview: number;
+  approvedAwaitingPublish: number;
+} {
+  const counts = new Map<string, number>();
+  for (const e of searchNoResultEvents) {
+    counts.set(e.query, (counts.get(e.query) ?? 0) + 1);
+  }
+  const topQueries = [...counts.entries()]
+    .map(([query, count]) => ({ query, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10);
+  return {
+    noResultCount: searchNoResultEvents.length,
+    topQueries,
+  informalB2bLeaks: countInformalB2bLeaks() /* spare; grocery checked in PD15 runner */,
+  pendingReview: reviewQueue.filter((r) => r.status === "queued").length,
+    approvedAwaitingPublish: reviewQueue.filter(
+      (r) =>
+        r.status === "approved" &&
+        ingestBatches.get(r.batchId)?.status === "approved",
+    ).length,
+  };
 }
 
 export function listCatalogueReviewQueue(): CatalogueReviewItem[] {
@@ -379,6 +564,162 @@ export async function publishApprovedBatchToMeili(input: {
   };
 }
 
+/**
+ * PD15 grocery publish — human-approved draft → grocery store + Meili grocery index.
+ * Rejects liquor/ageGate/DIAL_OWNED. Never auto-publish.
+ */
+export async function publishApprovedGroceryToMeili(input: {
+  batchId: string;
+  draft?: CatalogueDraftOffer;
+}): Promise<{
+  offerId: string;
+  taskUid: string | "fixture";
+  indexUid: string;
+}> {
+  const batch = ingestBatches.get(input.batchId);
+  if (!batch) throw new Error(`Unknown batch ${input.batchId}`);
+  if (batch.status !== "approved") {
+    throw new Error("Batch must be human-approved before Meili publish");
+  }
+  const review = reviewQueue.find((r) => r.batchId === input.batchId);
+  const draft = input.draft ?? review?.draft;
+  if (!draft || draft.vertical !== "grocery") {
+    throw new Error("Grocery draft required for grocery publish");
+  }
+  if (draft.payableFromAi !== false) {
+    throw new Error("AI payable drafts forbidden in Catalogue Factory");
+  }
+  if (draft.ageGateRequired !== false) {
+    throw new Error("Liquor/age-gate SKUs blocked (counsel gate)");
+  }
+  if (draft.offerSource !== "MARKETPLACE") {
+    throw new Error("DIAL_OWNED forbidden (D-58)");
+  }
+
+  const grocery = await import("./grocery.js");
+  grocery.assertGroceryPublishAllowed({
+    offerSource: draft.offerSource,
+    vertical: "grocery",
+    ageGateRequired: draft.ageGateRequired,
+  });
+
+  const offer = grocery.publishGroceryOfferFromFactory({
+    offerId: draft.offerId,
+    title: draft.title,
+    brand: draft.brand,
+    unitPriceUsdMinor: draft.unitPriceUsdMinor,
+    unitLabel: draft.unitLabel ?? "each",
+    coldChain: draft.coldChain ?? "ambient",
+    supplierFormality: draft.supplierFormality,
+    supplierDisplayName: `${draft.brand} Agency`,
+  });
+
+  batch.status = "published";
+  batch.publishedOfferId = offer.offerId;
+  batch.vertical = "grocery";
+  if (review) review.offerId = offer.offerId;
+
+  const { ensureGroceryOffersIndex, upsertGroceryOfferDocuments } = await import(
+    "./meiliClient.js"
+  );
+  const ensured = await ensureGroceryOffersIndex();
+  const docs = grocery
+    .listGroceryMeiliDocuments()
+    .filter((d) => d.id === offer.offerId);
+  const upsert = await upsertGroceryOfferDocuments(docs);
+  return {
+    offerId: offer.offerId,
+    taskUid: upsert.taskUid,
+    indexUid: upsert.indexUid || ensured.indexUid,
+  };
+}
+
+/**
+ * PD15 thin vertical: CSV ingest → human approve → Meili spare+grocery → demand-gap.
+ * No AI payable; no liquor; no auto-publish; B2B informal leak=0.
+ */
+export async function runPd15CatalogueFactoryThinVertical(): Promise<{
+  spareOfferId: string;
+  groceryOfferId: string;
+  spareIndex: string;
+  groceryIndex: string;
+  demandGap: ReturnType<typeof getDemandGapSnapshot>;
+  informalB2bLeaks: number;
+  autoPublishForbidden: true;
+  payableFromAi: false;
+}> {
+  __resetCatalogueForTests();
+  const { __resetGroceryForTests } = await import("./grocery.js");
+  __resetGroceryForTests();
+
+  searchOffers("pd15-missing-gap-query", { sessionRole: "b2c" });
+
+  const csv = [
+    "vertical,offerId,title,unitPriceUsdMinor,supplierFormality,brand,oem,qualityTier",
+    "spare,off_pd15_formal,PD15 Factory Spare,3300,formal,Bosch,PD15-OEM,OES",
+    "grocery,groc_pd15_oats,PD15 Rolled oats 1kg,450,formal,Dairibord,1kg,ambient",
+    "liquor,groc_beer,Blocked beer,999,formal,Brand,750ml,ambient",
+  ].join("\n");
+
+  const ingested = ingestCatalogueCsv(csv);
+  assertTrue(ingested.rejectedRows.length >= 1, "liquor row must be rejected");
+  assertTrue(ingested.batches.length === 2, "spare+grocery batches");
+
+  for (const review of ingested.reviews) {
+    if (review.draft?.payableFromAi !== false) {
+      throw new Error("Factory drafts must set payableFromAi=false");
+    }
+    approveCatalogueReview(review.reviewId);
+  }
+
+  const spareReview = ingested.reviews.find((r) => r.vertical === "spare")!;
+  const spareDraft = spareReview.draft!;
+  const sparePub = await publishApprovedBatchToMeili({
+    batchId: spareReview.batchId,
+    offer: {
+      offerId: spareDraft.offerId,
+      title: spareDraft.title,
+      unitPriceUsdMinor: spareDraft.unitPriceUsdMinor,
+      qualityTier: spareDraft.qualityTier ?? "OES",
+      offerSource: "MARKETPLACE",
+      supplierFormality: spareDraft.supplierFormality,
+      oem: spareDraft.oem ?? spareDraft.offerId,
+      brand: spareDraft.brand,
+    },
+  });
+
+  const groceryReview = ingested.reviews.find((r) => r.vertical === "grocery")!;
+  const groceryPub = await publishApprovedGroceryToMeili({
+    batchId: groceryReview.batchId,
+  });
+
+  const leaks =
+    countInformalB2bLeaks() +
+    (await import("./grocery.js")).countGroceryInformalB2bLeaks();
+  const demandGap = getDemandGapSnapshot();
+  if (demandGap.noResultCount < 1) {
+    throw new Error("PD15 expected demand-gap from no-result search");
+  }
+  if (leaks !== 0) {
+    throw new Error(`B2B informal leak must be 0, got ${leaks}`);
+  }
+
+  return {
+    spareOfferId: sparePub.doc.id,
+    groceryOfferId: groceryPub.offerId,
+    spareIndex: sparePub.indexUid,
+    groceryIndex: groceryPub.indexUid,
+    demandGap,
+    informalB2bLeaks: leaks,
+    autoPublishForbidden: true,
+    payableFromAi: false,
+  };
+}
+
+function assertTrue(cond: boolean, msg: string): void {
+  if (!cond) throw new Error(msg);
+}
+
 export function createCart(): Cart {
   const cart: Cart = {
     id: `cart_${Date.now().toString(36)}`,
@@ -448,10 +789,13 @@ export function __resetCatalogueForTests(): void {
 
 export {
   ensureSpareOffersIndex,
+  ensureGroceryOffersIndex,
+  groceryOffersIndexName,
   pingMeiliHealth,
   searchSpareOfferDocuments,
   spareOffersIndexName,
   upsertSpareOfferDocuments,
+  upsertGroceryOfferDocuments,
   integrationMode as meiliIntegrationMode,
 } from "./meiliClient.js";
 
@@ -472,6 +816,7 @@ export {
   listGroceryDeliverySlots,
   listGroceryMeiliDocuments,
   placeGroceryOrder,
+  publishGroceryOfferFromFactory,
   searchGroceryOffers,
   setGroceryCartSlot,
   trackGroceryOrder,

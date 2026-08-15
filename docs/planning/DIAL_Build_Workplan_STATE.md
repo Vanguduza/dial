@@ -2,15 +2,15 @@
 
 **SoR for stage order:** `DIAL_Build_Workplan.md`  
 **Updated:** 2026-08-15  
-**Auto-advance:** **ON for product-depth band** — through **PD14** green → **PD15** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
+**Auto-advance:** **ON for product-depth band** — through **PD15** green → **PD16** next. OpenAPI invent paused. **S99 = launch only (human)** — not eng next.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **PD15** — Catalogue Factory admin (next eng) |
-| `current_issue` | _(open when starting PD15)_ |
+| `current_stage` | **PD16** — Promotions & referrals admin (next eng) |
+| `current_issue` | _(open when starting PD16)_ |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **PD14** Grocery web deepen — **green** ([#35](https://github.com/Vanguduza/dial/issues/35)) |
-| `next_stage` | **PD15** Catalogue Factory admin |
+| `prior_stage` | **PD15** Catalogue Factory admin — **green** ([#36](https://github.com/Vanguduza/dial/issues/36)) |
+| `next_stage` | **PD16** Promotions & referrals admin |
 | `blocked_on_human` | **S99** customer-open/launch only; liquor counsel gate |
 
 ## Completed
@@ -34,16 +34,19 @@
 | **PD12** | 2026-08-15 | Meta WA Flows sandbox Spare + grocery food Cloud API; [#33](https://github.com/Vanguduza/dial/issues/33) |
 | **PD13** | 2026-08-15 | tech-web Pack §9.3 guide/emergency/book/status; [#34](https://github.com/Vanguduza/dial/issues/34) |
 | **PD14** | 2026-08-15 | Grocery web deepen slot/cart/checkout/track (food); [#35](https://github.com/Vanguduza/dial/issues/35) |
+| **PD15** | 2026-08-15 | Catalogue Factory admin CSV→approve→Meili spare+grocery + demand-gap; [#36](https://github.com/Vanguduza/dial/issues/36) |
 
 ## Planned (eng next)
 
 | Stage | Intent |
 | --- | --- |
-| **PD15** | Catalogue Factory admin — D-53 queues + demand-gap |
+| **PD16** | Promotions & referrals admin — Pack §9.5 (REFERRAL/PLATFORM/FLASH/SUPPLIER_COOP) |
+| **PD17** | Intelligence Factory shadow/promote — D-54 (human+Promptfoo; no payable AI) |
+| **PD18** | Spare-web deepen — Pack §9.2 orders/returns/garage |
 | **S99** | Customer-open — founder/ops — **not automatic / not eng next** |
 
 ## Note
 
-Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope.
+Founder (2026-08-15): product depth continues — do **not** idle at S99 for eng. Do **not** invent OpenAPI. No liquor Build. Skip `.github/workflows/*` until workflow scope. Pack §9 audit after PD15 authored **PD16–PD18**.
 
 *Dev Manager updates this file in the same commit as stage transitions.*

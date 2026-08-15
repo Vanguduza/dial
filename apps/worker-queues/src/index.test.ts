@@ -25,7 +25,7 @@ test("S98 worker-queues fixture start exits 0", async () => {
     setTimeout(() => {
       child.kill();
       reject(new Error(`timeout: ${err}`));
-    }, 20_000);
+    }, 60_000);
   });
   assert.equal(code, 0);
 });

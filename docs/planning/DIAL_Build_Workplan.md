@@ -81,9 +81,12 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | 118 | `PD12` | **Meta WA Flows** — Spare + grocery food Cloud API | [#33](https://github.com/Vanguduza/dial/issues/33) | Official Cloud API Flows (D-40); EcoCash\|COD buttons (D-57); no Baileys / no liquor | `PD13` |
 | 119 | `PD13` | **tech-web** — Pack §9.3 FixItNow patterns | [#34](https://github.com/Vanguduza/dial/issues/34) | Guide / emergency / diagnose / book vs `@dial/jobs`; no AI payable | `PD14` |
 | 120 | `PD14` | **Grocery web deepen** — slot + track + checkout (food) | [#35](https://github.com/Vanguduza/dial/issues/35) | Beyond G1 browse; USD; EcoCash\|COD; no liquor | `PD15` |
-| 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | new issue | Ingest/review/approve → Meili; B2B informal leak=0 | expand / next band |
+| 121 | `PD15` | **Catalogue Factory admin** — D-53 queues + demand-gap | [#36](https://github.com/Vanguduza/dial/issues/36) | CSV→approve→Meili spare+grocery; B2B leak=0 | `PD16` |
+| 122 | `PD16` | **Promotions & referrals admin** — Pack §9.5 | new issue | REFERRAL/PLATFORM/FLASH create; SUPPLIER_COOP approve; budgets; fraud holds; no cash-out | `PD17` |
+| 123 | `PD17` | **Intelligence Factory shadow/promote** — D-54 | new issue | Shadow eval → human+Promptfoo promote; AI drafts only; never payable | `PD18` |
+| 124 | `PD18` | **Spare-web deepen** — Pack §9.2 orders/returns/garage | new issue | Beyond PD3 browse; returns claim; garage vehicles; USD; EcoCash\|COD | expand / next band |
 
-**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD14 is **PD15**, not S99.
+**Paused (not SoR):** OpenAPI invent S91–S465+ — do **not** invent S466+. Skip `.github/workflows/*` in pushes until token has `workflow` scope. **No liquor Build** (counsel gate). Eng next after PD15 is **PD16**, not S99.
 
 ---
 
@@ -235,9 +238,27 @@ Founder directive (2026-08-14): after S90, **do not invent OpenAPI micro-stages*
 | Evidence | `runPd14GroceryWebThinVertical`; `pd14GroceryWeb.test.ts`; slot liquorAllowed=false |
 | Green → | **PD15** Catalogue Factory admin |
 
-### PD15 — Catalogue Factory admin (NEXT)
+### PD15 — Catalogue Factory admin (**GREEN** 2026-08-15)
 
-D-53 ingest/review/approve queues + demand-gap KPIs → Meili; B2B informal leak=0.
+| | |
+| --- | --- |
+| Issue | [#36](https://github.com/Vanguduza/dial/issues/36) |
+| Branch | `build/t4-tech-ui` |
+| Thin path | CSV ingest → human approve → Meili spare_offers + grocery_offers; demand-gap KPIs; admin `/admin/catalogue/factory` |
+| Evidence | `runPd15CatalogueFactoryThinVertical`; `pd15CatalogueFactory.test.ts`; liquor reject; payableFromAi=false; B2B leak=0 |
+| Green → | **PD16** Promotions & referrals admin |
+
+### PD16 — Promotions & referrals admin (NEXT)
+
+Pack §9.5 — create `REFERRAL` / `PLATFORM` / `FLASH`; approve `SUPPLIER_COOP`; budgets + fraud holds; promo credit never cash-out (D-42).
+
+### PD17 — Intelligence Factory shadow/promote
+
+D-54 — shadow eval → human + Promptfoo promote; AI drafts only; never auto-publish payable amounts.
+
+### PD18 — Spare-web deepen (Pack §9.2)
+
+Orders / returns / garage beyond PD3 browse; USD; EcoCash\|COD; returns ERP stub.
 
 ### S10 — E2a (historical)
 
