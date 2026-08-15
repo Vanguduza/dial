@@ -27,6 +27,7 @@ import {
   postCourierLocation,
   reconcileCodAfterPod,
   recordCodCollectAttempt,
+  recordCodCollectFailure,
   refreshEtaBanner,
   rejectOffer,
   reoptimiseRemainingStops,
@@ -439,6 +440,36 @@ export async function POST(req: Request) {
             heldUsdMinor: float.heldUsdMinor.toString(),
           },
           payableFromAi: false,
+        });
+      }
+      case "cod_collect_failure": {
+        const jobId = String(body.jobId ?? "");
+        const job = getDeliveryJob(jobId);
+        if (!job || job.assignedCourierId !== courierId) {
+          return NextResponse.json({ error: "Job not assigned to courier" }, { status: 403 });
+        }
+        const collect =
+          body.collectUsdMinor != null
+            ? BigInt(String(body.collectUsdMinor))
+            : (job.codAmountUsd?.amountMinor ?? 0n);
+        const failureReason = String(body.failureReason ?? "") as
+          | "customer_refused"
+          | "wrong_amount"
+          | "no_cash"
+          | "counterfeit_suspected"
+          | "other";
+        const attempt = recordCodCollectFailure({
+          jobId,
+          courierId,
+          collectUsdMinor: collect,
+          failureReason,
+          ...(body.note != null ? { note: String(body.note) } : {}),
+        });
+        return NextResponse.json({
+          ok: true,
+          attempt,
+          payableFromAi: false,
+          note: "PD61 — COD failure reason recorded",
         });
       }
       default:

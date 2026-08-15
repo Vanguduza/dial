@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD62 Unified four-eyes queue** — pending Daily ZiG proposals on `/admin/four-eyes`; approve/reject via SoR (same-actor blocked).
+- **PD61 COD failure reasons** — `recordCodCollectFailure` → `cod_attempts` with reason codes; float warn unchanged (Pack §9.8).
+- **PD60 Domain module registry** — certification SoR in `@dial/shared` + `/admin/platform/modules`; not Unleash; CERTIFIED–DORMANT ≠ public MVP ladder (D-53).
+- **PD59 Assignment-event timeline** — offer/accept/reject/timeout/FIFO/override events; dispatch board + `/api/admin/delivery/assignment-events` (D-45).
 - **PD58 Customer delivery track** — session-owned order → read-only MapLibre pin (`/delivery/track`); not Google/Mapbox SoR.
 - **PD57 Daily ZiG four-eyes** — propose → different ops approve before active rate; same-actor blocked (D-57 / Pack §9.5).
 - **PD56 Dispatch manual override assign** — FIFO → `manualOverrideAssign` on `/admin/delivery/dispatch` (D-45).

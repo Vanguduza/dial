@@ -209,6 +209,26 @@ test("PD58 customer delivery track read-only", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD59 assignment event timeline", async () => {
+  const { runPd59AssignmentEventsThinVertical } = await import("./index.js");
+  const out = runPd59AssignmentEventsThinVertical();
+  assert.equal(out.hasOfferRejectFifoOverride, true);
+  assert.ok(out.eventTypes.includes("offered"));
+  assert.ok(out.eventTypes.includes("rejected"));
+  assert.ok(out.eventTypes.includes("fifo_queued"));
+  assert.ok(out.eventTypes.includes("manual_override"));
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD61 COD failure reason on attempt", async () => {
+  const { runPd61CodFailureReasonThinVertical } = await import("./index.js");
+  const out = runPd61CodFailureReasonThinVertical();
+  assert.equal(out.failureRecorded, true);
+  assert.equal(out.failureReason, "customer_refused");
+  assert.equal(out.floatWarnStillWorks, true);
+  assert.equal(out.currency, "USD");
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

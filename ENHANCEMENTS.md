@@ -450,6 +450,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-466 | **PD56 Dispatch manual override assign** | `done` | D-45 FIFO override |
 | ENH-467 | **PD57 Daily ZiG four-eyes** propose/approve | `done` | D-57 Pack §9.5 |
 | ENH-468 | **PD58 Customer delivery track** read-only MapLibre | `done` | Pack §9.5; D-44 |
+| ENH-469 | **PD59 Assignment-event timeline** offer/reject/FIFO/override | `done` | Pack §9.5; D-45 |
+| ENH-470 | **PD60 Domain module registry** certification ≠ Unleash | `done` | D-53 |
+| ENH-471 | **PD61 COD failure reasons** on collect attempts | `done` | Pack §9.8 |
+| ENH-472 | **PD62 Unified four-eyes queue** Daily ZiG approve|reject | `done` | Pack §9.5 |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

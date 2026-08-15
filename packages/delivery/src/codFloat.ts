@@ -1,5 +1,6 @@
 /**
  * PD32 — COD float-limit warning on collect (Pack §9.8 / D-7 ops).
+ * PD61 — COD collect failure reasons on attempts.
  * USD amountMinor only — never float FX. Warning when projected held > limit.
  */
 
@@ -25,6 +26,14 @@ export type CodCollectEvaluation = {
   payableFromAi: false;
 };
 
+/** Pack §9.8 — failure reasons on COD collect attempts. */
+export type CodCollectFailureReason =
+  | "customer_refused"
+  | "wrong_amount"
+  | "no_cash"
+  | "counterfeit_suspected"
+  | "other";
+
 export type CodCollectAttempt = {
   attemptId: string;
   jobId: string;
@@ -32,7 +41,9 @@ export type CodCollectAttempt = {
   collectUsdMinor: string;
   floatLimitWarning: boolean;
   acknowledgedWarning: boolean;
-  status: "recorded" | "blocked_unacked_warning";
+  status: "recorded" | "blocked_unacked_warning" | "failed";
+  failureReason?: CodCollectFailureReason;
+  note?: string;
   currency: "USD";
   recordedAt: string;
   payableFromAi: false;
@@ -40,6 +51,14 @@ export type CodCollectAttempt = {
 
 const floats = new Map<string, CourierCodFloatState>();
 const attempts: CodCollectAttempt[] = [];
+
+const FAILURE_REASONS = new Set<CodCollectFailureReason>([
+  "customer_refused",
+  "wrong_amount",
+  "no_cash",
+  "counterfeit_suspected",
+  "other",
+]);
 
 function attemptId(): string {
   return `coda_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
@@ -146,6 +165,41 @@ export function recordCodCollectAttempt(input: {
     floatLimitWarning: evalResult.floatLimitWarning,
     acknowledgedWarning: Boolean(input.acknowledgedWarning),
     status: "recorded",
+    currency: "USD",
+    recordedAt: new Date().toISOString(),
+    payableFromAi: false,
+  };
+  attempts.push(row);
+  return { ...row };
+}
+
+/** PD61 — failed COD collect with required failure reason (does not change held float). */
+export function recordCodCollectFailure(input: {
+  jobId: string;
+  courierId: string;
+  collectUsdMinor: bigint;
+  failureReason: CodCollectFailureReason;
+  note?: string;
+}): CodCollectAttempt {
+  if (input.collectUsdMinor < 0n) {
+    throw new TypeError("collect amount must be >= 0");
+  }
+  if (!FAILURE_REASONS.has(input.failureReason)) {
+    throw new Error(`Unknown COD failure reason ${input.failureReason}`);
+  }
+  if (!input.jobId.trim() || !input.courierId.trim()) {
+    throw new Error("jobId and courierId required");
+  }
+  const row: CodCollectAttempt = {
+    attemptId: attemptId(),
+    jobId: input.jobId,
+    courierId: input.courierId,
+    collectUsdMinor: input.collectUsdMinor.toString(),
+    floatLimitWarning: false,
+    acknowledgedWarning: false,
+    status: "failed",
+    failureReason: input.failureReason,
+    ...(input.note ? { note: input.note } : {}),
     currency: "USD",
     recordedAt: new Date().toISOString(),
     payableFromAi: false,

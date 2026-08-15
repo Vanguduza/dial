@@ -22,6 +22,7 @@ import {
   runPd25Itf263TakeHomeThinVertical,
   runPd52TakeHomePolishThinVertical,
   runPd57DailyZigFourEyesThinVertical,
+  runPd62FourEyesQueueThinVertical,
   setDailyZigRate,
   toCanonicalPspCode,
   usdToZig,
@@ -259,6 +260,13 @@ test("PD57 Daily ZiG four-eyes thin vertical", () => {
   const out = runPd57DailyZigFourEyesThinVertical();
   assert.equal(out.fourEyesEnforced, true);
   assert.ok(out.activatedFxRateId);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("PD62 four-eyes queue thin vertical", () => {
+  const out = runPd62FourEyesQueueThinVertical();
+  assert.equal(out.queuedThenCleared, true);
+  assert.equal(out.kind, "daily_zig_rate");
   assert.equal(out.payableFromAi, false);
 });
 

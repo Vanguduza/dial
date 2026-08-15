@@ -286,6 +286,60 @@ export function runPd57DailyZigFourEyesThinVertical(): {
   };
 }
 
+export type FourEyesQueueItem = {
+  kind: "daily_zig_rate";
+  proposalId: string;
+  status: "pending";
+  zigMinorPerUsd: string;
+  proposedBy: string;
+  createdAt: string;
+  payableFromAi: false;
+};
+
+/** PD62 — unified admin four-eyes queue (FX proposals first; Pack §9.5). */
+export function listFourEyesQueue(): FourEyesQueueItem[] {
+  return listFxRateProposals({ status: "pending" }).map((p) => ({
+    kind: "daily_zig_rate" as const,
+    proposalId: p.proposalId,
+    status: "pending" as const,
+    zigMinorPerUsd: p.zigMinorPerUsd.toString(),
+    proposedBy: p.proposedBy,
+    createdAt: p.createdAt,
+    payableFromAi: false as const,
+  }));
+}
+
+/**
+ * PD62 thin vertical: pending FX proposal appears on four-eyes queue; approve clears it.
+ */
+export function runPd62FourEyesQueueThinVertical(): {
+  queuedThenCleared: true;
+  kind: "daily_zig_rate";
+  payableFromAi: false;
+} {
+  __resetPaymentsForTests();
+  proposeDailyZigRate({
+    zigMinorPerUsd: 2700_00n,
+    proposedBy: "ops_queue_a",
+  });
+  const queued = listFourEyesQueue();
+  if (queued.length !== 1 || queued[0]!.kind !== "daily_zig_rate") {
+    throw new Error("PD62 expected one daily_zig_rate queue item");
+  }
+  approveDailyZigRate({
+    proposalId: queued[0]!.proposalId,
+    approvedBy: "ops_queue_b",
+  });
+  if (listFourEyesQueue().length !== 0) {
+    throw new Error("PD62 queue must clear after approve");
+  }
+  return {
+    queuedThenCleared: true,
+    kind: "daily_zig_rate",
+    payableFromAi: false,
+  };
+}
+
 /** Convert USD minor → ZiG minor using active daily rate (integer math only). */
 export function usdToZig(usdMinor: bigint, rate: FxDailyRate): Money {
   return money(usdMinor * rate.zigMinorPerUsd / 100n, "ZWG");

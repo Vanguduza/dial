@@ -791,8 +791,52 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 
 | Gap | Stage |
 | --- | --- |
+| Assignment-event timeline | **PD59** |
+| Domain module registry (≠ Unleash) | **PD60** |
+| COD collect failure reasons | **PD61** |
+| Unified four-eyes queue | **PD62** |
 | Remote staging Playwright | ENH-011 optional human |
 | Liquor Build | counsel gate — not eng |
+
+### PD59 — Assignment-event timeline (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | offer → reject → FIFO → override → `listAssignmentEvents` on dispatch board |
+| Evidence | `runPd59AssignmentEventsThinVertical`; `pd59Pd62Ops.test.ts` |
+| Green → | **PD60** domain modules |
+
+### PD60 — Domain module registry (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | seeded modules → certify/dormant; `publicMvpLadder=false`; not Unleash SoR |
+| Evidence | `runPd60DomainModuleRegistryThinVertical`; `pd59Pd62Ops.test.ts` |
+| Green → | **PD61** COD failure reasons |
+
+### PD61 — COD failure reasons (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | `recordCodCollectFailure` with reason → attempt status failed; float warn intact |
+| Evidence | `runPd61CodFailureReasonThinVertical`; `pd59Pd62Ops.test.ts` |
+| Green → | **PD62** four-eyes queue |
+
+### PD62 — Unified four-eyes queue (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | pending Daily ZiG → `/admin/four-eyes` approve|reject; same-actor still blocked in SoR |
+| Evidence | `runPd62FourEyesQueueThinVertical`; `pd59Pd62Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD62)
+
+| Gap | Stage |
+| --- | --- |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
 
 ### S10 — E2a (historical)
 

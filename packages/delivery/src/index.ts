@@ -22,8 +22,14 @@ import {
   __resetCodFloatForTests,
   evaluateCodCollect,
   recordCodCollectAttempt,
+  recordCodCollectFailure,
   setCourierCodFloatLimit,
 } from "./codFloat.js";
+import {
+  __resetAssignmentEventsForTests,
+  listAssignmentEvents,
+  recordAssignmentEvent,
+} from "./assignmentEvents.js";
 
 export {
   activateOfflinePack,
@@ -55,11 +61,21 @@ export {
   getCourierCodFloat,
   listCodCollectAttempts,
   recordCodCollectAttempt,
+  recordCodCollectFailure,
   setCourierCodFloatLimit,
   type CodCollectAttempt,
   type CodCollectEvaluation,
+  type CodCollectFailureReason,
   type CourierCodFloatState,
 } from "./codFloat.js";
+
+export {
+  listAssignmentEvents,
+  recordAssignmentEvent,
+  __resetAssignmentEventsForTests,
+  type AssignmentEventType,
+  type DeliveryAssignmentEvent,
+} from "./assignmentEvents.js";
 
 export {
   createJobsFromMultiStopPlan,
@@ -302,6 +318,11 @@ export function startDeliveryDispatchWorkflow(jobId: string): DeliveryDispatchWo
     job.status = "queued_fifo";
     fifoQueue.push(jobId);
     workflow.phase = "fifo";
+    recordAssignmentEvent({
+      jobId,
+      type: "fifo_queued",
+      actor: "dispatch",
+    });
   }
   return { ...workflow };
 }
@@ -330,6 +351,12 @@ function offerToNextCourier(jobId: string): DeliveryOffer | undefined {
   offers.set(offer.id, offer);
   job.status = "offered";
   job.offerId = offer.id;
+  recordAssignmentEvent({
+    jobId,
+    type: "offered",
+    courierId,
+    actor: "dispatch",
+  });
   return { ...offer };
 }
 
@@ -345,6 +372,12 @@ export function acceptOffer(offerId: string, courierId: CourierId): DeliveryJob 
   job.assignedCourierId = courierId;
   const wf = [...workflows.values()].find((w) => w.jobId === job.id);
   if (wf) wf.phase = "accepted";
+  recordAssignmentEvent({
+    jobId: job.id,
+    type: "accepted",
+    courierId,
+    actor: courierId,
+  });
   return { ...job };
 }
 
@@ -376,6 +409,12 @@ export function manualOverrideAssign(input: {
   setCourierAvailabilityStatus(input.courierId, "busy");
   const wf = [...workflows.values()].find((w) => w.jobId === job.id);
   if (wf) wf.phase = "accepted";
+  recordAssignmentEvent({
+    jobId: job.id,
+    type: "manual_override",
+    courierId: input.courierId,
+    actor: input.assignedBy.trim(),
+  });
   return { ...job };
 }
 
@@ -415,6 +454,12 @@ export function rejectOffer(offerId: string, courierId: CourierId): DeliveryOffe
   if (offer.courierId !== courierId) throw new Error("Offer not for this courier");
   if (offer.status !== "pending") throw new Error(`Offer already ${offer.status}`);
   offer.status = "rejected";
+  recordAssignmentEvent({
+    jobId: offer.jobId,
+    type: "rejected",
+    courierId,
+    actor: courierId,
+  });
   reassignOrFifo(offer.jobId);
   return { ...offer };
 }
@@ -425,6 +470,12 @@ export function timeoutOffer(offerId: string): DeliveryOffer {
   if (!offer) throw new Error("Unknown offer");
   if (offer.status !== "pending") throw new Error(`Offer already ${offer.status}`);
   offer.status = "timed_out";
+  recordAssignmentEvent({
+    jobId: offer.jobId,
+    type: "timed_out",
+    courierId: offer.courierId,
+    actor: "dispatch_timeout",
+  });
   reassignOrFifo(offer.jobId);
   return { ...offer };
 }
@@ -436,11 +487,22 @@ function reassignOrFifo(jobId: string): void {
   const next = offerToNextCourier(jobId);
   if (next) {
     if (wf) wf.phase = "reassign";
+    recordAssignmentEvent({
+      jobId,
+      type: "reassigned",
+      courierId: next.courierId,
+      actor: "dispatch",
+    });
     return;
   }
   job.status = "queued_fifo";
   if (!fifoQueue.includes(jobId)) fifoQueue.push(jobId);
   if (wf) wf.phase = "fifo";
+  recordAssignmentEvent({
+    jobId,
+    type: "fifo_queued",
+    actor: "dispatch",
+  });
 }
 
 function drainFifo(): void {
@@ -1046,6 +1108,92 @@ export function runPd56ManualOverrideAssignThinVertical(input?: {
 }
 
 /**
+ * PD59 thin vertical: offer → reject → FIFO → override → assignment timeline.
+ */
+export function runPd59AssignmentEventsThinVertical(): {
+  jobId: string;
+  eventTypes: string[];
+  hasOfferRejectFifoOverride: true;
+  payableFromAi: false;
+  mapSor: "maplibre";
+} {
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus("cour_pd59_a", "available");
+  const job = createDeliveryJob({
+    orderId: "ord_pd59",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 18_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD59 expected offer");
+  rejectOffer(offered.offerId, "cour_pd59_a");
+  if (!listFifoQueue().includes(job.id)) {
+    throw new Error("PD59 expected FIFO after sole courier reject");
+  }
+  manualOverrideAssign({
+    jobId: job.id,
+    courierId: "cour_pd59_b",
+    assignedBy: "ops_pd59",
+  });
+  const timeline = listAssignmentEvents(job.id);
+  const types = timeline.map((e) => e.type);
+  for (const need of ["offered", "rejected", "fifo_queued", "manual_override"] as const) {
+    if (!types.includes(need)) {
+      throw new Error(`PD59 missing assignment event ${need}: ${types.join(",")}`);
+    }
+  }
+  if (timeline.some((e) => e.payableFromAi !== false)) {
+    throw new Error("PD59 timeline must never mark payableFromAi");
+  }
+  return {
+    jobId: job.id,
+    eventTypes: types,
+    hasOfferRejectFifoOverride: true,
+    payableFromAi: false,
+    mapSor: "maplibre",
+  };
+}
+
+/**
+ * PD61 thin vertical: COD collect failure reason recorded on attempt.
+ */
+export function runPd61CodFailureReasonThinVertical(): {
+  failureRecorded: true;
+  failureReason: "customer_refused";
+  floatWarnStillWorks: true;
+  payableFromAi: false;
+  currency: "USD";
+} {
+  __resetDeliveryForTests();
+  setCourierCodFloatLimit("cour_pd61", 50_00n);
+  const failed = recordCodCollectFailure({
+    jobId: "dj_pd61",
+    courierId: "cour_pd61",
+    collectUsdMinor: 20_00n,
+    failureReason: "customer_refused",
+  });
+  if (failed.status !== "failed" || failed.failureReason !== "customer_refused") {
+    throw new Error("PD61 expected failed COD with reason");
+  }
+  const warn = evaluateCodCollect({
+    courierId: "cour_pd61",
+    collectUsdMinor: 60_00n,
+  });
+  if (!warn.floatLimitWarning) {
+    throw new Error("PD61 float warn must still fire");
+  }
+  return {
+    failureRecorded: true,
+    failureReason: "customer_refused",
+    floatWarnStillWorks: true,
+    payableFromAi: false,
+    currency: "USD",
+  };
+}
+
+/**
  * PD58 thin vertical: assign job for order → post location → customer read-only track.
  */
 export function runPd58CustomerDeliveryTrackThinVertical(input?: {
@@ -1254,4 +1402,5 @@ export function __resetDeliveryForTests(): void {
   __resetOfflinePacksForTests();
   __resetNavigateStopsForTests();
   __resetCodFloatForTests();
+  __resetAssignmentEventsForTests();
 }

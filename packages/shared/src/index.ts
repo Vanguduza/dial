@@ -11,3 +11,12 @@ export {
   integrationMode as processedEventsIntegrationMode,
 } from "./processedEvents.js";
 export { pingInternalApiHealth } from "./internalApi.js";
+export {
+  getDomainModule,
+  listDomainModules,
+  runPd60DomainModuleRegistryThinVertical,
+  setDomainModuleCertification,
+  __resetDomainModulesForTests,
+  type DomainModule,
+  type DomainModuleCert,
+} from "./domainRegistry.js";

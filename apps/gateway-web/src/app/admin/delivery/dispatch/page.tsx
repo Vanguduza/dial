@@ -11,13 +11,24 @@ type Board = {
   offers: Array<{ id: string; jobId: string; courierId: string; status: string }>;
 };
 
+type AssignmentEvent = {
+  eventId: string;
+  jobId: string;
+  type: string;
+  courierId: string | null;
+  actor: string;
+  at: string;
+};
+
 /**
  * PD10 live dispatch board — FIFO + offers vs @dial/delivery (D-45).
- * MapLibre track remains /admin/delivery/track.
+ * PD59 assignment-event timeline. MapLibre track remains /admin/delivery/track.
  */
 export default function AdminDispatchBoardPage() {
   const [secret, setSecret] = useState("");
   const [board, setBoard] = useState<Board | null>(null);
+  const [timelineJobId, setTimelineJobId] = useState("");
+  const [events, setEvents] = useState<AssignmentEvent[]>([]);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -91,7 +102,34 @@ export default function AdminDispatchBoardPage() {
       setMessage(
         `Override assigned ${data.job?.id} → ${data.job?.assignedCourierId} (${data.job?.status})`,
       );
+      setTimelineJobId(jobId);
       await refresh();
+      await loadTimeline(jobId);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadTimeline(jobId?: string) {
+    const id = (jobId ?? timelineJobId).trim();
+    if (!id || !secret) return;
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch(
+        `/api/admin/delivery/assignment-events?jobId=${encodeURIComponent(id)}`,
+        { headers: headers() },
+      );
+      const data = (await res.json()) as {
+        error?: string;
+        events?: AssignmentEvent[];
+      };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setEvents(data.events ?? []);
+      setTimelineJobId(id);
     } finally {
       setBusy(false);
     }
@@ -218,6 +256,32 @@ export default function AdminDispatchBoardPage() {
               {board.offers.map((o) => (
                 <li key={o.id}>
                   <code>{o.id}</code> · {o.status} · {o.courierId} → job {o.jobId}
+                </li>
+              ))}
+            </ul>
+            <h2 style={{ fontSize: "1.1rem" }} data-testid="assignment-events-heading">
+              Assignment events (PD59)
+            </h2>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+              <input
+                placeholder="jobId"
+                value={timelineJobId}
+                onChange={(e) => setTimelineJobId(e.target.value)}
+                style={{ padding: 8, borderRadius: 6, border: "1px solid #ccc", minWidth: 200 }}
+              />
+              <button
+                type="button"
+                disabled={busy || !secret || !timelineJobId.trim()}
+                onClick={() => void loadTimeline()}
+              >
+                Load timeline
+              </button>
+            </div>
+            <ul style={{ fontSize: 13, lineHeight: 1.6 }} data-testid="assignment-events-list">
+              {events.map((e) => (
+                <li key={e.eventId}>
+                  <code>{e.type}</code> · {e.at} · actor {e.actor}
+                  {e.courierId ? ` · courier ${e.courierId}` : ""}
                 </li>
               ))}
             </ul>
