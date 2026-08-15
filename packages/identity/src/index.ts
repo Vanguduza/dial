@@ -287,6 +287,54 @@ export function rlsContextFromSession(session: {
   return { userId: session.userId, role };
 }
 
+/**
+ * PD82 thin vertical: sign-up → update own displayName → cross-tenant deny (Pack §10).
+ */
+export function runPd82AccountProfileThinVertical(): {
+  displayNameUpdated: true;
+  buyerSegment: "b2c";
+  crossTenantDenied: true;
+  payableFromAi: false;
+} {
+  __resetIdentityForTests();
+  const alice = signUp({
+    email: "alice_pd82@dial.test",
+    displayName: "Alice PD82",
+  });
+  const bob = signUp({
+    email: "bob_pd82@dial.test",
+    displayName: "Bob PD82",
+  });
+  const aliceCtx = rlsContextFromProfile(alice);
+  const updated = updateProfileAs(aliceCtx, alice.userId, {
+    displayName: "Alice Updated",
+  });
+  if (updated.displayName !== "Alice Updated") {
+    throw new Error("PD82 own profile update failed");
+  }
+  const bobCtx = rlsContextFromProfile(bob);
+  let denied = false;
+  try {
+    updateProfileAs(bobCtx, alice.userId, { displayName: "Hijack" });
+  } catch {
+    denied = true;
+  }
+  if (!denied) throw new Error("PD82 expected cross-tenant update deny");
+  const self = selectProfileAs(aliceCtx, alice.userId);
+  if (!self || self.displayName !== "Alice Updated") {
+    throw new Error("PD82 select own profile failed");
+  }
+  if (alice.buyerSegment !== "b2c") {
+    throw new Error("PD82 expected b2c default");
+  }
+  return {
+    displayNameUpdated: true,
+    buyerSegment: "b2c",
+    crossTenantDenied: true,
+    payableFromAi: false,
+  };
+}
+
 export {
   assertStepUpVerified,
   getStepUpChallenge,

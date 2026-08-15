@@ -126,6 +126,26 @@ export default function SpareGaragePage() {
     }
   }
 
+  async function removeVehicle(vehicleId: string) {
+    setBusy(true);
+    setMessage(null);
+    try {
+      const res = await fetch(
+        `/api/spare/garage?vehicleId=${encodeURIComponent(vehicleId)}`,
+        { method: "DELETE" },
+      );
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) {
+        setMessage(data.error ?? `HTTP ${res.status}`);
+        return;
+      }
+      setMessage("Vehicle deleted (PD79)");
+      await refresh();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main
       data-testid="spare-garage-hub"
@@ -223,6 +243,13 @@ export default function SpareGaragePage() {
                     Set active
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void removeVehicle(v.vehicleId)}
+                >
+                  Delete
+                </button>
                 {v.reminderConsent ? (
                   <button
                     type="button"

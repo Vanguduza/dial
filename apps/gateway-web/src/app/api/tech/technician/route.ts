@@ -28,9 +28,11 @@ import {
   listThermalPrintJobs,
   pairThermalPrinter,
   printJobTicket,
+  resolveChecklistBySymptom,
   setJobSitePin,
   setValueScoreSnapshot,
   startChecklistRun,
+  submitChecklistAnswers,
   uploadJobEvidence,
   type ChecklistId,
 } from "@dial/jobs";
@@ -245,6 +247,37 @@ export async function POST(req: Request) {
         const run = advanceChecklistStep(String(body.runId ?? ""));
         const checklist = getChecklist(run.checklistId);
         return NextResponse.json({ ok: true, run, checklist });
+      }
+      case "resolve_checklist_by_symptom": {
+        const checklist = resolveChecklistBySymptom({
+          symptom: String(body.symptom ?? ""),
+          ...(body.tradeId != null
+            ? { tradeId: String(body.tradeId) }
+            : {}),
+        });
+        return NextResponse.json({
+          ok: true,
+          checklist,
+          payableFromAi: false,
+          note: "PD81 — checklist by symptom (Pack §10)",
+        });
+      }
+      case "submit_checklist_answers": {
+        const answers = Array.isArray(body.answers)
+          ? body.answers.map((a) => String(a))
+          : [];
+        const run = submitChecklistAnswers({
+          runId: String(body.runId ?? ""),
+          answers,
+        });
+        const checklist = getChecklist(run.checklistId);
+        return NextResponse.json({
+          ok: true,
+          run,
+          checklist,
+          payableFromAi: false,
+          note: "PD81 — checklist answers submitted",
+        });
       }
       case "upload_evidence": {
         const kind = String(body.kind ?? "note") as "photo" | "note";

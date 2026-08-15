@@ -188,6 +188,15 @@ test("PD69 job variation approve", async () => {
   assert.equal(out.currency, "USD");
 });
 
+test("PD81 checklist by symptom + submit answers", async () => {
+  const { runPd81ChecklistBySymptomThinVertical } = await import("./index.js");
+  const out = runPd81ChecklistBySymptomThinVertical();
+  assert.equal(out.checklistId, "emergency_roadside");
+  assert.equal(out.completed, true);
+  assert.ok(out.answersCount >= 4);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

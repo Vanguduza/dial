@@ -110,6 +110,8 @@ export type ChecklistRun = {
   checklistId: ChecklistId;
   stepIndex: number;
   status: "in_progress" | "completed";
+  /** PD81 — answers submitted per step (Pack §10 Checklists). */
+  answers: string[];
 };
 
 export type JobEvidence = {
@@ -678,6 +680,35 @@ export function getChecklist(id: ChecklistId): Checklist | undefined {
   return c ? { ...c, steps: [...c.steps] } : undefined;
 }
 
+/**
+ * PD81 — Pack §10 resolve checklist by symptom (+ optional trade).
+ * Keyword map only — never AI-priced.
+ */
+export function resolveChecklistBySymptom(input: {
+  symptom: string;
+  tradeId?: string;
+}): Checklist {
+  const s = input.symptom.trim().toLowerCase();
+  if (!s) throw new Error("symptom required");
+  const emergencyHints = [
+    "battery",
+    "stranded",
+    "roadside",
+    "highway",
+    "breakdown",
+    "tow",
+    "flat tyre",
+    "flat tire",
+  ];
+  const isEmergency = emergencyHints.some((h) => s.includes(h));
+  const id: ChecklistId = isEmergency
+    ? "emergency_roadside"
+    : "automotive_basic";
+  const checklist = getChecklist(id);
+  if (!checklist) throw new Error(`Missing checklist ${id}`);
+  return checklist;
+}
+
 function fixtureSlots(): BookingSlot[] {
   const base = Date.now();
   return [0, 1, 2].map((i) => {
@@ -809,6 +840,7 @@ export function startChecklistRun(input: {
     checklistId: input.checklistId,
     stepIndex: 0,
     status: "in_progress",
+    answers: [],
   };
   checklistRuns.set(run.runId, run);
   const job = jobs.get(input.jobId)!;
@@ -818,13 +850,13 @@ export function startChecklistRun(input: {
 
 export function getChecklistRun(runId: string): ChecklistRun | undefined {
   const r = checklistRuns.get(runId);
-  return r ? { ...r } : undefined;
+  return r ? { ...r, answers: [...r.answers] } : undefined;
 }
 
 export function advanceChecklistStep(runId: string): ChecklistRun {
   const run = checklistRuns.get(runId);
   if (!run) throw new Error(`Unknown checklist run ${runId}`);
-  if (run.status === "completed") return { ...run };
+  if (run.status === "completed") return { ...run, answers: [...run.answers] };
   const checklist = getChecklist(run.checklistId)!;
   run.stepIndex += 1;
   if (run.stepIndex >= checklist.steps.length) {
@@ -833,7 +865,33 @@ export function advanceChecklistStep(runId: string): ChecklistRun {
     const job = jobs.get(run.jobId);
     if (job) job.status = "completed";
   }
-  return { ...run };
+  return { ...run, answers: [...run.answers] };
+}
+
+/**
+ * PD81 — submit step answers; completes run when all steps answered (Pack §10).
+ * Answers never set payable amounts.
+ */
+export function submitChecklistAnswers(input: {
+  runId: string;
+  answers: string[];
+}): ChecklistRun {
+  const run = checklistRuns.get(input.runId);
+  if (!run) throw new Error(`Unknown checklist run ${input.runId}`);
+  const checklist = getChecklist(run.checklistId)!;
+  if (!Array.isArray(input.answers) || input.answers.length !== checklist.steps.length) {
+    throw new Error(
+      `answers length must equal steps (${checklist.steps.length})`,
+    );
+  }
+  const cleaned = input.answers.map((a) => String(a).trim());
+  if (cleaned.some((a) => !a)) throw new Error("empty checklist answers forbidden");
+  run.answers = cleaned;
+  run.stepIndex = checklist.steps.length;
+  run.status = "completed";
+  const job = jobs.get(run.jobId);
+  if (job) job.status = "completed";
+  return { ...run, answers: [...run.answers] };
 }
 
 export function uploadJobEvidence(input: {
@@ -1085,6 +1143,52 @@ export function runPd25ValueScoreDeviceThinVertical(): {
     factorsExplainable: true,
     noPayableFactors: true,
     moneyPathClean: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD81 thin vertical: symptom → checklist → start run → submit answers (Pack §10).
+ */
+export function runPd81ChecklistBySymptomThinVertical(): {
+  checklistId: "emergency_roadside";
+  answersCount: number;
+  completed: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  const resolved = resolveChecklistBySymptom({
+    symptom: "battery dead stranded roadside",
+    tradeId: "trade_auto",
+  });
+  if (resolved.id !== "emergency_roadside") {
+    throw new Error("PD81 expected emergency_roadside for battery/stranded");
+  }
+  const basic = resolveChecklistBySymptom({ symptom: "engine noise on idle" });
+  if (basic.id !== "automotive_basic") {
+    throw new Error("PD81 expected automotive_basic for generic symptom");
+  }
+  const job = bookTechJob({
+    customerId: "cust_pd81",
+    technicianId: "tech_pd81",
+    jobClass: "roadside",
+    emergency: true,
+  });
+  const run = startChecklistRun({
+    jobId: job.id,
+    checklistId: resolved.id,
+  });
+  const answers = resolved.steps.map(
+    (step, i) => `ans_${i}_${step.slice(0, 12)}`,
+  );
+  const done = submitChecklistAnswers({ runId: run.runId, answers });
+  if (done.status !== "completed" || done.answers.length !== answers.length) {
+    throw new Error("PD81 submit must complete with answers");
+  }
+  return {
+    checklistId: "emergency_roadside",
+    answersCount: done.answers.length,
+    completed: true,
     payableFromAi: false,
   };
 }

@@ -470,6 +470,10 @@ Planned and accepted **engineering / process** enhancements for DIAL. This is a 
 | ENH-486 | **PD76 WHT YTD certificate download** Take-Home stub | `done` | Pack §9.7; D-50 |
 | ENH-487 | **PD77 Complete navigate stop → delivery_run** | `done` | Pack §9.8 / §10 |
 | ENH-488 | **PD78 Customer marketing consent** centre | `done` | Pack Matrix B; session SoR |
+| ENH-489 | **PD79 Garage CRUD** update + delete + promote | `done` | Pack §10 Vehicles |
+| ENH-490 | **PD80 COD confirm** settle USD minor | `done` | Pack §10 Delivery |
+| ENH-491 | **PD81 Checklist by symptom** + submit answers | `done` | Pack §10 Checklists |
+| ENH-492 | **PD82 Customer account profile** session SoR | `done` | Pack §10 Identity |
 
 | ENH-002 | **Responsive web UX DoD** on all Next.js tickets (desktop + mobile, shared design-tokens, cross-viewport QA) | `accepted` | Blueprint Â§8.0.1; wire into ticket templates as web apps land |
 | ENH-003 | **Living root docs** auto-maintained in every meaningful PR | `accepted` | `README` / `CHANGELOG` / `ENHANCEMENTS` / `BUGS` â€” Â§8.0.2 |

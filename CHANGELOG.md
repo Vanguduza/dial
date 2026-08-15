@@ -11,6 +11,10 @@ Living doc: update in the **same PR** as the change (Blueprint Â§8.0.2). Move 
 
 ### Added
 
+- **PD82 Customer account profile** — `/account/profile` get/update; session SoR; cross-tenant deny (Pack §10).
+- **PD81 Checklist by symptom** — resolve + submit answers on tech API (Pack §10).
+- **PD80 COD confirm settle** — recorded attempt → confirm USD settle (Pack §10).
+- **PD79 Garage CRUD update + delete** — promote active on delete (Pack §10 Vehicles).
 - **PD78 Customer marketing consent** — `/account/consent` grant/revoke + audit (Pack Matrix B; session SoR).
 - **PD77 Complete navigate stop → run** — last stop completes `delivery_run` (Pack §9.8 / §10).
 - **PD76 WHT YTD certificate download** — Take-Home stub PDF download (Pack §9.7; ≠ fiscal SoR).

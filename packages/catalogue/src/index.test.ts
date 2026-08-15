@@ -307,6 +307,16 @@ test("PD75 set active garage vehicle", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD79 garage CRUD update + delete promote", async () => {
+  const { runPd79GarageCrudThinVertical } = await import("./spareCustomer.js");
+  const out = runPd79GarageCrudThinVertical();
+  assert.equal(out.updatedLabel, "Updated Hilux");
+  assert.equal(out.deleted, true);
+  assert.equal(out.promotedActive, true);
+  assert.equal(out.remainingCount, 1);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD54 grocery Meili demand-gap thin vertical", () => {
   __resetCatalogueForTests();
   const out = runPd54GroceryDemandGapThinVertical();

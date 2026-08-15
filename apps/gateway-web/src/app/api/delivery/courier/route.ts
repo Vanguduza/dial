@@ -43,6 +43,7 @@ import {
   startTransit,
   timeoutOffer,
   completeStopAndMaybeRun,
+  confirmCodCollect,
   type CourierAvailability,
   type OfflinePackId,
 } from "@dial/delivery";
@@ -562,6 +563,18 @@ export async function POST(req: Request) {
           ok: true,
           ...result,
           note: "PD77 — complete stop; last stop completes delivery_run",
+        });
+      }
+      case "cod_confirm": {
+        const confirmed = confirmCodCollect({
+          jobId: String(body.jobId ?? ""),
+          courierId,
+          attemptId: String(body.attemptId ?? ""),
+        });
+        return NextResponse.json({
+          ok: true,
+          ...confirmed,
+          note: "PD80 — COD confirm settle USD minor",
         });
       }
       default:

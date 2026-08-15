@@ -44,6 +44,8 @@ export type CodCollectAttempt = {
   status: "recorded" | "blocked_unacked_warning" | "failed";
   failureReason?: CodCollectFailureReason;
   note?: string;
+  /** PD80 — set when courier confirms successful collect (Pack §10). */
+  confirmedAt?: string;
   currency: "USD";
   recordedAt: string;
   payableFromAi: false;
@@ -210,6 +212,61 @@ export function recordCodCollectFailure(input: {
 
 export function listCodCollectAttempts(courierId: string): CodCollectAttempt[] {
   return attempts.filter((a) => a.courierId === courierId).map((a) => ({ ...a }));
+}
+
+export function getCodCollectAttempt(
+  attemptId: string,
+): CodCollectAttempt | undefined {
+  const row = attempts.find((a) => a.attemptId === attemptId);
+  return row ? { ...row } : undefined;
+}
+
+/**
+ * PD80 — Pack §10 COD confirm: successful attempt → confirmed settle (USD minor).
+ * Does not invent amounts — uses the recorded collectUsdMinor from the attempt.
+ */
+export function confirmCodCollect(input: {
+  jobId: string;
+  courierId: string;
+  attemptId: string;
+}): {
+  confirmed: true;
+  jobId: string;
+  attemptId: string;
+  settleUsdMinor: string;
+  currency: "USD";
+  payableFromAi: false;
+} {
+  if (!input.jobId.trim() || !input.courierId.trim() || !input.attemptId.trim()) {
+    throw new Error("jobId, courierId, and attemptId required");
+  }
+  const attempt = attempts.find((a) => a.attemptId === input.attemptId);
+  if (!attempt) throw new Error(`Unknown COD attempt ${input.attemptId}`);
+  if (attempt.jobId !== input.jobId || attempt.courierId !== input.courierId) {
+    throw new Error("COD attempt does not match job/courier");
+  }
+  if (attempt.status !== "recorded") {
+    throw new Error(`COD attempt not confirmable (status=${attempt.status})`);
+  }
+  if (attempt.confirmedAt) {
+    return {
+      confirmed: true,
+      jobId: input.jobId,
+      attemptId: input.attemptId,
+      settleUsdMinor: attempt.collectUsdMinor,
+      currency: "USD",
+      payableFromAi: false,
+    };
+  }
+  attempt.confirmedAt = new Date().toISOString();
+  return {
+    confirmed: true,
+    jobId: input.jobId,
+    attemptId: input.attemptId,
+    settleUsdMinor: attempt.collectUsdMinor,
+    currency: "USD",
+    payableFromAi: false,
+  };
 }
 
 export function __resetCodFloatForTests(): void {

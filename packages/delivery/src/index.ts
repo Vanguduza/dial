@@ -22,6 +22,7 @@ import {
 } from "./navigateStops.js";
 import {
   __resetCodFloatForTests,
+  confirmCodCollect,
   evaluateCodCollect,
   recordCodCollectAttempt,
   recordCodCollectFailure,
@@ -71,9 +72,11 @@ export {
   DEFAULT_COD_FLOAT_LIMIT_USD_MINOR,
   evaluateCodCollect,
   getCourierCodFloat,
+  getCodCollectAttempt,
   listCodCollectAttempts,
   recordCodCollectAttempt,
   recordCodCollectFailure,
+  confirmCodCollect,
   setCourierCodFloatLimit,
   type CodCollectAttempt,
   type CodCollectEvaluation,
@@ -1572,6 +1575,64 @@ export async function runPd77CompleteStopThinVertical(input?: {
     allStopsCompleted: true,
     runCompleted: true,
     mapSor: "maplibre",
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD80 thin vertical: COD collect attempt → confirm settle USD (Pack §10).
+ */
+export function runPd80CodConfirmThinVertical(input?: {
+  courierId?: string;
+}): {
+  confirmed: true;
+  settleUsdMinor: string;
+  currency: "USD";
+  payableFromAi: false;
+} {
+  const courierId = input?.courierId ?? "cour_pd80";
+  __resetDeliveryForTests();
+  setCourierAvailabilityStatus(courierId, "available");
+  setCourierCodFloatLimit(courierId, 500_00n);
+  const job = createDeliveryJob({
+    orderId: "ord_pd80",
+    from: "supplier_hub",
+    to: "customer_pin",
+    codUsdMinor: 15_00n,
+  });
+  startDeliveryDispatchWorkflow(job.id);
+  const offered = getDeliveryJob(job.id)!;
+  if (!offered.offerId) throw new Error("PD80 expected offer");
+  acceptOffer(offered.offerId, courierId);
+  const attempt = recordCodCollectAttempt({
+    jobId: job.id,
+    courierId,
+    collectUsdMinor: 15_00n,
+  });
+  if (attempt.status !== "recorded") {
+    throw new Error("PD80 expected recorded COD attempt");
+  }
+  const confirmed = confirmCodCollect({
+    jobId: job.id,
+    courierId,
+    attemptId: attempt.attemptId,
+  });
+  if (!confirmed.confirmed || confirmed.settleUsdMinor !== "1500") {
+    throw new Error("PD80 COD confirm settle mismatch");
+  }
+  // Idempotent re-confirm
+  const again = confirmCodCollect({
+    jobId: job.id,
+    courierId,
+    attemptId: attempt.attemptId,
+  });
+  if (again.settleUsdMinor !== "1500") {
+    throw new Error("PD80 re-confirm must stay idempotent");
+  }
+  return {
+    confirmed: true,
+    settleUsdMinor: confirmed.settleUsdMinor,
+    currency: "USD",
     payableFromAi: false,
   };
 }

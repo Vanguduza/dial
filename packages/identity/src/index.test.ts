@@ -48,6 +48,15 @@ test("PD78 marketing consent thin vertical", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD82 account profile thin vertical", async () => {
+  const { runPd82AccountProfileThinVertical } = await import("./index.js");
+  const out = runPd82AccountProfileThinVertical();
+  assert.equal(out.displayNameUpdated, true);
+  assert.equal(out.crossTenantDenied, true);
+  assert.equal(out.buyerSegment, "b2c");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("T1 RLS profiles: own CRUD; cross-tenant deny; admin all", () => {
   __resetIdentityForTests();
   const alice = signUp({ email: "alice@dial.test", displayName: "Alice" });

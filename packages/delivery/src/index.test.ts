@@ -281,6 +281,15 @@ test("PD77 complete stop completes delivery_run", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("PD80 COD confirm thin vertical", async () => {
+  const { runPd80CodConfirmThinVertical } = await import("./index.js");
+  const out = runPd80CodConfirmThinVertical({ courierId: "cour_pd80_t" });
+  assert.equal(out.confirmed, true);
+  assert.equal(out.settleUsdMinor, "1500");
+  assert.equal(out.currency, "USD");
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD36 multi-vendor same band/slot consolidates; split on slot; POD unchanged", async () => {
   const { runPd36MultiStopDeliveryThinVertical } = await import("./index.js");
   const out = await runPd36MultiStopDeliveryThinVertical({

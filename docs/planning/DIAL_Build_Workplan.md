@@ -1004,9 +1004,53 @@ Primary Pack §9 residuals covered PD1–PD32. Founder default next = **PD33** s
 | --- | --- |
 | Thin path | grant → revoke → audit on `/account/consent` (Pack Matrix B; session SoR) |
 | Evidence | `runPd78MarketingConsentThinVertical`; `pd75Pd78Ops.test.ts` |
-| Green → | eng-safe continue ≠ S99 |
+| Green → | **PD79** garage CRUD |
 
 ### Pack / product gap audit (after PD78)
+
+| Gap | Stage |
+| --- | --- |
+| Garage CRUD update/delete | **PD79** |
+| COD confirm settle | **PD80** |
+| Checklist by symptom + answers | **PD81** |
+| Customer account profile | **PD82** |
+| Remote staging Playwright | ENH-011 optional human |
+| Liquor Build | counsel gate — not eng |
+| Live Meta/ZIMRA/PSP contracts | ENH-020–022 human |
+
+### PD79 — Garage CRUD update + delete (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | update label/chassis → delete active → promote remaining (Pack §10 Vehicles) |
+| Evidence | `runPd79GarageCrudThinVertical`; `pd79Pd82Ops.test.ts` |
+| Green → | **PD80** COD confirm |
+
+### PD80 — COD confirm settle (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | recorded COD attempt → `confirmCodCollect` USD settle (Pack §10) |
+| Evidence | `runPd80CodConfirmThinVertical`; `pd79Pd82Ops.test.ts` |
+| Green → | **PD81** checklist symptom |
+
+### PD81 — Checklist by symptom (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | symptom → checklist → submit answers → completed (Pack §10) |
+| Evidence | `runPd81ChecklistBySymptomThinVertical`; `pd79Pd82Ops.test.ts` |
+| Green → | **PD82** account profile |
+
+### PD82 — Customer account profile (**GREEN** 2026-08-15)
+
+| | |
+| --- | --- |
+| Thin path | session profile get/update; cross-tenant deny (Pack §10 Identity) |
+| Evidence | `runPd82AccountProfileThinVertical`; `pd79Pd82Ops.test.ts` |
+| Green → | eng-safe continue ≠ S99 |
+
+### Pack / product gap audit (after PD82)
 
 | Gap | Stage |
 | --- | --- |

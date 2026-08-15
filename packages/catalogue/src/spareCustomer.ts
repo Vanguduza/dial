@@ -367,6 +367,50 @@ export function setActiveGarageVehicle(vehicleId: string): GarageVehicle {
   return { ...v, isActive: true };
 }
 
+/** PD79 — Pack §10 Vehicles update (label / chassis). */
+export function updateGarageVehicle(input: {
+  vehicleId: string;
+  label?: string;
+  chassisHint?: string;
+}): GarageVehicle {
+  const v = store().vehicles.get(input.vehicleId);
+  if (!v) throw new Error(`Unknown garage vehicle ${input.vehicleId}`);
+  if (input.label !== undefined) {
+    const label = input.label.trim();
+    if (!label) throw new Error("label required");
+    v.label = label;
+  }
+  if (input.chassisHint !== undefined) {
+    v.chassisHint = input.chassisHint.trim() || "unknown";
+  }
+  return { ...v };
+}
+
+/**
+ * PD79 — Pack §10 Vehicles delete. If active deleted, promote another (if any).
+ */
+export function deleteGarageVehicle(vehicleId: string): {
+  deleted: true;
+  vehicleId: string;
+  promotedActiveId: string | null;
+} {
+  const v = store().vehicles.get(vehicleId);
+  if (!v) throw new Error(`Unknown garage vehicle ${vehicleId}`);
+  const customerId = v.customerId;
+  const wasActive = v.isActive;
+  store().vehicles.delete(vehicleId);
+  let promotedActiveId: string | null = null;
+  if (wasActive) {
+    const remaining = listGarageVehicles(customerId);
+    if (remaining.length > 0) {
+      const next = remaining[0]!;
+      setActiveGarageVehicle(next.vehicleId);
+      promotedActiveId = next.vehicleId;
+    }
+  }
+  return { deleted: true, vehicleId, promotedActiveId };
+}
+
 function appendGarageConsentEvent(input: {
   vehicleId: string;
   customerId: string;
@@ -501,6 +545,55 @@ export function runPd75SetActiveGarageVehicleThinVertical(): {
     activeVehicleId: second.vehicleId,
     activeCount: 1,
     switched: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * PD79 thin vertical: update label/chassis → delete active → promote remaining (Pack §10 CRUD).
+ */
+export function runPd79GarageCrudThinVertical(): {
+  updatedLabel: string;
+  deleted: true;
+  promotedActive: true;
+  remainingCount: 1;
+  payableFromAi: false;
+} {
+  __resetSpareCustomerForTests();
+  const a = addGarageVehicle({
+    customerId: "cust_pd79",
+    label: "Old Hilux",
+    chassisHint: "KUN25",
+    reminderConsent: false,
+  });
+  const b = addGarageVehicle({
+    customerId: "cust_pd79",
+    label: "Spare Prado",
+    chassisHint: "KDJ150",
+    reminderConsent: false,
+  });
+  const updated = updateGarageVehicle({
+    vehicleId: a.vehicleId,
+    label: "Updated Hilux",
+    chassisHint: "KUN26",
+  });
+  if (updated.label !== "Updated Hilux" || updated.chassisHint !== "KUN26") {
+    throw new Error("PD79 update failed");
+  }
+  if (!a.isActive) throw new Error("PD79 first vehicle should be active");
+  const del = deleteGarageVehicle(a.vehicleId);
+  if (!del.deleted || del.promotedActiveId !== b.vehicleId) {
+    throw new Error("PD79 delete must promote remaining active");
+  }
+  const list = listGarageVehicles("cust_pd79");
+  if (list.length !== 1 || !list[0]!.isActive) {
+    throw new Error("PD79 expected one active remaining");
+  }
+  return {
+    updatedLabel: updated.label,
+    deleted: true,
+    promotedActive: true,
+    remainingCount: 1,
     payableFromAi: false,
   };
 }
