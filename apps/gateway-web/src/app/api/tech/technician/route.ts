@@ -30,7 +30,6 @@ import {
   openValueScoreDispute,
   pairThermalPrinter,
   printJobTicket,
-  resolveChecklistBySymptom,
   setJobSitePin,
   setValueScoreSnapshot,
   setTechnicianCredential,
@@ -54,6 +53,7 @@ import {
   setItf263Status,
   uploadItf263Document,
 } from "@dial/payments";
+import { diagnoseTechSymptom } from "../../../../lib/tech/specialistRouting";
 import {
   getSessionFromToken,
   parseSessionCookie,
@@ -283,17 +283,16 @@ export async function POST(req: Request) {
         return NextResponse.json({ ok: true, run, checklist });
       }
       case "resolve_checklist_by_symptom": {
-        const checklist = resolveChecklistBySymptom({
-          symptom: String(body.symptom ?? ""),
-          ...(body.tradeId != null
-            ? { tradeId: String(body.tradeId) }
-            : {}),
-        });
+        const diagnosed = diagnoseTechSymptom(String(body.symptom ?? ""));
         return NextResponse.json({
           ok: true,
-          checklist,
+          checklist: diagnosed.checklist,
+          assessment: diagnosed.assessment,
+          recommendedSpecialists: diagnosed.recommendedSpecialists,
+          fallbackTechnicians: diagnosed.fallbackTechnicians,
+          matchedOnBrand: diagnosed.matchedOnBrand,
           payableFromAi: false,
-          note: "PD81 — checklist by symptom (Pack §10)",
+          note: "PD81 — checklist by symptom + OEM specialist routing (no money)",
         });
       }
       case "submit_checklist_answers": {

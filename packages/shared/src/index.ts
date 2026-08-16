@@ -103,6 +103,14 @@ export {
   stallRetryMs,
   resumeGlRebindDelayMs,
 } from "./mapLayout.js";
+export {
+  TEMPORAL_TASK_QUEUE,
+  WORKFLOW_DELIVERY_DISPATCH,
+  createTemporalWorkerOptions,
+  pingTemporalHealth,
+  type TemporalHealth,
+  type TemporalWorkerOptions,
+} from "./temporalConfig.js";
 export { logJson } from "./log.js";
 export { reportError } from "./errorReport.js";
 

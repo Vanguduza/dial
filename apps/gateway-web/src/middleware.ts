@@ -20,6 +20,11 @@ function allowedOrigins(): Set<string> {
   return set;
 }
 
+function localConnectSrc(): string[] {
+  if (process.env.NODE_ENV === "production") return [];
+  return ["http://127.0.0.1:*", "http://localhost:*"];
+}
+
 export function middleware(req: NextRequest) {
   const origin = req.headers.get("origin");
   const res = NextResponse.next();
@@ -51,7 +56,8 @@ export function middleware(req: NextRequest) {
       "img-src 'self' data: blob: https:",
       "style-src 'self' 'unsafe-inline'",
       scriptSrc,
-      "connect-src 'self' ws: wss: http://127.0.0.1:* http://localhost:*",
+      // MapLibre fetches vector styles, glyphs and tiles over https (D-44 self-host or OpenFreeMap).
+      ["connect-src 'self' ws: wss: https:", ...localConnectSrc()].join(" "),
       "worker-src 'self' blob:",
       "child-src 'self' blob:",
     ].join("; "),

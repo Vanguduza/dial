@@ -136,7 +136,7 @@ test("PD113 Formbricks + PostHog experience stubs API", async () => {
   assert.equal(thin.surveySkippedWithoutKey, true);
   assert.equal(thin.flagOffWithoutKey, true);
 
-  const get = await experienceGet();
+  const get = await experienceGet(new Request("http://localhost/api/experience"));
   assert.equal(get.status, 200);
 
   __resetAuthForTests();

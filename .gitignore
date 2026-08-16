@@ -39,3 +39,7 @@ apps/customer-ios/.build/
 
 # Self-hosted map tiles (Planetiler output — regenerated, not committed)
 infra/maps/data/
+.env*
+
+# Donor clones (pattern reference only — do not vendor or commit)
+.tmp/

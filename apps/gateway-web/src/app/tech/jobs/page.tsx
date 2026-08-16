@@ -2,33 +2,28 @@
  * PD13 customer job status list (Pack §9.3).
  */
 import Link from "next/link";
-import { dialTokens } from "@dial/design-tokens";
 import { TechJobsList } from "./TechJobsList";
 
 export default function TechJobsPage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: dialTokens.color.brand.surface,
-        color: dialTokens.color.brand.ink,
-        fontFamily: `${dialTokens.font.body}, system-ui, sans-serif`,
-        padding: dialTokens.space.md,
-      }}
-    >
-      <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        <Link href="/tech">Back</Link>
-        <h1
-          style={{
-            fontFamily: `${dialTokens.font.display}, Georgia, serif`,
-            color: dialTokens.color.brand.primary,
-            fontSize: "clamp(1.5rem, 4vw, 2rem)",
-          }}
-        >
-          My service jobs
-        </h1>
+    <main className="min-h-screen bg-background">
+      <section className="border-b bg-muted/30">
+        <div className="container mx-auto max-w-2xl px-4 py-10">
+          <p className="text-sm text-muted-foreground">
+            <Link href="/tech" className="hover:text-primary">
+              Home
+            </Link>
+            <span aria-hidden="true"> · </span>
+            <Link href="/tech/services" className="hover:text-primary">
+              Services
+            </Link>
+          </p>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight">My service jobs</h1>
+        </div>
+      </section>
+      <section className="container mx-auto max-w-2xl px-4 py-10">
         <TechJobsList />
-      </div>
+      </section>
     </main>
   );
 }

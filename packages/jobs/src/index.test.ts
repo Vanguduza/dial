@@ -265,6 +265,18 @@ test("PD102 tech Value Score dispute thin vertical", async () => {
   assert.ok(out.disputeId);
 });
 
+test("OEM specialist routing: Mercedes ranked; Honda not forced", async () => {
+  const { runOemSpecialistRoutingThinVertical, normalizeOemBrand } =
+    await import("./index.js");
+  assert.equal(normalizeOemBrand("Benz"), "mercedes");
+  assert.equal(normalizeOemBrand("MB"), "mercedes");
+  const out = runOemSpecialistRoutingThinVertical();
+  assert.equal(out.mercedesRanked, true);
+  assert.equal(out.hondaNotForced, true);
+  assert.equal(out.aliasesNormalized, true);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD106 technician profile cards thin vertical", async () => {
   const { runPd106TechnicianProfileCardsThinVertical } = await import("./index.js");
   const out = runPd106TechnicianProfileCardsThinVertical();

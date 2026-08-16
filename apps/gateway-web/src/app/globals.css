@@ -1,0 +1,471 @@
+/*
+ * DIAL web design system. Brand values come from @dial/design-tokens via the
+ * root layout; everything below is layout, rhythm and component chrome so
+ * storefront screens stop re-inventing inline styles.
+ */
+
+:root {
+  --dial-radius-sm: 8px;
+  --dial-radius-md: 12px;
+  --dial-radius-lg: 20px;
+  --dial-radius-pill: 999px;
+
+  --dial-shadow-sm: 0 1px 2px rgba(20, 32, 27, 0.06);
+  --dial-shadow-md: 0 4px 16px rgba(20, 32, 27, 0.08);
+  --dial-shadow-lg: 0 16px 40px rgba(20, 32, 27, 0.12);
+
+  --dial-space-xs: 4px;
+  --dial-space-sm: 8px;
+  --dial-space-md: 16px;
+  --dial-space-lg: 24px;
+  --dial-space-xl: 40px;
+
+  --dial-shell-max: 1180px;
+  --dial-header-h: 64px;
+  --dial-bottom-nav-h: 60px;
+
+  --dial-line: color-mix(in srgb, var(--dial-color-brand-ink) 12%, transparent);
+  --dial-muted: color-mix(in srgb, var(--dial-color-brand-ink) 62%, transparent);
+  --dial-faint: color-mix(in srgb, var(--dial-color-brand-ink) 42%, transparent);
+  --dial-tint: color-mix(in srgb, var(--dial-color-brand-primary) 8%, #fff);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--dial-color-brand-surface);
+  color: var(--dial-color-brand-ink);
+  font-family: var(--dial-font-body), system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--dial-font-display), Georgia, serif;
+  font-weight: 600;
+  line-height: 1.15;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--dial-color-brand-accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------- shell */
+
+.dial-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.dial-shell__body {
+  flex: 1;
+  padding-bottom: calc(var(--dial-bottom-nav-h) + var(--dial-space-lg));
+}
+
+@media (min-width: 900px) {
+  .dial-shell__body {
+    padding-bottom: var(--dial-space-xl);
+  }
+}
+
+.dial-container {
+  width: 100%;
+  max-width: var(--dial-shell-max);
+  margin: 0 auto;
+  padding: 0 var(--dial-space-md);
+}
+
+.dial-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--dial-color-brand-surface) 88%, #fff);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--dial-line);
+}
+
+.dial-header__row {
+  display: flex;
+  align-items: center;
+  gap: var(--dial-space-md);
+  min-height: var(--dial-header-h);
+}
+
+.dial-header__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--dial-font-display), Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--dial-color-brand-primary);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dial-header__brand span {
+  color: var(--dial-color-brand-accent);
+}
+
+.dial-header__search {
+  flex: 1;
+  display: none;
+}
+
+@media (min-width: 760px) {
+  .dial-header__search {
+    display: flex;
+  }
+}
+
+.dial-header__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: var(--dial-space-xs);
+}
+
+.dial-tabs {
+  display: flex;
+  gap: var(--dial-space-xs);
+  overflow-x: auto;
+  padding-bottom: var(--dial-space-sm);
+  scrollbar-width: none;
+}
+
+.dial-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.dial-tab {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  border-radius: var(--dial-radius-pill);
+  border: 1px solid var(--dial-line);
+  background: #fff;
+  color: var(--dial-muted);
+  font-size: 0.875rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dial-tab[aria-current="page"] {
+  background: var(--dial-color-brand-primary);
+  border-color: var(--dial-color-brand-primary);
+  color: #fff;
+  font-weight: 600;
+}
+
+.dial-bottom-nav {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 30;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  height: var(--dial-bottom-nav-h);
+  background: #fff;
+  border-top: 1px solid var(--dial-line);
+}
+
+@media (min-width: 900px) {
+  .dial-bottom-nav {
+    display: none;
+  }
+}
+
+.dial-bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.7rem;
+  color: var(--dial-muted);
+  text-decoration: none;
+}
+
+.dial-bottom-nav a[aria-current="page"] {
+  color: var(--dial-color-brand-primary);
+  font-weight: 600;
+}
+
+.dial-footer {
+  border-top: 1px solid var(--dial-line);
+  padding: var(--dial-space-lg) 0;
+  font-size: 0.8125rem;
+  color: var(--dial-muted);
+}
+
+/* ------------------------------------------------------------- sections */
+
+.dial-page-head {
+  padding: var(--dial-space-lg) 0 var(--dial-space-md);
+}
+
+.dial-page-head h1 {
+  font-size: clamp(1.6rem, 4.5vw, 2.25rem);
+  color: var(--dial-color-brand-primary);
+}
+
+.dial-page-head p {
+  margin: var(--dial-space-xs) 0 0;
+  color: var(--dial-muted);
+  font-size: 0.9375rem;
+}
+
+.dial-section {
+  margin-top: var(--dial-space-lg);
+}
+
+.dial-section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--dial-space-md);
+  margin-bottom: var(--dial-space-md);
+}
+
+.dial-section__head h2 {
+  font-size: 1.125rem;
+}
+
+/* --------------------------------------------------------------- pieces */
+
+.dial-card {
+  background: #fff;
+  border: 1px solid var(--dial-line);
+  border-radius: var(--dial-radius-md);
+  box-shadow: var(--dial-shadow-sm);
+  padding: var(--dial-space-md);
+}
+
+.dial-grid {
+  display: grid;
+  gap: var(--dial-space-md);
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media (min-width: 640px) {
+  .dial-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+.dial-product {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border: 1px solid var(--dial-line);
+  border-radius: var(--dial-radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+.dial-product:hover,
+.dial-product:focus-visible {
+  box-shadow: var(--dial-shadow-md);
+  transform: translateY(-2px);
+}
+
+.dial-product__media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  background: var(--dial-tint);
+}
+
+.dial-product__media svg {
+  width: 100%;
+  height: 100%;
+}
+
+.dial-product__body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--dial-space-md);
+  flex: 1;
+}
+
+.dial-product__title {
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.dial-product__meta {
+  font-size: 0.8125rem;
+  color: var(--dial-muted);
+}
+
+.dial-product__price {
+  margin-top: auto;
+  padding-top: var(--dial-space-sm);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--dial-color-brand-primary);
+}
+
+.dial-product__sold-by {
+  font-size: 0.75rem;
+  color: var(--dial-faint);
+}
+
+.dial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: var(--dial-radius-pill);
+  border: 1px solid var(--dial-line);
+  background: var(--dial-tint);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--dial-color-brand-primary);
+}
+
+.dial-badge--accent {
+  background: color-mix(in srgb, var(--dial-color-brand-accent) 18%, #fff);
+  border-color: color-mix(in srgb, var(--dial-color-brand-accent) 45%, #fff);
+  color: color-mix(in srgb, var(--dial-color-brand-ink) 80%, #000);
+}
+
+.dial-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dial-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 var(--dial-space-md);
+  border-radius: var(--dial-radius-sm);
+  border: 1px solid transparent;
+  background: var(--dial-color-brand-primary);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dial-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.dial-btn--secondary {
+  background: #fff;
+  border-color: var(--dial-line);
+  color: var(--dial-color-brand-ink);
+}
+
+.dial-btn--accent {
+  background: var(--dial-color-brand-accent);
+  color: var(--dial-color-brand-ink);
+}
+
+.dial-btn--block {
+  width: 100%;
+}
+
+.dial-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dial-field > span {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--dial-muted);
+}
+
+.dial-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--dial-line);
+  border-radius: var(--dial-radius-sm);
+  background: #fff;
+  font: inherit;
+  color: inherit;
+}
+
+.dial-searchbar {
+  display: flex;
+  gap: var(--dial-space-sm);
+  width: 100%;
+}
+
+.dial-searchbar .dial-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.dial-empty {
+  padding: var(--dial-space-xl) var(--dial-space-md);
+  text-align: center;
+  color: var(--dial-muted);
+  border: 1px dashed var(--dial-line);
+  border-radius: var(--dial-radius-md);
+  background: #fff;
+}
+
+/* Header search only appears from 760px, so pages repeat it below that. */
+.dial-only-compact {
+  display: block;
+}
+
+@media (min-width: 760px) {
+  .dial-only-compact {
+    display: none;
+  }
+}
+
+.dial-split {
+  display: grid;
+  gap: var(--dial-space-lg);
+}
+
+@media (min-width: 900px) {
+  .dial-split {
+    grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+    align-items: start;
+  }
+}

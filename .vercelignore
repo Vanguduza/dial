@@ -1,0 +1,19 @@
+node_modules
+**/node_modules
+.next
+**/.next
+.git
+.turbo
+
+# Native app sources are not part of the web deployment.
+apps/customer-android
+apps/customer-ios
+apps/delivery-android
+apps/technician-android
+
+# Evidence, screenshots and local artifacts.
+**/docs/ops/evidence
+**/*.png
+**/*.mbtiles
+.env
+.env.*

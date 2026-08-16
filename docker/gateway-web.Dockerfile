@@ -16,7 +16,8 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 # Placeholders only: real values are injected at run time, never baked into layers.
 ENV NEXT_TELEMETRY_DISABLED=1 \
-    DIAL_INTEGRATION_MODE=fixture
+    DIAL_INTEGRATION_MODE=fixture \
+    DIAL_BUILD_STANDALONE=1
 RUN pnpm --filter @dial/design-tokens build \
     && pnpm --filter @dial/gateway-web build
 

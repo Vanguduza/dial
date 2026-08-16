@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { dialTokens } from "@dial/design-tokens";
 
 /** Client book form — POST /api/tech/services action=book (session cookie). */
 export function TechBookForm({
@@ -43,44 +42,33 @@ export function TechBookForm({
   }
 
   return (
-    <div style={{ marginTop: dialTokens.space.md }}>
-      <label style={{ display: "block", marginBottom: 8, fontSize: 14 }}>
-        Cal.com slot
-        <select
-          value={slotId}
-          onChange={(e) => setSlotId(e.target.value)}
-          style={{ display: "block", width: "100%", maxWidth: 320, marginTop: 4, padding: 8 }}
-        >
-          {slots.map((s) => (
-            <option key={s.slotId} value={s.slotId}>
-              {s.label}
-            </option>
-          ))}
-        </select>
+    <div>
+      <label className="fin-label" htmlFor="fin-slot">
+        Available slot
       </label>
+      <select
+        id="fin-slot"
+        className="fin-select"
+        value={slotId}
+        onChange={(e) => setSlotId(e.target.value)}
+      >
+        {slots.map((s) => (
+          <option key={s.slotId} value={s.slotId}>
+            {s.label}
+          </option>
+        ))}
+      </select>
       <button
         type="button"
+        className="fin-btn fin-btn--primary"
         disabled={busy || !slotId}
         onClick={() => void book()}
-        style={{
-          marginTop: dialTokens.space.sm,
-          padding: `${dialTokens.space.sm} ${dialTokens.space.lg}`,
-          borderRadius: 8,
-          border: "none",
-          background: dialTokens.color.brand.primary,
-          color: "#fff",
-          fontWeight: 600,
-          width: "100%",
-          maxWidth: 320,
-          opacity: busy || !slotId ? 0.6 : 1,
-        }}
+        style={{ width: "100%" }}
       >
         {busy ? "Booking…" : "Request booking"}
       </button>
-      {status ? <p style={{ fontSize: 14 }}>{status}</p> : null}
-      {error ? (
-        <p style={{ fontSize: 14, color: "#a11" }}>{error}</p>
-      ) : null}
+      {status ? <p className="fin-msg">{status}</p> : null}
+      {error ? <p className="fin-msg fin-msg--err">{error}</p> : null}
     </div>
   );
 }

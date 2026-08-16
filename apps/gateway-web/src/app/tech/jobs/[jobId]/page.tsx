@@ -2,7 +2,6 @@
  * PD13 customer job detail — object AuthZ via session customerId (D-47).
  */
 import Link from "next/link";
-import { dialTokens } from "@dial/design-tokens";
 import { TechJobDetail } from "./TechJobDetail";
 
 export default async function TechJobDetailPage({
@@ -12,28 +11,20 @@ export default async function TechJobDetailPage({
 }) {
   const { jobId } = await params;
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: dialTokens.color.brand.surface,
-        color: dialTokens.color.brand.ink,
-        fontFamily: `${dialTokens.font.body}, system-ui, sans-serif`,
-        padding: dialTokens.space.md,
-      }}
-    >
-      <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        <Link href="/tech/jobs">Back to jobs</Link>
-        <h1
-          style={{
-            fontFamily: `${dialTokens.font.display}, Georgia, serif`,
-            color: dialTokens.color.brand.primary,
-            fontSize: "clamp(1.5rem, 4vw, 2rem)",
-          }}
-        >
-          Job status
-        </h1>
+    <main className="min-h-screen bg-background">
+      <section className="border-b bg-muted/30">
+        <div className="container mx-auto max-w-2xl px-4 py-10">
+          <p className="text-sm text-muted-foreground">
+            <Link href="/tech/jobs" className="hover:text-primary">
+              Back to jobs
+            </Link>
+          </p>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight">Job status</h1>
+        </div>
+      </section>
+      <section className="container mx-auto max-w-2xl px-4 py-10">
         <TechJobDetail jobId={jobId} />
-      </div>
+      </section>
     </main>
   );
 }

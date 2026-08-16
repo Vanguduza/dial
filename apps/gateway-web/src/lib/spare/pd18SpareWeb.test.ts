@@ -56,7 +56,6 @@ test("PD18 APIs: place order, return, garage consent", async () => {
       body: JSON.stringify({
         cartId: cart.id,
         payChoice: "cod",
-        customerId: "cust_api",
       }),
     }),
   );
@@ -70,6 +69,7 @@ test("PD18 APIs: place order, return, garage consent", async () => {
   const track = await ordersGet(
     new Request(
       `http://localhost/api/spare/orders?orderId=${encodeURIComponent(placeJson.order.orderId)}`,
+      { headers: { cookie } },
     ),
   );
   assert.equal(track.status, 200);

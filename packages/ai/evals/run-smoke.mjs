@@ -17,6 +17,8 @@ const cases = [
   "Car won't start, maybe battery",
   "Need a diagnostic for rough idle",
   "Emergency tow after accident",
+  "Mercedes Benz powertrain warning light",
+  "Honda Civic rough idle",
 ];
 
 function main() {

@@ -540,7 +540,7 @@ test("T9 Simulated Command Centre never auto-pays", () => {
 
 test("S92 integration health groups are enumerable (no secret leak)", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
-  const { GET } = await import("./app/api/health/integrations/route.js");
+  const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
   const res = await GET();
   assert.equal(res.status, 200);
   const body = (await res.json()) as {
@@ -606,7 +606,7 @@ test("S143 fixture health group labels come only from INTEGRATION_ENV_GROUPS", a
   const { INTEGRATION_ENV_GROUP_LABELS } = await import(
     "./lib/integrationsReadiness.js"
   );
-  const { GET } = await import("./app/api/health/integrations/route.js");
+  const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
   const res = await GET();
   assert.equal(res.status, 200);
   const body = (await res.json()) as {
@@ -628,7 +628,7 @@ test("S144 sandbox health group labels match INTEGRATION_ENV_GROUPS", async () =
     const { INTEGRATION_ENV_GROUP_LABELS } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -653,7 +653,7 @@ test("S145 live health group labels match INTEGRATION_ENV_GROUPS", async () => {
     const { INTEGRATION_ENV_GROUP_LABELS } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -679,7 +679,7 @@ test("S132 .env.example lists every integrations health group key", async () => 
     join(process.cwd(), "../../.env.example"),
     "utf8",
   );
-  const { GET } = await import("./app/api/health/integrations/route.js");
+  const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
   const res = await GET();
   const body = (await res.json()) as {
     groups: Array<{ label: string }>;
@@ -717,7 +717,7 @@ test("S151 health note cites INTEGRATION_ENV_GROUP_LABELS", async () => {
   const { INTEGRATION_ENV_GROUP_LABELS } = await import(
     "./lib/integrationsReadiness.js"
   );
-  const { GET } = await import("./app/api/health/integrations/route.js");
+  const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
   const res = await GET();
   assert.equal(res.status, 200);
   const body = (await res.json()) as { note?: string };
@@ -863,7 +863,7 @@ test("S154 admin integrations UI surfaces truncated health note", async () => {
     parseIntegrationsHealth,
     truncateIntegrationsHealthNote,
   } = await import("./lib/integrationsReadiness.js");
-  const { GET } = await import("./app/api/health/integrations/route.js");
+  const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const res = await GET();
   assert.equal(res.status, 200);
@@ -1146,7 +1146,7 @@ test("S190 sandbox health ready is false when probes incomplete", async () => {
     const { integrationsReady } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -1175,7 +1175,7 @@ test("S191 live health ready is false when probes incomplete", async () => {
     const { integrationsReady } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -1223,7 +1223,7 @@ test("S193 fixture ready=true even when env groups incomplete", async () => {
   const prevMode = process.env.DIAL_INTEGRATION_MODE;
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -1310,7 +1310,7 @@ test("S195 health note text differs fixture vs sandbox/live", async () => {
   try {
     for (const mode of ["fixture", "sandbox"] as const) {
       process.env.DIAL_INTEGRATION_MODE = mode;
-      const { GET } = await import("./app/api/health/integrations/route.js");
+      const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
       const res = await GET();
       assert.equal(res.status, 200);
       const body = (await res.json()) as { note?: string; mode?: string };
@@ -1606,7 +1606,7 @@ test("S210 groups[].missing are key names only (no values)", async () => {
   const prevMode = process.env.DIAL_INTEGRATION_MODE;
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -1643,7 +1643,7 @@ test("S211 fixture ready=true with zero groups configured", async () => {
   }
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -1924,7 +1924,7 @@ test("S223 fixture note cites groups labels with empty env", async () => {
   }
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as { note?: string; ready?: boolean };
@@ -2039,7 +2039,7 @@ test("S228 health note equals builder under empty env", async () => {
   }
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     const body = (await res.json()) as { note?: string };
     assert.equal(body.note, buildIntegrationsHealthNote("fixture"));
@@ -2272,7 +2272,7 @@ test("S238 sandbox health note differs from fixture under empty env", async () =
   }
   try {
     process.env.DIAL_INTEGRATION_MODE = "sandbox";
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     const body = (await res.json()) as { note?: string; mode?: string };
     assert.equal(body.mode, "sandbox");
@@ -2402,7 +2402,7 @@ test("S243 live health note equals sandbox builder", async () => {
   const prevMode = process.env.DIAL_INTEGRATION_MODE;
   process.env.DIAL_INTEGRATION_MODE = "live";
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as { note?: string; mode?: string };
@@ -2442,7 +2442,7 @@ test("S245 sandbox ready=false without Redis (queues probe)", async () => {
     const { integrationsReady } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -2472,7 +2472,7 @@ test("S246 fixture ready=true without Redis", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   delete process.env.REDIS_URL;
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -2573,7 +2573,7 @@ test("S250 live ready=false without Redis (queues probe)", async () => {
     const { integrationsReady } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -2659,7 +2659,7 @@ test("S253 sandbox internal probe fails without INTERNAL_API_SECRET", async () =
     const { integrationsReady } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -2691,7 +2691,7 @@ test("S254 fixture internal probe ok without INTERNAL_API_SECRET", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   delete process.env.INTERNAL_API_SECRET;
   try {
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as {
@@ -2767,7 +2767,7 @@ test("S257 live internal probe fails without INTERNAL_API_SECRET", async () => {
     const { integrationsReady } = await import(
       "./lib/integrationsReadiness.js"
     );
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     const body = (await res.json()) as {
       mode?: string;
@@ -7705,16 +7705,16 @@ test("S164 health route note comes from buildIntegrationsHealthNote", async () =
   );
   const { readFileSync } = await import("node:fs");
   const { join } = await import("node:path");
-  const routeSrc = readFileSync(
-    join(process.cwd(), "src/app/api/health/integrations/route.ts"),
+  const reportSrc = readFileSync(
+    join(process.cwd(), "src/lib/integrationsHealth.ts"),
     "utf8",
   );
-  assert.ok(routeSrc.includes("buildIntegrationsHealthNote"));
-  assert.equal(routeSrc.includes("INTEGRATION_ENV_GROUP_LABELS.join"), false);
+  assert.ok(reportSrc.includes("buildIntegrationsHealthNote"));
+  assert.equal(reportSrc.includes("INTEGRATION_ENV_GROUP_LABELS.join"), false);
 
   for (const mode of ["fixture", "sandbox", "live"] as const) {
     process.env.DIAL_INTEGRATION_MODE = mode;
-    const { GET } = await import("./app/api/health/integrations/route.js");
+    const { integrationsHealthResponse: GET } = await import("./lib/integrationsHealth.js");
     const res = await GET();
     assert.equal(res.status, 200);
     const body = (await res.json()) as { note?: string; mode?: string };
@@ -8036,6 +8036,86 @@ test("PD1 Auth depth: sign-up/in → profile RLS → /me AuthZ; body userId refu
   assert.equal(noPw.status, 400);
 });
 
+test("BUG-051: signed dial_session resolves after in-memory clear (serverless)", () => {
+  __resetAuthForTests();
+  const { token, session } = createSession({
+    email: "bug051@dial.test",
+    buyerSegment: "b2c",
+  });
+  assert.ok(token.startsWith("ds1."), "token is HMAC-signed ds1 payload");
+  __resetAuthForTests();
+  const restored = getSessionFromToken(token);
+  assert.equal(restored?.userId, session.userId);
+  assert.equal(restored?.email, session.email);
+  assert.equal(getSessionFromToken("ds1.bad.sig"), null);
+});
+
+test("BUG-050: form sign-up/in redirect to next with session cookie (no raw JSON)", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  __resetAuthForTests();
+  __resetIdentityForTests();
+  const { sessionCookieName: cookieName } = await import("./lib/auth/session.js");
+  const { POST: signUpPost } = await import("./app/api/auth/sign-up/route.js");
+  const { POST: signInPost } = await import("./app/api/auth/sign-in/route.js");
+
+  const email = `bug050_${Date.now().toString(36)}@dial.test`;
+  const signUpBody = new URLSearchParams({
+    displayName: "Bug050 User",
+    identifier: email,
+    password: "password1",
+    next: "/home",
+  }).toString();
+  const signedUp = await signUpPost(
+    new Request("http://localhost/api/auth/sign-up", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: signUpBody,
+    }),
+  );
+  assert.equal(signedUp.status, 303);
+  assert.equal(new URL(signedUp.headers.get("location") ?? "", "http://localhost").pathname, "/home");
+  const setCookie = signedUp.headers.get("set-cookie") ?? "";
+  assert.ok(setCookie.includes(`${cookieName()}=`), "sign-up sets DialSession cookie");
+
+  const signInBody = new URLSearchParams({
+    identifier: email,
+    password: "password1",
+    next: "/spare/checkout",
+  }).toString();
+  const signedIn = await signInPost(
+    new Request("http://localhost/api/auth/sign-in", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: signInBody,
+    }),
+  );
+  assert.equal(signedIn.status, 303);
+  assert.equal(
+    new URL(signedIn.headers.get("location") ?? "", "http://localhost").pathname,
+    "/spare/checkout",
+  );
+  assert.ok(
+    (signedIn.headers.get("set-cookie") ?? "").includes(`${cookieName()}=`),
+    "sign-in sets DialSession cookie",
+  );
+
+  const jsonStillApi = await signUpPost(
+    new Request("http://localhost/api/auth/sign-up", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        displayName: "Json User",
+        identifier: `bug050_json_${Date.now().toString(36)}@dial.test`,
+        password: "password1",
+      }),
+    }),
+  );
+  assert.equal(jsonStillApi.status, 200);
+  const jsonBody = (await jsonStillApi.json()) as { ok?: boolean; next?: string };
+  assert.equal(jsonBody.ok, true);
+  assert.equal(jsonBody.next, "/home");
+});
+
 test("S103 shared idempotency store dedupes across webhook sources", async () => {
   const {
     __resetIdempotencyForTests,
@@ -8066,9 +8146,8 @@ test("S115 admin money outbox drain fail-closed + fixture drain", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const prev = process.env.INTERNAL_API_SECRET;
   delete process.env.INTERNAL_API_SECRET;
-  const { GET, POST, __testMoneyOutbox } = await import(
-    "./app/api/admin/money/outbox/route.js"
-  );
+  const { GET, POST } = await import("./app/api/admin/money/outbox/route.js");
+  const { __testMoneyOutbox } = await import("./lib/testHandles.js");
   const closed = await GET(new Request("http://localhost/api/admin/money/outbox"));
   assert.equal(closed.status, 503);
 
@@ -8113,8 +8192,8 @@ test("S115 admin money outbox drain fail-closed + fixture drain", async () => {
   assert.equal(__testMoneyOutbox.list().length, 0);
 
   const health = await (
-    await import("./app/api/health/integrations/route.js")
-  ).GET();
+    await import("./lib/integrationsHealth.js")
+  ).integrationsHealthResponse();
   const healthBody = (await health.json()) as {
     moneyOutbox: { depth: number };
   };
@@ -8296,9 +8375,8 @@ test("S119 Paynow webhook durable claim + fixture payments SoR bridge", async ()
   const { __resetIdempotencyForTests } = await import("@dial/shared");
   const { __resetLedgerForTests } = await import("@dial/ledger");
   const { __resetTaxForTests } = await import("@dial/tax");
-  const { POST, __testPaynowPayments } = await import(
-    "./app/api/webhooks/paynow/route.js"
-  );
+  const { POST } = await import("./app/api/webhooks/paynow/route.js");
+  const { __testPaynowPayments } = await import("./lib/testHandles.js");
   __resetIdempotencyForTests();
   __testPaynowPayments.reset();
   __resetLedgerForTests();

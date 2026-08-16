@@ -18,17 +18,28 @@ import {
 
 const techRoot = join(process.cwd(), "src/app/tech");
 
-test("PD13 tech-web UI exists (guide/emergency/book/jobs, design-tokens)", () => {
+test("PD13 tech-web UI exists (FixItNow donor copy + book path)", () => {
   const home = readFileSync(join(techRoot, "page.tsx"), "utf8");
+  const layout = readFileSync(join(techRoot, "layout.tsx"), "utf8");
+  const css = readFileSync(join(techRoot, "tech.css"), "utf8");
   const book = readFileSync(join(techRoot, "book/page.tsx"), "utf8");
   const bookForm = readFileSync(join(techRoot, "book/TechBookForm.tsx"), "utf8");
   const emergency = readFileSync(join(techRoot, "emergency/page.tsx"), "utf8");
   const jobs = readFileSync(join(techRoot, "jobs/page.tsx"), "utf8");
-  assert.match(home, /dialTokens|@dial\/design-tokens/);
-  assert.match(home, /Diagnose|checklist/i);
-  assert.match(home, /My jobs/);
-  assert.match(book, /rate_card|@dial\/jobs/);
+  const bookingModal = readFileSync(
+    join(techRoot, "services/_components/BookingModal.tsx"),
+    "utf8",
+  );
+  assert.match(layout, /data-donor=["']fixitnow["']/);
+  assert.match(layout, /fin-tech/);
+  assert.doesNotMatch(layout, /from ["'].*AppShell|components\/shell\/AppShell/);
+  assert.match(css, /#ff7308/);
+  assert.match(home, /HeroCarousel/);
+  assert.match(home, /FeaturedServices/);
+  assert.doesNotMatch(home, /from ["'].*AppShell|@dial\/design-tokens/);
+  assert.match(book, /rate_card|@dial\/jobs|draftTechQuote/);
   assert.match(bookForm, /\/api\/tech\/services/);
+  assert.match(bookingModal, /\/api\/tech\/services/);
   assert.match(emergency, /EmergencyBookForm/);
   assert.match(jobs, /My service jobs|TechJobsList/);
 });

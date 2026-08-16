@@ -4,12 +4,34 @@
  */
 import { z } from "zod";
 
+/** Routing hint only — never a technician id or payable amount. */
+export const SpecialistHintSchema = z.object({
+  required: z
+    .boolean()
+    .describe("True when the symptom needs an OEM-registered specialist"),
+  brand: z
+    .string()
+    .nullable()
+    .describe("Canonical OEM brand such as mercedes; never a technician id"),
+  system: z
+    .string()
+    .nullable()
+    .describe("Optional vehicle system such as powertrain"),
+  reason: z
+    .string()
+    .min(1)
+    .describe("Short routing reason; no money and no identity"),
+});
+
+export type SpecialistHint = z.infer<typeof SpecialistHintSchema>;
+
 /** Structured assessment — no price / amount fields (C-1 / D-32). */
 export const JobAssessmentSchema = z.object({
   summary: z.string().min(1),
   likelyJobClass: z.string().min(1),
   urgency: z.enum(["normal", "emergency"]),
   needsHumanQuote: z.literal(true),
+  specialistHint: SpecialistHintSchema,
 });
 
 export type JobAssessment = z.infer<typeof JobAssessmentSchema>;
@@ -27,9 +49,53 @@ export function toModelEgress(input: GuidedIntakeInput): { text: string } {
   return { text: input.customerText.trim() };
 }
 
+const SPECIALIST_OEM: Array<{ canonical: string; pattern: RegExp }> = [
+  { canonical: "mercedes", pattern: /\bmercedes(?:[\s-]?benz)?\b|\bbenz\b|\bmb\b/i },
+  { canonical: "bmw", pattern: /\bbmw\b/i },
+  { canonical: "audi", pattern: /\baudi\b/i },
+  { canonical: "porsche", pattern: /\bporsche\b/i },
+  { canonical: "land_rover", pattern: /\b(?:land|range)[\s-]?rover\b/i },
+];
+
+const VEHICLE_SYSTEMS: Array<{ canonical: string; pattern: RegExp }> = [
+  {
+    canonical: "powertrain",
+    pattern: /\b(?:powertrain|transmission|gearbox|drivetrain)\b/i,
+  },
+  { canonical: "electrical", pattern: /\b(?:electrical|wiring|ecu|canbus)\b/i },
+  { canonical: "hvac", pattern: /\b(?:aircon|a\/c|hvac|climate)\b/i },
+];
+
+/**
+ * Structured specialist routing from symptom text.
+ * Emits brand/system only — never technician ids (matching is deterministic).
+ */
+export function inferSpecialistHint(text: string): SpecialistHint {
+  const system =
+    VEHICLE_SYSTEMS.find((s) => s.pattern.test(text))?.canonical ?? null;
+  const brand =
+    SPECIALIST_OEM.find((b) => b.pattern.test(text))?.canonical ?? null;
+  if (brand) {
+    return SpecialistHintSchema.parse({
+      required: true,
+      brand,
+      system,
+      reason: system
+        ? `Needs a registered ${brand} specialist for ${system}`
+        : `Needs a registered ${brand} specialist`,
+    });
+  }
+  return SpecialistHintSchema.parse({
+    required: false,
+    brand: null,
+    system,
+    reason: "General technician is sufficient",
+  });
+}
+
 /**
  * Stub guidedIntake — deterministic draft assessment (no LLM call in thin path).
- * Always requires human quote; never emits payable amounts.
+ * Always requires human quote; never emits payable amounts or technician ids.
  */
 export function guidedIntake(input: GuidedIntakeInput): JobAssessment {
   const { text } = toModelEgress(input);
@@ -42,9 +108,13 @@ export function guidedIntake(input: GuidedIntakeInput): JobAssessment {
     likelyJobClass: emergency ? "jc_roadside" : "jc_diag",
     urgency: emergency ? "emergency" : "normal",
     needsHumanQuote: true,
+    specialistHint: inferSpecialistHint(text),
   });
   // Guard: schema must not grow price fields silently.
   assertNoPayableKeys(assessment);
+  if ("technicianId" in assessment || "technicianIds" in assessment) {
+    throw new Error("guidedIntake must not emit technician ids");
+  }
   return assessment;
 }
 

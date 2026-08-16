@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { dialTokens } from "@dial/design-tokens";
+import { useRouter } from "next/navigation";
+import { Siren } from "lucide-react";
 
-/** PD13 emergency book — AI pricing bypassed; rate_card draft only. */
+import { Button } from "@/components/ui/button";
+
+/** PD13 emergency book — AI pricing bypassed; never waits on guidedIntake. */
 export function EmergencyBookForm() {
-  const [status, setStatus] = useState("");
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function requestEmergency() {
     setBusy(true);
     setError(null);
-    setStatus("");
     try {
       const res = await fetch("/api/tech/services", {
         method: "POST",
@@ -23,14 +25,17 @@ export function EmergencyBookForm() {
         error?: string;
         job?: { id: string };
         aiPricingBypassed?: boolean;
+        guidedIntakeGated?: boolean;
       };
+      if (res.status === 401) {
+        router.push("/?next=/tech/emergency");
+        return;
+      }
       if (!res.ok) {
         setError(json.error ?? "emergency book failed");
         return;
       }
-      setStatus(
-        `Emergency job ${json.job?.id ?? ""}`,
-      );
+      router.push(json.job?.id ? `/tech/jobs/${json.job.id}` : "/tech/jobs");
     } catch (e) {
       setError(e instanceof Error ? e.message : "emergency book failed");
     } finally {
@@ -39,29 +44,23 @@ export function EmergencyBookForm() {
   }
 
   return (
-    <div style={{ marginTop: dialTokens.space.md }}>
-      <button
+    <div className="space-y-3">
+      <Button
         type="button"
+        variant="destructive"
+        className="w-full"
+        size="lg"
         disabled={busy}
+        data-testid="emergency-dispatch"
         onClick={() => void requestEmergency()}
-        style={{
-          padding: `${dialTokens.space.sm} ${dialTokens.space.lg}`,
-          borderRadius: 8,
-          border: "none",
-          background: "#a33",
-          color: "#fff",
-          fontWeight: 600,
-          width: "100%",
-          maxWidth: 320,
-          fontSize: 16,
-          opacity: busy ? 0.6 : 1,
-        }}
       >
+        <Siren className="mr-2 h-4 w-4" />
         {busy ? "Requesting…" : "Request emergency dispatch"}
-      </button>
-      {status ? <p style={{ fontSize: 14 }}>{status}</p> : null}
+      </Button>
       {error ? (
-        <p style={{ fontSize: 14, color: "#a11" }}>{error}</p>
+        <p className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
       ) : null}
     </div>
   );

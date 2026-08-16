@@ -21,9 +21,8 @@ import {
 
 export const runtime = "nodejs";
 
-export async function GET(req?: Request) {
-  const url = req ? new URL(req.url) : null;
-  const view = url?.searchParams.get("view") ?? "pd113";
+export async function GET(req: Request) {
+  const view = new URL(req.url).searchParams.get("view") ?? "pd113";
   if (view === "pd117") {
     const thin = runPd117RealtimeStatusStubThinVertical();
     return NextResponse.json({

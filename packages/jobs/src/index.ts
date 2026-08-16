@@ -28,6 +28,10 @@ import {
   rejectJobVariation,
   runPd69JobVariationApproveThinVertical,
 } from "./variations.js";
+import {
+  matchCardsForOemSpecialist,
+  normalizeOemBrand,
+} from "./oemSpecialistMatch.js";
 
 export {
   approveJobVariation,
@@ -2387,12 +2391,14 @@ export type TechnicianProfileCard = {
   eligible: boolean;
   managersChoice: boolean;
   valueScore: number | null;
+  /** Registered OEM brands this technician covers (deterministic match). */
+  oemSpecialties: string[];
   payableFromAi: false;
 };
 
 const technicianProfileDirectory = new Map<
   string,
-  { displayName: string; tradeId: string }
+  { displayName: string; tradeId: string; oemSpecialties: string[] }
 >();
 
 /** PD106 — register technician for customer profile cards (Pack §9.3). */
@@ -2400,11 +2406,119 @@ export function upsertTechnicianProfileDirectory(input: {
   technicianId: string;
   displayName: string;
   tradeId: string;
+  oemSpecialties?: string[];
 }): void {
   if (!input.technicianId.trim()) throw new Error("technicianId required");
-  technicianProfileDirectory.set(input.technicianId.trim(), {
-    displayName: input.displayName.trim() || input.technicianId,
+  const id = input.technicianId.trim();
+  const prev = technicianProfileDirectory.get(id);
+  const specialties = (
+    input.oemSpecialties ??
+    prev?.oemSpecialties ??
+    []
+  )
+    .map((s) => normalizeOemBrand(s))
+    .filter((s) => s.length > 0);
+  technicianProfileDirectory.set(id, {
+    displayName: input.displayName.trim() || id,
     tradeId: input.tradeId.trim() || "trade_auto",
+    oemSpecialties: [...new Set(specialties)],
+  });
+}
+
+export function setTechnicianOemSpecialties(input: {
+  technicianId: string;
+  oemSpecialties: string[];
+}): string[] {
+  const id = input.technicianId.trim();
+  const prev = technicianProfileDirectory.get(id);
+  if (!prev) throw new Error(`Unknown technician ${id}`);
+  const oemSpecialties = [
+    ...new Set(
+      input.oemSpecialties.map((s) => normalizeOemBrand(s)).filter(Boolean),
+    ),
+  ];
+  technicianProfileDirectory.set(id, { ...prev, oemSpecialties });
+  return [...oemSpecialties];
+}
+
+/**
+ * Fixture directory for Dial a Tech / FixItNow — includes one Mercedes OEM specialist.
+ * Same SoR as profile cards; not a second registry.
+ */
+export function ensureDialTechProfileFixtures(): void {
+  upsertTechnicianProfileDirectory({
+    technicianId: "tech_guide_choice",
+    displayName: "Amai Choice",
+    tradeId: "trade_auto",
+  });
+  upsertTechnicianProfileDirectory({
+    technicianId: "tech_guide_std",
+    displayName: "Baba Standard",
+    tradeId: "trade_elec",
+  });
+  upsertTechnicianProfileDirectory({
+    technicianId: "tech_harare_plumb",
+    displayName: "Tariro Moyo",
+    tradeId: "trade_elec",
+  });
+  upsertTechnicianProfileDirectory({
+    technicianId: "tech_mercedes_spec",
+    displayName: "Farai Mercedes",
+    tradeId: "trade_auto",
+    oemSpecialties: ["mercedes"],
+  });
+  for (const technicianId of [
+    "tech_guide_choice",
+    "tech_guide_std",
+    "tech_harare_plumb",
+    "tech_mercedes_spec",
+  ]) {
+    setTechnicianCredential({
+      technicianId,
+      kind: "trade_licence",
+      status: "verified",
+    });
+  }
+  setValueScoreSnapshot({
+    technicianId: "tech_guide_choice",
+    score: 90,
+    sampleN: 30,
+  });
+  setManagersChoice({
+    technicianId: "tech_guide_choice",
+    managersChoice: true,
+    setBy: "fixitnow_fixture",
+  });
+  setValueScoreSnapshot({
+    technicianId: "tech_guide_std",
+    score: 72,
+    sampleN: 14,
+  });
+  setValueScoreSnapshot({
+    technicianId: "tech_harare_plumb",
+    score: 84,
+    sampleN: 22,
+  });
+  setValueScoreSnapshot({
+    technicianId: "tech_mercedes_spec",
+    score: 88,
+    sampleN: 26,
+  });
+  setTechnicianAvailability({
+    technicianId: "tech_guide_choice",
+    status: "available",
+  });
+  setTechnicianAvailability({
+    technicianId: "tech_guide_std",
+    status: "busy",
+  });
+  setTechnicianAvailability({
+    technicianId: "tech_harare_plumb",
+    status: "available",
+  });
+  setTechnicianAvailability({
+    technicianId: "tech_mercedes_spec",
+    status: "available",
   });
 }
 
@@ -2431,9 +2545,62 @@ export function listTechnicianProfileCards(): TechnicianProfileCard[] {
       }),
       managersChoice: snap?.managersChoice === true,
       valueScore: snap?.score ?? null,
+      oemSpecialties: [...meta.oemSpecialties],
       payableFromAi: false,
     };
   });
+}
+
+export function matchTechniciansForSpecialistHint(input: {
+  required: boolean;
+  brand?: string | null;
+}): ReturnType<typeof matchCardsForOemSpecialist<TechnicianProfileCard>> {
+  return matchCardsForOemSpecialist(listTechnicianProfileCards(), input);
+}
+
+/**
+ * Thin vertical: Mercedes hint ranks registered specialist; Honda general is not forced.
+ */
+export function runOemSpecialistRoutingThinVertical(): {
+  mercedesRanked: true;
+  hondaNotForced: true;
+  aliasesNormalized: true;
+  payableFromAi: false;
+} {
+  __resetJobsForTests();
+  ensureDialTechProfileFixtures();
+  const mercedes = matchTechniciansForSpecialistHint({
+    required: true,
+    brand: "Benz",
+  });
+  if (mercedes.matchedOnBrand !== "mercedes") {
+    throw new Error("expected Mercedes alias to normalize");
+  }
+  if (
+    mercedes.recommended[0]?.technicianId !== "tech_mercedes_spec" ||
+    mercedes.recommended.length !== 1
+  ) {
+    throw new Error("Mercedes hint must rank the registered specialist first");
+  }
+  if (mercedes.recommended.some((c) => c.technicianId === "tech_guide_choice")) {
+    throw new Error("general techs must not be in Mercedes recommended");
+  }
+  const honda = matchTechniciansForSpecialistHint({
+    required: false,
+    brand: "honda",
+  });
+  if (honda.recommended.length !== 0) {
+    throw new Error("Honda general must not force a specialist");
+  }
+  if (honda.fallback.length < 1) {
+    throw new Error("Honda general should fall back to the directory");
+  }
+  return {
+    mercedesRanked: true,
+    hondaNotForced: true,
+    aliasesNormalized: true,
+    payableFromAi: false,
+  };
 }
 
 /**
@@ -2917,6 +3084,12 @@ export async function runPd13TechWebThinVertical(input?: {
     checklists: ids,
   };
 }
+
+export {
+  matchCardsForOemSpecialist,
+  normalizeOemBrand,
+  technicianCoversOemBrand,
+} from "./oemSpecialistMatch.js";
 
 export {
   acceptTermsVersion,

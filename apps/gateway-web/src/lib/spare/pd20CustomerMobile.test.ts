@@ -200,7 +200,6 @@ test("PD20 package thin vertical + spare API parity", async () => {
       headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         cartId: cart.id,
-        customerId: "cust_pd20_api",
         payChoice: "cod",
       }),
     }),

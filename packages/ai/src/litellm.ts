@@ -50,6 +50,12 @@ export async function completeViaLiteLlm(input: {
         likelyJobClass: "jc_diag",
         urgency: "normal",
         needsHumanQuote: true,
+        specialistHint: {
+          required: false,
+          brand: null,
+          system: null,
+          reason: "General technician is sufficient",
+        },
       }),
       model: input.model ?? "fixture-gemini",
     });

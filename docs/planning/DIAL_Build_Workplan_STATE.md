@@ -11,12 +11,18 @@ Machine- and human-readable pointer for Dev Manager / Prime auto-advance.
 
 | Field | Value |
 | --- | --- |
-| `current_stage` | **Completion Phase 11** — Intelligence / Command Centre — **G11 green** (2026-08-16); **G8 green**; **G7 green**; Phase 6 still open |
+| `current_stage` | **Completion Phase 12 prep** — hardening / AppSec / ops (not G12); **G11 green**; **G8 green**; **G7 green** |
 | `current_branch` | `build/t4-tech-ui` |
-| `prior_stage` | **Completion Phase 7** — **G7 green** (2026-08-16); **G8 green** (2026-08-16) |
-| `next_stage` | Phase 12 hardening prep; G5/G3/G6/G9/G10/G2-live remain `blocked_on_human` or open |
+| `prior_stage` | **Completion Phase 11** — **G11 green** (2026-08-16) |
+| `next_stage` | G12 remains open (ENH-011 staging cohort); G5/G3/G6/G9/G10/G2-live remain `blocked_on_human` or open |
 | `blocked_on_human` | See **paused on human secrets** board below (G3 signing certs; G6 device PNG; real EcoCash for production-intent; Meta/ZIMRA/escrow; ENH-013 maps; ENH-011 staging; optional `DATABASE_URL` for local psql) |
-| `pause_mode` | **production-grade local stack landed (W1–W6)** — Pack §7 schema + durable reads + DialMap + compose images; **G5 map cells retracted** (BUG-046) until Playwright vs real GL; secret gates honestly open |
+| `pause_mode` | **Phase 12 eng prep + ENH-609 Tech FixItNow UI copy** — public `/tech` copied, dashboards still open; Spare still AppShell; secret gates honestly open |
+
+**Hosted preview (ENH-610):** Vercel project `dial` (fixture mode, no live keys). First deploy required fixing a **blocking** production-build defect (BUG-048) and a CSP defect that hid map tiles off localhost (BUG-049). Smoke: 33 routes answer, 0 server errors, auth-gated routes correctly 307/401. Preview sits behind Vercel deployment protection; the project's Root Directory is still unset (repo root carries `next` + `vercel.json` as the workaround).
+
+**Credential lock (founder, 2026-08-16):** live payment / WhatsApp / tax credentials are injected **only after** everything is tested and confirmed production-ready — `.cursor/rules/dial-credentials-after-testing.mdc`.
+
+**Donor UX (ENH-609 / D-38):** **In progress — Tech public UI copied, not full parity.** SoR = [`DIAL_Donor_Parity_Roadmap.md`](./DIAL_Donor_Parity_Roadmap.md). Founder: copy FixItNow UI, not redesign. `/tech` landing + services + technicians use copied FixItNow chrome; book → `POST /api/tech/services`. Dashboards / pay / reviews still open. Shared DIAL `AppShell` as cross-branch identity is **out**. Next: **P0** Spare AppShell rollback. Does **not** claim G3 or G12. Preview stays fixture (ENH-610).
 
 **Eng parallel (key-drop-in):** Adapter shapes + webhook settle bridges hardened so Pack §6 secrets plug in with **zero further coding**. G2 eng-exception ≠ live EcoCash green.
 
@@ -44,9 +50,9 @@ Machine- and human-readable pointer for Dev Manager / Prime auto-advance.
 | **9** | G9 sandbox probe + fiscal channel=wa settlement; `phase9PrepOps.test.ts` 6/6; FLOW pay EcoCash+COD fixture evidence | **not G9** (ENH-021 + test MSISDN) |
 | **10** | Spine order→POD + liquor hidden + B2B=0; **web Playwright green** (browse→track desktop+mobile, 14 PNGs in `g10/`); checkout client import fix | **not G10** (`g10Claimed=false`; G5 ENH-013 maps may block full exit) |
 | **11** | `executeRecommendedAction` + Promptfoo fail gate; `g11-sandbox-intelligence-dogfood.mts`; `phase11PrepOps.test.ts` 4/4; ai-capability-G11 audit | **G11 green** (`g11Claimed=true`) |
-| **12** | `phase12-hardening-dogfood-checklist.md` (Appendix C = human only) | **not G12** |
+| **12** | Spare-orders IDOR (BUG-047); `phase12PrepOps`; `g12-hardening-prep.json` `g12Claimed=false`; §5.16 dormancy register; DialMap recon requires GL canvas | **not G12** |
 
-**Remaining eng-safe backlog:** G12 prep only (remote staging cohort = human ENH-011). **Open gates (human/device/secrets):** G3 signing; G5 ENH-013 maps + device POD; G6 device PNG; G9 live ENH-021; G10 full (`g10Claimed=false`); G2 live EcoCash; G12 staging cohort.
+**Remaining eng-safe backlog:** Re-run `g5-admin-delivery-recon.mts` vs DialMap when gateway :3000 is up; local restore drill when Docker engine is up; Semgrep/Checkov on CI after push. **Open gates (human/device/secrets):** G3 signing; G5 ENH-013 maps + device POD; G6 device PNG; G9 live ENH-021; G10 full (`g10Claimed=false`); G2 live EcoCash; G12 staging cohort (ENH-011).
 
 ## G6 evidence board (anti-stub) — open
 
@@ -115,7 +121,7 @@ Machine- and human-readable pointer for Dev Manager / Prime auto-advance.
 | Temporal `DeliveryDispatchWorkflow` history | **green** | `g5-sandbox-delivery-dogfood.mts` `path=temporal`, `historyLength≥2` |
 | Courier sandbox offer→accept→POD→COD | **green** | `g5-sandbox-delivery-dogfood.json` durable `pod_captured` |
 | Timeout→reassign | **green** | `g5-sandbox-delivery-dogfood.json` |
-| Admin MapLibre T+S+A | **green** | `g5-admin-delivery-recon.mts` → `docs/ops/evidence/g5/` (9 PNGs) |
+| Admin MapLibre T+S+A | **retracted** | BUG-046 stub CSS; recon now requires `.maplibregl-canvas` — re-run before re-claim |
 | ENH-013 Nominatim/OSRM/VROOM | **open** | `g5-maps-tier2-probe.json` fail-closed |
 | Courier Android device POD PNG | **open** | G3 signing — unit tests only |
 | **G5** | **open** | Maps SoR + device POD remain |
@@ -179,6 +185,7 @@ Machine- and human-readable pointer for Dev Manager / Prime auto-advance.
 | **G7 extended + G10 web dogfood** | 2026-08-16 | G7: 6 missing extended desktop PNGs (integrations…wa-flows); G10: web browse→track desktop+mobile green after grocery checkout client import fix — **`g10Claimed=false`** (G5 maps residual) |
 | **Phase 7 / G7** | 2026-08-16 | Extended A–P checklist JSON validated (`finalizeSignOffFromExistingPngs`); all modules A–P walked; **`g7Claimed=true`** — **G7 green** |
 | **Phase 11 / G11** | 2026-08-16 | Promptfoo fail→no promote; Actual KPI action cannot pay; Simulated forbidden; ai-capability-G11 audit; **`g11Claimed=true`** — **G11 green** |
+| **Phase 12 prep** | 2026-08-16 | Spare-orders IDOR (BUG-047); `phase12PrepOps` + `g12-hardening-prep.json`; §5.16 dormancy; G5 recon GL wait — **not G12** |
 
 ## G8 evidence board (anti-stub) — green
 
@@ -222,8 +229,8 @@ Machine- and human-readable pointer for Dev Manager / Prime auto-advance.
 
 | Candidate | Note |
 | --- | --- |
+| **Phase 12 remaining** | Remote staging cohort (ENH-011); Semgrep/Checkov CI; restore drill when Docker up; DialMap Playwright re-run |
 | **Phase 3 / G3 remaining** | Device screenshots + signed internal builds against staging — human signing / ENH-011 |
-| **Phase 4 / G4 remaining** | Meili + REST→Meili + admin recon **green** — see G4 board |
 | **Live EcoCash** | After founder portal keys — refresh evidence; still not required to sequence Phase 3+ |
 | **S99** | Customer-open — founder/ops Appendix C — **not eng next** |
 

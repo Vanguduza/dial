@@ -16,8 +16,6 @@ import { GROCERY_CART_COOKIE } from "../../../../lib/grocery/cookies";
 
 export const runtime = "nodejs";
 
-export { GROCERY_CART_COOKIE };
-
 function buyerSegment(req: Request): "b2c" | "b2b" {
   const session = getSessionFromToken(
     parseSessionCookie(req.headers.get("cookie")),

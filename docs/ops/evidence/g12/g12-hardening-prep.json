@@ -1,0 +1,36 @@
+{
+  "g12Claimed": false,
+  "not_G12": true,
+  "not_S99": true,
+  "mode": "eng_prep",
+  "appsec": {
+    "spareOrdersSessionSoR": true,
+    "spareOrdersRejectsBodyCustomerId": true,
+    "paynowVerifyThenIdempotency": true,
+    "idorRouteTests": true,
+    "phase12PrepOps": true
+  },
+  "maps": {
+    "dialMap": true,
+    "reconRequiresGlCanvas": true,
+    "g5Claimed": false
+  },
+  "ops": {
+    "incident": true,
+    "degradation": true,
+    "restoreDrillDoc": true,
+    "restoreDrillExecuted": false,
+    "restoreDrillReason": "docker_engine_unavailable",
+    "s516Dormancy": true,
+    "storeListingDrafts": true
+  },
+  "blocked_on_human": [
+    "ENH-011 remote staging URL (G12 cohort)",
+    "G3 signing / device PNGs",
+    "G5 ENH-013 mbtiles + device POD",
+    "G6 device PNG",
+    "G9 ENH-021 WABA",
+    "Appendix C / G12-H"
+  ],
+  "ok": true
+}

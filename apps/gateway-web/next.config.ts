@@ -22,14 +22,21 @@ const dialPackages = [
   "@dial/shared",
   "@dial/suppliers",
   "@dial/tax",
-  "@dial/worker-temporal",
 ];
+
+// Vercel produces its own server output; standalone is only for the container image.
+const standalone = process.env.DIAL_BUILD_STANDALONE === "1";
 
 const nextConfig: NextConfig = {
   transpilePackages: dialPackages,
-  // Container image ships .next/standalone; tracing must span the pnpm workspace.
-  output: "standalone",
+  ...(standalone ? { output: "standalone" as const } : {}),
   outputFileTracingRoot: monorepoRoot,
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "placehold.co" },
+    ],
+  },
   webpack: (config) => {
     // Workspace packages use TS ESM `.js` import specifiers → resolve to `.ts`.
     config.resolve.extensionAlias = {

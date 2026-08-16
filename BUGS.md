@@ -61,6 +61,58 @@ _None._
 
 ## Resolved
 
+| ID | BUG-051 |
+| --- | --- |
+| Title | Sign-in 303s then `/home` bounces to `/` — in-memory DialSession lost across Vercel isolates |
+| Severity | blocker |
+| Status | fixed |
+| Surface | `apps/gateway-web` auth session cookie + `/home` |
+| Repro | Form POST `/api/auth/sign-in` on Vercel preview → 303 `/home` + `dial_session` → GET `/home` with cookie → 307 `/` |
+| Expected | Stay on `/home` with Shop\|Services after successful sign-in |
+| Actual | Looks like “sign-in does nothing” (land back on sign-in, no error) |
+| Owner | eng |
+| Opened | 2026-08-16 |
+| Fixed | 2026-08-16 — HMAC-signed `ds1.*` DialSession cookies + Secure cookie attrs |
+
+| ID | BUG-050 |
+| --- | --- |
+| Title | Form sign-up returned raw JSON instead of redirecting to `/home` |
+| Severity | major |
+| Status | fixed |
+| Surface | `apps/gateway-web` `/sign-up` → `POST /api/auth/sign-up` |
+| Repro | Submit Create account on `/sign-up` |
+| Expected | 303 to `/home` (or safe `next`) with DialSession cookie |
+| Actual | Browser showed `{"ok":true,"userId":…,"next":"/home"}` |
+| Owner | eng |
+| Opened | 2026-08-16 |
+| Fixed | 2026-08-16 — form posts redirect like sign-in; JSON API shape preserved |
+
+| ID | BUG-048 |
+| --- | --- |
+| Title | `next build` fails — gateway imports `@dial/worker-temporal`, and route/page files export non-route symbols |
+| Severity | blocker |
+| Status | fixed |
+| Surface | `apps/gateway-web` production build / any hosted deploy |
+| Repro | `pnpm --filter @dial/gateway-web build` |
+| Expected | Production build succeeds |
+| Actual | webpack cannot parse `@temporalio/worker` native bindings; then Next rejects `__testMoneyOutbox`, `__testPaynowPayments`, `GROCERY_CART_COOKIE`, `sessionFromCookieHeader` and optional `GET(req?)` params |
+| Owner | eng |
+| Opened | 2026-08-16 |
+| Links | Temporal config moved to `@dial/shared`; test handles in `src/lib/testHandles.ts`; report split into `src/lib/integrationsHealth.ts` |
+
+| ID | BUG-049 |
+| --- | --- |
+| Title | CSP `connect-src` blocks MapLibre tiles on any deployed origin |
+| Severity | major |
+| Status | fixed |
+| Surface | `apps/gateway-web/src/middleware.ts` |
+| Repro | Load `/delivery/track` on a non-localhost origin |
+| Expected | Vector style, glyphs and tiles load |
+| Actual | `connect-src 'self' … localhost` blocked every https tile fetch |
+| Owner | eng |
+| Opened | 2026-08-16 |
+| Links | `connect-src` now allows https; localhost entries are dev-only |
+
 | ID | BUG-042 |
 | Title | G2 Spare checkout Auth return URL + NEXT_REDIRECT swallow on pay success |
 | Severity | minor |
@@ -92,6 +144,14 @@ _None._
 | Surface | `packages/identity` (+ `apps/worker-queues` package.json) |
 | Opened | 2026-08-16 |
 | Fixed | 2026-08-16 — strip BOM |
+
+| ID | BUG-047 |
+| Title | `/api/spare/orders` listed/tracked any `orderId`/`customerId` without session object-level AuthZ |
+| Severity | major |
+| Status | fixed |
+| Surface | `apps/gateway-web` `/api/spare/orders` |
+| Opened | 2026-08-16 |
+| Fixed | 2026-08-16 — session + `assertResourceAccess`; reject body/query `customerId` (D-47) |
 
 | ID | BUG-046 |
 | Title | Admin delivery track was a CSS gradient with projected pins, not MapLibre GL — G5/G7 map recon was stub evidence |

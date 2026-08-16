@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { dialTokens } from "@dial/design-tokens";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 
 type JobRow = {
   id: string;
@@ -41,55 +43,52 @@ export function TechJobsList() {
     void refresh();
   }, [refresh]);
 
-  if (busy) return <p style={{ fontSize: 14 }}>Loading…</p>;
+  if (busy) {
+    return <p className="text-sm text-muted-foreground">Loading…</p>;
+  }
   if (error) {
     return (
-      <p style={{ fontSize: 14, color: "#a11" }}>
-        {error} — <Link href="/sign-in">Sign in</Link>
+      <p className="text-sm text-destructive">
+        {error} — <Link href="/?next=/tech/jobs" className="underline">Sign in</Link>
       </p>
     );
   }
   if (jobs.length === 0) {
     return (
-      <p style={{ fontSize: 14 }}>
-        No jobs yet. <Link href="/tech/book">Book a tech</Link> or{" "}
-        <Link href="/tech/emergency">request emergency</Link>.
+      <p className="text-sm text-muted-foreground">
+        No jobs yet.{" "}
+        <Link href="/tech/services" className="text-primary underline">
+          Book a tech
+        </Link>{" "}
+        or{" "}
+        <Link href="/tech/emergency" className="text-primary underline">
+          request emergency
+        </Link>
+        .
       </p>
     );
   }
 
   return (
-    <ul
-      style={{
-        listStyle: "none",
-        padding: 0,
-        display: "grid",
-        gap: dialTokens.space.md,
-      }}
-    >
+    <ul className="space-y-3">
       {jobs.map((j) => (
-        <li
-          key={j.id}
-          style={{
-            padding: dialTokens.space.md,
-            background: "#fff",
-            borderRadius: 12,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-          }}
-        >
-          <Link
-            href={`/tech/jobs/${j.id}`}
-            style={{ textDecoration: "none", color: dialTokens.color.brand.ink }}
-          >
-            <strong>{j.id}</strong>
-            <div style={{ fontSize: 13, opacity: 0.7 }}>
-              {j.status}
-              {j.emergency ? " · emergency" : ""} · {j.jobClassId}
-            </div>
-            <div style={{ fontSize: 13 }}>
-              Draft USD {(Number(j.draftAmountUsdMinor) / 100).toFixed(2)} (rate_card · not
-              payable from AI)
-            </div>
+        <li key={j.id}>
+          <Link href={`/tech/jobs/${j.id}`}>
+            <Card className="transition hover:border-primary/40 hover:shadow-md">
+              <CardContent className="flex items-center justify-between gap-4 p-4">
+                <div>
+                  <p className="font-semibold">
+                    {j.jobClassId}
+                    {j.emergency ? " · emergency" : ""}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    USD {(Number(j.draftAmountUsdMinor) / 100).toFixed(2)} draft
+                    {j.payableFromAi === false ? " · rate_card" : ""}
+                  </p>
+                </div>
+                <Badge>{j.status}</Badge>
+              </CardContent>
+            </Card>
           </Link>
         </li>
       ))}

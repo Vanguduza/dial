@@ -248,10 +248,15 @@ async function runViewport(vp: (typeof viewports)[number]) {
       ),
     );
 
-    const mapCanvas = page.locator('[aria-label="MapLibre map with courier pins"]');
-    const mapVisible = await mapCanvas.isVisible().catch(() => false);
-    if (!mapVisible) {
-      violations.push(`track-${vp.label}: MapLibre canvas not visible`);
+    const mapRoot = page.locator('[data-testid="dial-map"]');
+    await mapRoot.waitFor({ state: "visible", timeout: 15_000 }).catch(() => undefined);
+    const canvasVisible = await page
+      .locator(".maplibregl-canvas")
+      .first()
+      .isVisible({ timeout: 20_000 })
+      .catch(() => false);
+    if (!canvasVisible) {
+      violations.push(`track-${vp.label}: MapLibre GL canvas not visible (DialMap)`);
     }
 
     if (internalSecret) {
@@ -270,6 +275,16 @@ async function runViewport(vp: (typeof viewports)[number]) {
           await page.content(),
         ),
       );
+      const dispatchCanvas = await page
+        .locator(".maplibregl-canvas")
+        .first()
+        .isVisible({ timeout: 20_000 })
+        .catch(() => false);
+      if (!dispatchCanvas) {
+        violations.push(
+          `dispatch-${vp.label}: MapLibre GL canvas not visible (DialMap)`,
+        );
+      }
 
       const seedRes = await context.request.post(
         `${base}/api/admin/delivery/dispatch`,

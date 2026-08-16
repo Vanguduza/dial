@@ -3,21 +3,9 @@
  * GET: pending depth. POST: drainMoneyOutbox (ledger → queues; fiscal → FDMS).
  */
 import { NextResponse } from "next/server";
-import {
-  __resetLedgerForTests,
-  drainMoneyOutbox,
-  enqueueMoneyOutbox,
-  listMoneyOutbox,
-} from "@dial/ledger";
+import { drainMoneyOutbox, listMoneyOutbox } from "@dial/ledger";
 
 export const runtime = "nodejs";
-
-/** Test-only: same module graph as this route (avoids dual ledger instances under tsx). */
-export const __testMoneyOutbox = {
-  reset: __resetLedgerForTests,
-  enqueue: enqueueMoneyOutbox,
-  list: listMoneyOutbox,
-};
 
 function assertInternalSecret(req: Request): NextResponse | null {
   const secret = process.env.INTERNAL_API_SECRET;

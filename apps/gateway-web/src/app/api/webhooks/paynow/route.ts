@@ -5,27 +5,15 @@
 import { NextResponse } from "next/server";
 import { PaynowAdapter } from "@dial/adapter-psp";
 import {
-  __resetPaymentsForTests,
   admitPspWebhookEvent,
   completePspCaptureSettlement,
   findPaymentIntentForWebhook,
   findPaymentIntentForWebhookDurable,
-  getPaymentIntent,
-  runE1aMoneySpine,
-  runPd4MoneySpine,
 } from "@dial/payments";
 import { claimProcessedEventDurable } from "@dial/shared";
 import { takeRouteRateLimit } from "../../../../lib/http/rateLimit";
 
 export const runtime = "nodejs";
-
-/** Test-only: same module graph as this route (avoids dual payments instances under tsx). */
-export const __testPaynowPayments = {
-  reset: __resetPaymentsForTests,
-  runE1aMoneySpine,
-  runPd4MoneySpine,
-  getPaymentIntent,
-};
 
 export async function POST(req: Request) {
   const limited = await takeRouteRateLimit({

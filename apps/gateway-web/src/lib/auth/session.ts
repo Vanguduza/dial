@@ -1,7 +1,12 @@
 /**
- * PD1 Identity session — DialSession cookie cache over Supabase Auth + profiles.
+ * PD1 Identity session — DialSession cookie over Supabase Auth + profiles.
  * Never trust userId/email/role from request body (D-47).
+ *
+ * Tokens are HMAC-signed (`ds1.<payload>.<sig>`) so any serverless isolate can
+ * restore the session without an in-memory Map or Redis (Vercel preview).
+ * Optional Redis remains a cache for sandbox/live when REDIS_URL is set.
  */
+import { createHmac, timingSafeEqual } from "node:crypto";
 import type { ProfileRole } from "@dial/identity";
 import type Redis from "ioredis";
 
@@ -16,8 +21,11 @@ export type DialSession = {
 const COOKIE = "dial_session";
 const REDIS_PREFIX = "dial:session:";
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
+const TOKEN_PREFIX = "ds1";
 
 type SessionStore = Map<string, DialSession>;
+
+type SignedPayload = DialSession & { exp: number; v: 1 };
 
 function sessions(): SessionStore {
   const g = globalThis as typeof globalThis & {
@@ -27,6 +35,70 @@ function sessions(): SessionStore {
     g.__dialSessionStore = new Map();
   }
   return g.__dialSessionStore;
+}
+
+/** Pack §6 INTERNAL_API_SECRET when set; fixture-stable fallback for local/CI. */
+function sessionSigningSecret(): string {
+  return process.env.INTERNAL_API_SECRET?.trim() || "fixture_dial_session_hmac";
+}
+
+function signBody(body: string): string {
+  return createHmac("sha256", sessionSigningSecret())
+    .update(body)
+    .digest("base64url");
+}
+
+function safeEqualStr(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  return timingSafeEqual(ba, bb);
+}
+
+function encodeSessionToken(session: DialSession): string {
+  const payload: SignedPayload = {
+    ...session,
+    exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS,
+    v: 1,
+  };
+  const body = Buffer.from(JSON.stringify(payload), "utf8").toString(
+    "base64url",
+  );
+  return `${TOKEN_PREFIX}.${body}.${signBody(body)}`;
+}
+
+function decodeSignedSessionToken(token: string): DialSession | null {
+  const parts = token.split(".");
+  if (parts.length !== 3 || parts[0] !== TOKEN_PREFIX) return null;
+  const body = parts[1]!;
+  const sig = parts[2]!;
+  if (!safeEqualStr(signBody(body), sig)) return null;
+  let parsed: SignedPayload;
+  try {
+    parsed = JSON.parse(
+      Buffer.from(body, "base64url").toString("utf8"),
+    ) as SignedPayload;
+  } catch {
+    return null;
+  }
+  if (parsed.v !== 1 || typeof parsed.exp !== "number") return null;
+  if (parsed.exp < Math.floor(Date.now() / 1000)) return null;
+  if (
+    typeof parsed.userId !== "string" ||
+    typeof parsed.email !== "string" ||
+    (parsed.role !== "customer" &&
+      parsed.role !== "ops_admin" &&
+      parsed.role !== "technician") ||
+    (parsed.buyerSegment !== "b2c" && parsed.buyerSegment !== "b2b")
+  ) {
+    return null;
+  }
+  return {
+    userId: parsed.userId,
+    email: parsed.email,
+    role: parsed.role,
+    buyerSegment: parsed.buyerSegment,
+  };
 }
 
 let redisPromise: Promise<Redis | null> | null = null;
@@ -69,6 +141,11 @@ function persistSession(token: string, session: DialSession): void {
 async function loadSession(token: string): Promise<DialSession | null> {
   const mem = sessions().get(token);
   if (mem) return mem;
+  const signed = decodeSignedSessionToken(token);
+  if (signed) {
+    sessions().set(token, signed);
+    return signed;
+  }
   const client = await redisClient();
   if (!client) return null;
   const raw = await client.get(`${REDIS_PREFIX}${token}`);
@@ -92,7 +169,6 @@ export function createSession(input: {
 }): { token: string; session: DialSession } {
   const email = input.email.trim().toLowerCase();
   if (!email) throw new Error("email required");
-  const token = `sess_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
   const session: DialSession = {
     userId:
       input.userId ??
@@ -101,13 +177,21 @@ export function createSession(input: {
     role: input.role ?? "customer",
     buyerSegment: input.buyerSegment ?? "b2c",
   };
+  const token = encodeSessionToken(session);
   persistSession(token, session);
   return { token, session };
 }
 
 export function getSessionFromToken(token: string | undefined): DialSession | null {
   if (!token) return null;
-  return sessions().get(token) ?? null;
+  const mem = sessions().get(token);
+  if (mem) return mem;
+  const signed = decodeSignedSessionToken(token);
+  if (signed) {
+    sessions().set(token, signed);
+    return signed;
+  }
+  return null;
 }
 
 export async function getSessionFromTokenDurable(
@@ -140,7 +224,7 @@ export function parseSessionCookie(cookieHeader: string | null): string | undefi
   return part?.slice(COOKIE.length + 1);
 }
 
-/** Priority resources for T9 / Appendix A.1 IDOR smoke (≥5). */
+/** Authorize before cache read — keys must include userId (D-47). */
 export type ProtectedResourceKind =
   | "job"
   | "order"
@@ -176,6 +260,23 @@ export function userScopedCacheKey(userId: string, suffix: string): string {
 
 export function sessionCookieName(): string {
   return COOKIE;
+}
+
+/** Shared Set-Cookie attrs for sign-in/up (HTTPS preview needs Secure). */
+export function sessionCookieOptions(): {
+  httpOnly: true;
+  sameSite: "lax";
+  path: "/";
+  secure: boolean;
+  maxAge: number;
+} {
+  return {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: SESSION_TTL_SECONDS,
+  };
 }
 
 /** Test helper — never used as a production identity source. */

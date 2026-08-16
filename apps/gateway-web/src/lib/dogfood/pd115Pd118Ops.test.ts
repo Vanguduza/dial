@@ -35,6 +35,7 @@ test("PD115 spare order track timeline API + UI", async () => {
   assert.ok(thin.timelineLen >= 3);
 
   __resetSpareCustomerForTests();
+  __resetAuthForTests();
   const order = placeSpareOrder({
     cart: {
       id: "cart_pd115_api",
@@ -57,9 +58,16 @@ test("PD115 spare order track timeline API + UI", async () => {
   });
   advanceSpareOrderStatus(order.orderId);
 
+  const { token } = createSession({
+    email: "pd115@dial.test",
+    userId: "cust_pd115",
+    role: "customer",
+  });
+  const cookie = `${sessionCookieName()}=${token}`;
   const res = await ordersGet(
     new Request(
       `http://localhost/api/spare/orders?orderId=${encodeURIComponent(order.orderId)}`,
+      { headers: { cookie } },
     ),
   );
   assert.equal(res.status, 200);

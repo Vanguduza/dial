@@ -33,10 +33,36 @@ test("E4a guidedIntake: Zod assessment, no price, identity omitted from egress",
   assert.equal(assessment.likelyJobClass, "jc_roadside");
   assert.equal("price" in assessment, false);
   assert.equal("amountMinor" in assessment, false);
+  assert.equal(assessment.specialistHint.required, false);
+  assert.equal("technicianId" in assessment, false);
 
   const draft = opsDraftQuoteFromAssessment(assessment);
   assert.equal(draft.humanApprovalRequired, true);
   assert.equal(draft.ledgerWrite, false);
+});
+
+test("guidedIntake Mercedes specialist hint; Honda not forced; no money", () => {
+  const mercedes = guidedIntake({
+    customerText: "My Mercedes Benz powertrain is rattling",
+    customerUserId: "usr_secret",
+    customerPhone: "+26377",
+  });
+  assert.equal(mercedes.needsHumanQuote, true);
+  assert.equal(mercedes.specialistHint.required, true);
+  assert.equal(mercedes.specialistHint.brand, "mercedes");
+  assert.equal(mercedes.specialistHint.system, "powertrain");
+  assert.equal("amountMinor" in mercedes, false);
+  assert.equal("technicianId" in mercedes, false);
+  const dumped = JSON.stringify(mercedes);
+  assert.doesNotMatch(dumped, /amountMinor/);
+  assert.doesNotMatch(dumped, /tech_/);
+
+  const honda = guidedIntake({
+    customerText: "Honda Civic won't start, maybe battery",
+  });
+  assert.equal(honda.specialistHint.required, false);
+  assert.equal(honda.specialistHint.brand, null);
+  assert.equal("amountMinor" in honda, false);
 });
 
 test("PD88 guided intake thin vertical", async () => {

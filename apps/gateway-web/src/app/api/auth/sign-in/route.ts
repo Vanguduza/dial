@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import {
   createSessionFromSupabasePassword,
   sessionCookieName,
+  sessionCookieOptions,
 } from "../../../../lib/auth/session";
 import { takeRouteRateLimit } from "../../../../lib/http/rateLimit";
 
@@ -101,11 +102,7 @@ export async function POST(req: Request) {
     });
     if (isForm) {
       const res = NextResponse.redirect(new URL(next, req.url), 303);
-      res.cookies.set(sessionCookieName(), token, {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-      });
+      res.cookies.set(sessionCookieName(), token, sessionCookieOptions());
       return res;
     }
     const res = NextResponse.json({
@@ -116,11 +113,7 @@ export async function POST(req: Request) {
       auth: "supabase",
       next,
     });
-    res.cookies.set(sessionCookieName(), token, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-    });
+    res.cookies.set(sessionCookieName(), token, sessionCookieOptions());
     return res;
   } catch (e) {
     const msg = e instanceof Error ? e.message : "sign-in failed";

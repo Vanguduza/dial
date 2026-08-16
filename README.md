@@ -6,7 +6,7 @@ This repository is the DIAL ERP monorepo (apps, packages, infra, adapters). Prod
 
 ## Eng completion spine
 
-**What eng does next:** [docs/planning/DIAL_Full_ERP_Completion_Plan.md](./docs/planning/DIAL_Full_ERP_Completion_Plan.md) (Phases 0–12). Live pointer: [docs/planning/DIAL_Build_Workplan_STATE.md](./docs/planning/DIAL_Build_Workplan_STATE.md). **Phase 3 native Spare in progress (not G3).** G2 eng-exception sequencing green; live EcoCash still open. Phase 3 store-readiness: [docs/ops/phase3-native-store-readiness.md](./docs/ops/phase3-native-store-readiness.md).
+**What eng does next:** [docs/planning/DIAL_Full_ERP_Completion_Plan.md](./docs/planning/DIAL_Full_ERP_Completion_Plan.md) (Phases 0–12). Live pointer: [docs/planning/DIAL_Build_Workplan_STATE.md](./docs/planning/DIAL_Build_Workplan_STATE.md). **Phase 12 hardening prep (not G12).** G2 eng-exception sequencing green; live EcoCash still open. Local stack: [docs/ops/local-production-environment.md](./docs/ops/local-production-environment.md).
 
 Local production-like stack: [`docs/ops/local-production-environment.md`](./docs/ops/local-production-environment.md) — `pnpm secrets:local && pnpm stack:up && pnpm db:migrate`. Maps overlay: `pnpm stack:up:maps`.
 
@@ -84,7 +84,7 @@ Optional: `pnpm build`, `pnpm lint`. Pre-commit (lefthook) mirrors typecheck + t
 
 | Path | Notes |
 | --- | --- |
-| `apps/gateway-web` | Auth-first Next.js gateway + health/OpenAPI/webhooks/admin |
+| `apps/gateway-web` | Auth-first Next.js gateway + health/OpenAPI/webhooks/admin. **Dial a Tech** is `/tech` (copied FixItNow UI; DIAL APIs). Local: `pnpm --filter @dial/gateway-web dev` then open `http://localhost:3000/tech`. |
 | `apps/worker-temporal` | DeliveryDispatch Temporal client/SDK worker |
 | `apps/worker-queues` | BullMQ FDMS day + search-indexer + money outbox workers |
 | `adapters/psp` | Paynow / ContiPay / EcoCash / PayPal / COD / escrow |

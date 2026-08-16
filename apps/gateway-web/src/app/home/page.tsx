@@ -141,8 +141,3 @@ export default async function AuthHomePage() {
     </main>
   );
 }
-
-/** Exported for tests — cookie header → session. */
-export function sessionFromCookieHeader(cookieHeader: string | null) {
-  return getSessionFromToken(parseSessionCookie(cookieHeader));
-}

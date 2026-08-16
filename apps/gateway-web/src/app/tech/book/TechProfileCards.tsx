@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { dialTokens } from "@dial/design-tokens";
 
 type ProfileCard = {
   technicianId: string;
@@ -11,6 +10,7 @@ type ProfileCard = {
   eligible: boolean;
   managersChoice: boolean;
   valueScore: number | null;
+  oemSpecialties?: string[];
 };
 
 /** PD106 — Pack §9.3 technician profile cards with Manager's choice. */
@@ -33,47 +33,43 @@ export function TechProfileCards() {
     })();
   }, []);
 
-  if (error) return <p style={{ color: "#a11", fontSize: 14 }}>{error}</p>;
+  if (error) return <p className="fin-msg fin-msg--err">{error}</p>;
   if (cards.length === 0) {
-    return <p style={{ fontSize: 14, opacity: 0.7 }}>Loading technicians…</p>;
+    return <p className="fin-page__meta">Loading technicians…</p>;
   }
 
   return (
-    <section style={{ marginTop: dialTokens.space.lg }}>
-      <h2 style={{ fontSize: "1.1rem", marginBottom: dialTokens.space.sm }}>
+    <section style={{ marginTop: "1.25rem" }}>
+      <h2 style={{ fontSize: "1.15rem", marginBottom: "0.75rem" }}>
         Technicians
       </h2>
-      <ul
-        style={{
-          listStyle: "none",
-          padding: 0,
-          display: "grid",
-          gap: dialTokens.space.md,
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-        }}
-      >
+      <ul className="fin-cards">
         {cards.map((c) => (
-          <li
-            key={c.technicianId}
-            data-testid="tech-profile-card"
-            style={{
-              padding: dialTokens.space.md,
-              border: `1px solid ${dialTokens.color.brand.primary}33`,
-              borderRadius: 8,
-              background: c.managersChoice
-                ? `${dialTokens.color.brand.accent}18`
-                : "#fff",
-            }}
-          >
-            <p style={{ margin: 0, fontWeight: 600 }}>{c.displayName}</p>
-            <p style={{ margin: "4px 0", fontSize: 13 }}>
-              {c.tradeName} · {c.availability}
-            </p>
-            <p style={{ margin: 0, fontSize: 12, opacity: 0.8 }}>
-              {c.managersChoice ? "Manager's choice · " : ""}
-              {c.eligible ? "Eligible" : "Not eligible"}
-              {c.valueScore != null ? ` · score ${c.valueScore}` : ""}
-            </p>
+          <li key={c.technicianId}>
+            <div
+              className="fin-card"
+              data-testid="tech-profile-card"
+              style={
+                c.managersChoice
+                  ? { borderColor: "var(--fin-primary)", background: "var(--fin-primary-soft)" }
+                  : undefined
+              }
+            >
+              <strong>{c.displayName}</strong>
+              <span>
+                {c.tradeName} · {c.availability}
+              </span>
+              <span>
+                {c.managersChoice ? "Manager's choice · " : ""}
+                {c.eligible ? "Eligible" : "Not eligible"}
+                {c.valueScore != null ? ` · score ${c.valueScore}` : ""}
+              </span>
+              {(c.oemSpecialties ?? []).length > 0 ? (
+                <span data-testid="tech-oem-specialty">
+                  Specialist: {c.oemSpecialties!.join(", ")}
+                </span>
+              ) : null}
+            </div>
           </li>
         ))}
       </ul>

@@ -12,8 +12,8 @@ import { __resetPaymentsForTests } from "@dial/payments";
 import {
   GET as moneyGet,
   POST as moneyPost,
-  __testMoneyOutbox,
 } from "../../app/api/admin/money/outbox/route.js";
+import { __testMoneyOutbox } from "../testHandles.js";
 import {
   GET as dispatchGet,
   POST as dispatchPost,

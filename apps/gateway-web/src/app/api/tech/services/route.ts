@@ -14,13 +14,19 @@ import {
   listBookingSlots,
   listChecklists,
   listJobsForCustomer,
+  ensureDialTechProfileFixtures,
   listTechnicianProfileCards,
-  setManagersChoice,
-  setTechnicianAvailability,
-  setTechnicianCredential,
-  setValueScoreSnapshot,
-  upsertTechnicianProfileDirectory,
+  matchTechniciansForSpecialistHint,
 } from "@dial/jobs";
+import {
+  authorizeJobReserve,
+  createCheckoutPayment,
+  getActiveFxRate,
+  requireIdempotencyKey,
+  usdToZig,
+  type CheckoutPayChoice,
+} from "@dial/payments";
+import { diagnoseTechSymptom } from "../../../../lib/tech/specialistRouting";
 import {
   getSessionFromToken,
   parseSessionCookie,
@@ -36,11 +42,68 @@ function sessionOr401(req: Request) {
   return getSessionFromToken(parseSessionCookie(req.headers.get("cookie")));
 }
 
+function serializeQuote(
+  quote: ReturnType<typeof draftTechQuote>,
+) {
+  return {
+    quoteId: quote.quoteId,
+    jobClassId: quote.jobClassId,
+    draftAmountUsdMinor: quote.draftAmountUsdMinor.toString(),
+    currency: quote.currency,
+    source: quote.source,
+    emergency: quote.emergency,
+    labelledDraft: true as const,
+    payableFromAi: false as const,
+  };
+}
+
+function checklistForJob(job: NonNullable<ReturnType<typeof getTechJob>>) {
+  const id =
+    job.emergency || job.jobClassId === "jc_roadside"
+      ? "emergency_roadside"
+      : "automotive_basic";
+  return { checklistId: id, checklistHref: `/tech/checklist/${id}` };
+}
+
+function assignedTechnicianView(technicianId: string | null) {
+  if (!technicianId) return null;
+  ensureDialTechProfileFixtures();
+  const card = listTechnicianProfileCards().find(
+    (c) => c.technicianId === technicianId,
+  );
+  return {
+    technicianId,
+    displayName: card?.displayName ?? technicianId,
+    tradeName: card?.tradeName ?? null,
+    oemSpecialties: card?.oemSpecialties ?? [],
+  };
+}
+
+function payPreview(amountUsdMinor: bigint) {
+  const rate = getActiveFxRate();
+  const zig = rate ? usdToZig(amountUsdMinor, rate) : null;
+  return {
+    rails: ["ecocash", "cod"] as const,
+    amountUsdMinor: amountUsdMinor.toString(),
+    displayCurrency: "USD" as const,
+    zigMinor: zig ? zig.amountMinor.toString() : null,
+    fxRateId: rate?.fxRateId ?? null,
+    ready: Boolean(rate),
+    imttNotCustomerLine: true as const,
+    payableFromAi: false as const,
+    note: rate
+      ? "USD browse; ZiG only at pay from ops daily rate (D-57)"
+      : "EcoCash|COD fail-closed until ops Daily ZiG rate is set",
+  };
+}
+
 function serializeJob(j: NonNullable<ReturnType<typeof getTechJob>>) {
+  const checklist = checklistForJob(j);
   return {
     id: j.id,
     customerId: j.customerId,
     technicianId: j.technicianId,
+    assignedTechnician: assignedTechnicianView(j.technicianId),
     jobClassId: j.jobClassId,
     status: j.status,
     slotId: j.slotId,
@@ -51,6 +114,8 @@ function serializeJob(j: NonNullable<ReturnType<typeof getTechJob>>) {
     createdAt: j.createdAt,
     ...(j.intakeSummary != null ? { intakeSummary: j.intakeSummary } : {}),
     ...(j.intakeUrgency != null ? { intakeUrgency: j.intakeUrgency } : {}),
+    ...checklist,
+    labelledDraft: true as const,
     draftOnly: true,
     payableFromAi: false as const,
   };
@@ -72,16 +137,25 @@ export async function GET(req: Request) {
   const customerId = customerIdFromSession(session.email);
   const view = url.searchParams.get("view") ?? "home";
 
+  if (view === "quote") {
+    const jobClass =
+      url.searchParams.get("jobClass") ??
+      url.searchParams.get("serviceId") ??
+      "diagnostics";
+    const emergency = url.searchParams.get("emergency") === "true";
+    const quote = draftTechQuote({ jobClass, emergency });
+    return NextResponse.json({
+      quote: serializeQuote(quote),
+      note: "Rate-card USD draft only — AI never writes payable amounts",
+    });
+  }
+
   if (view === "slots") {
     const slots = await listBookingSlots();
     const quote = draftTechQuote({ jobClass: "diagnostics", emergency: false });
     return NextResponse.json({
       slots,
-      quote: {
-        ...quote,
-        draftAmountUsdMinor: quote.draftAmountUsdMinor.toString(),
-        payableFromAi: false,
-      },
+      quote: serializeQuote(quote),
       bookingSibling: "cal.com",
       note: "Pack §9.3 — rate_card draft only; human + pricing engine confirm payable",
     });
@@ -92,53 +166,26 @@ export async function GET(req: Request) {
   }
 
   if (view === "profiles") {
-    if (listTechnicianProfileCards().length === 0) {
-      upsertTechnicianProfileDirectory({
-        technicianId: "tech_guide_choice",
-        displayName: "Amai Choice",
-        tradeId: "trade_auto",
+    ensureDialTechProfileFixtures();
+    const brand = url.searchParams.get("oem") ?? url.searchParams.get("brand");
+    let profiles = listTechnicianProfileCards();
+    if (brand?.trim()) {
+      const match = matchTechniciansForSpecialistHint({
+        required: true,
+        brand,
       });
-      upsertTechnicianProfileDirectory({
-        technicianId: "tech_guide_std",
-        displayName: "Baba Standard",
-        tradeId: "trade_elec",
-      });
-      setTechnicianCredential({
-        technicianId: "tech_guide_choice",
-        kind: "trade_licence",
-        status: "verified",
-      });
-      setTechnicianCredential({
-        technicianId: "tech_guide_std",
-        kind: "trade_licence",
-        status: "verified",
-      });
-      setValueScoreSnapshot({
-        technicianId: "tech_guide_choice",
-        score: 90,
-        sampleN: 30,
-      });
-      setManagersChoice({
-        technicianId: "tech_guide_choice",
-        managersChoice: true,
-        setBy: "pd106_fixture",
-      });
-      setValueScoreSnapshot({
-        technicianId: "tech_guide_std",
-        score: 72,
-        sampleN: 14,
-      });
-      setTechnicianAvailability({
-        technicianId: "tech_guide_choice",
-        status: "available",
-      });
-      setTechnicianAvailability({
-        technicianId: "tech_guide_std",
-        status: "busy",
+      profiles = [...match.recommended, ...match.fallback];
+      return NextResponse.json({
+        profiles,
+        recommendedSpecialists: match.recommended,
+        fallbackTechnicians: match.fallback,
+        matchedOnBrand: match.matchedOnBrand,
+        payableFromAi: false,
+        note: "PD106 — OEM specialist ranking is deterministic (not AI ids)",
       });
     }
     return NextResponse.json({
-      profiles: listTechnicianProfileCards(),
+      profiles,
       payableFromAi: false,
       note: "PD106 — technician profile cards with Manager's choice (Pack §9.3)",
     });
@@ -153,16 +200,17 @@ export async function GET(req: Request) {
 
   if (view === "job") {
     const jobId = url.searchParams.get("jobId") ?? "";
-    const job = getTechJob(jobId);
-    if (!job) {
+    const existing = getTechJob(jobId);
+    if (!existing) {
       return NextResponse.json({ error: "unknown job" }, { status: 404 });
     }
-    if (job.customerId !== customerId) {
+    if (existing.customerId !== customerId) {
       return NextResponse.json({ error: "forbidden" }, { status: 403 });
     }
     const detail = getCustomerJobStatusDetail(jobId);
+    const serialized = serializeJob(detail.job);
     return NextResponse.json({
-      job: serializeJob(detail.job),
+      job: serialized,
       statusLabel: detail.statusLabel,
       evidenceCount: detail.evidenceCount,
       evidence: detail.evidence.map((e) => ({
@@ -171,6 +219,9 @@ export async function GET(req: Request) {
         createdAt: e.createdAt,
       })),
       timeline: detail.timeline,
+      assignedTechnician: serialized.assignedTechnician,
+      checklistHref: serialized.checklistHref,
+      pay: payPreview(detail.job.draftAmountUsdMinor),
       payableFromAi: false,
       note: "PD101 — customer job status + evidence deepen (Pack §9.3)",
     });
@@ -266,6 +317,22 @@ export async function POST(req: Request) {
       });
     }
 
+    if (action === "diagnose") {
+      const diagnosed = diagnoseTechSymptom(
+        String(body.customerText ?? body.symptom ?? body.note ?? ""),
+      );
+      return NextResponse.json({
+        ok: true,
+        assessment: diagnosed.assessment,
+        checklist: diagnosed.checklist,
+        recommendedSpecialists: diagnosed.recommendedSpecialists,
+        fallbackTechnicians: diagnosed.fallbackTechnicians,
+        matchedOnBrand: diagnosed.matchedOnBrand,
+        payableFromAi: false,
+        note: "OEM specialist routing — AI hint only; match is deterministic",
+      });
+    }
+
     if (action === "book") {
       const emergency = Boolean(body.emergency);
       const slotId = body.slotId != null ? String(body.slotId) : null;
@@ -282,15 +349,14 @@ export async function POST(req: Request) {
         jobClass,
         slotId,
         emergency,
+        ...(body.technicianId != null && String(body.technicianId).trim()
+          ? { technicianId: String(body.technicianId) }
+          : {}),
       });
       return NextResponse.json({
         ok: true,
         job: serializeJob(job),
-        quote: {
-          ...quote,
-          draftAmountUsdMinor: quote.draftAmountUsdMinor.toString(),
-          payableFromAi: false,
-        },
+        quote: serializeQuote(quote),
       });
     }
 
@@ -308,14 +374,106 @@ export async function POST(req: Request) {
       return NextResponse.json({
         ok: true,
         job: serializeJob(job),
-        quote: {
-          ...quote,
-          draftAmountUsdMinor: quote.draftAmountUsdMinor.toString(),
-          payableFromAi: false,
-        },
+        quote: serializeQuote(quote),
         aiPricingBypassed: true,
+        guidedIntakeGated: false,
         checklistHref: "/tech/checklist/emergency_roadside",
       });
+    }
+
+    if (action === "pay") {
+      const jobId = String(body.jobId ?? "").trim();
+      if (!jobId) {
+        return NextResponse.json({ error: "jobId required" }, { status: 400 });
+      }
+      const existing = getTechJob(jobId);
+      if (!existing || existing.customerId !== customerId) {
+        return NextResponse.json({ error: "Job not found" }, { status: 404 });
+      }
+      const choiceRaw = String(body.choice ?? "");
+      if (choiceRaw !== "ecocash" && choiceRaw !== "cod") {
+        return NextResponse.json(
+          { error: "choice must be ecocash or cod" },
+          { status: 400 },
+        );
+      }
+      const choice: CheckoutPayChoice = choiceRaw;
+      let idempotencyKey: string;
+      try {
+        idempotencyKey = requireIdempotencyKey(req.headers);
+      } catch (e) {
+        return NextResponse.json(
+          { error: e instanceof Error ? e.message : "Idempotency-Key required" },
+          { status: 400 },
+        );
+      }
+      const rate = getActiveFxRate();
+      if (!rate) {
+        return NextResponse.json(
+          {
+            error: "EcoCash|COD fail-closed — ops Daily ZiG rate not set",
+            failClosed: true,
+            railsReady: false,
+            payableFromAi: false,
+          },
+          { status: 503 },
+        );
+      }
+      try {
+        const checkout = await createCheckoutPayment({
+          choice,
+          orderId: jobId,
+          amountUsdMinor: existing.draftAmountUsdMinor,
+          idempotencyKey,
+        });
+        const reserve = await authorizeJobReserve({
+          jobId,
+          amountUsdMinor: existing.draftAmountUsdMinor,
+          idempotencyKey: `${idempotencyKey}:jr`,
+        });
+        return NextResponse.json({
+          ok: true,
+          choice,
+          job: serializeJob(existing),
+          intent: checkout.intent
+            ? {
+                id: checkout.intent.id,
+                method: checkout.intent.method,
+                status: checkout.intent.status,
+                orderId: checkout.intent.orderId,
+                amountUsdMinor: checkout.intent.amount.amountMinor.toString(),
+                currency: checkout.intent.amount.currency,
+                displayPayable: checkout.intent.displayPayable
+                  ? {
+                      amountMinor:
+                        checkout.intent.displayPayable.amountMinor.toString(),
+                      currency: checkout.intent.displayPayable.currency,
+                    }
+                  : null,
+                fxRateId: checkout.intent.fxRateId ?? null,
+              }
+            : null,
+          jobReserve: {
+            id: reserve.id,
+            status: reserve.status,
+            amountUsdMinor: reserve.amount.amountMinor.toString(),
+          },
+          pay: payPreview(existing.draftAmountUsdMinor),
+          payableFromAi: false,
+          imttNotCustomerLine: true,
+          note: "DIAL EcoCash|COD + Job Reserve — not Stripe/SSLCommerz",
+        });
+      } catch (e) {
+        return NextResponse.json(
+          {
+            error: e instanceof Error ? e.message : "pay failed",
+            failClosed: true,
+            railsReady: false,
+            payableFromAi: false,
+          },
+          { status: 503 },
+        );
+      }
     }
 
     return NextResponse.json({ error: `unknown action ${action}` }, { status: 400 });

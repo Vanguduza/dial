@@ -65,6 +65,7 @@ test("PD92 seven-day cancel API", async () => {
   __resetAuthForTests();
   const { token } = createSession({
     email: "pd92@dial.test",
+    userId: "cust_pd92",
     role: "customer",
   });
   const cookie = `${sessionCookieName()}=${token}`;

@@ -31,3 +31,16 @@ tests:
         value: '"urgency":"emergency"'
       - type: contains
         value: needsHumanQuote
+  - vars:
+      customerText: "Mercedes Benz powertrain warning light"
+    assert:
+      - type: not-contains
+        value: amountMinor
+      - type: not-contains
+        value: technicianId
+      - type: contains
+        value: needsHumanQuote
+      - type: contains
+        value: '"required":true'
+      - type: contains
+        value: mercedes

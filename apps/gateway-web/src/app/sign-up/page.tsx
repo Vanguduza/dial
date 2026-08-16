@@ -2,8 +2,25 @@ import { dialTokens } from "@dial/design-tokens";
 
 /**
  * Pre-auth sign-up (Pack T1 / §10 screens) — no Shop|Services until AuthN.
+ * Optional `next` query returns to checkout (or other same-origin path) after form sign-up.
  */
-export default function SignUpPage() {
+function safeNextPath(raw: string | undefined): string {
+  if (!raw) return "/home";
+  const t = raw.trim();
+  if (!t.startsWith("/") || t.startsWith("//") || t.includes("://")) {
+    return "/home";
+  }
+  return t;
+}
+
+export default async function SignUpPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>;
+}) {
+  const { next: nextRaw, error } = await searchParams;
+  const next = safeNextPath(nextRaw);
+
   return (
     <main
       style={{
@@ -31,6 +48,11 @@ export default function SignUpPage() {
         <p style={{ marginTop: dialTokens.space.sm, opacity: 0.85 }}>
           Create your account
         </p>
+        {error ? (
+          <p role="alert" style={{ color: "#a33", fontSize: 14 }}>
+            {error}
+          </p>
+        ) : null}
         <form
           style={{
             marginTop: dialTokens.space.xl,
@@ -41,6 +63,7 @@ export default function SignUpPage() {
           action="/api/auth/sign-up"
           method="post"
         >
+          <input type="hidden" name="next" value={next} />
           <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
             Display name
             <input

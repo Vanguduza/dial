@@ -1,0 +1,44 @@
+---
+description: Per-branch donor visual identity (D-38) — no shared DIAL storefront brand
+alwaysApply: true
+---
+
+# Donor identity — per branch (D-38 clarified 2026-08-16)
+
+**Founder lock.** Donors exist to **avoid designing from scratch**. Use each donor’s **look, layout, screens, and features**; customise copy/branding for DIAL; **wire every action to DIAL APIs**.
+
+## Hard ban — shared DIAL visual identity across branches
+
+- **Do NOT** invent or enforce one shared DIAL brand / `AppShell` look for Spare, Tech, Grocery, Supplier, Delivery, Account.
+- Shared chrome (`AppShell`, global design-tokens as a single storefront skin) is **wrong** for cross-branch customer UX.
+- Each branch keeps a **distinct visual identity from its locked donor**.
+
+## Branch → donor map
+
+| Branch | Donor | Expectation |
+| --- | --- | --- |
+| Dial a Tech (`/tech`, tech native) | [`AyanSujon/FixItNow`](https://github.com/AyanSujon/FixItNow) | Selecting Dial a Tech lands on a surface that **reads as FixItNow** (orange home-services marketplace), not the shared DIAL shell |
+| Spare | Mercur B2C | Mercur B2C storefront patterns |
+| Supplier | Mercur vendor-panel | Vendor-panel patterns |
+| Grocery | Marketplace / food patterns (Pack) | Donor marketplace patterns |
+| Natives | Pack §9 donors | Per-platform donor UX |
+
+Secondary Tech references (NearServe, Homezy) stay companions only — FixItNow is primary.
+
+## Still locked (unchanged)
+
+- Never adopt donor **backends / ledgers / auth / payments** as SoR.
+- Money = DIAL packages (`amountMinor`, outbox, Job Reserve).
+- Official WhatsApp Cloud API only; MapLibre SoR; agency (D-58).
+- No live payment / WhatsApp / tax keys until production-ready (`dial-credentials-after-testing.mdc`).
+- Prefer **pattern recreation** when donor LICENSE is missing or unclear — do not vendor donor **backend** source trees wholesale.
+- **Founder override (2026-08-16) — FixItNow UI only:** copy the **customer-facing Next.js UI** (pages, layouts, components, CSS/Tailwind/shadcn, public assets) into Dial a Tech. Do **not** treat donor Mongo/Stripe/SSLCommerz/JWT/auth as SoR. Do **not** paste donor git history or `node_modules`. Still no Baileys / unofficial WA; still no Expo.
+
+## Eng obligations
+
+- Prefer **branch-scoped** components/CSS (e.g. `app/tech/tech.css`, `.fin-tech`) over global shell reuse across branches. Tech may use copied FixItNow `components/ui` + `components/common` as long as Tailwind tokens stay under `.fin-tech`.
+- Thin vertical OK for large rebuilds: donor-looking landing + one critical path wired to real DIAL APIs — **not** stubs-as-MVP.
+- ENH-609 tracks **per-branch donor rebuilds**, not a shared branding programme.
+- **Plan SoR:** `docs/planning/DIAL_Donor_Parity_Roadmap.md` (screen matrices, waves, DoD, licence). Do not claim donor parity from a thin vertical.
+
+Authority: D-38 clarified 2026-08-16; v4 §6.2.1; Pack §9 / §15.
