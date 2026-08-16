@@ -3,8 +3,25 @@ import { dialTokens } from "@dial/design-tokens";
 /**
  * T0/T1 auth-first gateway shell (v4 §1.4) — sign-in surface only.
  * Shop | Services appear only after authentication.
+ * Optional `next` query returns to checkout (or other same-origin path) after form sign-in.
  */
-export default function SignInPage() {
+function safeNextPath(raw: string | undefined): string {
+  if (!raw) return "/home";
+  const t = raw.trim();
+  if (!t.startsWith("/") || t.startsWith("//") || t.includes("://")) {
+    return "/home";
+  }
+  return t;
+}
+
+export default async function SignInPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; error?: string }>;
+}) {
+  const { next: nextRaw, error } = await searchParams;
+  const next = safeNextPath(nextRaw);
+
   return (
     <main
       style={{
@@ -32,6 +49,11 @@ export default function SignInPage() {
         <p style={{ marginTop: dialTokens.space.sm, opacity: 0.85 }}>
           Find it. Buy it. Get it done.
         </p>
+        {error ? (
+          <p role="alert" style={{ color: "#a33", fontSize: 14 }}>
+            {error}
+          </p>
+        ) : null}
         <form
           style={{
             marginTop: dialTokens.space.xl,
@@ -42,6 +64,7 @@ export default function SignInPage() {
           action="/api/auth/sign-in"
           method="post"
         >
+          <input type="hidden" name="next" value={next} />
           <label style={{ display: "grid", gap: 6, fontSize: 14 }}>
             Email or phone
             <input
@@ -49,6 +72,7 @@ export default function SignInPage() {
               type="text"
               autoComplete="username"
               required
+              data-testid="sign-in-identifier"
               style={{
                 padding: "12px 14px",
                 borderRadius: 8,
@@ -65,6 +89,7 @@ export default function SignInPage() {
               autoComplete="current-password"
               required
               minLength={8}
+              data-testid="sign-in-password"
               style={{
                 padding: "12px 14px",
                 borderRadius: 8,
@@ -75,6 +100,7 @@ export default function SignInPage() {
           </label>
           <button
             type="submit"
+            data-testid="sign-in-submit"
             style={{
               padding: "12px 16px",
               borderRadius: 8,
@@ -93,9 +119,6 @@ export default function SignInPage() {
           <a href="/sign-up" style={{ color: dialTokens.color.brand.accent }}>
             Create account
           </a>
-        </p>
-        <p style={{ marginTop: dialTokens.space.md, fontSize: 12, opacity: 0.6 }}>
-          Auth-first — Supabase Auth + Shop | Services after sign-in (PD1)
         </p>
       </section>
     </main>

@@ -1,3 +1,7 @@
+/**
+ * Admin Daily ZiG rate (D-57) — ops-audited rate used for ZiG conversion at checkout.
+ * IMTT stays DIAL opex (D-60) and never appears as a checkout line; see /admin/cost-health.
+ */
 "use client";
 
 import { dialTokens } from "@dial/design-tokens";
@@ -168,12 +172,7 @@ export default function DailyZigAdminPage() {
         <h1 style={{ fontSize: "1.35rem", fontWeight: 600, marginTop: dialTokens.space.sm }}>
           Daily ZiG rate
         </h1>
-        <p style={{ opacity: 0.8, fontSize: 14, marginTop: dialTokens.space.sm }}>
-          Ops-audited FX for EcoCash ZiG display at checkout (D-57). Browse stays USD.
-          PD57 four-eyes: propose then a different ops user approves. IMTT is DIAL opex —
-          never a checkout line (D-60).{" "}
-          <a href="/admin/cost-health">Cost / health</a>
-        </p>
+        
 
         <form
           onSubmit={onSubmit}

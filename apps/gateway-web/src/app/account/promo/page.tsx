@@ -174,10 +174,6 @@ export default function AccountPromoPage() {
         >
           Promo & referrals
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD70 / PD138 — promo credit balance, code validate, referral share. Never cash-out
-          (D-42).
-        </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
           <button
             type="button"

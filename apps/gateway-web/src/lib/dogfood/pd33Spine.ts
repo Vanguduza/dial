@@ -48,7 +48,30 @@ function readPage(...parts: string[]): string {
   return readFileSync(join(appRoot(), ...parts), "utf8");
 }
 
-function withSandboxEnv(run: () => Promise<void>): Promise<void> {
+/**
+ * Sandbox settlement writes through to Postgres and fails closed without it
+ * (D-47). CI has no durable target, so rails that settle money run in fixture
+ * there; sandbox durability is proven by the compose integration job and the
+ * ops dogfood runbooks.
+ */
+function durableStoreConfigured(): boolean {
+  const url = (
+    process.env.SUPABASE_URL ??
+    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    ""
+  ).trim();
+  const key = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
+    ""
+  ).trim();
+  return Boolean(url && key);
+}
+
+function withSandboxEnv(
+  run: () => Promise<void>,
+  mode: "sandbox" | "fixture" = "sandbox",
+): Promise<void> {
   const prev = {
     mode: process.env.DIAL_INTEGRATION_MODE,
     token: process.env.WHATSAPP_TOKEN,
@@ -60,7 +83,7 @@ function withSandboxEnv(run: () => Promise<void>): Promise<void> {
     fdmsAct: process.env.FDMS_ACTIVATION_KEY,
     fdmsHttp: process.env.FDMS_SANDBOX_HTTP,
   };
-  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.DIAL_INTEGRATION_MODE = mode;
   process.env.WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN ?? "wa_token_pd33";
   process.env.WHATSAPP_PHONE_NUMBER_ID =
     process.env.WHATSAPP_PHONE_NUMBER_ID ?? "phone_pd33";
@@ -199,6 +222,7 @@ export async function runPd33StagingDogfoodThinVertical(): Promise<Pd33DogfoodRe
     note: "Grocery food checkout → track sandbox rail",
   });
 
+  const waMode = durableStoreConfigured() ? "sandbox" : "fixture";
   await withSandboxEnv(async () => {
     const wa = await runPd12WaFlowsSandboxThinVertical();
     if (wa.grocery.liquorForbidden !== true) {
@@ -212,9 +236,11 @@ export async function runPd33StagingDogfoodThinVertical(): Promise<Pd33DogfoodRe
       waitStrategy: "package_thin_vertical",
       selectorsOrMarkers: ["FLOW_SPARE_*", "FLOW_GROCERY_*", "ecocash_direct"],
       status: "ok",
-      note: "Meta Cloud API Flows sandbox — EcoCash|COD",
+      note: `Meta Cloud API Flows (${waMode}) — EcoCash|COD`,
     });
+  }, waMode);
 
+  await withSandboxEnv(async () => {
     const fdms = await runPd11FdmsSandboxThinVertical({
       orderId: `ord_pd33_${Date.now().toString(36)}`,
     });

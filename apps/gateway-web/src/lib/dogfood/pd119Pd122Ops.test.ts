@@ -22,6 +22,7 @@ import {
   __resetAuthForTests,
   createSession,
   sessionCookieName,
+  testAuthCookie,
 } from "../auth/session.js";
 import { GET as groceryTrackGet } from "../../app/api/grocery/track/route.js";
 import {
@@ -53,6 +54,7 @@ test("PD119 grocery track timeline API + UI", async () => {
   const res = await groceryTrackGet(
     new Request(
       `http://localhost/api/grocery/track?orderId=${encodeURIComponent(order.orderId)}`,
+      { headers: { cookie: testAuthCookie({ userId: "cust_pd119" }) } },
     ),
   );
   assert.equal(res.status, 200);

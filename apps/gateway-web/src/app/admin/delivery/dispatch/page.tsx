@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
+import { DialMap } from "../../../../components/map/DialMap";
 
 type Board = {
   fifoJobIds: string[];
@@ -160,10 +161,7 @@ export default function AdminDispatchBoardPage() {
         >
           Dispatch board
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          Live <code>delivery_jobs</code> FIFO + offers — SoR <code>@dial/delivery</code> +{" "}
-          <code>DeliveryDispatchWorkflow</code> (not Fleetbase).
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input
@@ -220,6 +218,9 @@ export default function AdminDispatchBoardPage() {
           </button>
         </div>
         {message ? <p role="status">{message}</p> : null}
+        <div style={{ marginTop: 16 }}>
+          <DialMap height="280px" center={[-17.829, 31.052]} zoom={11} />
+        </div>
         {board ? (
           <>
             <p style={{ marginTop: 16 }}>

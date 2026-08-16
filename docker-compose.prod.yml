@@ -1,0 +1,265 @@
+# DIAL production-like stack — deploy-agnostic.
+#
+# Runs the whole ERP locally the way a host would run it: built container images,
+# durable Postgres, Supabase-compatible auth/REST, Redis, Meilisearch, Temporal,
+# gateway and both workers. No host is assumed; the same images run anywhere.
+#
+#   pnpm secrets:local     # generate .env.local (gitignored) once
+#   pnpm stack:up          # build + boot + migrate
+#   pnpm stack:down
+#
+# Maps overlay (self-hosted MapLibre tiles, Nominatim, OSRM, VROOM):
+#   docker compose -f docker-compose.prod.yml -f docker-compose.maps.yml up -d
+#
+# Secrets come from .env.local at run time and are never baked into images.
+# Never place live PSP / WhatsApp / FDMS credentials in this file.
+
+name: dial
+
+x-app-env: &app-env
+  DIAL_INTEGRATION_MODE: ${DIAL_INTEGRATION_MODE:-sandbox}
+  # Server-side only: no browser code reads these (see integrationsReadiness).
+  NEXT_PUBLIC_SUPABASE_URL: http://supabase:8000
+  SUPABASE_URL: http://supabase:8000
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:?run pnpm secrets:local first}
+  SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:?run pnpm secrets:local first}
+  SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:?run pnpm secrets:local first}
+  DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD:?run pnpm secrets:local first}@postgres:5432/postgres
+  REDIS_URL: redis://redis:6379
+  MEILI_HOST: http://meilisearch:7700
+  MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?run pnpm secrets:local first}
+  MEILI_SPARE_INDEX: ${MEILI_SPARE_INDEX:-spare_offers_v1}
+  MEILI_GROCERY_INDEX: ${MEILI_GROCERY_INDEX:-grocery_offers_v1}
+  TEMPORAL_ADDRESS: temporal:7233
+  TEMPORAL_NAMESPACE: ${TEMPORAL_NAMESPACE:-dial}
+  INTERNAL_API_SECRET: ${INTERNAL_API_SECRET:?run pnpm secrets:local first}
+  DIAL_GATEWAY_BASE_URL: ${DIAL_GATEWAY_BASE_URL:-http://localhost:3000}
+  # Maps: populated by docker-compose.maps.yml, otherwise fail-closed.
+  MAP_TILES_STYLE_URL: ${MAP_TILES_STYLE_URL:-}
+  NOMINATIM_URL: ${NOMINATIM_URL:-}
+  OSRM_URL: ${OSRM_URL:-}
+  VROOM_URL: ${VROOM_URL:-}
+  MAP_OFFLINE_PACK_BASE_URL: ${MAP_OFFLINE_PACK_BASE_URL:-}
+  # Vendor rails stay fail-closed until real keys are dropped in.
+  ECOCASH_API_KEY: ${ECOCASH_API_KEY:-}
+  ECOCASH_MERCHANT_CODE: ${ECOCASH_MERCHANT_CODE:-}
+  ECOCASH_WEBHOOK_SECRET: ${ECOCASH_WEBHOOK_SECRET:-}
+  ECOCASH_ENVIRONMENT: ${ECOCASH_ENVIRONMENT:-sandbox}
+  PAYNOW_INTEGRATION_ID: ${PAYNOW_INTEGRATION_ID:-}
+  PAYNOW_INTEGRATION_KEY: ${PAYNOW_INTEGRATION_KEY:-}
+  WHATSAPP_TOKEN: ${WHATSAPP_TOKEN:-}
+  WHATSAPP_PHONE_NUMBER_ID: ${WHATSAPP_PHONE_NUMBER_ID:-}
+  WHATSAPP_APP_SECRET: ${WHATSAPP_APP_SECRET:-}
+  WHATSAPP_VERIFY_TOKEN: ${WHATSAPP_VERIFY_TOKEN:-}
+  FDMS_BASE_URL: ${FDMS_BASE_URL:-}
+  FDMS_DEVICE_ID: ${FDMS_DEVICE_ID:-}
+  FDMS_ACTIVATION_KEY: ${FDMS_ACTIVATION_KEY:-}
+  LITELLM_BASE_URL: ${LITELLM_BASE_URL:-}
+  LITELLM_API_KEY: ${LITELLM_API_KEY:-}
+
+services:
+  postgres:
+    image: postgres:16.4-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run pnpm secrets:local first}
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      AUTHENTICATOR_PASSWORD: ${AUTHENTICATOR_PASSWORD:?run pnpm secrets:local first}
+      AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD:?run pnpm secrets:local first}
+    volumes:
+      - dial_pg:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${POSTGRES_HOST_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  auth:
+    image: supabase/gotrue:v2.158.1
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      PORT: "9999"
+      API_EXTERNAL_URL: ${SUPABASE_EXTERNAL_URL:-http://localhost:8000}
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${AUTH_ADMIN_PASSWORD}@postgres:5432/postgres?search_path=auth&sslmode=disable
+      GOTRUE_SITE_URL: ${DIAL_GATEWAY_BASE_URL:-http://localhost:3000}
+      GOTRUE_URI_ALLOW_LIST: "*"
+      GOTRUE_JWT_SECRET: ${SUPABASE_JWT_SECRET:?run pnpm secrets:local first}
+      GOTRUE_JWT_EXP: "3600"
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_DISABLE_SIGNUP: "false"
+      # Local stack has no SMTP; hosted Supabase keeps confirmation on.
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9999/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  rest:
+    image: postgrest/postgrest:v12.2.3
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${AUTHENTICATOR_PASSWORD}@postgres:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: ${SUPABASE_JWT_SECRET}
+
+  supabase:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      - auth
+      - rest
+    volumes:
+      - ./docker/supabase-gateway.nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "${SUPABASE_HOST_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - dial_redis:/data
+    ports:
+      - "${REDIS_HOST_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.11
+    restart: unless-stopped
+    environment:
+      MEILI_ENV: production
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:?run pnpm secrets:local first}
+      MEILI_NO_ANALYTICS: "true"
+    volumes:
+      - dial_meili:/meili_data
+    ports:
+      - "${MEILI_HOST_PORT:-7700}:7700"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:7700/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  temporal-db:
+    image: postgres:16.4-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${TEMPORAL_DB_PASSWORD:-temporal}
+      POSTGRES_USER: temporal
+      POSTGRES_DB: temporal
+    volumes:
+      - dial_temporal_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U temporal"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  temporal:
+    image: temporalio/auto-setup:1.25.2
+    restart: unless-stopped
+    depends_on:
+      temporal-db:
+        condition: service_healthy
+    environment:
+      DB: postgres12
+      DB_PORT: "5432"
+      POSTGRES_USER: temporal
+      POSTGRES_PWD: ${TEMPORAL_DB_PASSWORD:-temporal}
+      POSTGRES_SEEDS: temporal-db
+    ports:
+      - "${TEMPORAL_HOST_PORT:-7233}:7233"
+
+  temporal-ui:
+    image: temporalio/ui:2.31.2
+    restart: unless-stopped
+    depends_on:
+      - temporal
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      TEMPORAL_CORS_ORIGINS: ${DIAL_GATEWAY_BASE_URL:-http://localhost:3000}
+    ports:
+      - "${TEMPORAL_UI_HOST_PORT:-8080}:8080"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: docker/gateway-web.Dockerfile
+    image: dial/gateway-web:local
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+      supabase:
+        condition: service_healthy
+    environment:
+      <<: *app-env
+    ports:
+      - "${GATEWAY_HOST_PORT:-3000}:3000"
+
+  worker-queues:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+      args:
+        WORKER: worker-queues
+    image: dial/worker-queues:local
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    environment:
+      <<: *app-env
+
+  worker-temporal:
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+      args:
+        WORKER: worker-temporal
+    image: dial/worker-temporal:local
+    restart: unless-stopped
+    depends_on:
+      - temporal
+    environment:
+      <<: *app-env
+
+volumes:
+  dial_pg:
+  dial_redis:
+  dial_meili:
+  dial_temporal_pg:

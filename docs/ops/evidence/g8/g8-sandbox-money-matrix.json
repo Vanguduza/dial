@@ -1,0 +1,47 @@
+{
+  "g8Claimed": true,
+  "not_G8_live": true,
+  "mode": "sandbox",
+  "liveBlockedOnHuman": [
+    "ENH-020 escrow partner (PSP_ESCROW_*)",
+    "ENH-022 ZIMRA Virtual FDMS live submit",
+    "EcoCash portal keys (live/production-intent)"
+  ],
+  "rails": {
+    "cod": {
+      "orderId": "sord_g2_cart_msvcysqs",
+      "journal": true,
+      "webhook": "skipped_cod",
+      "b2bLeaks": 0
+    },
+    "ecocash": {
+      "orderId": "sord_g2_cart_msvcyvwm",
+      "providerRefPrefix": "eco_sb_s",
+      "journal": true,
+      "webhook": "captured",
+      "b2bLeaks": 0
+    },
+    "paynow": {
+      "mode": "fixture",
+      "orderId": "ord_g8_pn_1786857745854",
+      "providerRefPrefix": "paynow_fx_",
+      "journal": true,
+      "webhook": "captured",
+      "fiscalCount": 2,
+      "note": "Paynow fixture rail — live PAYNOW_* keys remain blocked_on_human"
+    }
+  },
+  "fdms": {
+    "fiscalDayId": "fd_sb_dev_g8_matrix_msvcyysm",
+    "fiscalCodes": 3,
+    "dayClosed": true,
+    "moneyDrain": 3
+  },
+  "wht": {
+    "status": 200,
+    "rateBps": 3000,
+    "withholdMinor": "3000"
+  },
+  "ok": true,
+  "note": "G8 sandbox matrix green; live Paynow/ZIMRA/EcoCash/escrow remain blocked_on_human (Appendix §5)"
+}

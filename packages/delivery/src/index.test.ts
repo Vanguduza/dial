@@ -156,6 +156,43 @@ test("PD28 availability + Harare/Bulawayo offline packs; MapLibre SoR", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("Phase5-prep: offline pack URLs from MAP_OFFLINE_PACK_BASE_URL (MapLibre)", async () => {
+  const {
+    __resetOfflinePacksForTests,
+    activateOfflinePack,
+    listOfflinePackDefinitions,
+  } = await import("./offlinePacks.js");
+  __resetOfflinePacksForTests();
+  const prev = process.env.MAP_OFFLINE_PACK_BASE_URL;
+  process.env.MAP_OFFLINE_PACK_BASE_URL = "https://tiles.example.local/packs";
+  try {
+    const defs = listOfflinePackDefinitions();
+    const harare = defs.find((d) => d.packId === "harare_metro");
+    assert.ok(harare);
+    assert.equal(harare.tileSchema, "maplibre_vector");
+    assert.equal(
+      harare.packUrl,
+      "https://tiles.example.local/packs/harare_metro.mbtiles",
+    );
+    assert.equal(
+      harare.styleUrl,
+      "https://tiles.example.local/packs/harare_metro/style.json",
+    );
+    assert.equal(harare.mapSor, "maplibre");
+    const installed = activateOfflinePack({
+      courierId: "cour_p5_pack",
+      packId: "harare_metro",
+    });
+    assert.equal(installed.packUrl, harare.packUrl);
+    assert.equal(installed.styleUrl, harare.styleUrl);
+  } finally {
+    if (prev === undefined) delete process.env.MAP_OFFLINE_PACK_BASE_URL;
+    else process.env.MAP_OFFLINE_PACK_BASE_URL = prev;
+    __resetOfflinePacksForTests();
+  }
+});
+
+
 test("PD29 ETA banner + navigate stops + VROOM re-optimise", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const { runPd29EtaStopsVroomThinVertical } = await import("./index.js");

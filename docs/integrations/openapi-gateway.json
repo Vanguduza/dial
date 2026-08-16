@@ -429,7 +429,8 @@
                     "maps",
                     "temporal",
                     "redis",
-                    "internal"
+                    "internal",
+                    "supabase"
                   ]
                 },
                 "configured": {
@@ -442,7 +443,13 @@
                   "description": "Unset key names only — never values"
                 },
                 "presentCount": { "type": "integer" },
-                "requiredCount": { "type": "integer" }
+                "requiredCount": { "type": "integer" },
+                "optionalMissing": {
+                  "type": "array",
+                  "items": { "type": "string" },
+                  "description": "Unset optional key names — never values; does not affect configured"
+                },
+                "optionalCount": { "type": "integer" }
               }
             }
           },

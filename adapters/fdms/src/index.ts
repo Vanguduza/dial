@@ -3,6 +3,8 @@
  * Fixture = no keys. Sandbox = keys required + inline Virtual Gateway (no physical printer).
  * Live = HTTP to FDMS_BASE_URL. CloudESD = optional signer only.
  */
+import { createHmac, timingSafeEqual } from "node:crypto";
+
 export type IntegrationMode = "fixture" | "sandbox" | "live";
 
 export type AgencyReceiptClass =
@@ -28,6 +30,56 @@ function requireSecret(name: string): string {
   const v = process.env[name]?.trim();
   if (!v) throw new Error(`${name} unset — fail closed`);
   return v;
+}
+
+function hmacSha256Hex(secret: string, rawBody: string): string {
+  return createHmac("sha256", secret).update(rawBody, "utf8").digest("hex");
+}
+
+function timingSafeEqualStr(a: string, b: string): boolean {
+  const ba = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ba.length !== bb.length) return false;
+  return timingSafeEqual(ba, bb);
+}
+
+/**
+ * FDMS inbound webhook — HMAC with FDMS_ACTIVATION_KEY before mutate (key-drop-in / D-47).
+ * Header: `x-fdms-signature: sha256=<hex>`.
+ */
+export function verifyFdmsWebhook(
+  headers: Record<string, string>,
+  rawBody: string,
+): {
+  eventId: string;
+  type?: string;
+  receipt?: unknown;
+} {
+  const mode = integrationMode();
+  const secret =
+    process.env.FDMS_ACTIVATION_KEY?.trim() ||
+    (mode === "fixture" ? "fixture_secret" : "");
+  if (!secret) throw new Error("FDMS_ACTIVATION_KEY unset — fail closed");
+  const sig =
+    headers["x-fdms-signature"] ?? headers["X-Fdms-Signature"] ?? "";
+  const expected = `sha256=${hmacSha256Hex(secret, rawBody)}`;
+  if (mode !== "fixture" && !timingSafeEqualStr(sig, expected)) {
+    throw new Error("FDMS webhook signature invalid");
+  }
+  const payload = JSON.parse(rawBody || "{}") as {
+    eventId?: string;
+    type?: string;
+    receipt?: unknown;
+  };
+  if (!payload.eventId?.trim()) {
+    throw new Error("eventId required");
+  }
+  const out: { eventId: string; type?: string; receipt?: unknown } = {
+    eventId: payload.eventId,
+  };
+  if (payload.type != null) out.type = String(payload.type);
+  if (payload.receipt !== undefined) out.receipt = payload.receipt;
+  return out;
 }
 
 function requireSandboxKeys(): { base: string; deviceId: string; key: string } {

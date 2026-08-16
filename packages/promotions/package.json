@@ -17,6 +17,9 @@
   "engines": {
     "node": ">=20"
   },
+  "dependencies": {
+    "@dial/shared": "workspace:*"
+  },
   "devDependencies": {
     "@types/node": "^22.15.21",
     "tsx": "^4.19.4",

@@ -18,3 +18,4 @@ rootProject.name = "dial-delivery-android"
 
 include(":app")
 include(":core:network")
+include(":core:maps")

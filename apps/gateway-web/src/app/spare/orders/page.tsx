@@ -45,10 +45,7 @@ export default async function SpareOrdersPage({
         >
           Orders
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          USD totals · Sold by supplier (agency) · track from ERP · 7-day cancel
-          window on new orders. No ZiG on this screen (D-57).
-        </p>
+        
         {orders.length === 0 ? (
           <p>No orders yet — <Link href="/spare">browse spares</Link>.</p>
         ) : (

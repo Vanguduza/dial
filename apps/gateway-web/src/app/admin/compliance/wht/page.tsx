@@ -128,12 +128,8 @@ export default function ComplianceWhtPage() {
           Compliance / WHT remittance
         </h1>
         <p style={{ fontSize: 14, opacity: 0.85 }}>
-          PD23 · D-50 — without ITF263, 30% withhold into{" "}
-          <code>withholding_balances</code>. Remittance is human-submitted.
-          AI never writes payable amounts.{" "}
+          Without ITF263, 30% withhold applies. Remittance is human-submitted.{" "}
           <Link href="/admin/commercial-simulation">Commercial Simulation</Link>
-          {" · "}
-          <Link href="/admin/tech/take-home">Take-Home</Link>
         </p>
 
         <label style={{ display: "grid", gap: 6, marginTop: 16, fontSize: 14 }}>

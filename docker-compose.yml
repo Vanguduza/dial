@@ -1,3 +1,7 @@
+# Phase 1 / G1 staging compose — Redis + Meili (+ Temporal profile).
+# Dogfood: docs/ops/phase1-sandbox-dogfood.md
+# Phase 5 Temporal: docs/ops/phase5-delivery-temporal-dogfood.md
+# Maps Tier-2 (ENH-013): docs/ops/maps-tier2-compose.md — not in default compose
 # Local infra for sandbox / key-drop-in smoke (S92).
 # Does not run in CI. Never put live PSP/WA/FDMS secrets in compose env.
 #
@@ -67,7 +71,7 @@ services:
       POSTGRES_USER: temporal
       POSTGRES_PWD: ${TEMPORAL_DB_PASSWORD:-temporal}
       POSTGRES_SEEDS: temporal-db
-      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
+      # Omit DYNAMIC_CONFIG_FILE_PATH — auto-setup image lacks mounted development-sql.yaml
     ports:
       - "7233:7233"
 
@@ -85,3 +89,4 @@ services:
 volumes:
   meili_data:
   temporal_pg:
+

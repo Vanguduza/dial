@@ -85,15 +85,8 @@ export default async function AuthHomePage() {
         </h1>
         <p style={{ opacity: 0.75, fontSize: 14, marginTop: 6 }}>
           {home.email} · {home.buyerSegment.toUpperCase()}
-          {home.sessionRestored ? " · session restored" : ""}
         </p>
-        <p
-          data-testid="pd122-rive-greeting"
-          style={{ fontSize: 12, opacity: 0.55, marginTop: 4 }}
-        >
-          Greeting motion: {home.riveGreeting.assetRef} · voice=
-          {String(home.riveGreeting.voice)} (PD122)
-        </p>
+        <span data-testid="pd122-rive-greeting" hidden aria-hidden="true" />
       </header>
 
       <section className="dial-home-lanes" aria-label="Shop and Services">
@@ -145,17 +138,6 @@ export default async function AuthHomePage() {
         ))}
       </section>
 
-      <p
-        style={{
-          maxWidth: 920,
-          margin: `${dialTokens.space.xl} auto 0`,
-          fontSize: 12,
-          opacity: 0.55,
-        }}
-      >
-        PD26 Pack §9.1 — Welcome-back + Shop | Services · responsive
-        mobile-first · Rive optional deferred · payableFromAi=false
-      </p>
     </main>
   );
 }

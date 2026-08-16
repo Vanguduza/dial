@@ -30,7 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier.Modifier
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -460,7 +461,11 @@ private fun SpareCartCheckoutScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(top = 12.dp),
         ) {
-            Checkbox(checked = cpaReviewed, onCheckedChange = { cpaReviewed = it })
+            Checkbox(
+                checked = cpaReviewed,
+                onCheckedChange = { cpaReviewed = it },
+                modifier = Modifier.testTag("cpa-review-ack"),
+            )
             Text("I reviewed CPA disclosures (18 items)", style = MaterialTheme.typography.bodySmall)
         }
         error?.let {
@@ -470,7 +475,7 @@ private fun SpareCartCheckoutScreen(
         Button(
             onClick = { pay("ecocash") },
             enabled = !loading && cpaReviewed,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("pay-ecocash"),
         ) {
             Text("Pay EcoCash")
         }
@@ -478,7 +483,7 @@ private fun SpareCartCheckoutScreen(
         OutlinedButton(
             onClick = { pay("cod") },
             enabled = !loading && cpaReviewed,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("pay-cod"),
         ) {
             Text("Cash on delivery (USD)")
         }

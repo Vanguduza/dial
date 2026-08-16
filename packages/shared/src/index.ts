@@ -10,6 +10,21 @@ export {
   claimProcessedEventDurable,
   integrationMode as processedEventsIntegrationMode,
 } from "./processedEvents.js";
+export {
+  ensureDurableProfile,
+  persistOfferSnapshotDurable,
+  persistOrderDurable,
+  persistPaymentIntentDurable,
+  persistJobReserveDurable,
+  persistFdmsOutboxDurable,
+  persistJournalDurable,
+  persistFxDailyRateDurable,
+  persistWhtRemittanceBatchDurable,
+  durableRestSelect,
+  type DurableOfferSnapshotInput,
+  type DurableOrderInput,
+  type DurableOrderLineInput,
+} from "./durableCommerce.js";
 export { pingInternalApiHealth } from "./internalApi.js";
 export {
   getDomainModule,
@@ -52,3 +67,42 @@ export {
   type OpsTriageKind,
   type OpsTriageStatus,
 } from "./opsTriage.js";
+export {
+  G1_PRIORITY_RESOURCE_KINDS,
+  assertRlsSelect,
+  rlsAllowsSelect,
+  runG1CrossTenantRlsDenyMatrix,
+  type PriorityResourceKind,
+  type PriorityResourceRow,
+  type RlsActor,
+  type RlsRole,
+} from "./rlsPolicies.js";
+export {
+  assertWorkerQueuesSecrets,
+  assertWorkerTemporalSecrets,
+  requireWorkerQueuesSecrets,
+  requireWorkerTemporalSecrets,
+  workerIntegrationMode,
+  type WorkerSecretGate,
+} from "./workerSecrets.js";
+export {
+  apiError,
+  apiErrorSchema,
+  newRequestId,
+  parseJsonBody,
+  rateLimitTake,
+  __resetRateLimitForTests,
+  type ApiErrorBody,
+} from "./http.js";
+export {
+  OPENFREEMAP_LIBERTY,
+  resolveStyleUrl,
+  shouldWaitForMapLayout,
+  shouldCommitStyleCallback,
+  resumeShouldReloadStyle,
+  stallRetryMs,
+  resumeGlRebindDelayMs,
+} from "./mapLayout.js";
+export { logJson } from "./log.js";
+export { reportError } from "./errorReport.js";
+

@@ -43,9 +43,6 @@ export function TechProfileCards() {
       <h2 style={{ fontSize: "1.1rem", marginBottom: dialTokens.space.sm }}>
         Technicians
       </h2>
-      <p style={{ fontSize: 13, opacity: 0.75, marginTop: 0 }}>
-        Profile cards — Manager&apos;s choice flagged. Value Score is not a payable amount.
-      </p>
       <ul
         style={{
           listStyle: "none",

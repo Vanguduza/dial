@@ -1,0 +1,65 @@
+{
+  "base": "http://127.0.0.1:3000",
+  "secretConfigured": true,
+  "authEmailFromEnv": false,
+  "authEmailPresent": true,
+  "screenshots": [
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\track-desktop-initial.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-desktop-board.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-desktop-assignment.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\track-tablet-initial.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-tablet-board.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-tablet-assignment.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\track-small-initial.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-small-board.png",
+    "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-small-assignment.png"
+  ],
+  "viewports": [
+    {
+      "viewport": "desktop",
+      "authNote": "session_cookie_explicit",
+      "pinCount": 2,
+      "dispatchJobId": "dj_msvci4pt_7mytgs",
+      "assignmentSeedStatus": 200,
+      "screenshots": [
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\track-desktop-initial.png",
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-desktop-board.png",
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-desktop-assignment.png"
+      ],
+      "helperViolations": [],
+      "ok": true
+    },
+    {
+      "viewport": "tablet",
+      "authNote": "session_cookie_explicit",
+      "pinCount": 2,
+      "dispatchJobId": "dj_msvcibed_9j6fax",
+      "assignmentSeedStatus": 200,
+      "screenshots": [
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\track-tablet-initial.png",
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-tablet-board.png",
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-tablet-assignment.png"
+      ],
+      "helperViolations": [],
+      "ok": true
+    },
+    {
+      "viewport": "small",
+      "authNote": "session_cookie_explicit",
+      "pinCount": 2,
+      "dispatchJobId": "dj_msvcihas_vljexo",
+      "assignmentSeedStatus": 200,
+      "screenshots": [
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\track-small-initial.png",
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-small-board.png",
+        "C:\\DIAL\\docs\\ops\\evidence\\g5\\dispatch-small-assignment.png"
+      ],
+      "helperViolations": [],
+      "ok": true
+    }
+  ],
+  "helperViolations": [],
+  "not_G5": true,
+  "g5Claimed": false,
+  "ok": true
+}

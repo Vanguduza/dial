@@ -1,0 +1,2994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>DIAL Groceries &amp; Liquor — Branch Plan</title>
+<style>
+:root {
+  --ink: #1a1d21;
+  --muted: #5c6570;
+  --rule: #d8dde3;
+  --accent: #0b3d5c;
+  --code-bg: #f4f6f8;
+  --table-head: #eef2f6;
+}
+* { box-sizing: border-box; }
+html { font-size: 10.5pt; }
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Segoe UI", "Calibri", "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.45;
+  background: #fff;
+}
+.doc {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 0 0.25in;
+}
+.title-page {
+  page-break-after: always;
+  min-height: 9.5in;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.5in 0.5in;
+  border-top: 6px solid var(--accent);
+}
+.title-page .eyebrow {
+  color: var(--accent);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin: 0 0 1.25rem;
+}
+.title-page h1 {
+  font-size: 2.15rem;
+  line-height: 1.2;
+  color: var(--accent);
+  margin: 0 0 0.75rem;
+  font-weight: 700;
+  border: none;
+  padding: 0;
+}
+.title-page .subtitle {
+  font-size: 1.15rem;
+  color: var(--muted);
+  margin: 0 0 2rem;
+}
+.title-page .meta {
+  font-size: 0.95rem;
+  color: var(--ink);
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+  max-width: 28rem;
+}
+.title-page .meta div { margin: 0.35rem 0; }
+.title-page .disclaimer {
+  margin-top: 2.5rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.toc {
+  page-break-after: always;
+  padding-top: 0.5rem;
+}
+.toc h2 {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.35rem;
+  margin-top: 0;
+}
+.toc ul { list-style: none; padding-left: 0; margin: 0; }
+.toc > ul > li { margin: 0.45rem 0; }
+.toc li a { color: var(--ink); text-decoration: none; }
+.toc li a:hover { color: var(--accent); }
+.toc ul ul { padding-left: 1.1rem; margin: 0.15rem 0 0.35rem; }
+.toc ul ul li { margin: 0.2rem 0; font-size: 0.92rem; color: var(--muted); }
+.content h1 {
+  color: var(--accent);
+  font-size: 1.55rem;
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.3rem;
+  margin: 1.6rem 0 0.75rem;
+  page-break-after: avoid;
+}
+.content h2 {
+  color: var(--accent);
+  font-size: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.25rem;
+  margin: 1.35rem 0 0.55rem;
+  page-break-after: avoid;
+}
+.content h3 {
+  font-size: 1.08rem;
+  color: #243447;
+  margin: 1.1rem 0 0.4rem;
+  page-break-after: avoid;
+}
+.content h4 {
+  font-size: 1rem;
+  margin: 0.9rem 0 0.35rem;
+  page-break-after: avoid;
+}
+.content p { margin: 0.45rem 0; orphans: 3; widows: 3; }
+.content ul, .content ol { margin: 0.4rem 0 0.6rem; padding-left: 1.35rem; }
+.content li { margin: 0.2rem 0; }
+.content a { color: var(--accent); }
+.content hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 1.25rem 0;
+}
+.content blockquote {
+  margin: 0.75rem 0;
+  padding: 0.35rem 0.85rem;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+  background: #f8fafb;
+}
+.content code {
+  font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+  font-size: 0.86em;
+  background: var(--code-bg);
+  padding: 0.05em 0.3em;
+  border-radius: 3px;
+}
+.content pre {
+  background: var(--code-bg);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0.65rem 0.75rem;
+  overflow-x: auto;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  page-break-inside: avoid;
+}
+.content pre code { background: none; padding: 0; font-size: inherit; }
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.7rem 0 1rem;
+  font-size: 0.88rem;
+  page-break-inside: auto;
+}
+.content thead { display: table-header-group; }
+.content tr { page-break-inside: avoid; }
+.content th, .content td {
+  border: 1px solid var(--rule);
+  padding: 0.35rem 0.45rem;
+  vertical-align: top;
+  text-align: left;
+}
+.content th {
+  background: var(--table-head);
+  font-weight: 600;
+  color: #243447;
+}
+.content tbody tr:nth-child(even) td { background: #fafbfc; }
+.mermaid-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 0.35rem;
+}
+@media print {
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  a { text-decoration: none; color: inherit; }
+  .title-page { min-height: auto; height: 100vh; }
+}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<section class="title-page">
+  <p class="eyebrow">DIAL Planning Document</p>
+  <h1>DIAL Groceries &amp; Liquor — Branch Plan</h1>
+  <p class="subtitle">Agency / marketplace grocery &amp; liquor vertical</p>
+  <div class="meta">
+    <div><strong>Date:</strong> 2026-08-14</div>
+    <div><strong>Status:</strong> Planning — not SoR over v4</div>
+    <div><strong>Source:</strong> DIAL_Groceries_Liquor_Branch_Plan.md</div>
+  </div>
+  <p class="disclaimer">Formats the existing branch plan only. Authority remains DIAL Consolidated Plan v4 and the Development Agent Pack.</p>
+</section>
+
+<nav class="toc"><h2>Table of contents</h2><ul>
+<li><a href="#dial-groceries-liquor-branch-integration-plan-peer-depth">Dial Groceries &amp; Liquor — Branch Integration Plan (Peer-Depth)</a></li>
+<ul>
+<li><a href="#part-0-how-to-read-this-confidence-research-gaps">Part 0 — How to read this, confidence &amp; research gaps</a></li>
+<ul>
+<li><a href="#01-purpose-and-depth-bar">0.1 Purpose and depth bar</a></li>
+<li><a href="#02-confidence-tags-same-grammar-as-v4-7">0.2 Confidence tags (same grammar as v4 §7)</a></li>
+<li><a href="#03-what-this-document-adds-relative-to-the-short-prior-draft">0.3 What this document adds (relative to the short prior draft)</a></li>
+<li><a href="#04-reading-order-for-agents">0.4 Reading order for agents</a></li>
+<li><a href="#05-research-gaps-status-honest-vs-v4">0.5 Research gaps status (honest % vs v4)</a></li>
+<li><a href="#06-hard-locks-never-reopen">0.6 Hard locks (never reopen)</a></li>
+</ul>
+<li><a href="#part-1-market-problem-register">Part 1 — Market &amp; problem register</a></li>
+<ul>
+<li><a href="#11-vision-sentence-grocery-vertical">1.1 Vision sentence (grocery vertical)</a></li>
+<li><a href="#12-market-evidence-reported-unverified">1.2 Market evidence [Reported] / [Unverified]</a></li>
+<li><a href="#13-what-comparable-grocery-ventures-get-wrong-lessons-for-dial">1.3 What comparable grocery ventures get wrong (lessons for DIAL)</a></li>
+<li><a href="#14-problem-register-groceryliquor-specific">1.4 Problem register — grocery/liquor specific</a></li>
+<li><a href="#15-why-agency-marketplace-not-principal-grocer">1.5 Why agency marketplace (not principal grocer)</a></li>
+</ul>
+<li><a href="#part-2-product-dual-surface-scope">Part 2 — Product dual-surface &amp; scope</a></li>
+<ul>
+<li><a href="#21-shop-hub-placement-engineering">2.1 Shop hub placement [Engineering]</a></li>
+<li><a href="#22-in-mvp-launch-full-feature-mvp">2.2 In-MVP (launch) — Full Feature MVP</a></li>
+<li><a href="#23-explicitly-out-of-mvp">2.3 Explicitly out of MVP</a></li>
+<li><a href="#24-web-screen-inventory-gateway-web">2.4 Web screen inventory (gateway-web)</a></li>
+<li><a href="#25-native-screen-inventory-android-ios-c-5">2.5 Native screen inventory (Android + iOS — C-5)</a></li>
+<li><a href="#26-liquor-age-gate-ux-policy-engineering-counsel-numbers-unverified">2.6 Liquor age-gate UX policy [Engineering] + counsel numbers [Unverified]</a></li>
+<li><a href="#27-catch-weight-deferred-policy">2.7 Catch-weight deferred policy</a></li>
+</ul>
+<li><a href="#part-3-commercial-architecture-unit-economics">Part 3 — Commercial architecture &amp; unit economics</a></li>
+<ul>
+<li><a href="#31-pricing-engine-deterministic-v4-41">3.1 Pricing engine (deterministic — v4 §4.1)</a></li>
+<li><a href="#32-take-rate-ladder-publish-to-supply-founder-input">3.2 Take-rate ladder (publish to supply) [Founder-input]</a></li>
+<li><a href="#33-example-journals-amountminor-illustrative-only">3.3 Example journals (amountMinor) — illustrative only</a></li>
+<li><a href="#34-unit-economics-skeleton-no-line-may-be-deleted">3.4 Unit economics skeleton (no line may be deleted)</a></li>
+<li><a href="#35-multivendor-split-settlement-under-agency">3.5 Multivendor split settlement under agency</a></li>
+<li><a href="#36-channel-costs-reuse-v4-46">3.6 Channel costs (reuse v4 §4.6)</a></li>
+<li><a href="#37-promotions-d-41a-d-42">3.7 Promotions (D-41a / D-42)</a></li>
+</ul>
+<li><a href="#part-4-catalogue-meili-grocery_offers_v1">Part 4 — Catalogue / Meili (grocery_offers_v1)</a></li>
+<ul>
+<li><a href="#41-index-choice">4.1 Index choice</a></li>
+<li><a href="#42-document-shape-pack-8-style">4.2 Document shape (Pack §8 style)</a></li>
+<li><a href="#43-settings">4.3 Settings</a></li>
+<li><a href="#44-import-heartbeat-for-perishables">4.4 Import / heartbeat for perishables</a></li>
+<li><a href="#45-restricted-liquor-publish-gates">4.5 Restricted / liquor publish gates</a></li>
+</ul>
+<li><a href="#part-5-money-path-e1a-reuse">Part 5 — Money path (E1a reuse)</a></li>
+<ul>
+<li><a href="#51-end-to-end-spine">5.1 End-to-end spine</a></li>
+<li><a href="#52-grocery-specific-offersnapshot-fields">5.2 Grocery-specific OfferSnapshot fields</a></li>
+<li><a href="#53-pspadapter-rails-d-43">5.3 PspAdapter rails (D-43)</a></li>
+<li><a href="#54-escrow-vs-direct-capture-decision-table">5.4 Escrow vs direct capture — decision table</a></li>
+<li><a href="#55-wht-note-d-50-boundary">5.5 WHT note (D-50 boundary)</a></li>
+</ul>
+<li><a href="#part-6-tax-fdms-liquor-compliance-brief">Part 6 — Tax / FDMS / liquor compliance brief</a></li>
+<ul>
+<li><a href="#60-load-bearing-inheritance-from-v4-do-not-re-litigate">6.0 Load-bearing inheritance from v4 (do not re-litigate)</a></li>
+<li><a href="#61-vat-agency-fdms-for-grocery-lines">6.1 VAT &amp; agency FDMS for grocery lines</a></li>
+<li><a href="#62-liquor-licensing-hours">6.2 Liquor licensing &amp; hours</a></li>
+<li><a href="#63-food-safety-delivery-notes">6.3 Food safety &amp; delivery notes</a></li>
+<li><a href="#64-consumer-protection-perishables-reported-counsel">6.4 Consumer protection — perishables [Reported] / counsel</a></li>
+<li><a href="#65-data-protection-age-attestations">6.5 Data protection (age attestations)</a></li>
+<li><a href="#66-counsel-checklist-groceryliquor-addendum-to-v4-710">6.6 Counsel checklist (grocery/liquor addendum to v4 §7.10)</a></li>
+<li><a href="#67-what-could-not-be-verified-grocery-specific">6.7 What could not be verified (grocery-specific)</a></li>
+</ul>
+<li><a href="#part-7-delivery-temporal">Part 7 — Delivery / Temporal</a></li>
+<ul>
+<li><a href="#71-slot-capacity-model">7.1 Slot capacity model</a></li>
+<li><a href="#72-workflow-recommendation">7.2 Workflow recommendation</a></li>
+<li><a href="#73-cold-chain-eligibility">7.3 Cold-chain eligibility</a></li>
+<li><a href="#74-age-check-at-door">7.4 Age-check-at-door</a></li>
+<li><a href="#75-multi-stop">7.5 Multi-stop</a></li>
+<li><a href="#76-refunds-for-thawed-damaged-goods-sop-ops">7.6 Refunds for thawed / damaged goods — SOP (ops)</a></li>
+</ul>
+<li><a href="#part-8-whatsapp-companion-chapter">Part 8 — WhatsApp companion chapter</a></li>
+<ul>
+<li><a href="#81-happy-path">8.1 Happy path</a></li>
+<li><a href="#82-flow-screen-maps">8.2 Flow screen maps</a></li>
+<li><a href="#83-data_exchange-stubs-typescript-shaped">8.3 data_exchange stubs (TypeScript-shaped)</a></li>
+<li><a href="#84-templates-register">8.4 Templates register</a></li>
+<li><a href="#85-live-chat">8.5 Live chat</a></li>
+</ul>
+<li><a href="#part-9-ai-packagesai-only">Part 9 — AI (packages/ai only)</a></li>
+<ul>
+<li><a href="#91-rules-inherit-v4-51-d-61">9.1 Rules (inherit v4 §5.1 + D-61)</a></li>
+<li><a href="#92-capability-contracts">9.2 Capability contracts</a></li>
+<li><a href="#93-promptfoo-outline">9.3 Promptfoo outline</a></li>
+<li><a href="#94-metriccontract-kpis-examples">9.4 MetricContract KPIs (examples)</a></li>
+<li><a href="#95-privacy-egress">9.5 Privacy / egress</a></li>
+</ul>
+<li><a href="#part-10-security">Part 10 — Security</a></li>
+<ul>
+<li><a href="#101-idor-resource-list-extend-t9">10.1 IDOR resource list (extend T9)</a></li>
+<li><a href="#102-rls-notes">10.2 RLS notes</a></li>
+<li><a href="#103-age-gate-audit-trail">10.3 Age-gate audit trail</a></li>
+<li><a href="#104-webhooks-secrets">10.4 Webhooks &amp; secrets</a></li>
+<li><a href="#105-b2b-informal">10.5 B2B informal</a></li>
+</ul>
+<li><a href="#part-11-oss-stitch-table">Part 11 — OSS stitch table</a></li>
+<li><a href="#part-12-trains-tracer-g0g6-d-52">Part 12 — Trains / tracer G0–G6 (D-52)</a></li>
+<ul>
+<li><a href="#g0-plan-residual">G0 — Plan residual</a></li>
+<li><a href="#g1-thin-vertical-money-browse">G1 — Thin vertical (money + browse)</a></li>
+<li><a href="#g2-expand-commerce">G2 — Expand commerce</a></li>
+<li><a href="#g3-delivery-expand">G3 — Delivery expand</a></li>
+<li><a href="#g4-liquor-compliance-expand">G4 — Liquor compliance expand</a></li>
+<li><a href="#g5-whatsapp">G5 — WhatsApp</a></li>
+<li><a href="#g6-ai-drafts">G6 — AI drafts</a></li>
+<li><a href="#completion-matrix-ac-channel-fill-y-evidence-link-blank-incomplete">Completion matrix (AC × channel) — fill Y + evidence link; blank = incomplete</a></li>
+</ul>
+<li><a href="#part-13-proposed-decisions-g-log-grill-accepted-where-noted">Part 13 — Proposed decisions (G-log) — grill-accepted where noted</a></li>
+<li><a href="#part-14-launch-checklist-ops-kpis">Part 14 — Launch checklist &amp; ops KPIs</a></li>
+<ul>
+<li><a href="#141-groceryliquor-launch-checklist-additive-to-v4-appendix-c">14.1 Grocery/liquor launch checklist (additive to v4 Appendix C)</a></li>
+<li><a href="#142-ops-kpis-dashboard-from-week-one">14.2 Ops KPIs (dashboard from week one)</a></li>
+</ul>
+<li><a href="#part-15-founder-grill-answers-or-defaults">Part 15 — Founder grill (answers-or-defaults)</a></li>
+<li><a href="#part-16-architecture-integration-seamless-erp">Part 16 — Architecture integration (seamless ERP)</a></li>
+<ul>
+<li><a href="#161-domain-map">16.1 Domain map</a></li>
+<li><a href="#162-mermaid-request-path">16.2 Mermaid — request path</a></li>
+<li><a href="#163-package-boundary">16.3 Package boundary</a></li>
+<li><a href="#164-feature-flags">16.4 Feature flags</a></li>
+</ul>
+<li><a href="#part-17-risks-non-goals">Part 17 — Risks &amp; non-goals</a></li>
+<li><a href="#appendix-a-authority-citations">Appendix A — Authority citations</a></li>
+<li><a href="#appendix-b-repo-anchors">Appendix B — Repo anchors</a></li>
+<li><a href="#appendix-c-supplier-grocery-import-columns-draft">Appendix C — Supplier grocery import columns (draft)</a></li>
+</ul>
+</ul></nav>
+<article class="content">
+<h1 id="dial-groceries-liquor-branch-integration-plan-peer-depth">Dial Groceries &amp; Liquor — Branch Integration Plan (Peer-Depth)</h1>
+<p><strong>Status:</strong> Plan-phase artifact (<strong>D-52</strong> / <strong>D-56</strong>). <strong>Not product SoR.</strong><br>
+<strong>Date:</strong> 2026-08-14 (enhanced revision)<br>
+<strong>Authority conflict order:</strong> (1) <code>DIAL_Consolidated_Plan_v4.md</code> → (2) <code>DIAL_Development_Agent_Pack.md</code> → (3) Blueprint / WA / promotions companions → (4) this plan. <strong>On any conflict, v4 + D-log win.</strong><br>
+<strong>Grill:</strong> Founder grill Part 15 embeds <code>dial-grill-locks</code> questions. Run grill before scaffolding money / WA / maps / AI / catalogue / Intelligence for this branch.<br>
+<strong>Repo facts used:</strong> <code>packages/{catalogue,payments,delivery,tax,ledger,promotions,ai,queues,search-indexer,shared}</code>, <code>adapters/{psp,fdms,maps,whatsapp}</code>, <code>apps/{gateway-web,worker-temporal,worker-queues}</code>, Pack §8 Meili shape, tracer matrices E1–E4, <code>DIAL_WhatsApp_Flows_and_Templates.md</code>, <code>DIAL_Promotions_Package_Design.md</code> patterns.</p>
+<hr>
+<h2 id="part-0-how-to-read-this-confidence-research-gaps">Part 0 — How to read this, confidence &amp; research gaps</h2>
+<h3 id="01-purpose-and-depth-bar">0.1 Purpose and depth bar</h3>
+<p>This document is the <strong>groceries &amp; liquor vertical companion</strong> to v4. It aims for <strong>peer depth</strong> with <code>DIAL_Consolidated_Plan_v4.md</code> in <em>section kinds</em>: market evidence, problem register, commercial/unit economics, tax/compliance with confidence tags, architecture, companion contracts, D-log-style decisions, launch checklist, open questions — adapted to a third Shop vertical under the same ERP.</p>
+<p>It does <strong>not</strong> reopen locks. It does <strong>not</strong> replace Spare/Tech product SoR. It proposes <strong>G-log draft decisions</strong> pending founder (Part 13) — nothing here silently locks.</p>
+<h3 id="02-confidence-tags-same-grammar-as-v4-7">0.2 Confidence tags (same grammar as v4 §7)</h3>
+<table>
+<thead>
+<tr>
+<th>Tag</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>[Verified]</strong></td>
+<td>Primary instrument, official notice, or locked DIAL D-log / Pack contract already in-repo</td>
+</tr>
+<tr>
+<td><strong>[Reported]</strong></td>
+<td>Credible secondary (law firm, ministry page summary, trade press) — not cross-checked to primary in this revision</td>
+</tr>
+<tr>
+<td><strong>[Unverified]</strong></td>
+<td>Research lead or common practice claim — <strong>treat as false until counsel/ops confirm</strong></td>
+</tr>
+<tr>
+<td><strong>[Founder-input]</strong></td>
+<td>Placeholder cell — commercial number or policy the founder must supply</td>
+</tr>
+<tr>
+<td><strong>[Engineering]</strong></td>
+<td>DIAL implementation posture that does not invent statute</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Honest status:</strong> Liquor licensing, remote-sale hours, platform-vs-merchant licence holder, food-safety delivery duties, and CPA perishables carve-outs for electronic cancellation are <strong>predominantly [Unverified] or [Reported]</strong> in this plan. Engineering implements <strong>configurable gates + audit trails</strong>; counsel supplies numbers, copy, and who must hold what licence before customer-open.</p>
+<h3 id="03-what-this-document-adds-relative-to-the-short-prior-draft">0.3 What this document adds (relative to the short prior draft)</h3>
+<ol>
+<li>Market &amp; problem register with competitor evidence and agency rationale.  </li>
+<li>Dual-surface product inventories (web + native) + Shop hub + age-gate + catch-weight deferred.  </li>
+<li>Commercial architecture with take-rate ladders, example <code>amountMinor</code> journals, spoilage scenarios, IMTT opex, multivendor split.  </li>
+<li>Full Pack-§8-style <code>grocery_offers_v1</code> Meili schema + perishables heartbeat + optional Open Food Facts.  </li>
+<li>Money path: E1a reuse, grocery OfferSnapshot fields, PspAdapter, COD USD, escrow decision table.  </li>
+<li>Tax / FDMS / liquor compliance brief (v4 §7 style) + counsel checklist.  </li>
+<li>Delivery / Temporal: slots, cold-chain, age-check-at-door, multi-stop, thawed-goods SOP.  </li>
+<li>WhatsApp companion chapter (<code>FLOW_GROCERY_*</code>).  </li>
+<li>AI capability contracts + Promptfoo + MetricContract.  </li>
+<li>Security IDOR/RLS/age-gate audit.  </li>
+<li>OSS stitch table (SoR vs pattern).  </li>
+<li>Trains / tracer G0–G6 with filled DoD evidence columns.  </li>
+<li>Proposed G-1…G-n decisions (pending founder).  </li>
+<li>Launch checklist + ops KPIs.  </li>
+<li>Expanded founder grill with answers-or-defaults.</li>
+</ol>
+<h3 id="04-reading-order-for-agents">0.4 Reading order for agents</h3>
+<ol>
+<li>v4 Parts 0–1 locks + D-49…D-61  </li>
+<li>Agent Pack §2 non-negotiables + §8 Meili  </li>
+<li>This plan (Parts 1–15)  </li>
+<li><code>DIAL_WhatsApp_Flows_and_Templates.md</code> style for Flow implementation (mirror, do not fork SoR)  </li>
+<li><code>dial-grill-locks</code> → ticket DoD → <code>dial-tracer-slice</code> Build  </li>
+</ol>
+<h3 id="05-research-gaps-status-honest-vs-v4">0.5 Research gaps status (honest % vs v4)</h3>
+<table>
+<thead>
+<tr>
+<th>Gap cluster</th>
+<th>Status</th>
+<th>Blocks true 100% peer depth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Liquor Act primary cite for age / remote delivery / platform liability</td>
+<td><strong>[Unverified]</strong> pending counsel</td>
+<td>Yes — counsel brief Part 6.10</td>
+</tr>
+<tr>
+<td>Bottle-store / retail hours SI application to <em>delivery</em></td>
+<td><strong>[Reported]</strong> Open Council / SI 197 of 2004 summaries — not counsel-confirmed for e-commerce</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Food safety / cold-chain statutory duties for marketplace agent</td>
+<td><strong>[Unverified]</strong></td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>CPA § electronic cancellation vs perishables carve-out read-across</td>
+<td><strong>[Reported]</strong> via v4 §7.5 framing + Act text leads — counsel must map grocery SKUs</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Founder commercial inputs (take rate, delivery fee owner, spoilage %)</td>
+<td><strong>[Founder-input]</strong></td>
+<td>Yes — unit economics incomplete</td>
+</tr>
+<tr>
+<td>Escrow threshold policy for grocery</td>
+<td>Grill Q8 / G-log</td>
+<td>Soft block G1 money design</td>
+</tr>
+<tr>
+<td>Launch geography / informal food policy</td>
+<td>Grill</td>
+<td>Soft block catalogue publish rules</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Self-assessment:</strong> Structural/engineering depth ≈ <strong>~85–90% of v4 section kinds</strong>. True <strong>100%</strong> requires founder commercial cells + Zimbabwe counsel opinions on liquor + food + CPA perishables (Part 6.10). Do not claim legal Verified without those opinions.</p>
+<h3 id="06-hard-locks-never-reopen">0.6 Hard locks (never reopen)</h3>
+<p>Agency <strong>D-58</strong> (no principal stock / no <code>DIAL_OWNED</code>); Job Reserve / ledger money SoR; <strong>D-49</strong> B2B hide informal; <strong>D-57</strong> USD browse + ZiG-at-checkout; <strong>D-59</strong> FDMS classes; <strong>D-60</strong> IMTT opex + COD USD; official WhatsApp Cloud API only; MapLibre + Nominatim/OSRM/VROOM SoR (<strong>D-44</strong>); AI never writes payable amounts; no Expo customer shell (<strong>C-5</strong>); delivery job SoR = <code>packages/delivery</code> + Temporal (<strong>D-45</strong>); promotions = <code>@dial/promotions</code> only (<strong>D-42</strong>).</p>
+<hr>
+<h2 id="part-1-market-problem-register">Part 1 — Market &amp; problem register</h2>
+<h3 id="11-vision-sentence-grocery-vertical">1.1 Vision sentence (grocery vertical)</h3>
+<blockquote>
+<p><strong>Dial Groceries &amp; Liquor sells certainty that the right licensed merchant’s goods arrive in the booked window, at a frozen USD price the customer reviewed, with agency disclosure and door-level age controls for alcohol — without DIAL taking title to inventory.</strong></p>
+</blockquote>
+<p>Everything in this vertical either produces that certainty (catalogue freshness, slots, cold-chain eligibility, age gates, ledger, FDMS) or distributes it (web, native, WhatsApp). Features that do neither stay off the critical path.</p>
+<h3 id="12-market-evidence-reported-unverified">1.2 Market evidence <code>[Reported]</code> / <code>[Unverified]</code></h3>
+<p><strong>Framing.</strong> Public Zimbabwe grocery/liquor <em>marketplace</em> sizing with auditor-grade TAM is thin. This plan does <strong>not</strong> invent a false-precision TAM. Evidence below is competitive and behavioural — enough to shape product, not enough to replace founder unit-economics inputs.</p>
+<table>
+<thead>
+<tr>
+<th>Fact / observation</th>
+<th>Figure / note</th>
+<th>Why it matters</th>
+<th>Confidence</th>
+<th>Source lead</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Established grocery delivery brand in ZW</td>
+<td>TillPoint (formerly Fresh in a Box) — app claims same-day / “Deliver Now” windows, Harare-centric history since ~2018</td>
+<td>Incumbent <strong>principal / first-party</strong> fulfilment pattern; DIAL differentiates as <strong>multivendor agency</strong></td>
+<td>[Reported]</td>
+<td>App Store / Play listings (TillPoint by Fresh in a Box)</td>
+</tr>
+<tr>
+<td>On-demand horizontal delivery</td>
+<td>Tambi marketing: food, groceries, medicine, liquor, packages</td>
+<td>Liquor already appears in competitor messaging — age/hours are table stakes</td>
+<td>[Reported]</td>
+<td>tambi.mobi marketing</td>
+</tr>
+<tr>
+<td>Retail marketplace pitch</td>
+<td>Manna Store: connect to Spar / OK / Pick n Pay via riders; EcoCash + card</td>
+<td>Multivendor + EcoCash is expected UX in Harare 2026</td>
+<td>[Reported]</td>
+<td>LinkedIn / company pitch (treat volumes as marketing)</td>
+</tr>
+<tr>
+<td>Supermarket chains present</td>
+<td>OK, Spar, Pick n Pay, local bottle stores</td>
+<td>Supply exists; digital aggregation + trust + cash mechanics are the hard parts (same lesson as Spare §1.2)</td>
+<td>[Reported]</td>
+<td>Market common knowledge + competitor copy</td>
+</tr>
+<tr>
+<td>Mobile-money checkout</td>
+<td>EcoCash ubiquitous; COD still culturally strong</td>
+<td>Aligns <strong>D-57</strong> EcoCash|COD buttons + <strong>D-60</strong> COD USD</td>
+<td>[Verified] DIAL lock + market practice</td>
+<td>v4 D-57 / D-60</td>
+</tr>
+<tr>
+<td>WA as commerce surface</td>
+<td>High WA penetration (Spare premise)</td>
+<td>Grocery MVP should include WA thin path (grill Q11 default)</td>
+<td>[Reported]</td>
+<td>v4 channel cost §4.6; Meta Rest of Africa rates</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Competitive position (engineering implication).</strong> Incumbents are mostly <strong>owned-inventory or single-retailer</strong> apps, or horizontal courier marketplaces. DIAL’s wedge is: <strong>one ERP account</strong> already used for Spare/Tech → Shop tab → groceries/liquor with <strong>agency Sold by {Supplier}</strong>, shared Job Reserve / FDMS / delivery SoR, and B2B formal-only filters. Software alone does not win; freshness heartbeat + slot capacity + liquor compliance ops do.</p>
+<h3 id="13-what-comparable-grocery-ventures-get-wrong-lessons-for-dial">1.3 What comparable grocery ventures get wrong (lessons for DIAL)</h3>
+<table>
+<thead>
+<tr>
+<th>Failure mode</th>
+<th>Lesson encoded in this plan</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Principal inventory dark stores before unit economics</td>
+<td><strong>Forbidden</strong> without new D-log (<strong>D-58</strong>). Agency only.</td>
+</tr>
+<tr>
+<td>Stale stock → refunds as primary recovery</td>
+<td>Perishables heartbeat + short <code>stockValidUntil</code> + confirm-required (adapt Spare §2A-1)</td>
+</tr>
+<tr>
+<td>Ignoring spoilage / failed delivery cost</td>
+<td>Unit economics Part 3 includes spoilage % scenarios</td>
+</tr>
+<tr>
+<td>Age gate only on UI, not API</td>
+<td>Server-derived <code>ageGateRequired</code> + audit trail (Part 10)</td>
+</tr>
+<tr>
+<td>Dual money systems for “grocery OMS”</td>
+<td>Reject Medusa/Saleor/Fleetbase as SoR</td>
+</tr>
+<tr>
+<td>Passing IMTT to customers</td>
+<td><strong>D-60</strong> — never a checkout line</td>
+</tr>
+<tr>
+<td>Informal food visible to B2B</td>
+<td><strong>D-49</strong> filter at Meili/API</td>
+</tr>
+</tbody>
+</table>
+<h3 id="14-problem-register-groceryliquor-specific">1.4 Problem register — grocery/liquor specific</h3>
+<h4 id="14-1-perishable-oversell-stale-availability">1.4-1. Perishable oversell / stale availability</h4>
+<p><strong>Problem:</strong> Fresh/chilled/frozen stock decays faster than Spare TTL defaults; CSV weekly uploads guarantee lies.<br>
+<strong>Solution posture:</strong> State not quantity (<code>available</code> / <code>confirm_required</code> / <code>sourcing</code>); short TTL (e.g. 4–24h fresh — <strong>[Founder-input]</strong> exact); WA/dashboard <strong>heartbeat</strong> on top movers; shadow failover only for ambient/pantry same-brand where policy allows — <strong>never silent brand/protein swap</strong> without customer accept.<br>
+<strong>Measure:</strong> confirm-failure rate, % orders saved vs refunded, spoilage write-offs charged to whom (grill Q6).</p>
+<h4 id="14-2-cold-chain-break-thawed-goods-disputes">1.4-2. Cold-chain break / thawed goods disputes</h4>
+<p><strong>Problem:</strong> Customer claims thawed chicken; courier claims ambient delay.<br>
+<strong>Solution:</strong> Job metadata <code>coldChain</code>; courier eligibility filter; POD photo + temperature checklist (MVP checklist, not IoT SoR); refund SOP Part 7.6; risk allocation in supplier contract <strong>[Founder-input]</strong>.</p>
+<h4 id="14-3-liquor-age-hours-non-compliance">1.4-3. Liquor age &amp; hours non-compliance</h4>
+<p><strong>Problem:</strong> Platform enables remote sale; enforcement historically targets licensed premises.<br>
+<strong>Solution:</strong> Configurable <code>liquor_order_window</code>; ATC + checkout + door age-check; <code>liquor_licence_ref</code> on supplier; audit trail. Legal who-holds-licence = counsel (<strong>Unverified</strong> until then).</p>
+<h4 id="14-4-multivendor-cart-settlement-bugs">1.4-4. Multivendor cart settlement bugs</h4>
+<p><strong>Problem:</strong> One customer payment, N supplier payables + DIAL fee → drift.<br>
+<strong>Solution:</strong> Integer <code>amountMinor</code> journals; one Intent/Job Reserve; split ledger lines; webhook idempotency; daily reconcile (v4 §4.2).</p>
+<h4 id="14-5-catch-weight-price-surprise">1.4-5. Catch-weight price surprise</h4>
+<p><strong>Problem:</strong> Sold-by-weight after pick adjusts payable — disputes + AI temptation.<br>
+<strong>Solution:</strong> <strong>MVP = packed fixed weights only</strong> (grill Q13 default). Catch-weight = phase 2 with human pricing engine adjust — AI never writes payable.</p>
+<h4 id="14-6-informal-food-safety-optics-vs-d-60-b2c-informal">1.4-6. Informal food safety optics vs D-60 B2C informal</h4>
+<p><strong>Problem:</strong> D-60 allows B2C informal Spare visibility; food may need stricter policy.<br>
+<strong>Solution:</strong> Product policy flag <code>informalAllowedCategories</code>; default recommend formal-first food + formal-only liquor until counsel (grill Q5).</p>
+<h4 id="14-7-substitution-ux-vs-agency-disclosure">1.4-7. Substitution UX vs agency disclosure</h4>
+<p><strong>Problem:</strong> Out-of-stock banana → substitute brand looks like DIAL principal.<br>
+<strong>Solution:</strong> Substitution suggestions return <strong>offer ids</strong> only (AI); customer accepts; Sold by remains supplier; price from catalogue engine.</p>
+<h4 id="14-8-slot-capacity-thrash-late-delivery-cpa-risk">1.4-8. Slot capacity thrash / late delivery CPA risk</h4>
+<p><strong>Problem:</strong> CPA delivery timing rights (v4 §7.5) + unreasonable time tenders.<br>
+<strong>Solution:</strong> Capacity-decrement transactional holds; degrade messaging (Pack §6.22); reschedule Flow; counsel on cancellation fees for perishables.</p>
+<h4 id="14-9-b2b-pantry-fleet-grocery-informal-leak">1.4-9. B2B pantry / fleet grocery informal leak</h4>
+<p><strong>Problem:</strong> Same as Spare D-49 but SKU taxonomy differs.<br>
+<strong>Solution:</strong> Identical Meili <code>supplierFormality=formal</code> filter + <code>assertB2bMayPurchase</code> + leak=0 tests on <code>grocery_offers_v1</code>.</p>
+<h4 id="14-10-promo-cash-out-pressure-on-groceries">1.4-10. Promo cash-out pressure on groceries</h4>
+<p><strong>Problem:</strong> High-frequency grocery invites wallet-like credit abuse.<br>
+<strong>Solution:</strong> <code>@dial/promotions</code> only; promo credit <strong>non-cash-out</strong> (D-42 / §2B-30); vertical-scoped campaigns.</p>
+<h3 id="15-why-agency-marketplace-not-principal-grocer">1.5 Why agency marketplace (not principal grocer)</h3>
+<table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Principal dark store</th>
+<th>Agency marketplace (locked)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Title / COGS</td>
+<td>DIAL inventory</td>
+<td>Supplier principal (<strong>D-58</strong>)</td>
+</tr>
+<tr>
+<td>FDMS goods</td>
+<td>VAT on GMV risk</td>
+<td><code>GOODS_FORMAL</code>/<code>INFORMAL</code> + <code>DIAL_FEE</code> (<strong>D-59</strong>)</td>
+</tr>
+<tr>
+<td>Capital</td>
+<td>Warehouses, spoilage inventory</td>
+<td>Working capital on fees + float policy</td>
+</tr>
+<tr>
+<td>Competitive wedge vs TillPoint-class</td>
+<td>Race on assortment owned</td>
+<td>Multivendor + ERP trust stack</td>
+</tr>
+<tr>
+<td>Reopen cost</td>
+<td>New D-log + counsel</td>
+<td>N/A — do not scaffold <code>DIAL_OWNED</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="part-2-product-dual-surface-scope">Part 2 — Product dual-surface &amp; scope</h2>
+<h3 id="21-shop-hub-placement-engineering">2.1 Shop hub placement <code>[Engineering]</code></h3>
+<p>Authenticated Dial home (<strong>v4 §1.4</strong>): <strong>Shop | Services</strong>.<br>
+Shop expands:</p>
+<pre><code class="language-text">Shop
+  ├── Dial a Spare
+  ├── Dial Groceries &amp; Liquor   ← this vertical
+  └── (future shop verticals)
+Services
+  └── Dial a Tech
+</code></pre>
+<p>Prefer routes under <code>apps/gateway-web</code> (<code>/grocery/*</code>) first; split <code>apps/grocery-web</code> only after bundle measurement (Pack ship-less-JS). Brand: Shop tab under Dial + clear branch branding; one account (grill Q12 default).</p>
+<h3 id="22-in-mvp-launch-full-feature-mvp">2.2 In-MVP (launch) — Full Feature MVP</h3>
+<p><strong>Catalogue &amp; commerce</strong></p>
+<ul>
+<li>Multivendor grocery + liquor; <code>offerSource = MARKETPLACE</code> only.  </li>
+<li>Categories (ops taxonomy <strong>[Founder-input]</strong>): fresh, pantry, beverages, household, liquor (beer / wine / spirits / RTD).  </li>
+<li><code>pricingMode = unit | weight</code> with <strong>packed fixed weight</strong> only in MVP (<code>amountMinor</code> per unit or per packed kg step — never float).  </li>
+<li>Cold-chain hints: <code>ambient | chilled | frozen | fragile</code>.  </li>
+<li>Restricted SKU / <code>ageGateRequired</code> for liquor.  </li>
+<li>Multi-vendor cart → one checkout → split settlement.  </li>
+<li>Meili <code>grocery_offers_v1</code>; Postgres catalogue SoR.  </li>
+<li>Supplier onboarding formal/informal + liquor licence fields; Catalogue Factory human approve before Meili publish (<strong>D-53</strong>).  </li>
+<li>Promotions via <code>@dial/promotions</code> only.</li>
+</ul>
+<p><strong>Checkout &amp; FX (D-57 adapted)</strong></p>
+<ul>
+<li>Browse/cart <code>displayCurrency = USD</code>.  </li>
+<li>ZiG only at pay step from <code>fx_daily_rates</code> / <code>fx_rate_id</code>.  </li>
+<li>Required CTAs: <strong>EcoCash</strong> + <strong>COD</strong> buttons (web + WA); other rails per <strong>D-43</strong>.  </li>
+<li>COD settle <strong>USD</strong> (<strong>D-60</strong>); indicative ZiG on confirm.  </li>
+<li>Eighteen-item electronic disclosure + review before pay (v4 §7.5) — grocery-adapted counsel copy.</li>
+</ul>
+<p><strong>Delivery</strong></p>
+<ul>
+<li>Slot booking + capacity.  </li>
+<li><code>packages/delivery</code> + <code>DeliveryDispatchWorkflow</code>.  </li>
+<li>MapLibre track; OSRM/VROOM.  </li>
+<li>Multi-stop when multi-supplier or batching.  </li>
+<li>Liquor age-check-at-door activity before POD.</li>
+</ul>
+<p><strong>Surfaces:</strong> web responsive; native Android+iOS (<strong>not Expo</strong>); WA Flows; admin; supplier portal (Mercur vendor-panel <strong>pattern only</strong>).</p>
+<p><strong>Fiscal &amp; money:</strong> Job Reserve / authorize-capture per policy table Part 5; agency FDMS; same outbox drain.</p>
+<p><strong>AI:</strong> drafts only — guided shopping, substitution ids, ranking assist, ops summaries — MetricContract + Promptfoo + human promote.</p>
+<h3 id="23-explicitly-out-of-mvp">2.3 Explicitly out of MVP</h3>
+<ul>
+<li>DIAL-owned dark store / <code>DIAL_OWNED</code>.  </li>
+<li>Catch-weight post-pick price adjust (phase 2).  </li>
+<li>Subscription meal kits / recipe SoR / third-party grocery OMS as money SoR.  </li>
+<li>In-store POS as DIAL principal; click-and-collect unless founder prioritises.  </li>
+<li>Alcohol wholesale B2B licensing marketplace (separate counsel track).  </li>
+<li>AI-set prices; Simulated Command Centre auto-pay.  </li>
+<li>Baileys; Google/Mapbox SoR; Expo customer shell.  </li>
+<li>Cross-border grocery; national expansion beyond founder geography.  </li>
+<li>Customer wallet as money SoR; physical fiscal printers.</li>
+</ul>
+<h3 id="24-web-screen-inventory-gateway-web">2.4 Web screen inventory (<code>gateway-web</code>)</h3>
+<table>
+<thead>
+<tr>
+<th>Route / screen</th>
+<th>Purpose</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/grocery</code></td>
+<td>Home / categories</td>
+<td>Brand signal + search entry; USD</td>
+</tr>
+<tr>
+<td><code>/grocery/search</code></td>
+<td>Meili PLP</td>
+<td>Facets: category, coldChain, ageGate, price, formality (server)</td>
+</tr>
+<tr>
+<td><code>/grocery/[offerId]</code></td>
+<td>PDP</td>
+<td>Sold by {Supplier}; cold-chain badge; age-gate CTA</td>
+</tr>
+<tr>
+<td><code>/grocery/age-gate</code></td>
+<td>Attestation modal</td>
+<td>Before liquor ATC; audit write</td>
+</tr>
+<tr>
+<td><code>/grocery/cart</code></td>
+<td>Cart</td>
+<td>Multi-vendor grouping; USD only</td>
+</tr>
+<tr>
+<td><code>/grocery/slots</code></td>
+<td>Slot picker</td>
+<td>Capacity remaining</td>
+</tr>
+<tr>
+<td><code>/grocery/checkout</code></td>
+<td>Review + disclosures</td>
+<td>18-item + agency</td>
+</tr>
+<tr>
+<td><code>/grocery/checkout/pay</code></td>
+<td>Pay step</td>
+<td>EcoCash|COD buttons; ZiG for EcoCash</td>
+</tr>
+<tr>
+<td><code>/grocery/orders/[id]</code></td>
+<td>Status</td>
+<td>ERP status</td>
+</tr>
+<tr>
+<td><code>/grocery/orders/[id]/track</code></td>
+<td>MapLibre</td>
+<td>Read-only Realtime</td>
+</tr>
+<tr>
+<td><code>/grocery/orders/[id]/returns</code></td>
+<td>Returns</td>
+<td>Perishable / liquor policy</td>
+</tr>
+<tr>
+<td>Support deep-link</td>
+<td>Chatwoot</td>
+<td>Attach orderId</td>
+</tr>
+</tbody>
+</table>
+<p>Responsive desktop + mobile; <code>@dial/design-tokens</code> (Blueprint §8.0.1).</p>
+<h3 id="25-native-screen-inventory-android-ios-c-5">2.5 Native screen inventory (Android + iOS — C-5)</h3>
+<table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grocery home / categories</td>
+<td>Not Expo shell</td>
+</tr>
+<tr>
+<td>Search + facets</td>
+<td>Meili</td>
+</tr>
+<tr>
+<td>PDP</td>
+<td>Cold-chain + age-gate</td>
+</tr>
+<tr>
+<td>Age attestation</td>
+<td>Modal; biometric optional UX only — legal gate is attestation + door check</td>
+</tr>
+<tr>
+<td>Cart</td>
+<td>Multi-vendor Sold by groups</td>
+</tr>
+<tr>
+<td>Slot picker</td>
+<td></td>
+</tr>
+<tr>
+<td>Checkout review</td>
+<td>Disclosures</td>
+</tr>
+<tr>
+<td>Pay</td>
+<td>EcoCash | COD + other rails</td>
+</tr>
+<tr>
+<td>Order status + MapLibre track</td>
+<td></td>
+</tr>
+<tr>
+<td>Support</td>
+<td>Chatwoot / WA deep-link</td>
+</tr>
+</tbody>
+</table>
+<p>Courier: <strong>delivery-android</strong> (<strong>D-44</strong>) — age-check + cold-chain handling UI (not customer Expo).</p>
+<h3 id="26-liquor-age-gate-ux-policy-engineering-counsel-numbers-unverified">2.6 Liquor age-gate UX policy <code>[Engineering]</code> + counsel numbers <code>[Unverified]</code></h3>
+<p><strong>Engineering chain (mandatory):</strong></p>
+<ol>
+<li>Browse: liquor offers visible only if feature flag + hours window open (or browse-ok / ATC-blocked — prefer <strong>ATC blocked outside hours</strong>).  </li>
+<li>Add-to-cart: hard gate — DOB attest or “I am 18+” with T&Cs; write <code>age_attestations</code>.  </li>
+<li>Checkout: re-confirm; reject if any line <code>ageGateRequired</code> and attestation missing/expired.  </li>
+<li>Door: Temporal activity <code>awaitAgeCheckAtDoor</code> — courier records pass/fail + method; <strong>prefer no full ID image retention in MVP</strong> unless counsel requires.  </li>
+<li>API: server derives restricted flag from offer — client cannot omit.</li>
+</ol>
+<p><strong>Reported public lead:</strong> minimum purchase age commonly cited as <strong>18</strong> under Liquor Act Chapter 14:12 [Reported — Tripbase / IARD / secondary digests]. <strong>Do not ship “18” as Verified legal copy until counsel cites Act section and remote-delivery application.</strong> Config default may be <code>min_age=18</code> as engineering placeholder labelled counsel-pending.</p>
+<h3 id="27-catch-weight-deferred-policy">2.7 Catch-weight deferred policy</h3>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>MVP</th>
+<th>Phase 2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Packed fixed weight (e.g. 1kg bag)</td>
+<td><strong>Yes</strong> — OfferSnapshot freezes <code>amountMinor</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Catch-weight (scale at pick)</td>
+<td><strong>No</strong></td>
+<td>Human pricing-engine adjust + customer notify; new snapshot version; AI forbidden</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="part-3-commercial-architecture-unit-economics">Part 3 — Commercial architecture &amp; unit economics</h2>
+<h3 id="31-pricing-engine-deterministic-v4-41">3.1 Pricing engine (deterministic — v4 §4.1)</h3>
+<pre><code class="language-text">Customer line price (USD minor)
+  = supplier net (valid, unexpired)
+  + DIAL margin (category × supplier agreement)     [Founder-input ladder]
+  + delivery allocation (band × coldChain class)    [Founder-input owner]
+  + payment cost component (method)                 [modelled, not always shown]
+  ± promotion (@dial/promotions only)
+</code></pre>
+<p><strong>Never:</strong> AI prose prices; IMTT as customer line (<strong>D-60</strong>); float math.</p>
+<p>Agency display: formal VAT-inclusive goods; informal no goods VAT line; Sold by {Supplier}; B2B formal-only (<strong>D-49</strong>).</p>
+<h3 id="32-take-rate-ladder-publish-to-supply-founder-input">3.2 Take-rate ladder (publish to supply) <code>[Founder-input]</code></h3>
+<table>
+<thead>
+<tr>
+<th>Band</th>
+<th>GMV / month / supplier (USD)</th>
+<th>Commission on goods net</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Launch</td>
+<td>—</td>
+<td><strong>[Founder-input]</strong> e.g. target low-teens blended</td>
+<td>Start low; earn increases (v4 §4.4 lesson)</td>
+</tr>
+<tr>
+<td>Growth</td>
+<td>—</td>
+<td><strong>[Founder-input]</strong></td>
+<td>Volume / SLA / heartbeat compliance</td>
+</tr>
+<tr>
+<td>Preferred</td>
+<td>—</td>
+<td><strong>[Founder-input]</strong></td>
+<td>Promoted placement ≠ money SoR change</td>
+</tr>
+</tbody>
+</table>
+<p>Delivery fee options (pick one in grill Q6):</p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Customer sees</th>
+<th>FDMS</th>
+<th>Risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A. DIAL delivery fee</strong> (recommended default)</td>
+<td><code>DIAL_FEE</code> line</td>
+<td>DIAL VAT on fee</td>
+<td>DIAL ops cost vs courier payable</td>
+</tr>
+<tr>
+<td>B. Pass-through courier</td>
+<td>Courier component</td>
+<td>Careful agency characterisation</td>
+<td>Looks like logistics principal</td>
+</tr>
+<tr>
+<td>C. Supplier-absorbed</td>
+<td>“Free delivery” funded in margin</td>
+<td>Margin only</td>
+<td>Hide true cost</td>
+</tr>
+</tbody>
+</table>
+<h3 id="33-example-journals-amountminor-illustrative-only">3.3 Example journals (<code>amountMinor</code>) — illustrative only</h3>
+<p><strong>Scenario:</strong> Customer cart — Supplier A pantry $12.00 + Supplier B liquor $20.00 + DIAL delivery fee $3.00 = <strong>$35.00</strong> USD.<br>
+<code>amountMinor</code> scale = cents → <code>3500</code> total.</p>
+<p><strong>EcoCash capture (after FX to ZiG at pay — ledger still records USD legs + fx_rate_id as designed):</strong></p>
+<pre><code class="language-text">// On verified webhook capture (idempotent)
+Dr  cash_psp_clearing          3500 USD
+Cr  customer_clearing          3500 USD
+
+// Allocate (same txn or follow-on balanced entries)
+Dr  customer_clearing          3500
+Cr  supplier_payable_A         1200   // goods A — settlement net of commission per contract
+Cr  supplier_payable_B         2000
+Cr  dial_fee_revenue            300   // delivery fee example
+// Commission skim alternative: reduce payables and Cr dial_commission_revenue
+</code></pre>
+<p><strong>IMTT:</strong> book <strong>DIAL opex</strong> expense when PSP invoices / bank applies — <strong>never</strong> <code>Cr customer</code> surcharge line.</p>
+<p><strong>COD:</strong> intent <code>COD</code> → on POD <code>reconcileCodAfterPod</code> → cash_courier / customer_clearing per existing delivery patterns; settle USD.</p>
+<p><strong>Failed delivery / spoilage refund (supplier bears — example policy):</strong></p>
+<pre><code class="language-text">Dr  supplier_payable_A   500   // reverse goods
+Cr  cash_psp_refund      500   // or customer_clearing credit
+</code></pre>
+<p>Exact commission skim vs gross payable = <strong>[Founder-input]</strong> contract template.</p>
+<h3 id="34-unit-economics-skeleton-no-line-may-be-deleted">3.4 Unit economics skeleton (no line may be deleted)</h3>
+<p><strong>Per grocery order</strong></p>
+<pre><code class="language-text">+ Customer price (USD minor sum)
+− Supplier net cost(s)
+− Delivery cost (courier zone + cold-chain premium)
+− Failed-attempt cost × failure_rate                    [Founder-input]
+− Spoilage / thaw write-off × spoilage_rate             [Founder-input]
+− Payment processing (EcoCash / card / COD variance)
+− IMTT economic cost on collection + payout legs (opex) [model ~3.5–4% USD round-trip unless counsel/PSP better — v4 §7.2]
+− Grocery WHT if counsel says applicable (NOT auto 30% tech D-50)
+− Refund/return cost × return_rate (CPA-aware)
+− Oversell/failover cost × confirm_fail_rate
+− Ops minutes × loaded cost
+− AI cost per order (budgeted)
+− WA template cost (utility vs marketing — v4 §4.6)
+− Guarantee / food-safety provision %
+= Contribution per order
+</code></pre>
+<p><strong>Spoilage / failed-delivery scenarios (illustrative sensitivity)</strong></p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Spoilage % of chilled GMV</th>
+<th>Failed delivery %</th>
+<th>Contribution impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base</td>
+<td><strong>[Founder-input]</strong> e.g. 1.5%</td>
+<td><strong>[Founder-input]</strong> e.g. 3%</td>
+<td>Model</td>
+</tr>
+<tr>
+<td>Stress</td>
+<td>4%</td>
+<td>8%</td>
+<td>Often negative at thin take-rate</td>
+</tr>
+<tr>
+<td>Controlled</td>
+<td>0.5% + supplier SLA</td>
+<td>2% + slot discipline</td>
+<td>Target</td>
+</tr>
+</tbody>
+</table>
+<h3 id="35-multivendor-split-settlement-under-agency">3.5 Multivendor split settlement under agency</h3>
+<ol>
+<li>Single customer authorization/capture for order total.  </li>
+<li>Ledger N× <code>supplier_payable</code> + <code>dial_fee_revenue</code> (+ promo components).  </li>
+<li>Payout via PspAdapter <code>instructRelease</code> / batch when escrow; else T+N schedule <strong>[Founder-input]</strong>.  </li>
+<li>Per-supplier FDMS <code>GOODS_*</code> + one or more <code>DIAL_FEE</code> receipts (<strong>D-59</strong>).  </li>
+<li>Never net informal goods into B2B Valid VAT claims.</li>
+</ol>
+<h3 id="36-channel-costs-reuse-v4-46">3.6 Channel costs (reuse v4 §4.6)</h3>
+<p>Zimbabwe (+263) → Meta “Rest of Africa”: utility ~$0.0040; marketing ~$0.0225 per delivered template [Reported — Meta pricing; re-verify]. Prefer session messages; grocery heartbeats as utility inside open windows.</p>
+<h3 id="37-promotions-d-41a-d-42">3.7 Promotions (D-41a / D-42)</h3>
+<table>
+<thead>
+<tr>
+<th>Campaign</th>
+<th>Grocery use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PLATFORM</code></td>
+<td>Delivery fee off / first-order credit (non-cash)</td>
+</tr>
+<tr>
+<td><code>SUPPLIER_COOP</code></td>
+<td>Supplier-funded % on their SKUs</td>
+</tr>
+<tr>
+<td><code>REFERRAL</code></td>
+<td>Optional; fraud graph; no cash-out</td>
+</tr>
+<tr>
+<td><code>FLASH</code></td>
+<td>Time-boxed; stock heartbeat required</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="part-4-catalogue-meili-grocery_offers_v1">Part 4 — Catalogue / Meili (<code>grocery_offers_v1</code>)</h2>
+<h3 id="41-index-choice">4.1 Index choice</h3>
+<p><strong>Recommend separate index</strong> <code>grocery_offers_v1</code> (not Spare chassis/OEM fields). Unified index with <code>vertical</code> filter is acceptable later; separate keeps searchableAttributes clean.</p>
+<p>Postgres remains catalogue SoR; Meili = customer browse (<strong>Pack §8</strong> doctrine).</p>
+<h3 id="42-document-shape-pack-8-style">4.2 Document shape (Pack §8 style)</h3>
+<pre><code class="language-ts">export interface GroceryOfferDocument {
+  id: string                       // offerId
+  masterProductId: string
+  title: string
+  description: string
+  brand?: string
+  barcode?: string                 // EAN/UPC when known
+  categoryPath: string[]           // e.g. [&quot;fresh&quot;,&quot;dairy&quot;]
+  vertical: 'grocery' | 'liquor'   // liquor may also be category under grocery — pick one convention in ticket
+  pricingMode: 'unit' | 'weight'
+  priceMinor: number               // USD cents per unit OR per packed weight step
+  currency: 'USD'                  // D-57 — no ZiG on browse docs
+  packedWeightGrams?: number       // MVP packed only
+  unitLabel: string                // &quot;each&quot; | &quot;500g&quot; | &quot;1L&quot;
+  availability: 'available' | 'confirm_required' | 'sourcing'
+  coldChain: 'ambient' | 'chilled' | 'frozen' | 'fragile'
+  ageGateRequired: boolean
+  hasRestrictedSku: boolean
+  liquorCategory?: 'beer' | 'wine' | 'spirits' | 'rtd' | 'other'
+  deliveryBandId: string
+  stockValidUntil: number          // unix ms — short for perishables
+  offerSource: 'MARKETPLACE'       // D-58 — reject DIAL_OWNED
+  supplierFormality: 'formal' | 'informal'  // D-49
+  supplierDisplayName: string      // display only — NEVER authorize by client supplierId
+  imageUrl?: string
+  offEnrichment?: {                // optional Open Food Facts — enrichment only
+    productName?: string
+    nutriscore?: string
+    categoriesTags?: string[]
+  }
+  // NEVER index raw supplierId for customer search responses
+}
+</code></pre>
+<h3 id="43-settings">4.3 Settings</h3>
+<pre><code class="language-json">{
+  &quot;searchableAttributes&quot;: [
+    &quot;title&quot;,
+    &quot;description&quot;,
+    &quot;brand&quot;,
+    &quot;barcode&quot;,
+    &quot;categoryPath&quot;,
+    &quot;supplierDisplayName&quot;
+  ],
+  &quot;filterableAttributes&quot;: [
+    &quot;vertical&quot;,
+    &quot;categoryPath&quot;,
+    &quot;pricingMode&quot;,
+    &quot;availability&quot;,
+    &quot;coldChain&quot;,
+    &quot;ageGateRequired&quot;,
+    &quot;hasRestrictedSku&quot;,
+    &quot;liquorCategory&quot;,
+    &quot;currency&quot;,
+    &quot;deliveryBandId&quot;,
+    &quot;priceMinor&quot;,
+    &quot;stockValidUntil&quot;,
+    &quot;offerSource&quot;,
+    &quot;supplierFormality&quot;
+  ],
+  &quot;sortableAttributes&quot;: [&quot;priceMinor&quot;, &quot;stockValidUntil&quot;],
+  &quot;displayedAttributes&quot;: [
+    &quot;id&quot;, &quot;masterProductId&quot;, &quot;title&quot;, &quot;description&quot;, &quot;brand&quot;, &quot;barcode&quot;,
+    &quot;categoryPath&quot;, &quot;vertical&quot;, &quot;pricingMode&quot;, &quot;priceMinor&quot;, &quot;currency&quot;,
+    &quot;unitLabel&quot;, &quot;packedWeightGrams&quot;, &quot;availability&quot;, &quot;coldChain&quot;,
+    &quot;ageGateRequired&quot;, &quot;hasRestrictedSku&quot;, &quot;liquorCategory&quot;, &quot;deliveryBandId&quot;,
+    &quot;stockValidUntil&quot;, &quot;offerSource&quot;, &quot;supplierFormality&quot;, &quot;supplierDisplayName&quot;,
+    &quot;imageUrl&quot;
+  ]
+}
+</code></pre>
+<p><strong>B2B (D-49):</strong> force <code>supplierFormality = formal</code> on Meili + offer list APIs + checkout <code>assertB2bMayPurchase</code>. Regression: <code>countInformalB2bLeaks(grocery_offers_v1) === 0</code>.</p>
+<p><strong>Display currency (D-57):</strong> USD only in index and cart APIs.</p>
+<h3 id="44-import-heartbeat-for-perishables">4.4 Import / heartbeat for perishables</h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Use</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CSV / xlsx supplier import</td>
+<td>Bulk catalogue</td>
+<td>Catalogue Factory review queue (<strong>D-53</strong>)</td>
+</tr>
+<tr>
+<td>Targeted heartbeat (WA utility / dashboard)</td>
+<td>Top movers this week</td>
+<td>Refresh <code>stockValidUntil</code> / availability</td>
+</tr>
+<tr>
+<td>Photo/PDF price list OCR</td>
+<td>Optional</td>
+<td>Same <code>SupplierStockRow</code> + source field</td>
+</tr>
+<tr>
+<td>Open Food Facts API</td>
+<td>Optional enrichment by barcode</td>
+<td><strong>Not</strong> price/availability SoR; ODbL attribution</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Freshness defaults (engineering proposals — founder/ops override):</strong></p>
+<table>
+<thead>
+<tr>
+<th>coldChain</th>
+<th>Default stock TTL</th>
+<th>Heartbeat cadence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ambient pantry</td>
+<td>7d</td>
+<td>weekly top-N</td>
+</tr>
+<tr>
+<td>chilled</td>
+<td>24–48h</td>
+<td>daily</td>
+</tr>
+<tr>
+<td>frozen</td>
+<td>48–72h</td>
+<td>daily</td>
+</tr>
+<tr>
+<td>liquor ambient</td>
+<td>14d</td>
+<td>weekly</td>
+</tr>
+</tbody>
+</table>
+<p>On expiry → degrade to <code>confirm_required</code>, do not silent-delete (Spare §2A-1 pattern).</p>
+<h3 id="45-restricted-liquor-publish-gates">4.5 Restricted / liquor publish gates</h3>
+<p>Before Meili publish: <code>offerSource=MARKETPLACE</code>; if liquor → <code>liquor_licence_ref</code> present &amp; not expired (when policy on); <code>ageGateRequired=true</code>; hours config does not need to hide browse but must block ATC/checkout.</p>
+<hr>
+<h2 id="part-5-money-path-e1a-reuse">Part 5 — Money path (E1a reuse)</h2>
+<h3 id="51-end-to-end-spine">5.1 End-to-end spine</h3>
+<pre><code class="language-text">Cart (USD lines, amountMinor)
+  → assertB2bMayPurchase(formality) per line (D-49)
+  → assertAgeGate + liquor hours
+  → freeze OfferSnapshot(s) per supplier + DIAL fee + promo components
+  → createCheckoutPayment(EcoCash|COD|…) OR authorizeJobReserve (escrow)
+  → customer action ≠ truth
+  → verified PSP webhook + claimProcessedEvent
+  → ledger journal
+  → enqueueFiscalReceipt GOODS_* + DIAL_FEE
+  → money outbox → FDMS Virtual Gateway
+  → createDeliveryJob(s) + slot bind + start DeliveryDispatchWorkflow
+</code></pre>
+<p>Reuse: <code>freezeOfferSnapshot</code>, <code>createCheckoutPayment</code>, <code>authorizeJobReserve</code>, <code>runE1aMoneySpine</code>, <code>@dial/tax</code> — <strong>do not duplicate</strong>.</p>
+<h3 id="52-grocery-specific-offersnapshot-fields">5.2 Grocery-specific OfferSnapshot fields</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>vertical</code></td>
+<td><code>grocery</code> | <code>liquor</code></td>
+</tr>
+<tr>
+<td><code>supplierDisplayName</code></td>
+<td>Agency disclosure freeze</td>
+</tr>
+<tr>
+<td><code>supplierFormality</code></td>
+<td>FDMS class selection</td>
+</tr>
+<tr>
+<td><code>coldChain</code></td>
+<td>Job metadata</td>
+</tr>
+<tr>
+<td><code>ageGateRequired</code></td>
+<td>Door check + audit link</td>
+</tr>
+<tr>
+<td><code>slotId</code></td>
+<td>Capacity bind</td>
+</tr>
+<tr>
+<td><code>packedWeightGrams</code> / <code>unitLabel</code></td>
+<td>Dispute evidence</td>
+</tr>
+<tr>
+<td><code>pricingMode</code></td>
+<td>unit | weight (packed)</td>
+</tr>
+<tr>
+<td><code>fx_rate_id</code></td>
+<td>When ZiG pay conversion</td>
+</tr>
+<tr>
+<td><code>promo_campaign_id[]</code></td>
+<td>Logged components</td>
+</tr>
+<tr>
+<td><code>liquor_licence_ref</code> (supplier snapshot)</td>
+<td>Compliance evidence</td>
+</tr>
+</tbody>
+</table>
+<p>AI <strong>must not</strong> write any payable keys (<code>assertNoPayableKeys</code>).</p>
+<h3 id="53-pspadapter-rails-d-43">5.3 PspAdapter rails (D-43)</h3>
+<table>
+<thead>
+<tr>
+<th>Rail</th>
+<th>Grocery MVP posture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>EcoCash</td>
+<td>Required button; ZiG payable from daily rate</td>
+</tr>
+<tr>
+<td>COD</td>
+<td>Required button; USD settle</td>
+</tr>
+<tr>
+<td>Paynow</td>
+<td>URL / escrow-first ask (D-60)</td>
+</tr>
+<tr>
+<td>ContiPay</td>
+<td>As enabled</td>
+</tr>
+<tr>
+<td>PayPal Orders v2</td>
+<td>As enabled</td>
+</tr>
+<tr>
+<td>Escrow / Job Reserve</td>
+<td>Per decision table below</td>
+</tr>
+</tbody>
+</table>
+<h3 id="54-escrow-vs-direct-capture-decision-table">5.4 Escrow vs direct capture — decision table</h3>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Path</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COD</td>
+<td>Direct COD intent → POD reconcile</td>
+<td>D-60</td>
+</tr>
+<tr>
+<td>EcoCash / card below threshold T</td>
+<td>Direct capture</td>
+<td>Speed; low ticket</td>
+</tr>
+<tr>
+<td>Multi-vendor OR total ≥ T</td>
+<td>Job Reserve / escrow hold</td>
+<td>Dispute / split release</td>
+</tr>
+<tr>
+<td>Liquor-only high ticket ≥ T_liq</td>
+<td>Escrow preferred</td>
+<td>Returns / age-fail refunds</td>
+</tr>
+<tr>
+<td>B2B formal</td>
+<td>Escrow or Net terms <strong>[Founder-input]</strong></td>
+<td>TIN capture</td>
+</tr>
+</tbody>
+</table>
+<p><strong>T, T_liq:</strong> grill-accepted <strong>provisional</strong> defaults (ops-tunable config — not statute): <strong>T = 5000</strong> USD minor ($50.00); <strong>T_liq = 10000</strong> USD minor ($100.00). Engineering: strategy interface, not hard-coded magic numbers in adapters.</p>
+<h3 id="55-wht-note-d-50-boundary">5.5 WHT note (D-50 boundary)</h3>
+<p>Tech hire 30% ITF263 path stays for <strong>Dial a Tech</strong>. Grocery supplier payouts: <strong>pluggable withholding strategy</strong>; do <strong>not</strong> auto-apply 30% tech WHT; counsel decides marketplace commission/payout WHT (<strong>Unverified</strong> applicability).</p>
+<hr>
+<h2 id="part-6-tax-fdms-liquor-compliance-brief">Part 6 — Tax / FDMS / liquor compliance brief</h2>
+<p><strong>How to read:</strong> Research, not legal advice. Tags per Part 0.2. Mirror v4 §7 honesty.</p>
+<h3 id="60-load-bearing-inheritance-from-v4-do-not-re-litigate">6.0 Load-bearing inheritance from v4 (do not re-litigate)</h3>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Lock</th>
+<th>Confidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agency characterisation</td>
+<td>D-2 / <strong>D-58</strong></td>
+<td>[Verified] founder lock</td>
+</tr>
+<tr>
+<td>FDMS receipt classes</td>
+<td><strong>D-59</strong> <code>DIAL_FEE</code> / <code>GOODS_FORMAL</code> / <code>GOODS_INFORMAL</code></td>
+<td>[Verified] lock</td>
+</tr>
+<tr>
+<td>Virtual fiscalisation</td>
+<td>D-40a</td>
+<td>[Verified] lock</td>
+</tr>
+<tr>
+<td>VAT 15.5% from 2026</td>
+<td>v4 §7.1</td>
+<td>[Verified] in v4 research</td>
+</tr>
+<tr>
+<td>IMTT = opex</td>
+<td><strong>D-60</strong></td>
+<td>[Verified] lock</td>
+</tr>
+<tr>
+<td>COD USD</td>
+<td><strong>D-60</strong></td>
+<td>[Verified] lock</td>
+</tr>
+<tr>
+<td>CPA electronic disclosure + 7-day cancel</td>
+<td>v4 §7.5</td>
+<td>[Verified] Act framing in v4 — grocery read-across <strong>counsel</strong></td>
+</tr>
+<tr>
+<td>Job Reserve needs licensed PSP escrow</td>
+<td>C-4 / §7.3</td>
+<td>[Verified] RBZ posture in v4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="61-vat-agency-fdms-for-grocery-lines">6.1 VAT &amp; agency FDMS for grocery lines</h3>
+<p>Same as Spare agency model:</p>
+<ul>
+<li>DIAL taxable supply = <strong>fees/commission</strong> → <code>DIAL_FEE</code> (+ VAT on fee).  </li>
+<li>Formal supplier goods → <code>GOODS_FORMAL</code> (supplier deemed seller; VAT-inclusive; single invoice on-behalf rules per D-59).  </li>
+<li>Informal goods → <code>GOODS_INFORMAL</code> (no goods VAT line; <strong>never B2B</strong>).  </li>
+<li>No GMV VAT split-pot as principal.  </li>
+<li>Buyer TIN for B2B Valid claims (v4 §7.1).</li>
+</ul>
+<h3 id="62-liquor-licensing-hours">6.2 Liquor licensing &amp; hours</h3>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Public research lead</th>
+<th>Tag</th>
+<th>Engineering</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Governing statute</td>
+<td>Liquor Act Chapter <strong>14:12</strong>; Liquor Licensing under Ministry of Local Government</td>
+<td>[Reported]</td>
+<td>Store licence type + ref + expiry on supplier</td>
+</tr>
+<tr>
+<td>Licence types</td>
+<td>Retail, wholesale, restaurant, hotel, bottle store, etc.</td>
+<td>[Reported] MLG / Act schedule summaries</td>
+<td><code>liquor_licence_type</code> enum ops-configured</td>
+</tr>
+<tr>
+<td>Operating hours</td>
+<td>SI summaries e.g. bottle store often cited <strong>08:00–20:00</strong>; bars <strong>10:00–23:00</strong> (Open Council / SI 197 of 2004 digests)</td>
+<td>[Reported]</td>
+<td><code>liquor_order_window</code> config per band — <strong>fail closed</strong></td>
+</tr>
+<tr>
+<td>Apply hours to <em>delivery / remote sale</em>?</td>
+<td>Not established in this research</td>
+<td><strong>[Unverified]</strong></td>
+<td>Assume restricted until counsel says otherwise</td>
+</tr>
+<tr>
+<td>Who must hold licence for marketplace delivery?</td>
+<td>Platform vs each merchant</td>
+<td><strong>[Unverified]</strong></td>
+<td>Default eng: <strong>merchant holds</strong>; block liquor publish without ref</td>
+</tr>
+<tr>
+<td>Sale to minors</td>
+<td>Commonly cited 18+; supply to under-18 offence; some digests note guardian-consent nuances</td>
+<td>[Reported]</td>
+<td>Config <code>min_age</code>; door check; <strong>counsel copy</strong></td>
+</tr>
+<tr>
+<td>Credit sales of liquor</td>
+<td>News commentary cites prohibitions on credit liquor sales</td>
+<td>[Reported]</td>
+<td>Prefer no “buy now pay later” for liquor SKUs</td>
+</tr>
+<tr>
+<td>National Alcohol Policy reforms</td>
+<td>Government review of licensing/hours reported</td>
+<td>[Reported]</td>
+<td>Keep hours <strong>config-driven</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="63-food-safety-delivery-notes">6.3 Food safety &amp; delivery notes</h3>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Tag</th>
+<th>Engineering / ops</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mandatory safety/quality standards for goods marketed</td>
+<td>[Reported] CPA s. goods safety themes / v4 product liability</td>
+<td>Supplier warranties + indemnity; evidence photos</td>
+</tr>
+<tr>
+<td>Cold-chain statutory IoT logging</td>
+<td><strong>[Unverified]</strong></td>
+<td>MVP = eligibility + checklist; not IoT SoR</td>
+</tr>
+<tr>
+<td>Who is “supplier” for unsafe food on agency marketplace</td>
+<td><strong>[Unverified]</strong> — v4 §7.5 joint-and-several risk applies to platforms in spirit</td>
+<td>Contracts + insurance; counsel</td>
+</tr>
+<tr>
+<td>Allergen / labelling</td>
+<td><strong>[Unverified]</strong> detail</td>
+<td>Display supplier-provided fields; OFF enrichment optional</td>
+</tr>
+</tbody>
+</table>
+<h3 id="64-consumer-protection-perishables-reported-counsel">6.4 Consumer protection — perishables <code>[Reported]</code> / counsel</h3>
+<p>v4 §7.5: electronic transactions have strong cancellation / disclosure rules [Verified in v4]. Perishable exclusions for some cooling-off contexts are often discussed; <strong>whether they read across to grocery e-commerce cancellation</strong> is a <strong>counsel question</strong> (v4 already flags carve-out ambiguity).  </p>
+<p><strong>Engineering SOP pending counsel:</strong></p>
+<ul>
+<li>Eighteen-item disclosure + review on web/WA/native.  </li>
+<li>Clear perishable / opened-liquor return policy in ERP + T&amp;Cs module (§3.8 pattern).  </li>
+<li>Thawed-goods refund path (Part 7.6) without waiting for perfect legal taxonomy.  </li>
+<li>Do not silently exclude statutory rights in UI copy.</li>
+</ul>
+<h3 id="65-data-protection-age-attestations">6.5 Data protection (age attestations)</h3>
+<p>Age attestations and optional ID checks are personal data. Apply v4 §7.6 / D-32: minimise retention; prefer boolean + method + timestamp; POTRAZ licence; cross-border AI must not receive ID images / names / phones.</p>
+<h3 id="66-counsel-checklist-groceryliquor-addendum-to-v4-710">6.6 Counsel checklist (grocery/liquor addendum to v4 §7.10)</h3>
+<p><strong>Must confirm before customer-open of liquor SKUs:</strong></p>
+<ol>
+<li>Minimum age and acceptable ID types for <em>delivery</em> handover.  </li>
+<li>Whether Liquor Act hours bind remote acceptance of orders vs only on-premises sale.  </li>
+<li>Whether DIAL as agent needs any liquor licence, or only merchants.  </li>
+<li>Advertising restrictions for alcohol on WA marketing templates.  </li>
+<li>Food business registration / municipal permits for suppliers on platform.  </li>
+<li>CPA cancellation / returns for perishables and alcohol (opened vs unopened).  </li>
+<li>Product liability allocation for unsafe food delivered via DIAL couriers.  </li>
+<li>Whether informal food traders may be B2C-visible (policy + law).  </li>
+<li>WHT / VAT marketplace specifics for grocery commissions (beyond tech D-50).  </li>
+<li>Credit-sale prohibition implications for COD vs postpaid liquor.</li>
+</ol>
+<h3 id="67-what-could-not-be-verified-grocery-specific">6.7 What could not be verified (grocery-specific)</h3>
+<ul>
+<li>Primary-section citation for remote liquor delivery age check duties.  </li>
+<li>Binding hours for e-commerce liquor order <em>placement</em> vs <em>handover</em>.  </li>
+<li>Platform liquor licence category (if any).  </li>
+<li>Specific municipal food-handler certificate matrix per Harare district.  </li>
+<li>Exact CPA perishable carve-out application to § electronic cancellation.  </li>
+<li>Competitor GMV / take rates (marketing noise only).</li>
+</ul>
+<hr>
+<h2 id="part-7-delivery-temporal">Part 7 — Delivery / Temporal</h2>
+<h3 id="71-slot-capacity-model">7.1 Slot capacity model</h3>
+<pre><code class="language-text">DeliverySlot {
+  slotId, bandId, windowStart, windowEnd,
+  capacityTotal, capacityReserved, capacityRemaining,
+  coldChainAllowed: ambient[] | chilled | frozen,
+  liquorAllowed: boolean
+}
+</code></pre>
+<ul>
+<li>Checkout binds <code>slotId</code> with <strong>transactional</strong> decrement (Postgres); idempotent hold key = <code>cartId|orderId</code>.  </li>
+<li>Release hold on cancel / payment fail TTL.  </li>
+<li>Missed slot → Temporal timer → WA utility notify → reschedule Flow.</li>
+</ul>
+<h3 id="72-workflow-recommendation">7.2 Workflow recommendation</h3>
+<p><strong>Extend <code>DeliveryDispatchWorkflow</code></strong> (preferred) — do not invent parallel job SoR.</p>
+<table>
+<thead>
+<tr>
+<th>Activity</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>validateColdChainCapacity</code></td>
+<td>Offer ranking / assign</td>
+</tr>
+<tr>
+<td><code>multiStopPlanVroom</code></td>
+<td>Multi-supplier / batch</td>
+</tr>
+<tr>
+<td><code>awaitAgeCheckAtDoor</code></td>
+<td><code>ageCheckRequired</code></td>
+</tr>
+<tr>
+<td><code>recordHandlingChecklist</code></td>
+<td>chilled/frozen POD</td>
+</tr>
+<tr>
+<td>Existing offer→accept→reassign→FIFO</td>
+<td>Unchanged (<strong>D-45</strong>)</td>
+</tr>
+</tbody>
+</table>
+<p>Algorithm donor: AWS Last Mile Hyperlocal MIT-0 patterns inside <code>packages/delivery</code> (<strong>D-45a</strong>) — not Fleetbase.</p>
+<h3 id="73-cold-chain-eligibility">7.3 Cold-chain eligibility</h3>
+<ul>
+<li>Courier profile flags: <code>canChilled</code>, <code>canFrozen</code>, bag type.  </li>
+<li>Job <code>coldChainMax</code> = max severity among lines.  </li>
+<li>Ineligible couriers filtered before offer.  </li>
+<li>MVP: no continuous temperature SoR; optional phase-2 logger.</li>
+</ul>
+<h3 id="74-age-check-at-door">7.4 Age-check-at-door</h3>
+<pre><code class="language-text">ageCheckStatus: pending → passed | failed | skipped_not_required
+</code></pre>
+<ul>
+<li>Failed → cancel/return-to-supplier path + refund policy (founder).  </li>
+<li>Store: timestamp, courierId, method (<code>visual_id</code> | <code>dob_match</code> | <code>refused</code>), result — <strong>not</strong> full ID image unless counsel mandates secure upload.</li>
+</ul>
+<h3 id="75-multi-stop">7.5 Multi-stop</h3>
+<ul>
+<li>Cart with suppliers A+B → either one job multi-stop or N jobs — <strong>[Founder-input]</strong> default: <strong>one job multi-stop when same band/slot</strong>, else split.  </li>
+<li>VROOM plan returns stopSequence; customer track shows aggregated ETA honesty.</li>
+</ul>
+<h3 id="76-refunds-for-thawed-damaged-goods-sop-ops">7.6 Refunds for thawed / damaged goods — SOP (ops)</h3>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Owner</th>
+<th>System</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. Customer reports within policy window</td>
+<td>Support</td>
+<td>Ticket + orderId</td>
+</tr>
+<tr>
+<td>2. Evidence: POD photo + customer photo</td>
+<td>Support/courier</td>
+<td>Attachments</td>
+</tr>
+<tr>
+<td>3. Classify: <code>thaw_suspected</code> / <code>damaged_transit</code> / <code>wrong_item</code> / <code>quality</code></td>
+<td>Support</td>
+<td>Taxonomy</td>
+</tr>
+<tr>
+<td>4. Liability: courier vs supplier vs DIAL fee absorb</td>
+<td>Ops rules <strong>[Founder-input]</strong></td>
+<td>Ledger reason codes</td>
+</tr>
+<tr>
+<td>5. Refund / replace / partial</td>
+<td>Payments</td>
+<td>Idempotent refund + fiscal credit note path</td>
+</tr>
+<tr>
+<td>6. Supplier score / oversell fee if confirm failure</td>
+<td>Catalogue</td>
+<td>Statement line</td>
+</tr>
+</tbody>
+</table>
+<p>Opened liquor: default <strong>no return</strong> unless defect — counsel copy.</p>
+<hr>
+<h2 id="part-8-whatsapp-companion-chapter">Part 8 — WhatsApp companion chapter</h2>
+<p><strong>Align style with</strong> <code>DIAL_WhatsApp_Flows_and_Templates.md</code>. Official Cloud API only. Same ERP APIs — WA never second SoR. <strong>D-57:</strong> USD browse/cart; EcoCash|COD <strong>buttons</strong>; <strong>D-58/D-59</strong> fiscal outbox shared.</p>
+<h3 id="81-happy-path">8.1 Happy path</h3>
+<pre><code class="language-text">Menu → FLOW_GROCERY_HOME
+  → FLOW_GROCERY_SEARCH (Meili) — USD prices
+  → Age gate screen if liquor add
+  → FLOW_GROCERY_CART (USD)
+  → FLOW_GROCERY_SLOT
+  → FLOW_GROCERY_CHECKOUT (disclosure review)
+  → Pay buttons: EcoCash | COD | other
+  → Utilities: order_confirmed → packing → out_for_delivery → delivered
+  → FLOW_GROCERY_TRACK
+</code></pre>
+<h3 id="82-flow-screen-maps">8.2 Flow screen maps</h3>
+<h4 id="flow_grocery_home"><code>FLOW_GROCERY_HOME</code></h4>
+<p>Screens: Welcome · Shop groceries · Liquor (age notice) · Track · Live chat  </p>
+<h4 id="flow_grocery_search"><code>FLOW_GROCERY_SEARCH</code></h4>
+<table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>Fields / logic</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Query</td>
+<td>Text; category chips optional</td>
+</tr>
+<tr>
+<td>Results</td>
+<td><code>data_exchange</code> list: title, unitLabel, <strong>priceMinor USD</strong>, coldChain, Sold by display, ageGate badge</td>
+</tr>
+<tr>
+<td>PDP</td>
+<td>Detail; ATC</td>
+</tr>
+<tr>
+<td>Age gate</td>
+<td>If <code>ageGateRequired</code> — attest before ATC write</td>
+</tr>
+</tbody>
+</table>
+<h4 id="flow_grocery_cart"><code>FLOW_GROCERY_CART</code></h4>
+<p>Lines grouped by Sold by; edit qty; USD totals; continue / checkout.</p>
+<h4 id="flow_grocery_slot"><code>FLOW_GROCERY_SLOT</code></h4>
+<p>Select window; show remaining capacity; cold-chain notes.</p>
+<h4 id="flow_grocery_checkout"><code>FLOW_GROCERY_CHECKOUT</code></h4>
+<table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Delivery</td>
+<td>Saved place / pin+landmark+phone</td>
+</tr>
+<tr>
+<td>Buyer tax</td>
+<td>Optional VAT/TIN B2B</td>
+</tr>
+<tr>
+<td>Review</td>
+<td>USD totals, suppliers, cancellation/perishable summary, T&amp;Cs — <strong>mandatory</strong></td>
+</tr>
+<tr>
+<td>Pay</td>
+<td><strong>Buttons/CTAs:</strong> EcoCash | COD | Paynow/other — <strong>not free-text</strong>. EcoCash → ZiG + <code>fx_rate_id</code>. COD → USD + indicative ZiG</td>
+</tr>
+</tbody>
+</table>
+<h4 id="flow_grocery_track"><code>FLOW_GROCERY_TRACK</code></h4>
+<p>Order id → ERP status (not Chatwoot).</p>
+<h4 id="flow_grocery_returns-mvp"><code>FLOW_GROCERY_RETURNS</code> (MVP)</h4>
+<p>Reason taxonomy; media; liquor opened block messaging.</p>
+<h4 id="flow_supplier_grocery_heartbeat"><code>FLOW_SUPPLIER_GROCERY_HEARTBEAT</code></h4>
+<p>Supplier Yes/Sold-out on listed SKUs (utility).</p>
+<h3 id="83-data_exchange-stubs-typescript-shaped">8.3 <code>data_exchange</code> stubs (TypeScript-shaped)</h3>
+<pre><code class="language-ts">type GroceryFlowRequest =
+  | { screen: 'GROCERY_SEARCH'; data: { query: string; categoryPath?: string[] } }
+  | { screen: 'GROCERY_ADD_CART'; data: { offerId: string; qty: number; ageAttestToken?: string } }
+  | { screen: 'GROCERY_SET_SLOT'; data: { cartId: string; slotId: string } }
+  | { screen: 'GROCERY_APPLY_PROMO'; data: { code: string; cartId: string } }
+  | { screen: 'GROCERY_CHECKOUT_PAY'; data: { orderId: string; method: 'ECOCASH' | 'COD' | 'PAYNOW' | 'OTHER' } }
+</code></pre>
+<p>Server re-prices from ERP; never trust client <code>priceMinor</code>.</p>
+<h3 id="84-templates-register">8.4 Templates register</h3>
+<table>
+<thead>
+<tr>
+<th>Template name</th>
+<th>Category</th>
+<th>When</th>
+<th>Body shell</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grocery_welcome_menu</code></td>
+<td>UTILITY</td>
+<td>Opt-in / link</td>
+<td>Hi {{1}}. Groceries, Track, Live chat.</td>
+</tr>
+<tr>
+<td><code>grocery_order_confirmed</code></td>
+<td>UTILITY</td>
+<td>Paid</td>
+<td>Order {{1}} confirmed. Total {{2}} {{3}}. Slot {{4}}.</td>
+</tr>
+<tr>
+<td><code>grocery_supplier_confirming</code></td>
+<td>UTILITY</td>
+<td>Confirm SLA</td>
+<td>Confirming stock for {{1}} by {{2}}.</td>
+</tr>
+<tr>
+<td><code>grocery_out_for_delivery</code></td>
+<td>UTILITY</td>
+<td>Courier assigned</td>
+<td>Order {{1}} on the way. Track {{2}}.</td>
+</tr>
+<tr>
+<td><code>grocery_delivered</code></td>
+<td>UTILITY</td>
+<td>POD</td>
+<td>Order {{1}} delivered. Issues? {{2}}</td>
+</tr>
+<tr>
+<td><code>grocery_age_check_failed</code></td>
+<td>UTILITY</td>
+<td>Door fail</td>
+<td>Age verification failed for {{1}}. Refund/return per policy.</td>
+</tr>
+<tr>
+<td><code>grocery_slot_missed</code></td>
+<td>UTILITY</td>
+<td>Timer</td>
+<td>We missed slot {{1}}. Reschedule: {{2}}</td>
+</tr>
+<tr>
+<td><code>grocery_thaw_followup</code></td>
+<td>UTILITY</td>
+<td>Cold-chain complaint ack</td>
+<td>We received your report on {{1}}. Ticket {{2}}.</td>
+</tr>
+<tr>
+<td><code>grocery_payment_link</code></td>
+<td>UTILITY</td>
+<td>Resume unpaid</td>
+<td>Pay for {{1}}: {{2}} expires {{3}}.</td>
+</tr>
+<tr>
+<td><code>grocery_cart_resume</code></td>
+<td>MARKETING*</td>
+<td>Abandoned</td>
+<td>Resume grocery cart {{1}}. STOP to opt out.</td>
+</tr>
+<tr>
+<td><code>supplier_grocery_heartbeat</code></td>
+<td>UTILITY</td>
+<td>Stock</td>
+<td>Still have these SKUs? Yes / Sold out.</td>
+</tr>
+</tbody>
+</table>
+<p>*Prefer free session reminders.</p>
+<h3 id="85-live-chat">8.5 Live chat</h3>
+<p>Chatwoot handoff with <code>customer_id</code>, <code>cart_id</code>, <code>orderId</code>; status updates <strong>only</strong> via ERP.</p>
+<hr>
+<h2 id="part-9-ai-packagesai-only">Part 9 — AI (<code>packages/ai</code> only)</h2>
+<h3 id="91-rules-inherit-v4-51-d-61">9.1 Rules (inherit v4 §5.1 + D-61)</h3>
+<p>Production = typed capabilities + LiteLLM→Gemini + Temporal/BullMQ. <strong>No prod agent host.</strong> AI never writes payable amounts. D-32 strip identity. Merge gate: <code>dial-ai-capability-review</code> (<strong>D-56</strong>). Promote: Promptfoo + human (<strong>D-54</strong>).</p>
+<h3 id="92-capability-contracts">9.2 Capability contracts</h3>
+<table>
+<thead>
+<tr>
+<th>Capability</th>
+<th>Input (Zod)</th>
+<th>Output</th>
+<th>Forbidden</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>groceryGuidedShopping</code></td>
+<td>dietary prefs, category hints (no raw PII)</td>
+<td>structured list draft / category ids</td>
+<td>prices, payables</td>
+</tr>
+<tr>
+<td><code>substitutionSuggest</code></td>
+<td>unavailable <code>offerId</code>, constraints</td>
+<td>alternate <strong>offerIds</strong> + reasons</td>
+<td>amounts</td>
+</tr>
+<tr>
+<td><code>searchRankingAssist</code></td>
+<td>query + candidate ids</td>
+<td>rank hints / synonyms proposal</td>
+<td>silent Meili rewrite without human</td>
+</tr>
+<tr>
+<td><code>opsGrocerySummary</code></td>
+<td>MetricContract ids + aggregates</td>
+<td>narrative draft</td>
+<td><code>attemptCommandCentrePayout</code>; Simulated≠Actual</td>
+</tr>
+</tbody>
+</table>
+<h3 id="93-promptfoo-outline">9.3 Promptfoo outline</h3>
+<table>
+<thead>
+<tr>
+<th>Golden</th>
+<th>Assert</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Money keys absent</td>
+<td>No <code>price</code>, <code>amountMinor</code>, <code>fee</code> in model JSON</td>
+</tr>
+<tr>
+<td>Substitution ids exist</td>
+<td>ids ∈ catalogue fixture</td>
+</tr>
+<tr>
+<td>PII egress</td>
+<td>no phone/name/address in request after strip</td>
+</tr>
+<tr>
+<td>Liquor minor</td>
+<td>no assist that bypasses ageGate</td>
+</tr>
+<tr>
+<td>Informal B2B</td>
+<td>no suggest informal offers when <code>buyer_segment=b2b</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="94-metriccontract-kpis-examples">9.4 MetricContract KPIs (examples)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric id</th>
+<th>Definition</th>
+<th>Actual vs Simulated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grocery.fill_rate</code></td>
+<td>paid orders / checkout starts</td>
+<td>Actual</td>
+</tr>
+<tr>
+<td><code>grocery.confirm_fail_rate</code></td>
+<td>supplier confirm fails / orders</td>
+<td>Actual</td>
+</tr>
+<tr>
+<td><code>grocery.slot_ontime_pct</code></td>
+<td>POD in window / deliveries</td>
+<td>Actual</td>
+</tr>
+<tr>
+<td><code>grocery.age_check_fail_rate</code></td>
+<td>door fails / liquor jobs</td>
+<td>Actual</td>
+</tr>
+<tr>
+<td><code>grocery.spoilage_refund_bps</code></td>
+<td>thaw refunds / chilled GMV</td>
+<td>Actual</td>
+</tr>
+<tr>
+<td><code>grocery.contribution_per_order</code></td>
+<td>unit economics</td>
+<td>Actual; Simulated scenario never pays</td>
+</tr>
+</tbody>
+</table>
+<h3 id="95-privacy-egress">9.5 Privacy / egress</h3>
+<p>Omit identity from outbound payloads; no ID images to Gemini; Presidio on free text; transfer register; unbundled consent for cross-border (v4 §5.7 / §7.6).</p>
+<hr>
+<h2 id="part-10-security">Part 10 — Security</h2>
+<h3 id="101-idor-resource-list-extend-t9">10.1 IDOR resource list (extend T9)</h3>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>AuthZ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>grocery_cart</code></td>
+<td>owner userId from JWT</td>
+</tr>
+<tr>
+<td><code>grocery_order</code></td>
+<td>buyer or supplier-org scoped</td>
+</tr>
+<tr>
+<td><code>delivery_slot_hold</code></td>
+<td>owner</td>
+</tr>
+<tr>
+<td><code>age_attestation</code></td>
+<td>owner; courier write only via job assignment</td>
+</tr>
+<tr>
+<td><code>delivery_job</code> / offers</td>
+<td>D-47 patterns</td>
+</tr>
+<tr>
+<td><code>promo_credit</code></td>
+<td>owner; no cash-out</td>
+</tr>
+<tr>
+<td><code>supplier_liquor_licence</code></td>
+<td>supplier org + admin</td>
+</tr>
+<tr>
+<td>Admin catalogue publish</td>
+<td>role + Factory queue</td>
+</tr>
+</tbody>
+</table>
+<p>Never trust body <code>userId</code> / <code>email</code> / <code>role</code>. Authorize before cache; cache keys include <code>userId</code>.</p>
+<h3 id="102-rls-notes">10.2 RLS notes</h3>
+<p>Supabase RLS by <code>user_id</code> / <code>supplier_org_id</code> <strong>necessary not sufficient</strong> — object-level <code>assertResourceAccess</code> still required (<strong>D-47</strong>).</p>
+<h3 id="103-age-gate-audit-trail">10.3 Age-gate audit trail</h3>
+<pre><code class="language-text">age_attestations (
+  id, user_id, channel, offer_id?, order_id?,
+  method, result, min_age_policy_version,
+  created_at, ip_hash?, user_agent_hash?
+) append-only
+</code></pre>
+<p>Courier door check = separate <code>age_check_events</code> linked to <code>delivery_job_id</code>.</p>
+<h3 id="104-webhooks-secrets">10.4 Webhooks &amp; secrets</h3>
+<p>Signature + idempotency before mutate (PSP, WA, FDMS). No <code>NEXT_PUBLIC_</code>/<code>VITE_</code> on service_role/PSP/WA/FDMS. D-48 Semgrep/Checkov/Renovate; Threat Dragon model for grocery checkout + age-gate; Strix staging only.</p>
+<h3 id="105-b2b-informal">10.5 B2B informal</h3>
+<p>Meili + API + checkout; grocery index leak tests.</p>
+<hr>
+<h2 id="part-11-oss-stitch-table">Part 11 — OSS stitch table</h2>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Recommend</th>
+<th>License</th>
+<th>SoR vs pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multivendor UX</td>
+<td>Mercur B2C / Medusa marketplace UX</td>
+<td>MIT/BSD</td>
+<td><strong>Pattern only</strong> → DIAL APIs</td>
+</tr>
+<tr>
+<td>Supplier panel</td>
+<td>Mercur vendor-panel</td>
+<td>MIT</td>
+<td>Pattern → supplier-web</td>
+</tr>
+<tr>
+<td>Search</td>
+<td><strong>Meilisearch</strong></td>
+<td>MIT</td>
+<td>Customer search SoR (Postgres catalogue SoR)</td>
+</tr>
+<tr>
+<td>Maps/route/VRP</td>
+<td>MapLibre + Nominatim + OSRM + VROOM</td>
+<td>BSD/GPL self-host</td>
+<td><strong>D-44 SoR</strong></td>
+</tr>
+<tr>
+<td>Delivery UX</td>
+<td>foodhub-compose rider (strip Google/Stripe)</td>
+<td>Apache-2.0</td>
+<td>Pattern; job SoR = <code>packages/delivery</code></td>
+</tr>
+<tr>
+<td>Dispatch algorithms</td>
+<td>AWS Last Mile Hyperlocal</td>
+<td>MIT-0</td>
+<td>Reimplement in package (<strong>D-45a</strong>)</td>
+</tr>
+<tr>
+<td>Grocery OMS</td>
+<td>Saleor/Medusa runtime</td>
+<td>—</td>
+<td><strong>Rejected</strong> as money/job SoR</td>
+</tr>
+<tr>
+<td>Enrichment</td>
+<td>Open Food Facts</td>
+<td>ODbL</td>
+<td>Enrichment only</td>
+</tr>
+<tr>
+<td>Images</td>
+<td>Sharp</td>
+<td>Apache-2.0</td>
+<td>Tier 1</td>
+</tr>
+<tr>
+<td>Chat</td>
+<td>Chatwoot</td>
+<td>MIT</td>
+<td>Support; status from ERP</td>
+</tr>
+<tr>
+<td>Analytics/flags</td>
+<td>PostHog</td>
+<td>MIT</td>
+<td>T8</td>
+</tr>
+<tr>
+<td>Evals</td>
+<td>Promptfoo + Langfuse</td>
+<td>MIT/etc.</td>
+<td>D-54</td>
+</tr>
+<tr>
+<td>Workflows</td>
+<td>Temporal + BullMQ</td>
+<td>MIT</td>
+<td>Already SoR</td>
+</tr>
+<tr>
+<td>DB/auth</td>
+<td>Supabase</td>
+<td>Apache-2.0</td>
+<td>RLS + Realtime</td>
+</tr>
+<tr>
+<td>Native</td>
+<td>Kotlin + Swift donors (CoolMallKotlin patterns)</td>
+<td>—</td>
+<td>C-5 no Expo customer shell</td>
+</tr>
+<tr>
+<td>Promotions</td>
+<td>Medusa+OfferKit ideas</td>
+<td>—</td>
+<td>In-repo <code>@dial/promotions</code> only</td>
+</tr>
+<tr>
+<td>Fiscal</td>
+<td>In-house FDMS gateway</td>
+<td>—</td>
+<td>D-40a / D-59</td>
+</tr>
+<tr>
+<td>ZW liquor compliance engine</td>
+<td>None suitable</td>
+<td>—</td>
+<td>Config + counsel</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="part-12-trains-tracer-g0g6-d-52">Part 12 — Trains / tracer G0–G6 (D-52)</h2>
+<p><strong>Rule:</strong> Plan (this doc + grill) → Build thin vertical → Expand in-ticket → Done at DoD 100%. Tracer ≠ stub-as-MVP. Fits <strong>T0–T9 / E1–E6</strong> — no new train numbers; no Train 0–10 (<strong>D-53</strong>).</p>
+<h3 id="g0-plan-residual">G0 — Plan residual</h3>
+<table>
+<thead>
+<tr>
+<th>DoD item</th>
+<th>Acceptance criteria (evidence)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grill answered</td>
+<td>Part 15 answers recorded in ticket or linked doc</td>
+</tr>
+<tr>
+<td>Ticket opened</td>
+<td>One thin-vertical ticket with DoD + owner (Dev Manager)</td>
+</tr>
+<tr>
+<td>Counsel liquor brief started</td>
+<td>Checklist 6.6 filed or explicitly deferred with flag <strong>no liquor SKUs</strong> until done</td>
+</tr>
+<tr>
+<td>Living docs</td>
+<td>Same PR note when Build lands (Blueprint §8.0.2)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g1-thin-vertical-money-browse">G1 — Thin vertical (money + browse)</h3>
+<p><strong>Path:</strong> Browse USD → cart → checkout EcoCash|COD → Intent/Job Reserve → webhook → ledger → FiscalReceiptQueued → delivery job create.</p>
+<table>
+<thead>
+<tr>
+<th>DoD</th>
+<th>Evidence (acceptance)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Meili/stub returns MARKETPLACE grocery offers</td>
+<td>Automated test: query returns docs with <code>offerSource=MARKETPLACE</code></td>
+</tr>
+<tr>
+<td>Cart USD only; no ZiG on browse</td>
+<td>Test asserts currency===USD on cart API</td>
+</tr>
+<tr>
+<td>EcoCash ZiG from daily rate + <code>fx_rate_id</code></td>
+<td>Test with fixture rate row; snapshot persists fx_rate_id</td>
+</tr>
+<tr>
+<td>COD USD + indicative ZiG</td>
+<td>Test COD confirm payload</td>
+</tr>
+<tr>
+<td>OfferSnapshot Sold by {Supplier}; AI cannot set payable</td>
+<td>Unit test freeze + <code>assertNoPayableKeys</code> on AI fixtures</td>
+</tr>
+<tr>
+<td>B2B informal rejected</td>
+<td>Test buyer_segment=b2b + informal offer → 403/empty</td>
+</tr>
+<tr>
+<td>Webhook sig + idempotency</td>
+<td>Replay webhook → single ledger effect</td>
+</tr>
+<tr>
+<td>FDMS GOODS_* + DIAL_FEE queued</td>
+<td>Outbox rows asserted by class</td>
+</tr>
+<tr>
+<td>No DIAL_OWNED path</td>
+<td>Reject publish/test for DIAL_OWNED</td>
+</tr>
+<tr>
+<td>IMTT not on checkout lines</td>
+<td>Money-path review checklist signed</td>
+</tr>
+<tr>
+<td>Responsive web checkout</td>
+<td>Blueprint §8.0.1 QA note on ticket</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g2-expand-commerce">G2 — Expand commerce</h3>
+<table>
+<thead>
+<tr>
+<th>DoD</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Multi-vendor cart + split payables</td>
+<td>Ledger test: 2 suppliers → 2 payables + fee</td>
+</tr>
+<tr>
+<td>Weight/unit packed pricing</td>
+<td>Snapshot includes packedWeightGrams</td>
+</tr>
+<tr>
+<td>Categories + cold-chain badges</td>
+<td>UI + Meili filter tests</td>
+</tr>
+<tr>
+<td>Supplier onboarding + Factory review/publish</td>
+<td>Review queue → Meili doc visible only after approve</td>
+</tr>
+<tr>
+<td>Admin catalogue screens</td>
+<td>Screen checklist pass</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g3-delivery-expand">G3 — Delivery expand</h3>
+<table>
+<thead>
+<tr>
+<th>DoD</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slots + capacity transactional hold</td>
+<td>Concurrent hold test: capacity never negative</td>
+</tr>
+<tr>
+<td>Cold-chain eligibility filter</td>
+<td>Ineligible courier not offered</td>
+</tr>
+<tr>
+<td>Multi-stop VROOM</td>
+<td>Fixture plan stopSequence length ≥ 2</td>
+</tr>
+<tr>
+<td>Customer MapLibre track</td>
+<td>Recon smoke (dial-webapp-recon)</td>
+</tr>
+<tr>
+<td>delivery-android handling UI</td>
+<td>Build screenshot / checklist</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g4-liquor-compliance-expand">G4 — Liquor compliance expand</h3>
+<table>
+<thead>
+<tr>
+<th>DoD</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ATC + checkout age gate</td>
+<td>API rejects liquor ATC without attestation</td>
+</tr>
+<tr>
+<td>Door check blocks POD</td>
+<td>Workflow test: POD forbidden while pending</td>
+</tr>
+<tr>
+<td>Audit trail rows</td>
+<td>DB assert append-only events</td>
+</tr>
+<tr>
+<td>Restricted hours fail closed</td>
+<td>Outside window ATC → 403</td>
+</tr>
+<tr>
+<td>Licence publish gate</td>
+<td>Expired licence → cannot publish liquor</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g5-whatsapp">G5 — WhatsApp</h3>
+<table>
+<thead>
+<tr>
+<th>DoD</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FLOW_GROCERY_SEARCH→CART→CHECKOUT→TRACK</td>
+<td>Meta draft + ERP integration test</td>
+</tr>
+<tr>
+<td>EcoCash|COD buttons not free-text</td>
+<td>Flow JSON review</td>
+</tr>
+<tr>
+<td>Chatwoot handoff ids</td>
+<td>Ticket fields present</td>
+</tr>
+<tr>
+<td>Same intents as web</td>
+<td>Shared payment intent id asserted</td>
+</tr>
+</tbody>
+</table>
+<h3 id="g6-ai-drafts">G6 — AI drafts</h3>
+<table>
+<thead>
+<tr>
+<th>DoD</th>
+<th>Evidence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Capabilities + Zod</td>
+<td>Typecheck + unit</td>
+</tr>
+<tr>
+<td>Promptfoo goldens green</td>
+<td>CI smoke</td>
+</tr>
+<tr>
+<td>dial-ai-capability-review audit</td>
+<td><code>docs/agent-audits/*</code> attached</td>
+</tr>
+<tr>
+<td>Command Centre Simulated banner</td>
+<td>UI/assert Simulated cannot pay</td>
+</tr>
+</tbody>
+</table>
+<h3 id="completion-matrix-ac-channel-fill-y-evidence-link-blank-incomplete">Completion matrix (AC × channel) — fill Y + evidence link; blank = incomplete</h3>
+<table>
+<thead>
+<tr>
+<th>AC theme</th>
+<th>Web</th>
+<th>WA</th>
+<th>Native</th>
+<th>Admin/Courier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>USD browse/cart</td>
+<td>G1 test</td>
+<td>G5 Flow</td>
+<td>G1/G2 screen QA</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>ZiG pay / EcoCash|COD</td>
+<td>G1</td>
+<td>G5</td>
+<td>G1</td>
+<td>FX admin audit</td>
+</tr>
+<tr>
+<td>Agency disclosure + FDMS</td>
+<td>G1</td>
+<td>G5 receipt link</td>
+<td>G1</td>
+<td>Fiscal day worker</td>
+</tr>
+<tr>
+<td>Multi-vendor settle</td>
+<td>G2 ledger</td>
+<td>G5</td>
+<td>G2</td>
+<td>Supplier statements</td>
+</tr>
+<tr>
+<td>Slots + dispatch</td>
+<td>G3</td>
+<td>slot Flow</td>
+<td>G3</td>
+<td>delivery-android</td>
+</tr>
+<tr>
+<td>Age gate + audit</td>
+<td>G4</td>
+<td>G5 gate screen</td>
+<td>G4</td>
+<td>door check</td>
+</tr>
+<tr>
+<td>B2B hide informal</td>
+<td>G1 leak=0</td>
+<td>G5 filter</td>
+<td>G1</td>
+<td>—</td>
+</tr>
+<tr>
+<td>AI no money</td>
+<td>G6</td>
+<td>N/A</td>
+<td>N/A</td>
+<td>ops drafts G6</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="part-13-proposed-decisions-g-log-grill-accepted-where-noted">Part 13 — Proposed decisions (G-log) — grill-accepted where noted</h2>
+<p>Cite as <code>G-n</code> in tickets. <strong>Grill Waves 1–2 closed 2026-08-14</strong> — see <a href="./DIAL_Groceries_Liquor_Grill_Session.md"><code>DIAL_Groceries_Liquor_Grill_Session.md</code></a>. Promote to v4 D-log only if ecosystem-wide.</p>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Decision draft</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>G-1</strong></td>
+<td>Grocery/liquor is third Shop vertical in same ERP (no monorepo fork)</td>
+<td>Accept (plan)</td>
+</tr>
+<tr>
+<td><strong>G-2</strong></td>
+<td>Apply D-57 USD browse / ZiG pay / EcoCash|COD buttons unchanged</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+<tr>
+<td><strong>G-3</strong></td>
+<td>Meili index <code>grocery_offers_v1</code> separate from Spare</td>
+<td>Accept (plan)</td>
+</tr>
+<tr>
+<td><strong>G-4</strong></td>
+<td>Absorb domain into <code>@dial/catalogue</code> modules first; extract <code>packages/grocery</code> only if needed</td>
+<td>Accept (plan)</td>
+</tr>
+<tr>
+<td><strong>G-5</strong></td>
+<td>Delivery fee as <code>DIAL_FEE</code> (option A); spoilage supplier until POD; Dial-caused cold-chain → Dial</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+<tr>
+<td><strong>G-6</strong></td>
+<td>Escrow if multi-vendor OR ≥ T; direct below T; liquor-high ≥ T_liq. <strong>Provisional</strong> T=<strong>5000</strong>, T_liq=<strong>10000</strong> USD minor (ops-tunable)</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+<tr>
+<td><strong>G-7</strong></td>
+<td>Liquor formal-only suppliers at launch</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+<tr>
+<td><strong>G-8</strong></td>
+<td>Food informal B2C: formal-first launch</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+<tr>
+<td><strong>G-9</strong></td>
+<td>Packed fixed weights only in MVP; catch-weight deferred</td>
+<td>Accept (plan default stands)</td>
+</tr>
+<tr>
+<td><strong>G-10</strong></td>
+<td>Extend <code>DeliveryDispatchWorkflow</code> (no parallel Grocery workflow SoR)</td>
+<td>Accept (plan)</td>
+</tr>
+<tr>
+<td><strong>G-11</strong></td>
+<td>WA grocery Flows <strong>full MVP</strong> (Part 8)</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+<tr>
+<td><strong>G-12</strong></td>
+<td><strong>No WHT</strong> on grocery merchants; provisional payout <strong>T+3</strong> after capture/release</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+<tr>
+<td><strong>G-13</strong></td>
+<td>Merchant holds liquor licence; platform terms + publish gates</td>
+<td>Provisional eng; <strong>counsel pending</strong></td>
+</tr>
+<tr>
+<td><strong>G-14</strong></td>
+<td>Age default config 18 until counsel cites</td>
+<td>Eng placeholder; counsel for finals</td>
+</tr>
+<tr>
+<td><strong>G-15</strong></td>
+<td>Open Food Facts optional enrichment off by default</td>
+<td>Accept (plan)</td>
+</tr>
+<tr>
+<td><strong>G-16</strong></td>
+<td>Delivery fee = deterministic multi-factor pricing engine (<code>amountMinor</code>); AI capability drafts rate-card/explanations only; no LLM live fees; no prod agent host (<strong>D-61</strong>)</td>
+<td><strong>Grill-accepted</strong></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="part-14-launch-checklist-ops-kpis">Part 14 — Launch checklist &amp; ops KPIs</h2>
+<h3 id="141-groceryliquor-launch-checklist-additive-to-v4-appendix-c">14.1 Grocery/liquor launch checklist (additive to v4 Appendix C)</h3>
+<p><strong>Bold = blocks grocery customer-open for that SKU class.</strong></p>
+<ul>
+<li>Supplier contracts: agency, spoilage, oversell fee, indemnity, <strong>liquor licence warranties</strong>, food-safety certs for chilled/frozen  </li>
+<li><strong>Counsel liquor opinion (Part 6.6) green — or liquor category dormant</strong>  </li>
+<li><strong>Age-gate + hours config live; audit trail live</strong>  </li>
+<li><strong>Licence publish gate live</strong>  </li>
+<li>Customer T&amp;Cs: perishables, alcohol returns, 18-item disclosure audited on web/WA/native  </li>
+<li>FDMS virtual device + <code>GOODS_*</code>/<code>DIAL_FEE</code> grocery paths tested  </li>
+<li>Job Reserve / PspAdapter rails for grocery order namespace  </li>
+<li><strong>IMTT never on checkout (pricing review signed)</strong>  </li>
+<li>Meili <code>grocery_offers_v1</code> + B2B informal leak=0  </li>
+<li>Slot capacity + DeliveryDispatch activities  </li>
+<li>delivery-android cold-chain + age-check UI  </li>
+<li>WA Flows published + templates approved  </li>
+<li>POTRAZ / D-32 still green for age data  </li>
+<li>Insurance: product liability sized for foodborne claim <strong>[Founder-input]</strong>  </li>
+<li>Threat Dragon grocery money + age-gate models; Semgrep CI green  </li>
+<li>Tracer matrices G1–G5 green; G6 if AI exposed  </li>
+<li>Living root docs updated in landing PR  </li>
+</ul>
+<h3 id="142-ops-kpis-dashboard-from-week-one">14.2 Ops KPIs (dashboard from week one)</h3>
+<table>
+<thead>
+<tr>
+<th>KPI</th>
+<th>Target posture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Contribution / order</td>
+<td><strong>[Founder-input]</strong> &gt; 0 after stress spoilage</td>
+</tr>
+<tr>
+<td>Ops minutes / order</td>
+<td>Trend down</td>
+</tr>
+<tr>
+<td>Fill rate</td>
+<td>≥ Spare analog</td>
+</tr>
+<tr>
+<td>Confirm-fail rate</td>
+<td>Low; fee enforced</td>
+</tr>
+<tr>
+<td>On-time slot %</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Age-check fail %</td>
+<td>Monitor; refund SLA</td>
+</tr>
+<tr>
+<td>Spoilage refund bps</td>
+<td>Within provision</td>
+</tr>
+<tr>
+<td>Repeat 90-day</td>
+<td>LTV:CAC track</td>
+</tr>
+<tr>
+<td>Advance-pay vs COD share</td>
+<td>Float vs equity funding</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="part-15-founder-grill-answers-or-defaults">Part 15 — Founder grill (answers-or-defaults)</h2>
+<p>Per <code>dial-grill-locks</code>: facts looked up in-repo; below are <strong>human decisions</strong>. Defaults in italics are <strong>recommendations</strong>, not locks.<br>
+<strong>Living session:</strong> <a href="./DIAL_Groceries_Liquor_Grill_Session.md"><code>DIAL_Groceries_Liquor_Grill_Session.md</code></a> — <strong>Waves 1–2 CLOSED</strong> (2026-08-14). G1 thin vertical unblocked except liquor counsel.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Question</th>
+<th>Recommended default</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1</td>
+<td>Launch geography / bands?</td>
+<td><em>Harare metro single band first; reuse deliveryBandId</em></td>
+<td><strong>Accepted</strong></td>
+</tr>
+<tr>
+<td>Q2</td>
+<td>FX display follows D-57?</td>
+<td><em>Yes — USD browse/cart; ZiG at pay</em></td>
+<td><strong>Accepted</strong> → G-2</td>
+</tr>
+<tr>
+<td>Q3</td>
+<td>Liquor licensing holder?</td>
+<td><em>Merchant holds; DIAL terms + publish gates</em></td>
+<td><strong>Provisional eng</strong>; <strong>counsel pending</strong></td>
+</tr>
+<tr>
+<td>Q4</td>
+<td>Age &amp; hours numbers/ID types?</td>
+<td><em>Config + min_age=18 pending counsel</em></td>
+<td><strong>Accepted</strong> eng; counsel for finals</td>
+</tr>
+<tr>
+<td>Q5</td>
+<td>Informal grocery/liquor visibility?</td>
+<td><em>Food formal-first; liquor formal-only</em></td>
+<td><strong>Accepted</strong> → G-7/G-8</td>
+</tr>
+<tr>
+<td>Q6</td>
+<td>Fee / delivery owner / spoilage bearer?</td>
+<td><em>DIAL_FEE + pricing engine; supplier until POD</em></td>
+<td><strong>Accepted</strong> → G-5 / G-16</td>
+</tr>
+<tr>
+<td>Q7</td>
+<td>Merchant payout WHT / T+N?</td>
+<td><em>No WHT; provisional T+3</em></td>
+<td><strong>Accepted</strong> → G-12</td>
+</tr>
+<tr>
+<td>Q8</td>
+<td>Escrow vs direct?</td>
+<td><em>Direct below T; escrow multi-vendor/high ticket</em></td>
+<td><strong>Accepted</strong> → G-6</td>
+</tr>
+<tr>
+<td>Q9</td>
+<td>SLA / cold-chain / thaw refunds?</td>
+<td><em>Same-day slots MVP; best-effort cold-chain + refund SOP before market</em></td>
+<td>Open (Wave 3 / ops)</td>
+</tr>
+<tr>
+<td>Q10</td>
+<td>Supplier KYC / food-safety certs?</td>
+<td><em>KYC before first payout; cert required chilled/frozen</em></td>
+<td>Open (Wave 3 / ops)</td>
+</tr>
+<tr>
+<td>Q11</td>
+<td>WA in MVP?</td>
+<td><em>Full FLOW_GROCERY_</em> (Part 8)*</td>
+<td><strong>Accepted</strong> → G-11</td>
+</tr>
+<tr>
+<td>Q12</td>
+<td>Brand: separate vs Shop tab?</td>
+<td><em>Shop tab under Dial + branch branding; one account</em></td>
+<td>Open (Wave 3)</td>
+</tr>
+<tr>
+<td>Q13</td>
+<td>Catch-weight?</td>
+<td><em>Packed fixed weights only MVP</em></td>
+<td>Plan default stands → G-9</td>
+</tr>
+<tr>
+<td>Q14</td>
+<td>B2B grocery MVP?</td>
+<td><em>B2C first; B2B formal-only if launched</em></td>
+<td>Open (Wave 3)</td>
+</tr>
+<tr>
+<td>Q15</td>
+<td>Multi-stop vs split jobs default?</td>
+<td><em>One multi-stop job when same band/slot</em></td>
+<td>Open (Wave 3)</td>
+</tr>
+<tr>
+<td>Q16</td>
+<td>Take-rate launch bps / ladder?</td>
+<td><em>[Founder-input] publish ladder to supply</em></td>
+<td>Open (commercial)</td>
+</tr>
+<tr>
+<td>Q17</td>
+<td>Escrow threshold T (USD minor)?</td>
+<td><em>Provisional T=5000; T_liq=10000</em></td>
+<td><strong>Accepted provisional</strong> → G-6</td>
+</tr>
+<tr>
+<td>Q18</td>
+<td>Liquor outside hours: browse ok or hide?</td>
+<td><em>Browse ok; ATC/checkout fail closed</em></td>
+<td>Aligned with Q4</td>
+</tr>
+<tr>
+<td>Q19</td>
+<td>ID image retention at door?</td>
+<td><em>Boolean+method only unless counsel requires</em></td>
+<td>Open (counsel/D-32)</td>
+</tr>
+<tr>
+<td>Q20</td>
+<td>Open Food Facts on by default?</td>
+<td><em>Off; optional enrichment</em></td>
+<td>Accept → G-15</td>
+</tr>
+</tbody>
+</table>
+<p>❓ Format for live grill rounds — ask frontier only; refuse lock reopeners (C-5, Baileys, Mapbox SoR, AI money, DIAL_OWNED, etc.).</p>
+<hr>
+<h2 id="part-16-architecture-integration-seamless-erp">Part 16 — Architecture integration (seamless ERP)</h2>
+<h3 id="161-domain-map">16.1 Domain map</h3>
+<table>
+<thead>
+<tr>
+<th>Grocery concept</th>
+<th>Existing SoR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Offer / product</td>
+<td>Postgres catalogue + Meili</td>
+</tr>
+<tr>
+<td>Cart</td>
+<td>Extend <code>@dial/catalogue</code> cart (<code>vertical</code> metadata)</td>
+</tr>
+<tr>
+<td>Money</td>
+<td><code>@dial/payments</code> + ledger + PspAdapter</td>
+</tr>
+<tr>
+<td>FDMS</td>
+<td><code>@dial/tax</code> + adapter-fdms</td>
+</tr>
+<tr>
+<td>Delivery</td>
+<td><code>@dial/delivery</code> + Temporal</td>
+</tr>
+<tr>
+<td>Promo</td>
+<td><code>@dial/promotions</code></td>
+</tr>
+<tr>
+<td>WA</td>
+<td><code>@dial/adapter-whatsapp</code></td>
+</tr>
+<tr>
+<td>Maps</td>
+<td><code>@dial/adapter-maps</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="162-mermaid-request-path">16.2 Mermaid — request path</h3>
+<p class="mermaid-note">Mermaid diagram (source — not rendered in PDF)</p><pre><code class="language-mermaid">flowchart TB
+  subgraph surfaces [Customer surfaces]
+    WEB[gateway-web /grocery]
+    NAT[Native Android+iOS]
+    WA[WhatsApp Cloud API Flows]
+  end
+  subgraph edge [Edge]
+    GW[gateway-web API + webhooks]
+  end
+  subgraph domain [DIAL domain packages]
+    CAT[&quot;@dial/catalogue&quot;]
+    PAY[&quot;@dial/payments&quot;]
+    LED[&quot;@dial/ledger&quot;]
+    TAX[&quot;@dial/tax&quot;]
+    DEL[&quot;@dial/delivery&quot;]
+    PROMO[&quot;@dial/promotions&quot;]
+    AI[&quot;@dial/ai drafts&quot;]
+    ID[&quot;@dial/identity&quot;]
+  end
+  subgraph adapters [Adapters]
+    PSP[&quot;adapter-psp&quot;]
+    FDMS[&quot;adapter-fdms&quot;]
+    MAPS[&quot;adapter-maps&quot;]
+    WAA[&quot;adapter-whatsapp&quot;]
+  end
+  WEB --&gt; GW
+  NAT --&gt; GW
+  WA --&gt; WAA --&gt; GW
+  GW --&gt; ID
+  GW --&gt; CAT
+  GW --&gt; PAY
+  GW --&gt; DEL
+  CAT --&gt; MEILI[Meilisearch grocery_offers_v1]
+  PAY --&gt; PSP
+  PAY --&gt; LED
+  LED --&gt; TAX
+  TAX --&gt; FDMS
+  DEL --&gt; TEMP[Temporal DeliveryDispatchWorkflow]
+  DEL --&gt; MAPS
+</code></pre>
+<h3 id="163-package-boundary">16.3 Package boundary</h3>
+<p><strong>Absorb into <code>@dial/catalogue</code> + existing packages (recommended).</strong> Reject parallel Medusa/Saleor. Optional later <code>packages/grocery</code> only if slotting/substitution logic proves catalogue-bloating.</p>
+<h3 id="164-feature-flags">16.4 Feature flags</h3>
+<p><code>DIAL_FEATURE_GROCERY=1</code> / PostHog; vertical tags; <strong>not</strong> <code>DIAL_BUSINESS_BRANCH</code> process fork that disables Spare/Tech.</p>
+<hr>
+<h2 id="part-17-risks-non-goals">Part 17 — Risks &amp; non-goals</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agency threatened by owned inventory</td>
+<td>Ban DIAL_OWNED; disclosure tests</td>
+</tr>
+<tr>
+<td>Food safety liability</td>
+<td>Contracts; SOP; insurance; counsel</td>
+</tr>
+<tr>
+<td>Liquor regulatory surprise</td>
+<td>Config gates; counsel before liquor SKUs</td>
+</tr>
+<tr>
+<td>Dual SoR creep</td>
+<td>Stitch doctrine; money-path skill</td>
+</tr>
+<tr>
+<td>Settlement bugs</td>
+<td>Integer money; idempotent webhooks</td>
+</tr>
+<tr>
+<td>Informal→B2B leak</td>
+<td>Shared filters + leak=0</td>
+</tr>
+<tr>
+<td>AI price hallucination</td>
+<td>Zod; Promptfoo; capability review</td>
+</tr>
+<tr>
+<td>Slot overload</td>
+<td>Capacity + degrade messaging</td>
+</tr>
+<tr>
+<td>IMTT on checkout</td>
+<td>D-60 checklist</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Non-goals:</strong> principal grocer; renumber trains; Expo/Baileys/Mapbox SoR; Formance/Medusa ledger; Simulated auto-pay; promo cash-out; physical fiscal printers; parallel monorepo fork.</p>
+<hr>
+<h2 id="appendix-a-authority-citations">Appendix A — Authority citations</h2>
+<table>
+<thead>
+<tr>
+<th>Lock</th>
+<th>Relevance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C-4 / C-5</td>
+<td>Job Reserve; native not Expo</td>
+</tr>
+<tr>
+<td>D-38</td>
+<td>UX donors only</td>
+</tr>
+<tr>
+<td>D-40 / D-40a / D-41</td>
+<td>WA; virtual FDMS; MVP Flows</td>
+</tr>
+<tr>
+<td>D-42</td>
+<td>promotions SoR</td>
+</tr>
+<tr>
+<td>D-43</td>
+<td>PspAdapter</td>
+</tr>
+<tr>
+<td>D-44 / D-45 / D-45a</td>
+<td>maps + delivery SoR</td>
+</tr>
+<tr>
+<td>D-47 / D-48</td>
+<td>IDOR + AppSec</td>
+</tr>
+<tr>
+<td>D-49</td>
+<td>B2B hide informal</td>
+</tr>
+<tr>
+<td>D-50</td>
+<td>Tech WHT ≠ auto grocery</td>
+</tr>
+<tr>
+<td>D-52 / D-56</td>
+<td>Tracer + grill</td>
+</tr>
+<tr>
+<td>D-53 / D-54</td>
+<td>Factory; MetricContract</td>
+</tr>
+<tr>
+<td>D-57</td>
+<td>USD browse; ZiG pay; EcoCash|COD</td>
+</tr>
+<tr>
+<td>D-58 / D-59 / D-60</td>
+<td>Agency; FDMS; IMTT; COD USD</td>
+</tr>
+<tr>
+<td>D-61</td>
+<td>AI capabilities; no prod agent host</td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-b-repo-anchors">Appendix B — Repo anchors</h2>
+<ul>
+<li><code>packages/catalogue</code>, <code>packages/payments</code>, <code>packages/delivery</code>, <code>packages/tax</code>, <code>adapters/fdms</code>, <code>adapters/whatsapp</code>  </li>
+<li><code>apps/gateway-web/src/app/spare/*</code> (pattern for <code>/grocery/*</code>)  </li>
+<li><code>docs/integrations/README.md</code>  </li>
+<li><code>docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md</code>  </li>
+<li>Pack §8 <code>spare_offers_v1</code> → mirror for <code>grocery_offers_v1</code></li>
+</ul>
+<h2 id="appendix-c-supplier-grocery-import-columns-draft">Appendix C — Supplier grocery import columns (draft)</h2>
+<table>
+<thead>
+<tr>
+<th>Col</th>
+<th>Field</th>
+<th>Required</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>Supplier SKU</td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td>B</td>
+<td>Title</td>
+<td>Yes</td>
+<td></td>
+</tr>
+<tr>
+<td>C</td>
+<td>Barcode</td>
+<td>No</td>
+<td>OFF enrichment key</td>
+</tr>
+<tr>
+<td>D</td>
+<td>Category path</td>
+<td>Yes</td>
+<td>slash or pipe</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Unit label</td>
+<td>Yes</td>
+<td>each / 500g / 1L</td>
+</tr>
+<tr>
+<td>F</td>
+<td>Packed weight grams</td>
+<td>If weight</td>
+<td>MVP packed</td>
+</tr>
+<tr>
+<td>G</td>
+<td>Net cost minor</td>
+<td>Yes</td>
+<td>integer</td>
+</tr>
+<tr>
+<td>H</td>
+<td>Currency</td>
+<td>Yes</td>
+<td>USD default</td>
+</tr>
+<tr>
+<td>I</td>
+<td>Cold chain</td>
+<td>Yes</td>
+<td>ambient/chilled/frozen</td>
+</tr>
+<tr>
+<td>J</td>
+<td>Age gate</td>
+<td>Yes</td>
+<td>Y/N</td>
+</tr>
+<tr>
+<td>K</td>
+<td>Stock valid until</td>
+<td>No</td>
+<td>default TTL by cold chain</td>
+</tr>
+<tr>
+<td>L</td>
+<td>Liquor licence ref</td>
+<td>If liquor</td>
+<td>publish gate</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><em>End of peer-depth plan. Next: founder answers Part 15 → counsel Part 6.6 for liquor → Dev Manager opens G1 thin-vertical ticket with DoD matrix → Build (<code>dial-tracer-slice</code>). Living docs note only when Build lands (or when this plan is committed per Dev Manager).</em></p>
+</article>
+</main>
+</body>
+</html>

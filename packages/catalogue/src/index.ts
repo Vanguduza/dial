@@ -221,10 +221,35 @@ const OFFER_SEED: StubOffer[] = [
 
 const OFFERS: StubOffer[] = [...OFFER_SEED];
 
-const carts = new Map<string, Cart>();
-const ingestBatches = new Map<string, CatalogueIngestBatch>();
-const reviewQueue: CatalogueReviewItem[] = [];
-const searchNoResultEvents: SearchNoResultEvent[] = [];
+/** globalThis — Next RSC vs server-action bundles must share the same cart Map. */
+function cartsStore(): Map<string, Cart> {
+  const g = globalThis as typeof globalThis & {
+    __dialCatalogueCarts?: Map<string, Cart>;
+  };
+  if (!g.__dialCatalogueCarts) g.__dialCatalogueCarts = new Map();
+  return g.__dialCatalogueCarts;
+}
+function ingestBatchesStore(): Map<string, CatalogueIngestBatch> {
+  const g = globalThis as typeof globalThis & {
+    __dialCatalogueIngest?: Map<string, CatalogueIngestBatch>;
+  };
+  if (!g.__dialCatalogueIngest) g.__dialCatalogueIngest = new Map();
+  return g.__dialCatalogueIngest;
+}
+function reviewQueueStore(): CatalogueReviewItem[] {
+  const g = globalThis as typeof globalThis & {
+    __dialCatalogueReview?: CatalogueReviewItem[];
+  };
+  if (!g.__dialCatalogueReview) g.__dialCatalogueReview = [];
+  return g.__dialCatalogueReview;
+}
+function searchNoResultEventsStore(): SearchNoResultEvent[] {
+  const g = globalThis as typeof globalThis & {
+    __dialSearchNoResult?: SearchNoResultEvent[];
+  };
+  if (!g.__dialSearchNoResult) g.__dialSearchNoResult = [];
+  return g.__dialSearchNoResult;
+}
 
 import { chassisCodesForOffer } from "./dualEntry.js";
 
@@ -549,14 +574,14 @@ export function recordSearchNoResult(
     vertical,
     createdAt: new Date().toISOString(),
   };
-  searchNoResultEvents.push(event);
+  searchNoResultEventsStore().push(event);
   return event;
 }
 
 export function listSearchNoResultEvents(filter?: {
   vertical?: "spare" | "grocery";
 }): SearchNoResultEvent[] {
-  return searchNoResultEvents
+  return searchNoResultEventsStore()
     .filter((e) => (filter?.vertical ? e.vertical === filter.vertical : true))
     .map((e) => ({ ...e }));
 }
@@ -571,7 +596,7 @@ export function enqueueCatalogueIngest(rowCount: number): CatalogueIngestBatch {
     createdAt: new Date().toISOString(),
     vertical: "spare",
   };
-  ingestBatches.set(batch.batchId, batch);
+  ingestBatchesStore().set(batch.batchId, batch);
   const review: CatalogueReviewItem = {
     reviewId: `crq_${batch.batchId}`,
     batchId: batch.batchId,
@@ -579,7 +604,7 @@ export function enqueueCatalogueIngest(rowCount: number): CatalogueIngestBatch {
     status: "queued",
     vertical: "spare",
   };
-  reviewQueue.push(review);
+  reviewQueueStore().push(review);
   return { ...batch };
 }
 
@@ -619,7 +644,7 @@ export function ingestCatalogueCsv(csvText: string): {
         createdAt: new Date().toISOString(),
         vertical: draft.vertical,
       };
-      ingestBatches.set(batch.batchId, batch);
+      ingestBatchesStore().set(batch.batchId, batch);
       const review: CatalogueReviewItem = {
         reviewId: `crq_${batch.batchId}`,
         batchId: batch.batchId,
@@ -628,7 +653,7 @@ export function ingestCatalogueCsv(csvText: string): {
         vertical: draft.vertical,
         draft,
       };
-      reviewQueue.push(review);
+      reviewQueueStore().push(review);
       batches.push({ ...batch });
       reviews.push({ ...review, draft: { ...draft } });
     } catch (e) {
@@ -727,8 +752,8 @@ export function getDemandGapSnapshot(filter?: {
   vertical: "spare" | "grocery" | "all";
 } {
   const events = filter?.vertical
-    ? searchNoResultEvents.filter((e) => e.vertical === filter.vertical)
-    : searchNoResultEvents;
+    ? searchNoResultEventsStore().filter((e) => e.vertical === filter.vertical)
+    : searchNoResultEventsStore();
   const counts = new Map<string, number>();
   for (const e of events) {
     counts.set(e.query, (counts.get(e.query) ?? 0) + 1);
@@ -741,16 +766,16 @@ export function getDemandGapSnapshot(filter?: {
     noResultCount: events.length,
     topQueries,
     informalB2bLeaks: countInformalB2bLeaks() /* spare; grocery checked in PD15 runner */,
-    pendingReview: reviewQueue.filter(
+    pendingReview: reviewQueueStore().filter(
       (r) =>
         (r.status === "queued" || r.status === "claimed") &&
         (filter?.vertical ? r.vertical === filter.vertical : true),
     ).length,
-    approvedAwaitingPublish: reviewQueue.filter(
+    approvedAwaitingPublish: reviewQueueStore().filter(
       (r) =>
         r.status === "approved" &&
         (filter?.vertical ? r.vertical === filter.vertical : true) &&
-        ingestBatches.get(r.batchId)?.status === "approved",
+        ingestBatchesStore().get(r.batchId)?.status === "approved",
     ).length,
     vertical: filter?.vertical ?? "all",
   };
@@ -817,7 +842,7 @@ function cloneReviewItem(r: CatalogueReviewItem): CatalogueReviewItem {
 }
 
 export function listCatalogueReviewQueue(): CatalogueReviewItem[] {
-  return reviewQueue.map(cloneReviewItem);
+  return reviewQueueStore().map(cloneReviewItem);
 }
 
 /** PD66 — pending_review items only (queued|claimed) for admin claim queue. */
@@ -864,7 +889,7 @@ export function runPd66PendingReviewQueueThinVertical(): {
 export function getCatalogueIngestBatch(
   batchId: string,
 ): CatalogueIngestBatch | undefined {
-  const batch = ingestBatches.get(batchId);
+  const batch = ingestBatchesStore().get(batchId);
   return batch ? { ...batch } : undefined;
 }
 
@@ -876,7 +901,7 @@ export function claimCatalogueReview(input: {
   claimedBy: string;
 }): CatalogueReviewItem {
   if (!input.claimedBy.trim()) throw new Error("claimedBy required");
-  const item = reviewQueue.find((r) => r.reviewId === input.reviewId);
+  const item = reviewQueueStore().find((r) => r.reviewId === input.reviewId);
   if (!item) throw new Error(`Unknown review ${input.reviewId}`);
   if (item.status !== "queued") {
     throw new Error(`Review ${input.reviewId} is already ${item.status}`);
@@ -893,25 +918,25 @@ export function claimCatalogueReview(input: {
  * Accepts queued (legacy PD15) or claimed (PD64).
  */
 export function approveCatalogueReview(reviewId: string): CatalogueReviewItem {
-  const item = reviewQueue.find((r) => r.reviewId === reviewId);
+  const item = reviewQueueStore().find((r) => r.reviewId === reviewId);
   if (!item) throw new Error(`Unknown review ${reviewId}`);
   if (item.status !== "queued" && item.status !== "claimed") {
     throw new Error(`Review ${reviewId} is already ${item.status}`);
   }
   item.status = "approved";
-  const batch = ingestBatches.get(item.batchId);
+  const batch = ingestBatchesStore().get(item.batchId);
   if (batch) batch.status = "approved";
   return cloneReviewItem(item);
 }
 
 export function rejectCatalogueReview(reviewId: string): CatalogueReviewItem {
-  const item = reviewQueue.find((r) => r.reviewId === reviewId);
+  const item = reviewQueueStore().find((r) => r.reviewId === reviewId);
   if (!item) throw new Error(`Unknown review ${reviewId}`);
   if (item.status !== "queued" && item.status !== "claimed") {
     throw new Error(`Review ${reviewId} is already ${item.status}`);
   }
   item.status = "rejected";
-  const batch = ingestBatches.get(item.batchId);
+  const batch = ingestBatchesStore().get(item.batchId);
   if (batch) batch.status = "rejected";
   return cloneReviewItem(item);
 }
@@ -958,7 +983,7 @@ export function publishApprovedBatchToMeiliStub(input: {
   batchId: string;
   offer: StubOffer;
 }): SpareOfferDocument {
-  const batch = ingestBatches.get(input.batchId);
+  const batch = ingestBatchesStore().get(input.batchId);
   if (!batch) throw new Error(`Unknown batch ${input.batchId}`);
   if (batch.status !== "approved") {
     throw new Error("Batch must be human-approved before Meili publish");
@@ -969,7 +994,7 @@ export function publishApprovedBatchToMeiliStub(input: {
   OFFERS.push(input.offer);
   batch.status = "published";
   batch.publishedOfferId = input.offer.offerId;
-  const review = reviewQueue.find((r) => r.batchId === input.batchId);
+  const review = reviewQueueStore().find((r) => r.batchId === input.batchId);
   if (review) review.offerId = input.offer.offerId;
   return toMeiliDoc(input.offer);
 }
@@ -999,6 +1024,57 @@ export async function publishApprovedBatchToMeili(input: {
   };
 }
 
+/** Build StubOffer from durable REST draft JSON (Phase 4 sandbox publish). */
+export function stubOfferFromRestDraft(draft: {
+  offerId: string;
+  title: string;
+  unitPriceUsdMinor: bigint | string | number;
+  supplierFormality: SupplierFormality;
+  brand: string;
+  oem?: string;
+  qualityTier?: StubOffer["qualityTier"];
+  offerSource?: OfferSource;
+}): StubOffer {
+  if (draft.offerSource && draft.offerSource !== "MARKETPLACE") {
+    throw new Error("DIAL_OWNED forbidden on REST publish (D-58)");
+  }
+  return {
+    offerId: draft.offerId,
+    title: draft.title,
+    unitPriceUsdMinor: BigInt(String(draft.unitPriceUsdMinor)),
+    qualityTier: draft.qualityTier ?? "OES",
+    offerSource: "MARKETPLACE",
+    supplierFormality: draft.supplierFormality,
+    oem: draft.oem ?? draft.offerId,
+    brand: draft.brand,
+  };
+}
+
+/**
+ * Phase 4 durable REST path — upsert approved offer to Meili without in-memory batch SoR.
+ * Caller must verify review.status === approved in Postgres before invoke.
+ */
+export async function publishStubOfferDirectToMeili(offer: StubOffer): Promise<{
+  doc: SpareOfferDocument;
+  taskUid: string | "fixture";
+  indexUid: string;
+}> {
+  if (offer.offerSource !== "MARKETPLACE") {
+    throw new Error("DIAL_OWNED forbidden (D-58)");
+  }
+  const doc = toMeiliDoc(offer);
+  const { ensureSpareOffersIndex, upsertSpareOfferDocuments } = await import(
+    "./meiliClient.js"
+  );
+  const ensured = await ensureSpareOffersIndex();
+  const upsert = await upsertSpareOfferDocuments([doc]);
+  return {
+    doc,
+    taskUid: upsert.taskUid,
+    indexUid: upsert.indexUid || ensured.indexUid,
+  };
+}
+
 /**
  * PD15 grocery publish — human-approved draft → grocery store + Meili grocery index.
  * Rejects liquor/ageGate/DIAL_OWNED. Never auto-publish.
@@ -1011,12 +1087,12 @@ export async function publishApprovedGroceryToMeili(input: {
   taskUid: string | "fixture";
   indexUid: string;
 }> {
-  const batch = ingestBatches.get(input.batchId);
+  const batch = ingestBatchesStore().get(input.batchId);
   if (!batch) throw new Error(`Unknown batch ${input.batchId}`);
   if (batch.status !== "approved") {
     throw new Error("Batch must be human-approved before Meili publish");
   }
-  const review = reviewQueue.find((r) => r.batchId === input.batchId);
+  const review = reviewQueueStore().find((r) => r.batchId === input.batchId);
   const draft = input.draft ?? review?.draft;
   if (!draft || draft.vertical !== "grocery") {
     throw new Error("Grocery draft required for grocery publish");
@@ -1164,12 +1240,12 @@ export function createCart(): Cart {
     lines: [],
     total: money(0n, "USD"),
   };
-  carts.set(cart.id, cart);
+  cartsStore().set(cart.id, cart);
   return cart;
 }
 
 export function getCart(cartId: string): Cart | undefined {
-  return carts.get(cartId);
+  return cartsStore().get(cartId);
 }
 
 /** Lookup marketplace offer by id (PD5 Android + spare checkout API). */
@@ -1179,7 +1255,7 @@ export function getOffer(offerId: string): StubOffer | undefined {
 }
 
 export function addToCart(cartId: string, offerId: string, qty = 1): Cart {
-  const cart = carts.get(cartId);
+  const cart = cartsStore().get(cartId);
   if (!cart) throw new Error(`Unknown cart ${cartId}`);
   if (qty < 1) throw new Error("qty must be >= 1");
   const offer = OFFERS.find((o) => o.offerId === offerId);
@@ -1219,10 +1295,12 @@ export function addToCart(cartId: string, offerId: string, qty = 1): Cart {
 }
 
 export function __resetCatalogueForTests(): void {
-  carts.clear();
-  ingestBatches.clear();
-  reviewQueue.length = 0;
-  searchNoResultEvents.length = 0;
+  cartsStore().clear();
+  ingestBatchesStore().clear();
+  const review = reviewQueueStore();
+  review.splice(0, review.length);
+  const noHits = searchNoResultEventsStore();
+  noHits.splice(0, noHits.length);
   OFFERS.length = 0;
   OFFERS.push(...OFFER_SEED);
 }
@@ -1254,6 +1332,7 @@ export {
   getGroceryDeliverySlot,
   getGroceryOffer,
   getGroceryOrder,
+  getGroceryOrderDurable,
   groceryMeiliFilterForSession,
   listGroceryDeliverySlots,
   listGroceryMeiliDocuments,
@@ -1295,6 +1374,7 @@ export {
   cancelSpareOrder,
   getActiveGarageVehicle,
   getSpareOrder,
+  getSpareOrderDurable,
   getSpareReturnClaim,
   getFleetExpiryBoard,
   listDueVehicleReminders,
@@ -1364,11 +1444,92 @@ export {
   getTakeRateLadder,
   listTakeRateLadders,
   publishTakeRateLadder,
+  publishTakeRateLadderDurable,
   resolveTakeRateBps,
   runPd34B2bTakeRateThinVertical,
+  runPhase4PrepTakeRateDurableThinVertical,
   type TakeRateLadder,
   type TakeRateTier,
 } from "./takeRate.js";
+
+export {
+  listCatalogueReviewsDurable,
+  persistCatalogueBatchDurable,
+  persistCatalogueReviewDurable,
+  persistFactoryIngestDurable,
+  persistTakeRateLadderDurable,
+} from "./durableFactory.js";
+
+/**
+ * Phase 4 prep — CSV ingest + durable persist (fixture) + human approve.
+ * Meili publish via publishApprovedBatchToMeili / publishFactoryOfferViaIndexer separately.
+ */
+export async function runPhase4PrepFactoryIngestApproveThinVertical(): Promise<{
+  batchId: string;
+  reviewId: string;
+  offerId: string;
+  informalB2bLeaks: number;
+  liquorRejected: true;
+  durableMode: "fixture";
+  payableFromAi: false;
+  offerSource: "MARKETPLACE";
+}> {
+  __resetCatalogueForTests();
+  const csv = [
+    "vertical,offerId,title,unitPriceUsdMinor,supplierFormality,brand,oem,qualityTier",
+    "spare,off_p4prep_formal,P4 Prep Filter,2100,formal,Bosch,P4-OEM,OES",
+    "spare,off_p4prep_informal,P4 Prep Informal Wiper,900,informal,Local,P4-INF,Aftermarket",
+    "liquor,groc_beer_p4,Blocked beer,999,formal,Brand,750ml,ambient",
+  ].join("\n");
+  const ingested = ingestCatalogueCsv(csv);
+  if (ingested.rejectedRows.length < 1) {
+    throw new Error("Phase4-prep expected liquor rejection");
+  }
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { persistFactoryIngestDurable } = await import("./durableFactory.js");
+  const durable = await persistFactoryIngestDurable({
+    batches: ingested.batches,
+    reviews: ingested.reviews,
+  });
+  if (durable.mode !== "fixture") {
+    throw new Error("Phase4-prep expected fixture durable skip");
+  }
+
+  const formal = ingested.reviews.find(
+    (r) => r.draft?.offerId === "off_p4prep_formal",
+  );
+  if (!formal?.draft || formal.draft.payableFromAi !== false) {
+    throw new Error("Phase4-prep formal draft missing");
+  }
+  approveCatalogueReview(formal.reviewId);
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.SUPABASE_ANON_KEY;
+  let closed = false;
+  try {
+    await persistFactoryIngestDurable({
+      batches: ingested.batches,
+      reviews: ingested.reviews,
+    });
+  } catch {
+    closed = true;
+  }
+  if (!closed) throw new Error("expected factory durable fail-closed");
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+
+  return {
+    batchId: formal.batchId,
+    reviewId: formal.reviewId,
+    offerId: formal.draft.offerId,
+    informalB2bLeaks: countInformalB2bLeaks(),
+    liquorRejected: true,
+    durableMode: "fixture",
+    payableFromAi: false,
+    offerSource: "MARKETPLACE",
+  };
+}
 
 import { offersForChassis as offersForChassisJoin } from "./dualEntry.js";
 import type { SearchSessionRole as DualRole } from "./dualEntry.js";

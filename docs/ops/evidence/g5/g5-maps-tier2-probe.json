@@ -1,0 +1,17 @@
+{
+  "date": "2026-08-16",
+  "mode": "sandbox",
+  "urlsConfigured": {
+    "nominatim": false,
+    "osrm": false,
+    "vroom": false
+  },
+  "healthOk": false,
+  "healthError": "NOMINATIM_URL / OSRM_URL unset — fail closed",
+  "liveGeocode": null,
+  "liveRoute": null,
+  "liveVroom": null,
+  "enh013Open": true,
+  "g5MapsSoR": false,
+  "residual": "ENH-013 maps Tier-2 hosting not running locally — NOMINATIM_URL/OSRM_URL unset or unreachable"
+}

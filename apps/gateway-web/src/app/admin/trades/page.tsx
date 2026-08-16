@@ -130,11 +130,7 @@ export default function AdminTradesPage() {
         >
           Trade / JobClass + Value Score
         </h1>
-        <p style={{ opacity: 0.85, maxWidth: 640 }}>
-          D-53 lifecycle editor and technician Value Score disputes. Ranking
-          never writes prices, ledger, or Job Reserve. AI never writes payable
-          amounts.
-        </p>
+        
 
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
           Internal API secret

@@ -1,7 +1,9 @@
 /**
  * BullMQ worker host — FDMS day + search indexer + money outbox (when not fixture).
  * Fixture mode drains money outbox once then exits (CI-safe).
+ * Phase 1 / G1: sandbox/live fail closed without REDIS_URL + INTERNAL_API_SECRET.
  */
+import { requireWorkerQueuesSecrets } from "@dial/shared";
 import {
   integrationMode,
   startFdmsDayWorker,
@@ -39,6 +41,19 @@ if (mode === "fixture") {
   process.exit(0);
 }
 
+try {
+  requireWorkerQueuesSecrets();
+} catch (e) {
+  console.error(
+    JSON.stringify({
+      ok: false,
+      mode,
+      error: e instanceof Error ? e.message : "fail closed",
+    }),
+  );
+  process.exit(1);
+}
+
 const fdms = await startFdmsDayWorker({
   processor: async (data) => {
     await processFdmsDayJob({ action: data.action });
@@ -63,9 +78,20 @@ const outbox = await startOutboxSideEffectsWorker({
 console.log(
   JSON.stringify({
     ok: true,
-    workers: ["fdms-day", "search-indexer", "outbox-side-effects"],
+    workers: ["fdms-day", "search-indexer", "outbox-side-effects", "retention-cron"],
   }),
 );
+
+const retentionMs = 6 * 60 * 60 * 1000;
+setInterval(() => {
+  void import("node:child_process").then(({ spawn }) => {
+    spawn(process.execPath, ["scripts/retention-job.mjs"], {
+      cwd: process.cwd(),
+      stdio: "inherit",
+      env: process.env,
+    });
+  });
+}, retentionMs);
 
 async function shutdown() {
   await fdms.stop();

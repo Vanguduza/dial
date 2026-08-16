@@ -20,14 +20,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier.Modifier
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import zw.co.dial.delivery.network.DialDeliveryClient
-import zw.co.dial.delivery.network.MemoryCookieStore
+import zw.co.dial.delivery.location.CourierLocationPipeline
+import zw.co.dial.delivery.maps.MapLayoutDecisions
+import zw.co.dial.shared.session.SecureSessionStore
 
 /**
  * Pack §9.8 thin UI: offer Accept|Reject → transit → ETA/stops/VROOM → POD → COD.
@@ -35,6 +37,7 @@ import zw.co.dial.delivery.network.MemoryCookieStore
  */
 @Composable
 fun DeliveryApp(baseUrl: String) {
+    val gatewayError = SecureSessionStore.misconfiguredGateway(baseUrl, baseUrl.isNotBlank())
     val cookies = remember { MemoryCookieStore() }
     val client = remember { DialDeliveryClient(baseUrl, cookies) }
     var signedIn by remember { mutableStateOf(false) }
@@ -204,7 +207,11 @@ fun DeliveryApp(baseUrl: String) {
                     val jid = jobId ?: return@Button
                     run {
                         client.startTransit(jid)
-                        client.postLocation(-17.8292, 31.0522, jid)
+                        val pipeline = CourierLocationPipeline { lat, lng ->
+                            client.postLocation(lat, lng, jid)
+                        }
+                        pipeline.onFix(-17.8292, 31.0522)
+                        val waitLayout = MapLayoutDecisions.shouldWaitForMapLayout(0, 0, 0)
                         val eta = client.getEtaBanner(jid)
                         val stops = client.listNavigateStops(jid)
                         etaBanner =
@@ -213,7 +220,7 @@ fun DeliveryApp(baseUrl: String) {
                             stops
                                 .sortedBy { it.sequence }
                                 .joinToString(" → ") { "${it.sequence}. ${it.label}" }
-                        status = "In transit · OSRM ETA + navigate stops (MapLibre SoR)"
+                        status = "In transit · layoutWait=$waitLayout · OSRM ETA + MapLibre SoR"
                     }
                 },
                 enabled = jobId != null,
@@ -287,6 +294,9 @@ fun DeliveryApp(baseUrl: String) {
             ) { Text("Ack float + COD collect") }
         }
 
+        if (gatewayError != null) {
+            Text(gatewayError, color = MaterialTheme.colorScheme.error)
+        }
         if (loading) {
             CircularProgressIndicator()
         }

@@ -39,12 +39,8 @@ export default function TechEmergencyPage() {
         >
           Emergency
         </h1>
-        <p style={{ fontWeight: 600 }}>
-          AI pricing bypassed — dispatch + rate_card draft only. Human confirms payable.
-        </p>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Indicative USD {(Number(quote.draftAmountUsdMinor) / 100).toFixed(2)} ({quote.source}) —
-          not a customer charge.
+        <p style={{ fontSize: 14 }}>
+          Draft USD {(Number(quote.draftAmountUsdMinor) / 100).toFixed(2)}
         </p>
         <EmergencyBookForm />
         <p style={{ marginTop: dialTokens.space.lg }}>

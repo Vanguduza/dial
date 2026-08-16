@@ -17,7 +17,14 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             DialTheme {
-                DialApp(baseUrl = BuildConfig.DIAL_GATEWAY_BASE_URL)
+                // Staging flavor without ops URL stays fail-closed (empty) — never invent a host.
+                val baseUrl =
+                    if (BuildConfig.DIAL_GATEWAY_URL_CONFIGURED) {
+                        BuildConfig.DIAL_GATEWAY_BASE_URL
+                    } else {
+                        ""
+                    }
+                DialApp(baseUrl = baseUrl)
             }
         }
     }

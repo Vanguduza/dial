@@ -76,9 +76,7 @@ export default function IntegrationsReadinessPage() {
           Integration readiness
         </h1>
         <p style={{ opacity: 0.8, fontSize: 14, marginTop: dialTokens.space.sm }}>
-          Snapshot of{" "}
-          <code>/api/health/integrations</code> — plug-in key status without secret
-          values. See <code>docs/integrations/README.md</code>.
+          Key status for connected services (secrets never shown).
         </p>
         <p
           style={{ opacity: 0.75, fontSize: 13, marginTop: dialTokens.space.sm }}

@@ -4,6 +4,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { dialTokens } from "@dial/design-tokens";
+import { EIGHTEEN_ITEM_DISCLOSURES } from "@dial/adapter-whatsapp";
 import { getGroceryCart, getGroceryDeliverySlot } from "@dial/catalogue";
 import {
   getActiveFxRate,
@@ -53,8 +54,7 @@ export default async function GroceryCheckoutPage() {
           Grocery checkout
         </h1>
         <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Cart stayed USD. ZiG appears only here from ops Daily ZiG rate. Required pay CTAs:
-          EcoCash | COD (D-57). No liquor. IMTT not a line item (D-60).
+          USD cart · ZiG at pay. Pay with EcoCash or cash on delivery.
         </p>
         {!cart || cart.lines.length === 0 ? (
           <p>
@@ -73,7 +73,10 @@ export default async function GroceryCheckoutPage() {
             <p style={{ fontSize: 13 }}>
               Slot {slot?.windowLabel} · {slot?.coldChainNotes}
             </p>
-            <GroceryCheckoutForm cartId={cart.id} />
+            <GroceryCheckoutForm
+              cartId={cart.id}
+              disclosures={EIGHTEEN_ITEM_DISCLOSURES}
+            />
           </>
         )}
       </div>

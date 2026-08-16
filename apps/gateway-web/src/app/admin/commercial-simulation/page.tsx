@@ -118,13 +118,7 @@ export default function CommercialSimulationPage() {
         <h1 style={{ fontSize: "1.35rem", fontWeight: 600 }}>
           Commercial Simulation
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.85 }}>
-          PD23 · D-54 — Actual vs Simulated watermark. Simulated never auto-pays.
-          Not money SoR.{" "}
-          <Link href="/admin/compliance/wht">WHT remittance</Link>
-          {" · "}
-          <Link href="/admin/command-centre">Command Centre</Link>
-        </p>
+        
 
         <label style={{ display: "grid", gap: 6, marginTop: 16, fontSize: 14 }}>
           Internal API secret

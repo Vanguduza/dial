@@ -20,7 +20,7 @@ export default async function SpareBrowsePage({
   const chassis = params.chassis?.trim() ?? "";
   const jar = await cookies();
   const { sessionRole } = sessionFromCookieStore((name) => jar.get(name));
-  const { hits, source, meiliFilter, chassisFilter } = await searchSpareForSession(
+  const { hits, source, chassisFilter } = await searchSpareForSession(
     q,
     sessionRole,
     chassis ? { chassis } : undefined,
@@ -49,8 +49,8 @@ export default async function SpareBrowsePage({
           Dial a Spare
         </p>
         <p style={{ opacity: 0.7, fontSize: 14 }}>
-          Browse USD only · agency marketplace ·{" "}
-          {sessionRole === "b2b" ? "B2B formal stock" : "B2C"} · search {source}
+          {sessionRole === "b2b" ? "B2B formal stock" : "USD browse"} · search{" "}
+          {source}
           {chassisFilter ? ` · chassis ${chassisFilter}` : ""}
         </p>
         <nav
@@ -158,16 +158,6 @@ export default async function SpareBrowsePage({
           No offers for “{q || "empty query"}”.
         </p>
       ) : null}
-      <p
-        style={{
-          maxWidth: 960,
-          margin: `${dialTokens.space.lg} auto 0`,
-          fontSize: 11,
-          opacity: 0.45,
-        }}
-      >
-        PD3 · filter {meiliFilter} · currency USD (no ZiG on browse)
-      </p>
     </main>
   );
 }

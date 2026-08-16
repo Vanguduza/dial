@@ -166,3 +166,33 @@ test("PD38 heartbeat SLA + confirm breach escalations", () => {
   assert.equal(out.healthyAfterHeartbeat, true);
   assert.equal(out.payableFromAi, false);
 });
+
+test("Phase4-prep durable supplier costs/stock/heartbeat + Factory CSV", async () => {
+  const { runPhase4PrepSupplierDurableThinVertical } = await import("./index.js");
+  const out = await runPhase4PrepSupplierDurableThinVertical();
+  assert.equal(out.costPersisted, "fixture_skip");
+  assert.equal(out.stockPersisted, "fixture_skip");
+  assert.equal(out.heartbeatPersisted, "fixture_skip");
+  assert.equal(out.escalateNotifyReady, true);
+  assert.ok(out.factoryCsvRows >= 1);
+  assert.equal(out.offerSource, "MARKETPLACE");
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.liquorAllowed, false);
+});
+
+test("Phase4-prep two-supplier Factory + confirm-SLA board + co-op shapes", async () => {
+  const { runPhase4PrepTwoSupplierFactoryReadyThinVertical } = await import(
+    "./index.js"
+  );
+  const out = await runPhase4PrepTwoSupplierFactoryReadyThinVertical();
+  assert.ok(out.formalFactoryRows >= 1);
+  assert.ok(out.informalFactoryRows >= 1);
+  assert.equal(out.b2bInformalLeak, 0);
+  assert.equal(out.confirmPersisted, "fixture_skip");
+  assert.equal(out.coopPersisted, "fixture_skip");
+  assert.ok(out.confirmBoardOrders >= 1);
+  assert.ok(out.slaEscalationsOpen >= 1);
+  assert.equal(out.offerSource, "MARKETPLACE");
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.liquorAllowed, false);
+});

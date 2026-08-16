@@ -1,0 +1,19 @@
+{
+  "g9Claimed": false,
+  "not_G9_live": true,
+  "enh021BlockingLive": true,
+  "mode": "sandbox",
+  "health": {
+    "ok": false,
+    "mode": "sandbox",
+    "token": false,
+    "phoneNumberId": false,
+    "appSecret": false,
+    "verifyToken": false,
+    "error": "WHATSAPP_* unset — fail closed"
+  },
+  "flows": null,
+  "baileysForbidden": true,
+  "ok": false,
+  "error": "WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID unset — fail closed"
+}

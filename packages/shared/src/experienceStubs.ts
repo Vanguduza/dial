@@ -3,6 +3,15 @@
  * Never money SoR; flags/surveys only. Live SaaS keys optional.
  */
 
+/** Bracket access — Next/webpack must not rewrite `delete process.env.X` into invalid LHS. */
+function envGet(name: string): string | undefined {
+  return process.env[name];
+}
+function envSet(name: string, value: string | undefined): void {
+  if (value === undefined) delete process.env[name];
+  else process.env[name] = value;
+}
+
 export type FormbricksSurveyStub = {
   surveyId: string;
   jobId?: string;
@@ -21,11 +30,11 @@ export type PostHogFlagStub = {
 };
 
 function formbricksKeySet(): boolean {
-  return Boolean(process.env.FORMBRICKS_API_KEY?.trim());
+  return Boolean(envGet("FORMBRICKS_API_KEY")?.trim());
 }
 
 function posthogKeySet(): boolean {
-  return Boolean(process.env.POSTHOG_API_KEY?.trim());
+  return Boolean(envGet("POSTHOG_API_KEY")?.trim());
 }
 
 /**
@@ -83,10 +92,10 @@ export function runPd113FormbricksPosthogStubThinVertical(): {
   moneyAuthority: false;
   payableFromAi: false;
 } {
-  const prevFb = process.env.FORMBRICKS_API_KEY;
-  const prevPh = process.env.POSTHOG_API_KEY;
-  delete process.env.FORMBRICKS_API_KEY;
-  delete process.env.POSTHOG_API_KEY;
+  const prevFb = envGet("FORMBRICKS_API_KEY");
+  const prevPh = envGet("POSTHOG_API_KEY");
+  envSet("FORMBRICKS_API_KEY", undefined);
+  envSet("POSTHOG_API_KEY", undefined);
   try {
     const survey = queueFormbricksSurvey({
       surveyId: "csat_post_job",
@@ -106,10 +115,8 @@ export function runPd113FormbricksPosthogStubThinVertical(): {
       payableFromAi: false,
     };
   } finally {
-    if (prevFb !== undefined) process.env.FORMBRICKS_API_KEY = prevFb;
-    else delete process.env.FORMBRICKS_API_KEY;
-    if (prevPh !== undefined) process.env.POSTHOG_API_KEY = prevPh;
-    else delete process.env.POSTHOG_API_KEY;
+    envSet("FORMBRICKS_API_KEY", prevFb);
+    envSet("POSTHOG_API_KEY", prevPh);
   }
 }
 
@@ -125,9 +132,9 @@ export type RealtimeStatusSubscription = {
 
 function realtimeConfigured(): boolean {
   return Boolean(
-    process.env.SUPABASE_URL?.trim() &&
-      (process.env.SUPABASE_ANON_KEY?.trim() ||
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()),
+    envGet("SUPABASE_URL")?.trim() &&
+      (envGet("SUPABASE_ANON_KEY")?.trim() ||
+        envGet("NEXT_PUBLIC_SUPABASE_ANON_KEY")?.trim()),
   );
 }
 
@@ -169,12 +176,12 @@ export function runPd117RealtimeStatusStubThinVertical(): {
   mapSor: "maplibre";
   payableFromAi: false;
 } {
-  const prevUrl = process.env.SUPABASE_URL;
-  const prevKey = process.env.SUPABASE_ANON_KEY;
-  const prevPub = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  delete process.env.SUPABASE_URL;
-  delete process.env.SUPABASE_ANON_KEY;
-  delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const prevUrl = envGet("SUPABASE_URL");
+  const prevKey = envGet("SUPABASE_ANON_KEY");
+  const prevPub = envGet("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  envSet("SUPABASE_URL", undefined);
+  envSet("SUPABASE_ANON_KEY", undefined);
+  envSet("NEXT_PUBLIC_SUPABASE_ANON_KEY", undefined);
   try {
     const sub = subscribeRealtimeStatusChannel({ channel: "run:ord_pd117" });
     if (sub.status !== "skipped_no_realtime" || !sub.readOnly) {
@@ -190,12 +197,9 @@ export function runPd117RealtimeStatusStubThinVertical(): {
       payableFromAi: false,
     };
   } finally {
-    if (prevUrl !== undefined) process.env.SUPABASE_URL = prevUrl;
-    else delete process.env.SUPABASE_URL;
-    if (prevKey !== undefined) process.env.SUPABASE_ANON_KEY = prevKey;
-    else delete process.env.SUPABASE_ANON_KEY;
-    if (prevPub !== undefined) process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = prevPub;
-    else delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    envSet("SUPABASE_URL", prevUrl);
+    envSet("SUPABASE_ANON_KEY", prevKey);
+    envSet("NEXT_PUBLIC_SUPABASE_ANON_KEY", prevPub);
   }
 }
 
@@ -272,8 +276,8 @@ export function runPd118CsatFlowThinVertical(): {
   csatId: string;
 } {
   __resetCsatForTests();
-  const prev = process.env.FORMBRICKS_API_KEY;
-  delete process.env.FORMBRICKS_API_KEY;
+  const prev = envGet("FORMBRICKS_API_KEY");
+  envSet("FORMBRICKS_API_KEY", undefined);
   try {
     const out = recordCsatScore({
       score: 5,
@@ -301,8 +305,7 @@ export function runPd118CsatFlowThinVertical(): {
       csatId: out.csatId,
     };
   } finally {
-    if (prev !== undefined) process.env.FORMBRICKS_API_KEY = prev;
-    else delete process.env.FORMBRICKS_API_KEY;
+    envSet("FORMBRICKS_API_KEY", prev);
   }
 }
 
@@ -321,7 +324,7 @@ export type RiveGreetingStub = {
 export function resolveRiveGreeting(input?: {
   assetRef?: string;
 }): RiveGreetingStub {
-  const fromEnv = process.env.DIAL_RIVE_GREETING_ASSET?.trim();
+  const fromEnv = envGet("DIAL_RIVE_GREETING_ASSET")?.trim();
   const assetRef =
     input?.assetRef?.trim() ||
     fromEnv ||
@@ -345,8 +348,8 @@ export function runPd122RiveGreetingStubThinVertical(): {
   payableFromAi: false;
   assetRef: string;
 } {
-  const prev = process.env.DIAL_RIVE_GREETING_ASSET;
-  delete process.env.DIAL_RIVE_GREETING_ASSET;
+  const prev = envGet("DIAL_RIVE_GREETING_ASSET");
+  envSet("DIAL_RIVE_GREETING_ASSET", undefined);
   try {
     const g = resolveRiveGreeting();
     if (!g.assetRef || g.voice !== false || g.payableFromAi !== false) {
@@ -363,8 +366,7 @@ export function runPd122RiveGreetingStubThinVertical(): {
       assetRef: g.assetRef,
     };
   } finally {
-    if (prev !== undefined) process.env.DIAL_RIVE_GREETING_ASSET = prev;
-    else delete process.env.DIAL_RIVE_GREETING_ASSET;
+    envSet("DIAL_RIVE_GREETING_ASSET", prev);
   }
 }
 
@@ -380,8 +382,8 @@ export type LangfuseTraceStub = {
 
 function langfuseKeysSet(): boolean {
   return Boolean(
-    process.env.LANGFUSE_PUBLIC_KEY?.trim() &&
-      process.env.LANGFUSE_SECRET_KEY?.trim(),
+    envGet("LANGFUSE_PUBLIC_KEY")?.trim() &&
+      envGet("LANGFUSE_SECRET_KEY")?.trim(),
   );
 }
 
@@ -411,10 +413,10 @@ export function runPd130LangfuseTraceStubThinVertical(): {
   moneyAuthority: false;
   payableFromAi: false;
 } {
-  const prevPub = process.env.LANGFUSE_PUBLIC_KEY;
-  const prevSec = process.env.LANGFUSE_SECRET_KEY;
-  delete process.env.LANGFUSE_PUBLIC_KEY;
-  delete process.env.LANGFUSE_SECRET_KEY;
+  const prevPub = envGet("LANGFUSE_PUBLIC_KEY");
+  const prevSec = envGet("LANGFUSE_SECRET_KEY");
+  envSet("LANGFUSE_PUBLIC_KEY", undefined);
+  envSet("LANGFUSE_SECRET_KEY", undefined);
   try {
     const t = queueLangfuseTrace({
       name: "guidedIntake.shadow",
@@ -432,9 +434,7 @@ export function runPd130LangfuseTraceStubThinVertical(): {
       payableFromAi: false,
     };
   } finally {
-    if (prevPub !== undefined) process.env.LANGFUSE_PUBLIC_KEY = prevPub;
-    else delete process.env.LANGFUSE_PUBLIC_KEY;
-    if (prevSec !== undefined) process.env.LANGFUSE_SECRET_KEY = prevSec;
-    else delete process.env.LANGFUSE_SECRET_KEY;
+    envSet("LANGFUSE_PUBLIC_KEY", prevPub);
+    envSet("LANGFUSE_SECRET_KEY", prevSec);
   }
 }

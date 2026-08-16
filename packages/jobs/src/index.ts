@@ -126,7 +126,31 @@ export type ChecklistId =
   | "elec_no_power"
   | "appliance_fridge_not_cooling"
   | "appliance_washer_wont_spin"
-  | "hvac_heater_not_working";
+  | "hvac_heater_not_working"
+  // Pack §10 library seeds (42/42 catalog coverage).
+  | "autoelec_charge_warning"
+  | "autoelec_lights"
+  | "autoelec_central_locking"
+  | "autoelec_dash_gremlins"
+  | "auto_clutch_gearbox"
+  | "auto_auto_transmission"
+  | "plumb_no_hot_water"
+  | "plumb_blocked_toilet"
+  | "plumb_low_pressure"
+  | "plumb_burst_pipe"
+  | "elec_lights_flicker"
+  | "elec_burning_smell"
+  | "elec_breaker_tripping"
+  | "elec_no_power_whole"
+  | "appliance_stove"
+  | "appliance_fridge"
+  | "appliance_washer"
+  | "general_triage_router"
+  | "clean_residential_intake"
+  | "clean_deep_intake"
+  | "beauty_hair_intake"
+  | "beauty_home_visit_intake"
+  | "nail_intake";
 
 export type Checklist = {
   id: ChecklistId;
@@ -521,6 +545,261 @@ const CHECKLISTS: Checklist[] = [
       "Cabin or home HVAC?",
       "Coolant level if vehicle heater?",
       "Draft quote only — never AI payable",
+    ],
+  },
+  /** Phase 6 prep tranche 4 — Pack library IDs toward 42 (≠ G6 until 42/42 + evidence). */
+  {
+    id: "autoelec_charge_warning",
+    title: "Alternator / charge warning light",
+    catalogId: "autoelec.charge_warning.v1",
+    steps: [
+      "Battery light on while running?",
+      "Voltage at idle vs 2000 rpm?",
+      "Belt condition?",
+      "Stall risk — never AI-price parts",
+    ],
+  },
+  {
+    id: "autoelec_lights",
+    title: "Lights not working",
+    catalogId: "autoelec.lights.v1",
+    steps: [
+      "Which lights dead?",
+      "Brake lights urgency?",
+      "Fuse / bulb / switch?",
+      "Draft only — never AI payable",
+    ],
+  },
+  {
+    id: "plumb_no_hot_water",
+    title: "No hot water",
+    catalogId: "plumb.no_hot_water.v1",
+    steps: [
+      "Geyser / boiler power?",
+      "Gas LPG if applicable?",
+      "Cold water still flowing?",
+      "Never AI-price plumbing labour",
+    ],
+  },
+  {
+    id: "plumb_blocked_toilet",
+    title: "Blocked / overflowing toilet",
+    catalogId: "plumb.blocked_toilet.v1",
+    steps: [
+      "Overflow in progress?",
+      "Shutoff valve location?",
+      "Chemical vs mechanical clear?",
+      "Draft quote only",
+    ],
+  },
+  {
+    id: "elec_lights_flicker",
+    title: "Lights flickering or out",
+    catalogId: "elec.lights_flicker.v1",
+    steps: [
+      "Whole circuit or one fixture?",
+      "Recent work / storm?",
+      "Loose neutral symptoms?",
+      "Never AI electrical payable",
+    ],
+  },
+  {
+    id: "elec_burning_smell",
+    title: "Burning smell / sparking",
+    catalogId: "elec.burning_smell.v1",
+    steps: [
+      "Evacuate / isolate if smoke?",
+      "Which board / circuit?",
+      "Emergency path — never wait on AI",
+      "No AI prices",
+    ],
+  },
+  {
+    id: "appliance_stove",
+    title: "Stove / oven not heating",
+    catalogId: "appliance.stove.v1",
+    steps: [
+      "Gas or electric?",
+      "Igniter / element check?",
+      "LPG safety if gas?",
+      "Draft only — never AI payable",
+    ],
+  },
+  {
+    id: "general_triage_router",
+    title: "Something's broken triage router",
+    catalogId: "general.triage_router.v1",
+    steps: [
+      "Trade guess from symptoms?",
+      "Escalate to emergency.triage anytime?",
+      "Capture photos before quoting?",
+      "Never AI-write payable amounts",
+    ],
+  },
+  /** Phase 6 prep tranche 5 — remaining Pack library catalogIds (seed ≠ G6 without evidence). */
+  {
+    id: "auto_clutch_gearbox",
+    title: "Manual clutch / gearbox trouble",
+    catalogId: "auto.clutch_gearbox.v1",
+    steps: [
+      "Clutch bite point?",
+      "Gear grind into which gear?",
+      "Fluid level if applicable?",
+      "Draft only — never AI payable",
+    ],
+  },
+  {
+    id: "auto_auto_transmission",
+    title: "Automatic transmission trouble",
+    catalogId: "auto.auto_transmission.v1",
+    steps: [
+      "Slips / delayed engage?",
+      "Fluid colour / smell?",
+      "Warning lights?",
+      "Never AI-price transmission work",
+    ],
+  },
+  {
+    id: "autoelec_central_locking",
+    title: "Central locking / windows dead",
+    catalogId: "autoelec.central_locking.v1",
+    steps: [
+      "One door or all?",
+      "Fob battery?",
+      "Window switch dead too?",
+      "Draft quote only",
+    ],
+  },
+  {
+    id: "autoelec_dash_gremlins",
+    title: "Multiple / erratic warning lights",
+    catalogId: "autoelec.dash_gremlins.v1",
+    steps: [
+      "Which lights cycle?",
+      "Battery voltage stable?",
+      "Recent battery disconnect?",
+      "Never AI payable",
+    ],
+  },
+  {
+    id: "plumb_low_pressure",
+    title: "Low water pressure",
+    catalogId: "plumb.low_pressure.v1",
+    steps: [
+      "One fixture or whole home?",
+      "Municipal vs borehole?",
+      "Filter / PRV check?",
+      "Draft only",
+    ],
+  },
+  {
+    id: "plumb_burst_pipe",
+    title: "Burst pipe",
+    catalogId: "plumb.burst_pipe.v1",
+    steps: [
+      "Shut mains immediately?",
+      "Water near electrics?",
+      "Emergency path — never wait on AI",
+      "No AI prices",
+    ],
+  },
+  {
+    id: "elec_breaker_tripping",
+    title: "Breaker tripping repeatedly",
+    catalogId: "elec.breaker_tripping.v1",
+    steps: [
+      "Which circuit?",
+      "Load recently added?",
+      "Burning smell?",
+      "Never AI electrical payable",
+    ],
+  },
+  {
+    id: "elec_no_power_whole",
+    title: "No power to whole property",
+    catalogId: "elec.no_power_whole.v1",
+    steps: [
+      "Neighbourhood outage?",
+      "Main breaker / prepaid?",
+      "Isolate loads?",
+      "Draft only — never AI payable",
+    ],
+  },
+  {
+    id: "appliance_fridge",
+    title: "Fridge / freezer not cooling",
+    catalogId: "appliance.fridge.v1",
+    steps: [
+      "Compressor running?",
+      "Frost pattern?",
+      "Food safety advisory?",
+      "Never AI-price appliance parts",
+    ],
+  },
+  {
+    id: "appliance_washer",
+    title: "Washer not draining / spinning",
+    catalogId: "appliance.washer.v1",
+    steps: [
+      "Drain hose clear?",
+      "Filter blocked?",
+      "Error code?",
+      "Draft quote only",
+    ],
+  },
+  {
+    id: "clean_residential_intake",
+    title: "Residential / office cleaning intake",
+    catalogId: "clean.residential_intake.v1",
+    steps: [
+      "Rooms / sqm scope?",
+      "Products preferences?",
+      "Access / alarm?",
+      "Never AI-write payable rates",
+    ],
+  },
+  {
+    id: "clean_deep_intake",
+    title: "Post-construction / deep-clean intake",
+    catalogId: "clean.deep_intake.v1",
+    steps: [
+      "Construction hazards cleared?",
+      "Dust / paint residue?",
+      "Duration band?",
+      "Draft only — never AI payable",
+    ],
+  },
+  {
+    id: "beauty_hair_intake",
+    title: "Hair service intake",
+    catalogId: "beauty.hair_intake.v1",
+    steps: [
+      "Service type?",
+      "Chemical allergy unconfirmed?",
+      "Patch test needed?",
+      "Never AI payable",
+    ],
+  },
+  {
+    id: "beauty_home_visit_intake",
+    title: "Home-visit grooming / beauty intake",
+    catalogId: "beauty.home_visit_intake.v1",
+    steps: [
+      "Travel band?",
+      "Medical contraindication unconfirmed?",
+      "Setup space?",
+      "Draft quote only",
+    ],
+  },
+  {
+    id: "nail_intake",
+    title: "Nail service intake & hygiene",
+    catalogId: "nail.intake.v1",
+    steps: [
+      "Open wound or infection?",
+      "Hygiene station ready?",
+      "Service length?",
+      "Never AI-write payable amounts",
     ],
   },
 ];
@@ -1405,9 +1684,7 @@ export function runPd114ChecklistCatalogSeedThinVertical(): {
       throw new Error(`PD114 missing catalogId ${cat}`);
     }
   }
-  if (withCatalog.length >= 42) {
-    throw new Error("PD114 tranche must not claim full 42-library seed");
-  }
+  // Seed count may reach 42 via later prep; this vertical still does not claim G6.
   const resolved = resolveChecklistBySymptom({ symptom: "engine won't start" });
   if (resolved.catalogId !== "auto.wont_start.v1") {
     throw new Error("PD114 expected wont_start resolve");
@@ -1437,9 +1714,7 @@ export function runPd133ChecklistLibraryTranche2ThinVertical(): {
   if (withCatalog.length < 16) {
     throw new Error("PD133 expected ≥16 catalogId seeds");
   }
-  if (withCatalog.length >= 42) {
-    throw new Error("PD133 must not claim full 42 library");
-  }
+  // Later prep may seed all 42 library IDs; this vertical does not claim G6.
   const need = [
     "auto.warning_light.v1",
     "hvac.ac_not_cooling.v1",
@@ -1483,9 +1758,7 @@ export function runPd136ChecklistLibraryTranche3ThinVertical(): {
   if (withCatalog.length < 24) {
     throw new Error("PD136 expected ≥24 catalogId seeds");
   }
-  if (withCatalog.length >= 42) {
-    throw new Error("PD136 must not claim full 42 library");
-  }
+  // Later prep may seed all 42 library IDs; this vertical does not claim G6.
   const need = [
     "auto.clutch_slip.v1",
     "elec.breaker_trips.v1",
@@ -1510,6 +1783,115 @@ export function runPd136ChecklistLibraryTranche3ThinVertical(): {
     catalogSeedCount: withCatalog.length,
     tranche3Present: true,
     trancheNotFullLibrary: true,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * Phase 6 prep — checklist library tranche 4 (≥32 catalogIds; still ≠ 42 / not G6).
+ */
+export function runPhase6PrepChecklistTranche4ThinVertical(): {
+  catalogSeedCount: number;
+  tranche4Present: true;
+  trancheNotFullLibrary: boolean;
+  payableFromAi: false;
+} {
+  const withCatalog = listChecklists().filter((c) => c.catalogId);
+  const unique = new Set(withCatalog.map((c) => c.catalogId));
+  if (unique.size < 32) {
+    throw new Error(`Phase6-prep expected ≥32 unique catalogIds, got ${unique.size}`);
+  }
+  // May reach 42 seeds; G6 still needs book path + tech Android evidence (anti-stub).
+  const need = [
+    "autoelec.charge_warning.v1",
+    "plumb.blocked_toilet.v1",
+    "elec.burning_smell.v1",
+    "general.triage_router.v1",
+  ];
+  for (const cat of need) {
+    if (!unique.has(cat)) {
+      throw new Error(`Phase6-prep missing catalogId ${cat}`);
+    }
+  }
+  return {
+    catalogSeedCount: unique.size,
+    tranche4Present: true,
+    trancheNotFullLibrary: unique.size < 42,
+    payableFromAi: false,
+  };
+}
+
+/**
+ * Phase 6 prep — Pack library seed coverage (42 catalogIds). Does **not** claim G6:
+ * exit still needs customer book + tech Android evidence + capability review.
+ */
+export function runPhase6PrepChecklistLibrary42SeedThinVertical(): {
+  catalogSeedCount: number;
+  library42Seeded: true;
+  g6Claimed: false;
+  payableFromAi: false;
+} {
+  const required = [
+    "auto.wont_start.v1",
+    "auto.overheating.v1",
+    "auto.warning_light.v1",
+    "auto.brake_noise.v1",
+    "auto.unusual_noise.v1",
+    "auto.stalling.v1",
+    "auto.poor_fuel_economy.v1",
+    "auto.exhaust_smoke.v1",
+    "auto.fluid_leak.v1",
+    "auto.pulling_vibration.v1",
+    "auto.clutch_gearbox.v1",
+    "auto.auto_transmission.v1",
+    "auto.flat_tyre.v1",
+    "autoelec.battery.v1",
+    "autoelec.charge_warning.v1",
+    "autoelec.lights.v1",
+    "autoelec.central_locking.v1",
+    "autoelec.dash_gremlins.v1",
+    "hvac.ac_not_cooling.v1",
+    "hvac.ac_intermittent_smell.v1",
+    "plumb.no_hot_water.v1",
+    "plumb.leak.v1",
+    "plumb.blocked_drain.v1",
+    "plumb.blocked_toilet.v1",
+    "plumb.low_pressure.v1",
+    "plumb.burst_pipe.v1",
+    "plumb.no_water.v1",
+    "elec.socket_dead.v1",
+    "elec.breaker_tripping.v1",
+    "elec.lights_flicker.v1",
+    "elec.no_power_whole.v1",
+    "elec.burning_smell.v1",
+    "appliance.fridge.v1",
+    "appliance.washer.v1",
+    "appliance.stove.v1",
+    "clean.residential_intake.v1",
+    "clean.deep_intake.v1",
+    "beauty.hair_intake.v1",
+    "beauty.home_visit_intake.v1",
+    "nail.intake.v1",
+    "general.triage_router.v1",
+    "emergency.triage.v1",
+  ] as const;
+  const unique = new Set(
+    listChecklists()
+      .map((c) => c.catalogId)
+      .filter((id): id is string => Boolean(id)),
+  );
+  for (const cat of required) {
+    if (!unique.has(cat)) {
+      throw new Error(`Phase6-prep library42 missing ${cat}`);
+    }
+  }
+  if (required.length !== 42) {
+    throw new Error("library required list must be exactly 42");
+  }
+  return {
+    catalogSeedCount: required.length,
+    library42Seeded: true,
+    g6Claimed: false,
     payableFromAi: false,
   };
 }
@@ -1646,6 +2028,47 @@ export async function runPd120CalComConfirmThinVertical(): Promise<{
 export function getTechJob(jobId: string): TechJob | undefined {
   const j = jobs.get(jobId);
   return j ? { ...j } : undefined;
+}
+
+export async function getTechJobDurable(
+  jobId: string,
+): Promise<TechJob | undefined> {
+  const mem = getTechJob(jobId);
+  if (mem) return mem;
+  const { processedEventsIntegrationMode, durableRestSelect } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") return undefined;
+  const rows = await durableRestSelect<{
+    job_id: string;
+    customer_id: string;
+    technician_id: string | null;
+    job_class_id: string | null;
+    status: string;
+  }>("jobs", `job_id=eq.${encodeURIComponent(jobId)}`);
+  const row = rows[0];
+  if (!row) return undefined;
+  const job: TechJob = {
+    id: row.job_id,
+    customerId: row.customer_id,
+    technicianId: row.technician_id,
+    jobClassId: row.job_class_id ?? "jc_diag",
+    status:
+      row.status === "booked" ||
+      row.status === "assigned" ||
+      row.status === "in_progress" ||
+      row.status === "completed"
+        ? row.status
+        : "intake",
+    slotId: null,
+    emergency: false,
+    quoteId: "",
+    draftAmountUsdMinor: 0n,
+    currency: "USD",
+    createdAt: new Date().toISOString(),
+  };
+  jobs.set(job.id, job);
+  return { ...job };
 }
 
 export function listJobsForTechnician(technicianId: string): TechJob[] {

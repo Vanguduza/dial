@@ -1,0 +1,28 @@
+.git
+node_modules
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/build
+**/out
+**/coverage
+**/*.tsbuildinfo
+
+# Never ship secrets or local state into a build context
+.env
+.env.local
+.env.*.local
+
+# Native app build output and toolchain caches
+**/.gradle
+**/local.properties
+apps/customer-ios/.build
+**/*.apk
+**/*.aab
+
+# Large local-only map data
+infra/maps/data
+
+# Evidence screenshots and transcripts are not part of the runtime image
+docs/ops/evidence

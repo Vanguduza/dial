@@ -41,6 +41,39 @@ export async function geocodeNominatim(query: string): Promise<GeoPoint> {
   return { lat: Number(data[0].lat), lon: Number(data[0].lon) };
 }
 
+/**
+ * Nominatim reverse geocode — key-drop-in from
+ * https://nominatim.org/release-docs/latest/api/Reverse/
+ */
+export async function reverseGeocodeNominatim(
+  point: GeoPoint,
+): Promise<{ displayName: string; lat: number; lon: number }> {
+  if (integrationMode() === "fixture") {
+    return {
+      displayName: "Harare CBD (fixture)",
+      lat: point.lat,
+      lon: point.lon,
+    };
+  }
+  const base = requireUrl("NOMINATIM_URL");
+  const url = `${base}/reverse?format=json&lat=${encodeURIComponent(String(point.lat))}&lon=${encodeURIComponent(String(point.lon))}`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": "DIAL-maps-adapter/0.1" },
+  });
+  if (!res.ok) throw new Error(`Nominatim reverse HTTP ${res.status}`);
+  const data = (await res.json()) as {
+    display_name?: string;
+    lat?: string;
+    lon?: string;
+  };
+  if (!data.display_name) throw new Error("Nominatim reverse no result");
+  return {
+    displayName: data.display_name,
+    lat: data.lat ? Number(data.lat) : point.lat,
+    lon: data.lon ? Number(data.lon) : point.lon,
+  };
+}
+
 /** OSRM route between two points. */
 export async function estimateRouteOsrm(
   from: GeoPoint,

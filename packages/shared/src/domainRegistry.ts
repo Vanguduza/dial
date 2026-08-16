@@ -20,13 +20,36 @@ export type DomainModule = {
   payableFromAi: false;
 };
 
-const DEFAULT_MODULES: Array<{ moduleId: string; label: string }> = [
+/**
+ * Phase 7 prep (not G7): Pack §9.5 K/G/P seed as CERTIFIED–DORMANT until ops/counsel
+ * deepen — dormancy ≠ public MVP ladder (D-53). Not fixture-only “done”.
+ */
+const DEFAULT_MODULES: Array<{
+  moduleId: string;
+  label: string;
+  certification?: DomainModuleCert;
+}> = [
   { moduleId: "spare", label: "Dial a Spare" },
   { moduleId: "grocery", label: "Dial Groceries" },
   { moduleId: "tech", label: "Dial a Tech" },
   { moduleId: "delivery", label: "Delivery dispatch" },
   { moduleId: "promotions", label: "Promotions & referrals" },
   { moduleId: "intelligence", label: "Intelligence Factory" },
+  {
+    moduleId: "hr_payroll",
+    label: "HR / Payroll-ZW (module K)",
+    certification: "dormant",
+  },
+  {
+    moduleId: "pricing",
+    label: "Pricing / rate cards (module G)",
+    certification: "dormant",
+  },
+  {
+    moduleId: "analytics",
+    label: "Analytics / Metabase (module P)",
+    certification: "dormant",
+  },
 ];
 
 function store(): Map<string, DomainModule> {
@@ -38,7 +61,7 @@ function store(): Map<string, DomainModule> {
       g.__dialDomainModules.set(m.moduleId, {
         moduleId: m.moduleId,
         label: m.label,
-        certification: "draft",
+        certification: m.certification ?? "draft",
         publicMvpLadder: false,
         updatedAt: now,
         updatedBy: "system",

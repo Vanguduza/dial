@@ -14,11 +14,22 @@
     "dev:worker": "pnpm --filter @dial/worker-temporal start",
     "dev:queues": "pnpm --filter @dial/worker-queues start",
     "compose:up": "docker compose up -d redis meilisearch",
+    "secrets:local": "node scripts/gen-local-secrets.mjs",
+    "db:migrate": "node scripts/db-migrate.mjs",
+    "stack:up": "node scripts/stack.mjs up",
+    "stack:up:maps": "node scripts/stack.mjs up --maps",
+    "stack:down": "node scripts/stack.mjs down",
+    "stack:logs": "node scripts/stack.mjs logs",
+    "encoding:check": "node scripts/fix-text-encoding.mjs --check",
+    "maps:prepare": "node scripts/maps-prepare.mjs",
+    "restore:drill": "node scripts/run-restore-drill.mjs",
+    "retention": "node scripts/retention-job.mjs",
     "bootstrap:search": "pnpm --filter @dial/search-indexer run bootstrap",
     "eval:smoke": "pnpm --filter @dial/ai run eval:smoke"
   },
   "devDependencies": {
     "lefthook": "^1.11.13",
+    "pg": "^8.13.1",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   }

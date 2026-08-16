@@ -98,10 +98,7 @@ export default function AdminFourEyesQueuePage() {
         >
           Four-eyes queue
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD62 — pending Daily ZiG proposals (same-actor approve blocked in SoR). AI never
-          writes payable amounts.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

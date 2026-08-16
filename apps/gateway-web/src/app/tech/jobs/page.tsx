@@ -27,9 +27,6 @@ export default function TechJobsPage() {
         >
           My service jobs
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Status from DIAL jobs SoR. Draft amounts are rate_card only — never AI payable.
-        </p>
         <TechJobsList />
       </div>
     </main>

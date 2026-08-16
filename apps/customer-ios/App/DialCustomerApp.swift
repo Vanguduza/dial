@@ -8,7 +8,8 @@ import DialCustomerCore
 struct DialCustomerApp: App {
     var body: some Scene {
         WindowGroup {
-            RootView(baseUrl: ProcessInfo.processInfo.environment["DIAL_GATEWAY_BASE_URL"] ?? "http://127.0.0.1:3000")
+            // Phase 3 prep: env → Info.plist DialGatewayBaseURL → localhost (GatewayBaseUrl).
+            RootView(baseUrl: GatewayBaseUrl.resolve())
         }
     }
 }
@@ -251,9 +252,11 @@ struct RootView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(Color(red: 196 / 255, green: 163 / 255, blue: 90 / 255))
                 .disabled(!cpaReviewed)
+                .accessibilityIdentifier("pay-ecocash")
             Button("Cash on delivery (USD)") { paySpare(offer: offer, choice: "cod") }
                 .buttonStyle(.bordered)
                 .disabled(!cpaReviewed)
+                .accessibilityIdentifier("pay-cod")
             if !status.isEmpty { Text(status).font(.footnote) }
             if let error { Text(error).foregroundStyle(.red) }
             if busy { ProgressView() }

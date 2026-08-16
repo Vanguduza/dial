@@ -65,7 +65,7 @@ export default function AdminRosterPage() {
         <Link href="/admin/command-centre">Command Centre</Link>
       </p>
       <h1>Tech roster</h1>
-      <p>Schedule-X pattern day board — display only; book via Cal.com.</p>
+      
       <label>
         Internal secret{" "}
         <input

@@ -124,12 +124,7 @@ export default function AdminIntelligenceFactoryPage() {
         >
           Intelligence Factory
         </h1>
-        <p style={{ opacity: 0.85, maxWidth: 640 }}>
-          Shadow draft → Promptfoo eval → human approve → promote to
-          outcome-weighted dataset. No auto-publish. AI never writes payable
-          amounts. Flash-Lite safety organ stays P1. Simulated never auto-pays
-          (D-54).
-        </p>
+        
 
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
           Internal API secret

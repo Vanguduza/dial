@@ -1,0 +1,20 @@
+{
+  "g11Claimed": true,
+  "not_G11": false,
+  "mode": "sandbox",
+  "promptfoo": {
+    "smokeCases": 3,
+    "smokeOk": true,
+    "failBlocksPromote": true,
+    "passThenHumanPromotes": true
+  },
+  "commandCentre": {
+    "actualKpiRecommendedActionId": "open_delivery_track",
+    "recommendedActionCannotPay": true,
+    "simulatedPayoutForbidden": true,
+    "autoPublishForbidden": true,
+    "g7SimulatedReconRef": "docs/ops/evidence/g7/g7-admin-ops-recon.json ccPayoutBlocked=true"
+  },
+  "aiCapabilityReview": "docs/agent-audits/ai-capability-G11-2026-08-16.md",
+  "ok": true
+}

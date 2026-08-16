@@ -17,6 +17,7 @@ import {
   __resetAuthForTests,
   createSession,
   sessionCookieName,
+  testAuthCookie,
 } from "../auth/session.js";
 import {
   DELETE as garageDelete,
@@ -39,12 +40,12 @@ test("PD79 garage CRUD update + delete", async () => {
   assert.equal(thin.deleted, true);
   assert.equal(thin.promotedActive, true);
 
+  const cookie = testAuthCookie({ userId: "cust_pd79_api" });
   const a = await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
-        customerId: "cust_pd79_api",
         label: "A",
         chassisHint: "A1",
         reminderConsent: false,
@@ -56,9 +57,8 @@ test("PD79 garage CRUD update + delete", async () => {
   await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
-        customerId: "cust_pd79_api",
         label: "B",
         chassisHint: "B1",
         reminderConsent: false,
@@ -68,7 +68,7 @@ test("PD79 garage CRUD update + delete", async () => {
   const upd = await garagePatch(
     new Request("http://localhost/api/spare/garage", {
       method: "PATCH",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         vehicleId: bodyA.vehicle.vehicleId,
         label: "A Updated",
@@ -80,7 +80,7 @@ test("PD79 garage CRUD update + delete", async () => {
   const del = await garageDelete(
     new Request(
       `http://localhost/api/spare/garage?vehicleId=${bodyA.vehicle.vehicleId}`,
-      { method: "DELETE" },
+      { method: "DELETE", headers: { cookie } },
     ),
   );
   assert.equal(del.status, 200);

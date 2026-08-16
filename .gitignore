@@ -36,3 +36,6 @@ apps/technician-android/app/build/
 apps/technician-android/core/network/build/
 apps/technician-android/.cxx/
 apps/customer-ios/.build/
+
+# Self-hosted map tiles (Planetiler output — regenerated, not committed)
+infra/maps/data/

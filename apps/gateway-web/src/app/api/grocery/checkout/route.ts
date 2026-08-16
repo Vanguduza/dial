@@ -9,10 +9,7 @@ import {
 } from "@dial/catalogue";
 import { getActiveFxRate, requireIdempotencyKey, setDailyZigRate, usdToZig } from "@dial/payments";
 import { runG1GroceryThinVertical } from "../../../../lib/grocery/g1Spine";
-import {
-  getSessionFromToken,
-  parseSessionCookie,
-} from "../../../../lib/auth/session";
+import { requireSession } from "../../../../lib/auth/session";
 import { GROCERY_CART_COOKIE } from "../../../../lib/grocery/cookies";
 
 export const runtime = "nodejs";
@@ -103,9 +100,7 @@ export async function POST(req: Request) {
     choice = c === "cod" ? "cod" : "ecocash";
   }
 
-  const session = getSessionFromToken(
-    parseSessionCookie(req.headers.get("cookie")),
-  );
+  const session = await requireSession(req);
   const buyerSegment = session?.buyerSegment === "b2b" ? "b2b" : "b2c";
 
   try {
@@ -135,9 +130,7 @@ export async function POST(req: Request) {
         payChoice: choice,
         soldBy: result.soldBy,
         deliveryJobId: result.deliveryJobId,
-        customerId: session?.email
-          ? `cust_${session.email.split("@")[0]!.replace(/[^a-z0-9]/gi, "_").toLowerCase()}`
-          : null,
+        customerId: session?.userId ?? null,
       });
       return NextResponse.json({
         ok: true,

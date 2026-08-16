@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --import tsx --test src/**/*.test.ts",
     "bootstrap": "node --import tsx scripts/bootstrap.mjs",
+    "publish:rest-factory": "node --import tsx scripts/phase4-sandbox-rest-meili-publish.mjs",
     "lint": "node -e \"process.exit(0)\""
   },
   "dependencies": {

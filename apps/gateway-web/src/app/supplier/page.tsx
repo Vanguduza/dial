@@ -65,9 +65,7 @@ export default async function SupplierPortalPage() {
         >
           Dial Supplier
         </p>
-        <p style={{ opacity: 0.7, fontSize: 14 }}>
-          Vendor panel · {session.email} · agency marketplace · USD costs
-        </p>
+        
         {heartbeatSla ? (
           <p
             role="status"
@@ -186,9 +184,7 @@ export default async function SupplierPortalPage() {
 
       <section id="sla" style={sectionStyle} data-testid="supplier-sla-escalations">
         <h2 style={h2}>SLA escalations (ops)</h2>
-        <p style={{ fontSize: 13, opacity: 0.7 }}>
-          Heartbeat stale / confirm breach → open tickets · payableFromAi=false
-        </p>
+        
         <form action="/api/supplier/portal" method="post" style={formRow}>
           <input type="hidden" name="action" value="sync_sla" />
           <button type="submit" style={btnPrimary}>
@@ -283,11 +279,7 @@ export default async function SupplierPortalPage() {
 
       <section id="coop" data-testid="supplier-coop-panel" style={sectionStyle}>
         <h2 style={h2}>SUPPLIER_COOP / co-op spend</h2>
-        <p style={{ fontSize: 13, opacity: 0.75, marginTop: 0 }}>
-          Propose→accept→ops approve (admin). Live spend appears as{" "}
-          <code>coop_spend</code> statement lines. Promo credit never cash-outs
-          (D-42).
-        </p>
+        
         {coopAgreements.length === 0 ? (
           <p style={{ opacity: 0.7 }}>No co-op agreements for this supplier yet.</p>
         ) : (
@@ -344,10 +336,7 @@ export default async function SupplierPortalPage() {
         </ul>
       </section>
 
-      <p style={{ maxWidth: 960, margin: "24px auto 0", fontSize: 11, opacity: 0.45 }}>
-        PD38 · Pack §9.4 heartbeat/confirm SLA · Mercur patterns only · money SoR stays
-        DIAL packages · supplierId={supplierId}
-      </p>
+      
     </main>
   );
 }

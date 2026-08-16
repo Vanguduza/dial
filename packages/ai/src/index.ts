@@ -164,6 +164,8 @@ export {
   recommendedActionsForTile,
   commandCentreBanner,
   attemptCommandCentrePayout,
+  executeRecommendedAction,
+  runG11IntelligenceCommandCentreSandboxEvidence,
   __resetIntelligenceForTests,
   type MetricContract,
   type MetricTile,

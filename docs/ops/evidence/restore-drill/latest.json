@@ -1,0 +1,8 @@
+{
+  "executed": false,
+  "reason": "docker_engine_unavailable",
+  "rtoTargetMinutes": 60,
+  "rpoTargetHours": 24,
+  "procedure": "docs/security/restore-drill.md",
+  "elapsedMs": 1000
+}

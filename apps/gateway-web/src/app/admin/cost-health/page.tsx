@@ -127,12 +127,7 @@ export default function CostHealthPage() {
         DIAL
       </p>
       <h1 style={{ fontSize: "1.5rem", margin: "0.5rem 0" }}>Cost / health</h1>
-      <p style={{ margin: "0 0 0.75rem", maxWidth: "36rem", opacity: 0.85 }}>
-        PD22 — LiteLLM/AI + cloud + SMS/WhatsApp opex with alert thresholds and
-        kill-switches to rate limits. Money SoR remains ledger packages — this
-        page never authorizes payouts. IMTT is DIAL opex (D-60), never a checkout
-        line.
-      </p>
+      
 
       <p
         style={{ margin: "0 0 1rem", maxWidth: "36rem", opacity: 0.75, fontSize: 13 }}

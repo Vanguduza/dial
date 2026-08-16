@@ -129,10 +129,7 @@ export default function CommandCentrePage() {
         >
           Command Centre
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          Every KPI registers a MetricContract. Severity→recommended permissioned
-          actions (PD47). Simulated never auto-pays (D-54). CC is not money SoR.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input
@@ -147,6 +144,7 @@ export default function CommandCentrePage() {
           <label style={{ fontSize: 14 }}>
             Mode{" "}
             <select
+              data-testid="cc-mode-select"
               value={mode}
               onChange={(e) => setMode(e.target.value as "actual" | "simulated")}
               style={{ padding: 8, marginLeft: 6 }}
@@ -157,6 +155,7 @@ export default function CommandCentrePage() {
           </label>
           <button
             type="button"
+            data-testid="cc-load-tiles"
             disabled={busy || !secret}
             onClick={() => void refresh()}
             style={{
@@ -182,24 +181,25 @@ export default function CommandCentrePage() {
               fontWeight: 600,
             }}
           >
-            Attempt payout (must refuse)
+            Attempt payout
           </button>
         </div>
         {watermark ? (
-          <p
-            style={{
-              marginTop: 16,
-              padding: dialTokens.space.sm,
-              background:
-                mode === "simulated" ? dialTokens.color.brand.accent : dialTokens.color.brand.primary,
-              color: "#fff",
-              borderRadius: 8,
-              fontWeight: 600,
-            }}
-          >
-            {watermark} · autoPayAllowed=false
-          </p>
-        ) : null}
+            <p
+              data-testid="cc-simulated-watermark"
+              style={{
+                marginTop: 16,
+                padding: dialTokens.space.sm,
+                background:
+                  mode === "simulated" ? dialTokens.color.brand.accent : dialTokens.color.brand.primary,
+                color: "#fff",
+                borderRadius: 8,
+                fontWeight: 600,
+              }}
+            >
+              {watermark} · auto-pay off
+            </p>
+          ) : null}
         {message ? <p role="status">{message}</p> : null}
         <div
           data-testid="cc-metric-tiles"

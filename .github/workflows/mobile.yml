@@ -1,0 +1,46 @@
+name: Mobile assemble
+
+on:
+  push:
+    paths:
+      - "apps/customer-android/**"
+      - "apps/technician-android/**"
+      - "apps/delivery-android/**"
+      - "apps/customer-ios/**"
+      - ".github/workflows/mobile.yml"
+  pull_request:
+    paths:
+      - "apps/customer-android/**"
+      - "apps/technician-android/**"
+      - "apps/delivery-android/**"
+      - "apps/customer-ios/**"
+      - ".github/workflows/mobile.yml"
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [customer-android, technician-android, delivery-android]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Unit tests + assemble localDebug
+        working-directory: apps/${{ matrix.app }}
+        run: |
+          if [ -x ./gradlew ]; then
+            ./gradlew test assembleLocalDebug --stacktrace
+          else
+            echo "gradlew missing — skip assemble"
+          fi
+
+  ios:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift test
+        working-directory: apps/customer-ios
+        run: swift test

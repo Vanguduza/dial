@@ -1,0 +1,51 @@
+{
+  // DIAL Build — founder-authorized agent autonomy (Completion Plan Phases 0–12).
+  // Takes effect when Cursor Run Mode is Auto-review / Allowlist / Run Everything.
+  // For zero prompts on Windows (no full shell sandbox): set Run Mode = "Run Everything"
+  //   Settings → Agents → Approvals & Execution → Run Everything
+  // Docs: https://cursor.com/docs/reference/permissions
+  //        https://cursor.com/docs/agent/security/run-modes
+
+  "terminalAllowlist": [
+    "pnpm",
+    "npm",
+    "node",
+    "npx",
+    "docker",
+    "git",
+    "gh",
+    "turbo",
+    "lefthook",
+    "powershell",
+    "pwsh",
+    "cmd",
+    "curl",
+    "wget",
+    "rg",
+    "tsc"
+  ],
+
+  "mcpAllowlist": [
+    "cursor-app-control:*",
+    "cursor-ide-browser:*"
+  ],
+
+  "autoRun": {
+    "allow_instructions": [
+      "Founder authorized DIAL Build agent to finish Completion Plan Phases 0–12 with production-intent sandbox evidence.",
+      "Allow shell and network that load local .env (never print secret values), write/update gitignored .env from founder-supplied credentials, and run Phase dogfood scripts under packages/*/scripts.",
+      "Allow Supabase Management API and GoTrue/PostgREST calls when the founder supplied a personal access token or project keys for the DIAL org sandbox project — apply supabase/migrations, Auth admin create-user, password sign-in, and gateway /api/auth/me recon.",
+      "Allow docker compose up for redis, meilisearch, and temporal profile; pnpm bootstrap:search; Meili upsert/search evidence; worker-queues and worker-temporal fail-closed and sandbox start.",
+      "Allow pnpm install, typecheck, test, lint, build, and living-doc updates (README, CHANGELOG, ENHANCEMENTS, BUGS, docs/planning STATE) for Completion Plan landings.",
+      "Allow git status/diff/log/add/commit/push when the user or Dev Manager auto-push rules request it; never force-push main.",
+      "Prefer allowing required_permissions all on Windows when sandbox cannot provide filesystem isolation — this machine needs unrestricted shell for compose and .env."
+    ],
+    "block_instructions": [
+      "Still ask before declaring customer-open / S99 / Appendix C Gate 3 green.",
+      "Still ask before force-push, hard reset, or rewriting git history on main/master.",
+      "Still ask before committing or printing .env, service_role, PSP, WhatsApp, or FDMS secret values into chat, commits, or tracked files.",
+      "Still ask before production (live) ZIMRA/Meta/PSP credential cutover or liquor Build work.",
+      "Still ask before deleting the repo or wiping Docker volumes that hold production-like data without an explicit founder request."
+    ]
+  }
+}

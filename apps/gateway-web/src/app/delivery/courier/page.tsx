@@ -7,6 +7,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
+import { DialMap } from "../../../components/map/DialMap";
 
 type Offer = { id: string; jobId: string; status: string };
 type Job = {
@@ -120,10 +121,6 @@ export default function CourierHubPage() {
         >
           Courier hub
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          PD51 — float banner + POD photo stub + COD ack. MapLibre/OSRM SoR (not
-          Google). Session auth required.
-        </p>
         {floatBanner ? (
           <p
             role="alert"
@@ -250,6 +247,7 @@ export default function CourierHubPage() {
           </section>
         ) : null}
         {message ? <p role="status">{message}</p> : null}
+        <DialMap height="260px" center={[-17.829, 31.052]} zoom={11} />
       </div>
     </main>
   );

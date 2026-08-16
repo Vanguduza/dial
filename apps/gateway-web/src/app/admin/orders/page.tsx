@@ -103,10 +103,7 @@ export default function AdminOrdersPage() {
         >
           Orders queue
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          PD55 — Spare + grocery ops queue. Advance ERP status only. Food/pantry —
-          no liquor. AI never writes payable amounts.
-        </p>
+        
         <label style={{ display: "block", marginTop: 12 }}>
           Internal secret
           <input

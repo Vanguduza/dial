@@ -1,0 +1,25 @@
+# D-47 — identity on id-bearing routes must come from the session, never from
+# query-string customerId / orderId used as the *caller* identity. Reading an
+# object id (orderId) is fine; treating customerId from the query as "who I am" is not.
+rules:
+  - id: dial.no-query-customer-identity
+    message: >-
+      Do not take customerId from the query string as the caller identity.
+      Use the session (JWT/cookie) and assertResourceAccess (D-47).
+    severity: ERROR
+    languages: [typescript, javascript]
+    metadata:
+      dial: D-47
+      category: security
+      cwe: "CWE-639"
+    patterns:
+      - pattern-either:
+          - pattern: searchParams.get("customerId")
+          - pattern: url.searchParams.get("customerId")
+          - pattern: $X.searchParams.get("customerId")
+    paths:
+      include:
+        - "apps/gateway-web/src/app/api/**"
+      exclude:
+        - "**/*.test.ts"
+        - "**/*.test.tsx"

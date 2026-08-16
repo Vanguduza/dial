@@ -1,9 +1,11 @@
 # DIAL Build — End-to-End Workplan (auto-advance)
 
+> **Historical (2026-08-16+):** Eng sequencing SoR is [`DIAL_Full_ERP_Completion_Plan.md`](./DIAL_Full_ERP_Completion_Plan.md) (Phases 0–12, hard DoD gates). This workplan remains the **S00–S90 / PD1–PD138 inventory**. Do **not** invent PD139+. Do **not** treat S90 green as customer-ready. S99 stays human (Appendix C).
+
 **Authority:** Pack §15 (T0–T9) · DoD backlog E1–E6 · Blueprint §8.0 · D-52 / D-56 / D-61  
 **Companion:** `DIAL_Dev_Manager_Autonomous_Runbook.md` (decision policy)  
 **State pointer:** `DIAL_Build_Workplan_STATE.md` (current stage — update every landing)  
-**Rule:** When a stage goes **green**, Dev Manager **immediately** opens and starts the next stage. **No human confirm. No idle wait.**
+**Rule (historical band only):** When a stage goes **green**, Dev Manager **immediately** opens and starts the next stage. **No human confirm. No idle wait.** — **Superseded for “what’s next” by Completion Plan phases.**
 
 ---
 

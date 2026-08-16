@@ -9,7 +9,7 @@ import {
   listWaTemplateRegistry,
   MetaCloudApiAdapter,
   pingWhatsAppHealth,
-  runPd12WaFlowsSandboxThinVertical,
+  runG9WaFlowsSandboxEvidence,
   runPd40WaTemplateRegistryThinVertical,
   type WaTemplateKey,
 } from "@dial/adapter-whatsapp";
@@ -122,10 +122,31 @@ export async function POST(req: Request) {
       { status: 503 },
     );
   }
+  // Sandbox settlement writes journals durably; without a store the rail would
+  // only look green in memory, which is exactly what the anti-stub rule forbids.
+  const durableUrl = (
+    process.env.SUPABASE_URL ??
+    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    ""
+  ).trim();
+  const durableKey = (
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    process.env.SUPABASE_ANON_KEY ??
+    ""
+  ).trim();
+  if (!durableUrl || !durableKey) {
+    return NextResponse.json(
+      {
+        error:
+          "SUPABASE_URL + service role/anon key required — sandbox settlement must be durable",
+      },
+      { status: 503 },
+    );
+  }
 
   try {
-    const result = await runPd12WaFlowsSandboxThinVertical();
-    return NextResponse.json({ ok: true, result });
+    const result = await runG9WaFlowsSandboxEvidence();
+    return NextResponse.json({ ok: true, result, g9Claimed: false });
   } catch (e) {
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "thin_vertical failed" },

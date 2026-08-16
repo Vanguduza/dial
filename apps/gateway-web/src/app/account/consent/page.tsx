@@ -91,9 +91,6 @@ export default function AccountConsentPage() {
           <Link href="/home">Home</Link>
         </nav>
         <h1 style={{ fontSize: 22, marginBottom: 8 }}>Marketing consent</h1>
-        <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 16 }}>
-          PD78 — grant or revoke marketing messages. Audit trail retained.
-        </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button type="button" disabled={busy} onClick={() => void refresh()}>
             Refresh

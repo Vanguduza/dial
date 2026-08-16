@@ -1,5 +1,6 @@
 /**
- * Admin WA Flows + template registry (PD12 / PD40) — Cloud API only, no Baileys, no liquor.
+ * Admin WA Flows + template registry (PD12 / PD40) — official Meta Cloud API only.
+ * No Baileys or other unofficial WhatsApp clients (D-40). No liquor flows.
  */
 "use client";
 
@@ -118,11 +119,7 @@ export default function AdminWaFlowsPage() {
       >
         WA Flows + template registry
       </h1>
-      <p style={{ color: "#444", marginTop: 0, fontSize: 14 }}>
-        Official Meta Cloud API only (D-40). FLOW_SPARE_* + FLOW_GROCERY_* food.
-        EcoCash | COD buttons (D-57). No liquor Flows. No Baileys. Templates never
-        carry AI payables.
-      </p>
+      
       <label style={{ display: "block", marginBottom: 12, fontSize: 14 }}>
         Internal secret
         <input
@@ -192,9 +189,7 @@ export default function AdminWaFlowsPage() {
             ))}
           </ul>
           <h2 style={{ fontSize: "1.05rem" }}>Template registry</h2>
-          <p style={{ fontSize: 13, opacity: 0.7 }}>
-            Set env hint to promote stub → approved (ops Meta name).
-          </p>
+          
           <ul data-testid="wa-template-registry">
             {(status.templates ?? []).map((t) => (
               <li key={t.key}>

@@ -35,9 +35,6 @@ export default async function GrocerySlotPage() {
         >
           Delivery window
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Food & pantry only — no liquor windows. Cold-chain notes shown per slot.
-        </p>
         {!cart || cart.lines.length === 0 ? (
           <p>
             <Link href="/grocery">Add items</Link> before choosing a slot.

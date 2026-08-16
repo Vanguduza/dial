@@ -196,6 +196,31 @@ export function getPromoCreditBalance(customerId: string): PromoCreditBalance {
   };
 }
 
+export async function getPromoCreditBalanceDurable(
+  customerId: string,
+): Promise<PromoCreditBalance> {
+  const mem = store().balances.get(customerId);
+  if (mem !== undefined) return getPromoCreditBalance(customerId);
+  const { processedEventsIntegrationMode, durableRestSelect } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") {
+    return getPromoCreditBalance(customerId);
+  }
+  const rows = await durableRestSelect<{
+    user_id: string;
+    balance_minor: number | string;
+  }>(
+    "promo_credits",
+    `user_id=eq.${encodeURIComponent(customerId)}`,
+  );
+  const row = rows[0];
+  if (row) {
+    store().balances.set(customerId, BigInt(row.balance_minor));
+  }
+  return getPromoCreditBalance(customerId);
+}
+
 export function shareReferral(input: {
   customerId: string;
   campaignId: string;

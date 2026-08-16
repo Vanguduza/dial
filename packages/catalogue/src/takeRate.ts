@@ -144,3 +144,68 @@ export function runPd34B2bTakeRateThinVertical(): {
     b2bFormalOnly: true,
   };
 }
+
+/**
+ * Phase 4 prep — publish take-rate then durable persist (fixture skip / sandbox fail-closed).
+ * Integer bps ops-set only; never AI payable; no liquor.
+ */
+export async function publishTakeRateLadderDurable(
+  ladderId: string,
+  setBy: string,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{
+  ladder: TakeRateLadder;
+  persisted: "accepted" | "fixture_skip";
+}> {
+  const ladder = publishTakeRateLadder(ladderId, setBy);
+  const { persistTakeRateLadderDurable } = await import("./durableFactory.js");
+  const persisted = await persistTakeRateLadderDurable(ladder, env);
+  return { ladder, persisted };
+}
+
+/** Phase 4 prep thin vertical for take-rate durable path. */
+export async function runPhase4PrepTakeRateDurableThinVertical(): Promise<{
+  resolvedBps: number;
+  persisted: "fixture_skip";
+  payableFromAi: false;
+  liquorAllowed: false;
+}> {
+  __resetTakeRateForTests();
+  const draft = createGroceryTakeRateDraft({
+    label: "P4prep grocery ladder",
+    setBy: "ops_p4prep",
+    tiers: [
+      { minGmvUsdMinor: 0n, takeRateBps: 750 },
+      { minGmvUsdMinor: 200_00n, takeRateBps: 550 },
+    ],
+  });
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { ladder, persisted } = await publishTakeRateLadderDurable(
+    draft.ladderId,
+    "ops_p4prep",
+  );
+  const bps = resolveTakeRateBps(ladder, 250_00n);
+  if (bps !== 550 || persisted !== "fixture_skip") {
+    throw new Error("Phase4-prep take-rate durable fixture failed");
+  }
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.SUPABASE_ANON_KEY;
+  let closed = false;
+  try {
+    await publishTakeRateLadderDurable(draft.ladderId, "ops_p4prep");
+  } catch {
+    closed = true;
+  }
+  if (!closed) throw new Error("expected take-rate durable fail-closed");
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+
+  return {
+    resolvedBps: bps,
+    persisted: "fixture_skip",
+    payableFromAi: false,
+    liquorAllowed: false,
+  };
+}

@@ -1,41 +1,43 @@
 /**
- * FDMS / ZIMRA Virtual Gateway webhook — fiscal events (D-40a / D-59 / S118).
- * Fail closed without FDMS_ACTIVATION_KEY outside fixture mode.
+ * FDMS / ZIMRA Virtual Gateway webhook — fiscal events (D-40a / D-59 / S118 / key-drop-in).
+ * Signature verify (FDMS_ACTIVATION_KEY HMAC) + durable idempotency before mutate.
  */
 import { NextResponse } from "next/server";
-import { ZimraVirtualGatewayAdapter } from "@dial/adapter-fdms";
+import {
+  ZimraVirtualGatewayAdapter,
+  verifyFdmsWebhook,
+} from "@dial/adapter-fdms";
 import { claimProcessedEventDurable } from "@dial/shared";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
-  if (mode !== "fixture" && !process.env.FDMS_ACTIVATION_KEY?.trim()) {
-    return NextResponse.json(
-      { error: "FDMS_ACTIVATION_KEY unset — fail closed" },
-      { status: 503 },
-    );
+  const rawBody = await req.text();
+  const headers = Object.fromEntries(req.headers.entries());
+  try {
+    const body = verifyFdmsWebhook(headers, rawBody);
+    if (
+      (await claimProcessedEventDurable({
+        eventId: body.eventId,
+        source: "fdms",
+      })) === "duplicate"
+    ) {
+      return NextResponse.json({ ok: true, duplicate: true });
+    }
+    if (body.type === "submit_receipt" && body.receipt) {
+      const gw = new ZimraVirtualGatewayAdapter();
+      const result = await gw.submitReceipt(body.receipt);
+      return NextResponse.json({ ok: true, result });
+    }
+    return NextResponse.json({ ok: true, acknowledged: true });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "webhook error";
+    const status =
+      msg.includes("unset") || msg.includes("fail closed")
+        ? 503
+        : msg.includes("eventId")
+          ? 400
+          : 401;
+    return NextResponse.json({ error: msg }, { status });
   }
-  const body = (await req.json()) as {
-    eventId?: string;
-    type?: string;
-    receipt?: unknown;
-  };
-  if (!body.eventId) {
-    return NextResponse.json({ error: "eventId required" }, { status: 400 });
-  }
-  if (
-    (await claimProcessedEventDurable({
-      eventId: body.eventId,
-      source: "fdms",
-    })) === "duplicate"
-  ) {
-    return NextResponse.json({ ok: true, duplicate: true });
-  }
-  if (body.type === "submit_receipt" && body.receipt) {
-    const gw = new ZimraVirtualGatewayAdapter();
-    const result = await gw.submitReceipt(body.receipt);
-    return NextResponse.json({ ok: true, result });
-  }
-  return NextResponse.json({ ok: true, acknowledged: true });
 }

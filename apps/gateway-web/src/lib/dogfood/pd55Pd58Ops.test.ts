@@ -219,6 +219,7 @@ test("PD58 customer delivery track read-only", async () => {
   __resetDeliveryForTests();
   const { token } = createSession({
     email: "pd58@dial.test",
+    userId: "cust_pd58",
     buyerSegment: "b2c",
   });
   const cookie = `${sessionCookieName()}=${token}`;

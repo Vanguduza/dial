@@ -9,6 +9,7 @@ import {
   listMoneyOutbox,
   postJournal,
   postPspCaptureSimple,
+  getJournalDurable,
   runPd126FormanceConsoleExplorerThinVertical,
 } from "./index.js";
 
@@ -108,4 +109,20 @@ test("PD11 sandbox thin vertical: money outbox agency receipts via Virtual Gatew
   assert.ok(out.fiscalCodes.some((c) => c.includes("GOODS_INFORMAL")));
   assert.ok(out.fiscalCodes.some((c) => c.includes("DIAL_FEE")));
   process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
+test("getJournalDurable stays in-memory in fixture", async () => {
+  __resetLedgerForTests();
+  const j = postJournal({
+    orderId: "ord_durable_fx",
+    currency: "USD",
+    idempotencyKey: "idem_durable_fx",
+    lines: [
+      { account: "cash_psp", amountMinor: 100n, memo: "d" },
+      { account: "customer_clearing", amountMinor: -100n, memo: "c" },
+    ],
+  });
+  const loaded = await getJournalDurable(j.id);
+  assert.equal(loaded?.id, j.id);
+  assert.equal(await getJournalDurable("missing_journal"), undefined);
 });

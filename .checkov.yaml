@@ -1,0 +1,17 @@
+# Checkov (D-48) — hard-fail HIGH/CRITICAL is enforced by .github/workflows/checkov.yml.
+# Local compose binds host ports so the founder can dogfood on one machine; those
+# bindings are not a production exposure. Skip the host-network findings, never
+# skip image-user / healthcheck / secret-in-layer checks.
+
+skip-check:
+  - CKV_SECRET_6                 # generic entropy; compose interpolates env, never literals
+  - CKV2_DOCKERCOMPOSE_5         # host ports on the local stack (runbook documents the bind)
+  - CKV_DOCKERCOMPOSE_5          # same — local-only published ports
+  - CKV_DOCKERCOMPOSE_FILE_OUTPUT # compose file is the intended artefact
+
+skip-path:
+  - node_modules
+  - ThreatDragonModels
+  - docs
+  - .tmp-td-sample
+  - apps/gateway-web/.next

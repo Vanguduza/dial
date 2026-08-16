@@ -122,9 +122,7 @@ export default function AdminPendingReviewPage() {
         >
           Pending review
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD64/PD66 — list → claim → approve|reject. No AI auto-publish. No liquor.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

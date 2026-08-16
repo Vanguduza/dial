@@ -3,19 +3,17 @@
  * Session SoR; order ownership via customerId match (D-47). Never body userId/role.
  */
 import { NextResponse } from "next/server";
-import { getGroceryOrder, getSpareOrder } from "@dial/catalogue";
+import { getGroceryOrderDurable, getSpareOrderDurable } from "@dial/catalogue";
 import { getCustomerDeliveryTrack } from "@dial/delivery";
 import {
-  getSessionFromToken,
-  parseSessionCookie,
+  assertResourceAccess,
+  requireSession,
 } from "../../../../lib/auth/session";
 
 export const runtime = "nodejs";
 
 export async function GET(req: Request) {
-  const session = getSessionFromToken(
-    parseSessionCookie(req.headers.get("cookie")),
-  );
+  const session = await requireSession(req);
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -31,19 +29,27 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "orderId required" }, { status: 400 });
   }
 
-  const spare = getSpareOrder(orderId);
-  const grocery = getGroceryOrder(orderId);
+  const spare = await getSpareOrderDurable(orderId);
+  const grocery = spare ? undefined : await getGroceryOrderDurable(orderId);
   const order = spare ?? grocery;
   if (!order) {
     return NextResponse.json({ error: "Unknown order" }, { status: 404 });
   }
-  const customerKey = `cust_${session.email.split("@")[0]!.replace(/[^a-z0-9]/gi, "_").toLowerCase()}`;
-  const owns =
-    order.customerId == null ||
-    order.customerId === session.email ||
-    order.customerId === customerKey;
-  if (!owns) {
-    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  if (session.role !== "ops_admin") {
+    const ownerId = order.customerId ?? "";
+    if (ownerId) {
+      try {
+        assertResourceAccess({
+          session,
+          resourceOwnerId: ownerId,
+          resourceKind: "order",
+        });
+      } catch {
+        return NextResponse.json({ error: "forbidden" }, { status: 403 });
+      }
+    } else if ((process.env.DIAL_INTEGRATION_MODE ?? "fixture") !== "fixture") {
+      return NextResponse.json({ error: "Unknown order" }, { status: 404 });
+    }
   }
 
   const track = getCustomerDeliveryTrack({ orderId });

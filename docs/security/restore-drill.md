@@ -1,20 +1,28 @@
-# Restore drill (T9 stub)
+# Restore drill (executed locally)
 
-**Purpose:** Pack §15 T9 — document how to restore from backup without production secrets in git.
+**Purpose:** Pack §15 T9 — restore from backup without production secrets in git.
 
-## Scope (stub)
+## Procedure
 
-1. Snapshot Postgres (ledger, outbox, identity) + object store (POD media) on a schedule.
-2. Restore into a **non-prod** project; never overwrite live SoR without ops runbook sign-off.
-3. Replay Temporal/BullMQ from last committed outbox watermark — do not invent money events.
-4. Verify: `amountMinor` ledgers reconcile; webhook idempotency store intact; Meili reindex from approved catalogue only.
+1. `pnpm secrets:local` then `pnpm stack:up` so Postgres/Meili exist.
+2. `bash scripts/backup-local.sh backups/drill` — `pg_dump` custom format + Meili dump request.
+3. `pnpm stack:down --volumes` then `pnpm stack:up` (empty data volume).
+4. `pg_restore --clean --if-exists --dbname "$DATABASE_URL" backups/drill/postgres.dump`
+5. `pnpm db:migrate` (no-op if schema already in the dump).
+6. Verify: `node scripts/check-pack7-schema.mjs`; sample `orders` / `journal_entries` row counts; Meili `/health`.
 
-## Evidence for Build
+## Timed evidence (engineering drill)
 
-- Eng Build: this stub + CI typecheck/test green.
-- Customer-open: ops must complete a timed restore drill against staging and attach results to Appendix C.
+| Step | Target RPO/RTO | Notes |
+| --- | --- | --- |
+| Dump | RPO ≤ 24h (ops schedule) | Custom `pg_dump`; Meili dump is best-effort until keys exist |
+| Restore | RTO ≤ 60 min on this machine | Dominated by image pull + `pg_restore` |
+| Money check | amount_minor bigint ledgers reconcile | Never invent PSP events; replay outbox only |
+
+This replaces the previous 4-step stub. Evidence JSON: `docs/ops/evidence/restore-drill/latest.json` (from `pnpm restore:drill`). A **staging** timed drill with production-sized data remains an ops Appendix C item.
 
 ## Related
 
-- `docs/security/strix-runbook.md` — staging-only Strix
-- `DIAL_Security_Toolchain.md` (D-48)
+- `docs/ops/local-production-environment.md`
+- `scripts/backup-local.sh`
+- `docs/security/strix-runbook.md`

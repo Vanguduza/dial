@@ -97,7 +97,7 @@ export default function SpareGaragePage() {
         return;
       }
       setMessage(
-        reminderConsent ? "Consent granted" : "Consent revoked (PD50 audit)",
+        reminderConsent ? "Consent granted" : "Consent revoked",
       );
       await refresh();
     } finally {
@@ -128,7 +128,7 @@ export default function SpareGaragePage() {
         setMessage(data.error ?? `HTTP ${res.status}`);
         return;
       }
-      setMessage(`Reminder scheduled ${data.reminder?.reminderId ?? ""} (PD108)`);
+      setMessage(`Reminder scheduled ${data.reminder?.reminderId ?? ""}`);
       await refresh();
     } finally {
       setBusy(false);
@@ -149,7 +149,7 @@ export default function SpareGaragePage() {
         setMessage(data.error ?? `HTTP ${res.status}`);
         return;
       }
-      setMessage("Active vehicle set (PD75)");
+      setMessage("Active vehicle set");
       await refresh();
     } finally {
       setBusy(false);
@@ -169,7 +169,7 @@ export default function SpareGaragePage() {
         setMessage(data.error ?? `HTTP ${res.status}`);
         return;
       }
-      setMessage("Vehicle deleted (PD79)");
+      setMessage("Vehicle deleted");
       await refresh();
     } finally {
       setBusy(false);
@@ -208,10 +208,6 @@ export default function SpareGaragePage() {
         >
           Garage · Vehicle Hub
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Chassis-aware browse and reminder consent audit. Reminders require
-          explicit grant; revoke is recorded.
-        </p>
 
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
           Customer id

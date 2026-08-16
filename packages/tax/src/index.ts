@@ -175,6 +175,27 @@ export function getFiscalDayState(): FiscalDayState {
   return { ...fiscalDay };
 }
 
+export async function getFiscalDayStateDurable(): Promise<FiscalDayState> {
+  const mem = getFiscalDayState();
+  if (mem.fiscalDayId) return mem;
+  const { processedEventsIntegrationMode, durableRestSelect } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") return mem;
+  const rows = await durableRestSelect<{
+    fiscal_day_id: string;
+    status: string;
+    opened_at: string;
+    closed_at: string | null;
+  }>("fiscal_days", "status=eq.open&order=opened_at.desc&limit=1");
+  const row = rows[0];
+  if (!row) return mem;
+  fiscalDay.fiscalDayId = row.fiscal_day_id;
+  fiscalDay.openedAt = row.opened_at;
+  fiscalDay.closedAt = row.closed_at;
+  return getFiscalDayState();
+}
+
 /**
  * FDMS fiscal-day open worker (D-40a / D-59) — Virtual Gateway openDay.
  */

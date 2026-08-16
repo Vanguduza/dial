@@ -145,10 +145,7 @@ export default function TechTakeHomePage() {
         >
           Technician Take-Home
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD52 — gross → DIAL fee → ITF263|30% WHT → net. Upload/verify ITF263;
-          certificate PDF stub only. Draft — human + pricing engine write payables.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

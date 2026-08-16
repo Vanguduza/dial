@@ -206,6 +206,25 @@ final class DialGatewayClientTests: XCTestCase {
         XCTAssertTrue(book.draftOnly)
         XCTAssertEqual(step, 5)
     }
+
+    func testGatewayBaseUrlInternalTrackRejectsLoopback() {
+        XCTAssertTrue(GatewayBaseUrl.isLoopback("http://127.0.0.1:3000"))
+        XCTAssertTrue(GatewayBaseUrl.isLoopback("http://10.0.2.2:3000"))
+        XCTAssertFalse(GatewayBaseUrl.isLoopback("https://gateway.example.test"))
+        XCTAssertNil(
+            GatewayBaseUrl.resolveForInternalTrack(
+                env: ["DIAL_GATEWAY_BASE_URL": "http://127.0.0.1:3000"],
+                bundle: .main
+            )
+        )
+        XCTAssertEqual(
+            GatewayBaseUrl.resolveForInternalTrack(
+                env: ["DIAL_GATEWAY_BASE_URL": "https://gateway.example.test"],
+                bundle: .main
+            ),
+            "https://gateway.example.test"
+        )
+    }
 }
 
 struct MockTransport: HttpTransport {

@@ -134,7 +134,7 @@ export default function SpareDualEntryPage() {
     }
     setHits(data.hits ?? []);
     setMessage(
-      `${entry} · chassis ${code} · ${data.hits?.length ?? 0} USD offers · no reverse-engineered EPC`,
+      `${data.hits?.length ?? 0} offers · chassis ${code}`,
     );
   }
 
@@ -162,10 +162,6 @@ export default function SpareDualEntryPage() {
         <h1 style={{ fontSize: "1.25rem", margin: "8px 0 0" }}>
           Select Vehicle | Browse EPC
         </h1>
-        <p style={{ opacity: 0.75, fontSize: 14 }}>
-          Dual entry · join on chassis_code · USD only (D-57) · OpenCatalog/ACES
-          fixtures (C-6)
-        </p>
         <nav
           style={{
             display: "flex",
@@ -199,7 +195,6 @@ export default function SpareDualEntryPage() {
           }}
         >
           <h2 style={{ margin: 0 }}>Select Vehicle</h2>
-          <p style={{ fontSize: 14, opacity: 0.9 }}>vehicle_master cascade</p>
           <label style={{ display: "block", marginTop: 12, fontSize: 13 }}>
             Make
             <select
@@ -253,9 +248,6 @@ export default function SpareDualEntryPage() {
           }}
         >
           <h2 style={{ margin: 0 }}>Browse EPC</h2>
-          <p style={{ fontSize: 14, opacity: 0.9 }}>
-            catalog_* groups · brand-feed fixtures
-          </p>
           <ul style={{ listStyle: "none", padding: 0, marginTop: 12 }}>
             {groups.map((g) => (
               <li key={g.groupId} style={{ marginBottom: 8 }}>

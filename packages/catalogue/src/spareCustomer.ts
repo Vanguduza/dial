@@ -172,6 +172,8 @@ export function placeSpareOrder(input: {
   cart: SpareCartSnapshot;
   customerId?: string | null;
   payChoice: "ecocash" | "cod";
+  /** Optional stable id (G2 durable spine). */
+  orderId?: string;
 }): SpareOrder {
   const cart = input.cart;
   if (cart.currency !== "USD") {
@@ -186,7 +188,9 @@ export function placeSpareOrder(input: {
   const soldBySummary = [...new Set(cart.lines.map((l) => l.soldBy))].join(", ");
   const createdAt = new Date().toISOString();
   const order: SpareOrder = {
-    orderId: `sord_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+    orderId:
+      input.orderId?.trim() ||
+      `sord_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
     cartId: cart.id,
     customerId: input.customerId ?? null,
     status: "confirmed",
@@ -208,6 +212,57 @@ export function placeSpareOrder(input: {
 export function getSpareOrder(orderId: string): SpareOrder | undefined {
   const o = store().orders.get(orderId);
   return o ? cloneOrder(o) : undefined;
+}
+
+export async function getSpareOrderDurable(
+  orderId: string,
+): Promise<SpareOrder | undefined> {
+  const mem = getSpareOrder(orderId);
+  if (mem) return mem;
+  const { processedEventsIntegrationMode, durableRestSelect } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") return undefined;
+  const rows = await durableRestSelect<{
+    order_id: string;
+    customer_id: string | null;
+    status: SpareOrderStatus;
+    total_minor: number | string;
+    currency: "USD";
+    created_at: string;
+  }>("orders", `order_id=eq.${encodeURIComponent(orderId)}`);
+  const row = rows[0];
+  if (!row) return undefined;
+  const lines = await durableRestSelect<{
+    offer_id: string;
+    title: string;
+    qty: number;
+    unit_price_minor: number | string;
+  }>("order_lines", `order_id=eq.${encodeURIComponent(orderId)}`);
+  const order: SpareOrder = {
+    orderId: row.order_id,
+    cartId: "",
+    customerId: row.customer_id,
+    status: row.status,
+    currency: "USD",
+    totalUsdMinor: BigInt(row.total_minor),
+    payChoice: "cod",
+    soldBySummary: "Agency",
+    lines: lines.map((l) => ({
+      offerId: l.offer_id,
+      title: l.title,
+      qty: l.qty,
+      unitPriceUsdMinor: BigInt(l.unit_price_minor),
+      lineTotalUsdMinor: BigInt(l.unit_price_minor) * BigInt(l.qty),
+      soldBy: "Agency",
+      supplierFormality: "formal",
+    })),
+    createdAt: row.created_at,
+    cancellableUntil: row.created_at,
+    timeline: [{ at: row.created_at, event: "order_placed", status: row.status }],
+  };
+  store().orders.set(order.orderId, order);
+  return cloneOrder(order);
 }
 
 export function listSpareOrders(customerId?: string | null): SpareOrder[] {

@@ -6,6 +6,7 @@
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
+import { DialMap } from "../../../components/map/DialMap";
 
 type Address = {
   addressId: string;
@@ -24,6 +25,7 @@ export default function AccountAddressesPage() {
   const [phone, setPhone] = useState("+263771000000");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [pin, setPin] = useState({ lat: -17.8292, lng: 31.0522 });
 
   const refresh = useCallback(async () => {
     setBusy(true);
@@ -53,8 +55,8 @@ export default function AccountAddressesPage() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           label,
-          lat: -17.8292,
-          lng: 31.0522,
+          lat: pin.lat,
+          lng: pin.lng,
           landmark,
           phoneE164: phone,
         }),
@@ -89,9 +91,6 @@ export default function AccountAddressesPage() {
           <Link href="/home">Home</Link>
         </nav>
         <h1 style={{ fontSize: 22 }}>Delivery addresses</h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD83 — pin + landmark + phone (MapLibre SoR).
-        </p>
         <div style={{ display: "grid", gap: 8, marginTop: 12 }}>
           <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Label" />
           <input
@@ -109,7 +108,15 @@ export default function AccountAddressesPage() {
             </button>
           </div>
         </div>
-        {message ? <p role="status">{message}</p> : null}
+          <DialMap
+            pins={addresses.map((a) => ({
+              id: a.addressId,
+              lat: a.lat,
+              lng: a.lng,
+              label: a.label,
+            }))}
+            onPick={(lat, lng) => setPin({ lat, lng })}
+          />
         <ul style={{ marginTop: 16 }}>
           {addresses.map((a) => (
             <li key={a.addressId}>

@@ -84,7 +84,34 @@ export async function upsertSpareOfferDocuments(
   });
   if (!res.ok) throw new Error(`Meili documents HTTP ${res.status}`);
   const data = (await res.json()) as { taskUid?: number };
-  return { taskUid: String(data.taskUid ?? "unknown"), indexUid: uid };
+  const taskUid = String(data.taskUid ?? "unknown");
+  if (taskUid !== "unknown" && taskUid !== "fixture") {
+    await waitForMeiliTask(taskUid);
+  }
+  return { taskUid, indexUid: uid };
+}
+
+/** Poll Meili task until succeeded (sandbox/live indexing evidence). */
+export async function waitForMeiliTask(
+  taskUid: string,
+  env: NodeJS.ProcessEnv = process.env,
+  maxMs = 15_000,
+): Promise<void> {
+  if (integrationMode(env) === "fixture") return;
+  const host = requireSecret("MEILI_HOST").replace(/\/$/, "");
+  const key = requireSecret("MEILI_MASTER_KEY");
+  const started = Date.now();
+  while (Date.now() - started < maxMs) {
+    const res = await fetch(`${host}/tasks/${taskUid}`, {
+      headers: { Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) throw new Error(`Meili task HTTP ${res.status}`);
+    const data = (await res.json()) as { status?: string };
+    if (data.status === "succeeded") return;
+    if (data.status === "failed") throw new Error(`Meili task ${taskUid} failed`);
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error(`Meili task ${taskUid} timed out after ${maxMs}ms`);
 }
 
 export function groceryOffersIndexName(

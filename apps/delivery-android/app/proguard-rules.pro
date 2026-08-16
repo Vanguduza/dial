@@ -1,0 +1,2 @@
+-keep class zw.co.dial.** { *; }
+-dontwarn org.maplibre.**

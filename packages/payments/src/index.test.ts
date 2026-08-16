@@ -54,6 +54,32 @@ test("PD23 WHT remittance thin vertical", () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("Phase8-prep: WHT remittance durable row shape + fixture persist skip", async () => {
+  const {
+    __resetWhtRemittanceForTests,
+    createWhtRemittanceDraft,
+    persistWhtRemittanceDurable,
+    whtRemittanceDurableRow,
+  } = await import("./whtRemittance.js");
+  __resetWhtRemittanceForTests();
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const draft = createWhtRemittanceDraft({
+    yearOfAssessment: 2026,
+    balances: [
+      {
+        technicianId: "tech_p8",
+        yearOfAssessment: 2026,
+        withheldMinor: 30_00n,
+      },
+    ],
+  });
+  const row = whtRemittanceDurableRow(draft);
+  assert.equal(row.payable_from_ai, false);
+  assert.equal(row.currency, "USD");
+  assert.equal(row.batch_id, draft.batchId);
+  assert.equal(await persistWhtRemittanceDurable(draft), "fixture_skip");
+});
+
 test("checkout EcoCash button creates intent with ZWG display + fx_rate_id", async () => {
   __resetPaymentsForTests();
   setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_test" });
@@ -216,6 +242,45 @@ test("Job Reserve authorize → capture/release only via signed webhook", async 
     signatureValid: true,
   });
   assert.equal(dup.status, "captured");
+});
+
+test("key-drop-in findPaymentIntent / JobReserve resolve orderId + providerRef", async () => {
+  const {
+    findJobReserveForWebhook,
+    findPaymentIntentForWebhook,
+  } = await import("./index.js");
+  __resetPaymentsForTests();
+  setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "ops_kdi" });
+  const { intent } = await createCheckoutPayment({
+    choice: "ecocash",
+    orderId: "ord_kdi_1",
+    amountUsdMinor: 10_00n,
+    idempotencyKey: "kdi-eco-1",
+  });
+  assert.ok(intent);
+  assert.equal(findPaymentIntentForWebhook("ord_kdi_1")?.id, intent!.id);
+  if (intent!.providerRef) {
+    assert.equal(
+      findPaymentIntentForWebhook(intent!.providerRef)?.id,
+      intent!.id,
+    );
+  }
+  const reserve = await authorizeJobReserve({
+    jobId: "job_kdi_1",
+    amountUsdMinor: 50_00n,
+    idempotencyKey: "kdi-jr-1",
+  });
+  assert.ok(reserve.intentId, "job reserve must link a payment intent");
+  assert.equal(findJobReserveForWebhook(reserve.id)?.id, reserve.id);
+  assert.equal(findJobReserveForWebhook("job_kdi_1")?.id, reserve.id);
+  const jrIntent = reserve.intentId
+    ? findPaymentIntentForWebhook(reserve.intentId)
+    : undefined;
+  assert.ok(jrIntent?.providerRef);
+  assert.equal(
+    findJobReserveForWebhook(jrIntent!.providerRef!)?.id,
+    reserve.id,
+  );
 });
 
 test("Tech WHT 30% without ITF263; zero withhold with clearance (D-50)", () => {

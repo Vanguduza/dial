@@ -6,6 +6,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
+import { DialMap } from "../../../components/map/DialMap";
 
 export default function CustomerDeliveryTrackPage() {
   const [orderId, setOrderId] = useState("ord_pd58");
@@ -67,10 +68,6 @@ export default function CustomerDeliveryTrackPage() {
         >
           Track delivery
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          PD58 — read-only courier pin (MapLibre SoR). Not Google/Mapbox. Session
-          auth required.
-        </p>
         <label style={{ display: "block", marginTop: 12 }}>
           Order id
           <input
@@ -89,10 +86,15 @@ export default function CustomerDeliveryTrackPage() {
         </button>
         {message ? <p role="status">{message}</p> : null}
         {lat != null && lng != null ? (
-          <p style={{ marginTop: 12 }}>
-            Pin {lat.toFixed(4)}, {lng.toFixed(4)} · job {status}
-          </p>
-        ) : null}
+          <>
+            <p style={{ marginTop: 12 }}>
+              Pin {lat.toFixed(4)}, {lng.toFixed(4)} · job {status}
+            </p>
+            <DialMap pins={[{ id: orderId, lat, lng, label: orderId }]} />
+          </>
+        ) : (
+          <DialMap pins={[]} />
+        )}
       </div>
     </main>
   );

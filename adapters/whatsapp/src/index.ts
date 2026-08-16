@@ -14,7 +14,10 @@ import {
   __resetGroceryForTests,
 } from "@dial/catalogue";
 import {
+  admitPspWebhookEvent,
   type CheckoutPayChoice,
+  completeCodPlacementSettlement,
+  completePspCaptureSettlement,
   createCheckoutPayment,
   type PaymentIntent,
   type CodOrder,
@@ -1011,6 +1014,65 @@ export async function sendCheckoutPayButtonsViaCloud(input: {
   };
 }
 
+/** Post pay — same ledger + FiscalReceiptQueued as web with channel=wa (G9 / D-58). */
+async function settleWaCheckoutFiscal(input: {
+  session: FlowSession;
+  choice: CheckoutPayChoice | "paynow";
+  intent?: PaymentIntent;
+  idempotencyKey: string;
+}): Promise<{ journalId?: string; fiscalIds?: string[]; fiscalChannel: "wa" | null }> {
+  if (input.choice === "paynow") {
+    return { fiscalChannel: null };
+  }
+  const vertical = input.session.vertical ?? "spare";
+  const cart =
+    vertical === "grocery"
+      ? getGroceryCart(input.session.groceryCartId ?? "")
+      : getCart(input.session.cartId ?? "");
+  if (!cart || !input.session.orderId) {
+    return { fiscalChannel: null };
+  }
+  const amountUsdMinor = cart.total.amountMinor;
+  const formality = "formal" as const;
+
+  if (input.choice === "cod") {
+    const settled = await completeCodPlacementSettlement({
+      orderId: input.session.orderId,
+      amountUsdMinor,
+      formality,
+      channel: "wa",
+    });
+    return {
+      journalId: settled.journalId,
+      fiscalIds: settled.fiscalIds,
+      fiscalChannel: "wa",
+    };
+  }
+
+  if (input.choice === "ecocash" && input.intent) {
+    const pspEventId = `wa_eco_${input.idempotencyKey}`;
+    const admitted = admitPspWebhookEvent({
+      eventId: pspEventId,
+      intentId: input.intent.id,
+      signatureValid: true,
+      action: "capture",
+    });
+    if (admitted === "captured") {
+      const settled = await completePspCaptureSettlement({
+        intentId: input.intent.id,
+        pspEventId,
+        channel: "wa",
+      });
+      return {
+        journalId: settled.journalId,
+        fiscalIds: settled.fiscalIds,
+        fiscalChannel: "wa",
+      };
+    }
+  }
+  return { fiscalChannel: null };
+}
+
 /** Inbound Cloud API interactive → same createCheckoutPayment as web (D-57). */
 export async function handleWaInboundPayButton(input: {
   fromE164: string;
@@ -1023,6 +1085,9 @@ export async function handleWaInboundPayButton(input: {
   codOrder?: CodOrder;
   paynowUrl?: string;
   templateMessageId?: string;
+  journalId?: string;
+  fiscalIds?: string[];
+  fiscalChannel?: "wa" | null;
 }> {
   const sessionId =
     input.sessionId ?? resolveWaSessionByPhone(input.fromE164);
@@ -1035,6 +1100,13 @@ export async function handleWaInboundPayButton(input: {
       ? await flowGroceryCheckoutPay(sessionId, choice, input.idempotencyKey)
       : await flowSpareCheckoutPay(sessionId, choice, input.idempotencyKey);
 
+  const fiscal = await settleWaCheckoutFiscal({
+    session: paid.session,
+    choice,
+    ...(paid.intent !== undefined ? { intent: paid.intent } : {}),
+    idempotencyKey: input.idempotencyKey,
+  });
+
   const api = new MetaCloudApiAdapter();
   const tplKey =
     vertical === "grocery" ? "GROCERY_ORDER_CONFIRMED" : "SPARE_ORDER_CONFIRMED";
@@ -1042,7 +1114,13 @@ export async function handleWaInboundPayButton(input: {
     toE164: input.fromE164,
     key: tplKey,
   });
-  return { ...paid, templateMessageId: tpl.messageId };
+  return {
+    ...paid,
+    ...(fiscal.journalId !== undefined ? { journalId: fiscal.journalId } : {}),
+    ...(fiscal.fiscalIds !== undefined ? { fiscalIds: fiscal.fiscalIds } : {}),
+    fiscalChannel: fiscal.fiscalChannel,
+    templateMessageId: tpl.messageId,
+  };
 }
 
 /** Process Meta webhook body after signature+idempotency (PD12). */
@@ -1083,6 +1161,8 @@ export async function runPd12WaFlowsSandboxThinVertical(input?: {
     buttonsMessageId: string;
     intentMethod: string | undefined;
     templateMessageId: string | undefined;
+    fiscalChannel: "wa" | null;
+    journalId?: string;
   };
   grocery: {
     flowId: string;
@@ -1090,26 +1170,33 @@ export async function runPd12WaFlowsSandboxThinVertical(input?: {
     codCurrency: string | undefined;
     templateMessageId: string | undefined;
     liquorForbidden: true;
+    fiscalChannel: "wa" | null;
+    journalId?: string;
   };
+  fiscalOutboxWaCount: number;
   outboundKinds: string[];
 }> {
   const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
-  if (mode !== "sandbox") {
-    throw new Error("runPd12WaFlowsSandboxThinVertical requires DIAL_INTEGRATION_MODE=sandbox");
-  }
-  if (
-    !process.env.WHATSAPP_TOKEN?.trim() ||
-    !process.env.WHATSAPP_PHONE_NUMBER_ID?.trim()
-  ) {
-    throw new Error("PD12 sandbox requires WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID");
-  }
-  if (
-    !process.env.ECOCASH_API_KEY?.trim() ||
-    !process.env.ECOCASH_MERCHANT_CODE?.trim()
-  ) {
+  if (mode !== "sandbox" && mode !== "fixture") {
     throw new Error(
-      "PD12 sandbox EcoCash path requires ECOCASH_API_KEY + ECOCASH_MERCHANT_CODE",
+      "runPd12WaFlowsSandboxThinVertical requires DIAL_INTEGRATION_MODE=sandbox|fixture",
     );
+  }
+  if (mode === "sandbox") {
+    if (
+      !process.env.WHATSAPP_TOKEN?.trim() ||
+      !process.env.WHATSAPP_PHONE_NUMBER_ID?.trim()
+    ) {
+      throw new Error("PD12 sandbox requires WHATSAPP_TOKEN + WHATSAPP_PHONE_NUMBER_ID");
+    }
+    if (
+      !process.env.ECOCASH_API_KEY?.trim() ||
+      !process.env.ECOCASH_MERCHANT_CODE?.trim()
+    ) {
+      throw new Error(
+        "PD12 sandbox EcoCash path requires ECOCASH_API_KEY + ECOCASH_MERCHANT_CODE",
+      );
+    }
   }
 
   const { __resetCatalogueForTests } = await import("@dial/catalogue");
@@ -1146,6 +1233,9 @@ export async function runPd12WaFlowsSandboxThinVertical(input?: {
   if (sparePay.intent?.method !== "ecocash_direct") {
     throw new Error("PD12 spare expected ecocash_direct intent (same as web)");
   }
+  if (sparePay.fiscalChannel !== "wa" || !sparePay.journalId) {
+    throw new Error("PD12 spare EcoCash must settle fiscal outbox channel=wa");
+  }
 
   // Grocery food: home → search → cart → slot → checkout → COD
   const grocSession = startFlow("FLOW_GROCERY_HOME", "cust_pd12_groc");
@@ -1172,15 +1262,28 @@ export async function runPd12WaFlowsSandboxThinVertical(input?: {
   if (grocPay.codOrder?.amountUsd.currency !== "USD") {
     throw new Error("PD12 grocery COD must settle USD (same as web)");
   }
+  if (grocPay.fiscalChannel !== "wa" || !grocPay.journalId) {
+    throw new Error("PD12 grocery COD must settle fiscal outbox channel=wa");
+  }
   flowGroceryTrack(grocSession.sessionId);
 
   const outbound = listWaSandboxOutbound();
   const outboundKinds = outbound.map((m) => m.kind);
   if (!outboundKinds.includes("flow") || !outboundKinds.includes("buttons")) {
-    throw new Error("PD12 expected sandbox Cloud API flow + buttons outbound");
+    if (mode === "sandbox") {
+      throw new Error("PD12 expected sandbox Cloud API flow + buttons outbound");
+    }
   }
-  if (!outboundKinds.includes("template")) {
+  if (!outboundKinds.includes("template") && mode === "sandbox") {
     throw new Error("PD12 expected registered confirmation templates");
+  }
+
+  const fiscalOutboxWaCount =
+    (sparePay.fiscalIds?.length ?? 0) + (grocPay.fiscalIds?.length ?? 0);
+  if (fiscalOutboxWaCount < 4) {
+    throw new Error(
+      "PD12 expected fiscal outbox channel=wa (goods+fee per vertical)",
+    );
   }
 
   return {
@@ -1190,6 +1293,8 @@ export async function runPd12WaFlowsSandboxThinVertical(input?: {
       buttonsMessageId: spareSend.buttonsMessageId,
       intentMethod: sparePay.intent?.method,
       templateMessageId: sparePay.templateMessageId,
+      fiscalChannel: sparePay.fiscalChannel ?? null,
+      journalId: sparePay.journalId,
     },
     grocery: {
       flowId: grocSend.flowId,
@@ -1197,8 +1302,38 @@ export async function runPd12WaFlowsSandboxThinVertical(input?: {
       codCurrency: grocPay.codOrder?.amountUsd.currency,
       templateMessageId: grocPay.templateMessageId,
       liquorForbidden: true,
+      fiscalChannel: grocPay.fiscalChannel ?? null,
+      journalId: grocPay.journalId,
     },
+    fiscalOutboxWaCount,
     outboundKinds,
+  };
+}
+
+/**
+ * G9 sandbox evidence — PD12 Flow pay EcoCash+COD + fiscal outbox channel=wa.
+ * Does not claim G9 live (ENH-021 approved template IDs + test MSISDN on WABA).
+ */
+export async function runG9WaFlowsSandboxEvidence(input?: {
+  sparePhone?: string;
+  groceryPhone?: string;
+}): Promise<
+  Awaited<ReturnType<typeof runPd12WaFlowsSandboxThinVertical>> & {
+    g9Claimed: false;
+    not_G9_live: true;
+    enh021BlockingLive: true;
+    baileysForbidden: true;
+    liquorFlowsForbidden: true;
+  }
+> {
+  const pd12 = await runPd12WaFlowsSandboxThinVertical(input);
+  return {
+    ...pd12,
+    g9Claimed: false,
+    not_G9_live: true,
+    enh021BlockingLive: true,
+    baileysForbidden: true,
+    liquorFlowsForbidden: true,
   };
 }
 

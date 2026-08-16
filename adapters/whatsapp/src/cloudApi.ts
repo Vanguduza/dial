@@ -89,6 +89,11 @@ export interface WhatsAppCloudAdapter {
     flowToken: string;
     cta?: string;
   }): Promise<{ messageId: string; flowId: string }>;
+  /**
+   * Mark inbound message as read (Graph messages status=read).
+   * Docs: https://developers.facebook.com/docs/whatsapp/cloud-api/guides/mark-message-as-read
+   */
+  markMessageRead(input: { messageId: string }): Promise<{ ok: true }>;
 }
 
 function requireSecret(name: string): string {
@@ -379,6 +384,38 @@ export class MetaCloudApiAdapter implements WhatsAppCloudAdapter {
       messageId: data.messages?.[0]?.id ?? "unknown",
       flowId: binding.flowId,
     };
+  }
+
+  async markMessageRead(input: {
+    messageId: string;
+  }): Promise<{ ok: true }> {
+    if (!input.messageId.trim()) {
+      throw new Error("messageId required");
+    }
+    const mode = integrationMode();
+    if (mode === "fixture") {
+      return { ok: true };
+    }
+    if (mode === "sandbox" && !useHttpSandbox()) {
+      requireSandboxKeys();
+      return { ok: true };
+    }
+    const token = requireSecret("WHATSAPP_TOKEN");
+    const phoneId = requireSecret("WHATSAPP_PHONE_NUMBER_ID");
+    const res = await fetch(`${graphBase()}/${phoneId}/messages`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messaging_product: "whatsapp",
+        status: "read",
+        message_id: input.messageId,
+      }),
+    });
+    if (!res.ok) throw new Error(`WA mark-read HTTP ${res.status}`);
+    return { ok: true };
   }
 }
 

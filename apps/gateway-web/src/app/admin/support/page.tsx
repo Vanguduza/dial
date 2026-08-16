@@ -93,10 +93,7 @@ export default function AdminSupportPage() {
         >
           Support + consent audit
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          ERP support tickets (SoR) and marketing/consent audit trail. Chatwoot
-          is handoff only — never ticket status SoR. No AI payables.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

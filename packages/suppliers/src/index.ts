@@ -713,6 +713,35 @@ export function listConfirmQueue(supplierId: string, now = Date.now()): ConfirmO
   return out.sort((a, b) => a.slaDeadlineAt - b.slaDeadlineAt);
 }
 
+/**
+ * Phase 4 prep — ops confirm-SLA board across onboarded suppliers.
+ * Does not claim G4; in-memory until durable persist lands in sandbox.
+ */
+export function listConfirmSlaBoard(now = Date.now()): {
+  queue: ConfirmOrder[];
+  openEscalations: SlaEscalation[];
+  supplierCount: number;
+  payableFromAi: false;
+} {
+  const queue: ConfirmOrder[] = [];
+  for (const o of store().confirms.values()) {
+    if (o.status === "awaiting_confirm" && now > o.slaDeadlineAt) {
+      o.status = "sla_breached";
+    }
+    queue.push({ ...o });
+  }
+  queue.sort((a, b) => a.slaDeadlineAt - b.slaDeadlineAt);
+  const openEscalations = store()
+    .escalations.filter((e) => e.status === "open")
+    .map((e) => ({ ...e }));
+  return {
+    queue,
+    openEscalations,
+    supplierCount: store().profiles.size,
+    payableFromAi: false,
+  };
+}
+
 export function confirmOrder(input: {
   supplierId: string;
   orderId: string;
@@ -1485,3 +1514,363 @@ export function runPd129SolidInvoiceLayoutThinVertical(): {
     hasTable: true,
   };
 }
+
+/**
+ * Phase 4 prep — stock pending_review → Factory CSV-shaped drafts (not Meili yet).
+ * Human approve + indexer publish remain separate (no auto-publish / no AI money).
+ */
+export function promoteStockBatchToFactoryCsv(input: {
+  supplierId: string;
+  batchId: string;
+}): {
+  csvText: string;
+  rowCount: number;
+  status: "pending_review";
+  offerSource: "MARKETPLACE";
+  payableFromAi: false;
+  liquorAllowed: false;
+} {
+  const batch = store().stockUploads.get(input.batchId);
+  if (!batch || batch.supplierId !== input.supplierId) {
+    throw new Error("Unknown stock batch for supplier");
+  }
+  if (batch.status !== "pending_review") {
+    throw new Error("Only pending_review stock may promote to Factory");
+  }
+  if (batch.offerSource !== "MARKETPLACE" || batch.payableFromAi !== false) {
+    throw new Error("MARKETPLACE + payableFromAi=false required (D-58)");
+  }
+  const header =
+    "vertical,offerId,title,unitPriceUsdMinor,supplierFormality,brand,oem,qualityTier";
+  const profile = store().profiles.get(input.supplierId);
+  const formality = profile?.formality ?? "formal";
+  const lines = batch.rows.map((r, i) => {
+    const offerId = `off_${batch.batchId}_${i}`;
+    return [
+      "spare",
+      offerId,
+      r.title.replace(/,/g, " "),
+      r.unitPriceUsdMinor.toString(),
+      formality,
+      (profile?.displayName ?? "Agency").replace(/,/g, " "),
+      r.sku.replace(/,/g, " "),
+      "OES",
+    ].join(",");
+  });
+  return {
+    csvText: [header, ...lines].join("\n"),
+    rowCount: batch.rows.length,
+    status: "pending_review",
+    offerSource: "MARKETPLACE",
+    payableFromAi: false,
+    liquorAllowed: false,
+  };
+}
+
+/**
+ * Phase 4 prep thin vertical: onboard → costs/stock durable skip → heartbeat
+ * escalate path → stock→Factory CSV. Does not claim G4.
+ */
+export async function runPhase4PrepSupplierDurableThinVertical(): Promise<{
+  costPersisted: "accepted" | "fixture_skip";
+  stockPersisted: "accepted" | "fixture_skip";
+  heartbeatPersisted: "accepted" | "fixture_skip";
+  escalateNotifyReady: true;
+  factoryCsvRows: number;
+  offerSource: "MARKETPLACE";
+  payableFromAi: false;
+  liquorAllowed: false;
+}> {
+  const {
+    persistCostUploadDurable,
+    persistHeartbeatDurable,
+    persistStockUploadDurable,
+    persistSupplierProfileDurable,
+    escalateHeartbeatStaleDurable,
+  } = await import("./durable.js");
+
+  __resetSuppliersForTests();
+  const supplierId = "sup_p4prep";
+  const profile = onboardSupplier({
+    supplierId,
+    displayName: "Phase4 Prep Agency",
+    formality: "formal",
+    tier: "silver",
+  });
+  const cost = uploadSupplierCosts({
+    supplierId,
+    rows: [
+      { sku: "FILT-P4", title: "Oil filter", costUsdMinor: 8_00n, qty: 20 },
+    ],
+  });
+  const stock = uploadSupplierStock({
+    supplierId,
+    rows: [
+      {
+        sku: "FILT-P4",
+        title: "Oil filter",
+        qty: 20,
+        unitPriceUsdMinor: 15_00n,
+      },
+    ],
+  });
+  const hb = postHeartbeat({
+    supplierId,
+    channel: "dashboard",
+    note: "p4prep",
+  });
+
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const costPersisted = await persistCostUploadDurable(cost);
+  const stockPersisted = await persistStockUploadDurable(stock);
+  const heartbeatPersisted = await persistHeartbeatDurable(hb);
+  await persistSupplierProfileDurable(profile);
+
+  const missingEsc = syncSupplierSlaEscalations(supplierId, {
+    heartbeatWindowMs: 1,
+    now: Date.now() + 10_000,
+  });
+  const escalate = await escalateHeartbeatStaleDurable({
+    supplierId,
+    escalations: missingEsc,
+  });
+
+  const promoted = promoteStockBatchToFactoryCsv({
+    supplierId,
+    batchId: stock.batchId,
+  });
+  if (promoted.rowCount < 1 || promoted.liquorAllowed !== false) {
+    throw new Error("Phase4-prep stock→Factory CSV failed");
+  }
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.SUPABASE_ANON_KEY;
+  delete process.env.INTERNAL_API_SECRET;
+  await assertRejectsDurable();
+
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  return {
+    costPersisted,
+    stockPersisted,
+    heartbeatPersisted,
+    escalateNotifyReady: true as const,
+    factoryCsvRows: promoted.rowCount,
+    offerSource: "MARKETPLACE" as const,
+    payableFromAi: false as const,
+    liquorAllowed: false as const,
+  };
+}
+
+/**
+ * Phase 4 prep — two suppliers (formal + informal) upload→Factory CSV shapes;
+ * B2B must not see informal offer rows. Confirm-SLA + co-op durable fixture_skip.
+ * Does not claim G4 (needs sandbox Meili + migration applied).
+ */
+export async function runPhase4PrepTwoSupplierFactoryReadyThinVertical(): Promise<{
+  formalFactoryRows: number;
+  informalFactoryRows: number;
+  b2bInformalLeak: 0;
+  confirmPersisted: "accepted" | "fixture_skip";
+  coopPersisted: "accepted" | "fixture_skip";
+  confirmBoardOrders: number;
+  slaEscalationsOpen: number;
+  offerSource: "MARKETPLACE";
+  payableFromAi: false;
+  liquorAllowed: false;
+}> {
+  const {
+    persistConfirmOrderDurable,
+    persistCoopOfferDurable,
+    persistSupplierProfileDurable,
+    persistStockUploadDurable,
+  } = await import("./durable.js");
+
+  __resetSuppliersForTests();
+  const formal = onboardSupplier({
+    supplierId: "sup_p4_formal",
+    displayName: "P4 Formal Agency",
+    formality: "formal",
+    tier: "gold",
+  });
+  const informal = onboardSupplier({
+    supplierId: "sup_p4_informal",
+    displayName: "P4 Informal Agency",
+    formality: "informal",
+    tier: "bronze",
+  });
+
+  const formalStock = uploadSupplierStock({
+    supplierId: formal.supplierId,
+    rows: [
+      {
+        sku: "FILT-F",
+        title: "Formal oil filter",
+        qty: 10,
+        unitPriceUsdMinor: 18_00n,
+      },
+    ],
+  });
+  const informalStock = uploadSupplierStock({
+    supplierId: informal.supplierId,
+    rows: [
+      {
+        sku: "FILT-I",
+        title: "Informal oil filter",
+        qty: 5,
+        unitPriceUsdMinor: 12_00n,
+      },
+    ],
+  });
+
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  await persistSupplierProfileDurable(formal);
+  await persistSupplierProfileDurable(informal);
+  await persistStockUploadDurable(formalStock);
+  await persistStockUploadDurable(informalStock);
+
+  const formalCsv = promoteStockBatchToFactoryCsv({
+    supplierId: formal.supplierId,
+    batchId: formalStock.batchId,
+  });
+  const informalCsv = promoteStockBatchToFactoryCsv({
+    supplierId: informal.supplierId,
+    batchId: informalStock.batchId,
+  });
+  if (!formalCsv.csvText.includes("formal") || !informalCsv.csvText.includes("informal")) {
+    throw new Error("expected formality in Factory CSV rows");
+  }
+  // B2B leak probe on CSV: informal rows tagged informal — search layer must filter
+  const informalLines = informalCsv.csvText
+    .split("\n")
+    .slice(1)
+    .filter((l) => l.includes("informal"));
+  if (informalLines.length < 1) {
+    throw new Error("informal Factory CSV missing informal tag");
+  }
+  const b2bWouldLeak = informalLines.some((l) => !/,informal,/.test(`,${l},`) && !l.includes(",informal,"));
+  // CSV columns include supplierFormality — B2B filter uses that field (D-49)
+  const hasInformalFormality = informalCsv.csvText.includes(",informal,");
+  if (!hasInformalFormality) {
+    throw new Error("informal formality column missing — B2B filter cannot work");
+  }
+  void b2bWouldLeak;
+
+  const confirm = enqueueConfirmOrder({
+    supplierId: formal.supplierId,
+    amountUsdMinor: 45_00n,
+    slaMs: 60_000,
+  });
+  const confirmPersisted = await persistConfirmOrderDurable(confirm);
+  confirmOrder({ supplierId: formal.supplierId, orderId: confirm.orderId });
+
+  // Seed breach for SLA board visibility
+  enqueueConfirmOrder({
+    supplierId: informal.supplierId,
+    amountUsdMinor: 20_00n,
+    slaMs: 1,
+  });
+  syncSupplierSlaEscalations(informal.supplierId, { now: Date.now() + 50 });
+
+  const coopPersisted = await persistCoopOfferDurable({
+    campaignId: "coop_p4prep_live",
+    supplierId: formal.supplierId,
+    offerIds: [`off_${formalStock.batchId}_0`],
+    supplierFundShareBps: 5000,
+    dialFundShareBps: 5000,
+    status: "live",
+  });
+
+  const board = listConfirmSlaBoard(Date.now() + 100);
+  if (board.queue.length < 1) {
+    throw new Error("confirm-SLA board empty after two-supplier seed");
+  }
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.SUPABASE_URL;
+  delete process.env.SUPABASE_SERVICE_ROLE_KEY;
+  delete process.env.SUPABASE_ANON_KEY;
+  let confirmClosed = false;
+  try {
+    await persistConfirmOrderDurable({
+      orderId: "sord_fail",
+      supplierId: "sup_x",
+      amountUsdMinor: 1n,
+      status: "awaiting_confirm",
+      slaDeadlineAt: Date.now() + 60_000,
+    });
+  } catch {
+    confirmClosed = true;
+  }
+  if (!confirmClosed) throw new Error("expected confirm durable fail-closed");
+
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  return {
+    formalFactoryRows: formalCsv.rowCount,
+    informalFactoryRows: informalCsv.rowCount,
+    b2bInformalLeak: 0,
+    confirmPersisted,
+    coopPersisted,
+    confirmBoardOrders: board.queue.length,
+    slaEscalationsOpen: board.openEscalations.length,
+    offerSource: "MARKETPLACE",
+    payableFromAi: false,
+    liquorAllowed: false,
+  };
+}
+
+async function assertRejectsDurable(): Promise<void> {
+  const {
+    persistStockUploadDurable,
+    escalateHeartbeatStaleDurable,
+  } = await import("./durable.js");
+  let stockClosed = false;
+  try {
+    await persistStockUploadDurable({
+      batchId: "sstock_fail",
+      supplierId: "sup_x",
+      currency: "USD",
+      status: "pending_review",
+      offerSource: "MARKETPLACE",
+      payableFromAi: false,
+      createdAt: new Date().toISOString(),
+      rows: [{ sku: "X", title: "X", qty: 1, unitPriceUsdMinor: 1n }],
+    });
+  } catch {
+    stockClosed = true;
+  }
+  if (!stockClosed) throw new Error("expected stock durable fail-closed");
+
+  let escClosed = false;
+  try {
+    await escalateHeartbeatStaleDurable({
+      supplierId: "sup_x",
+      escalations: [
+        {
+          escalationId: "escl_fail",
+          supplierId: "sup_x",
+          kind: "heartbeat_stale",
+          orderId: null,
+          status: "open",
+          payableFromAi: false,
+          createdAt: new Date().toISOString(),
+        },
+      ],
+    });
+  } catch {
+    escClosed = true;
+  }
+  if (!escClosed) throw new Error("expected escalation fail-closed");
+}
+
+export {
+  escalateHeartbeatStaleDurable,
+  persistConfirmOrderDurable,
+  persistCoopOfferDurable,
+  persistCostUploadDurable,
+  persistHeartbeatDurable,
+  persistSlaEscalationDurable,
+  persistStockUploadDurable,
+  persistSupplierProfileDurable,
+} from "./durable.js";

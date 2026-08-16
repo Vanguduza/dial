@@ -79,9 +79,6 @@ export default function AccountProfilePage() {
           <Link href="/home">Home</Link>
         </nav>
         <h1 style={{ fontSize: 22, marginBottom: 8 }}>Account profile</h1>
-        <p style={{ fontSize: 14, opacity: 0.8, marginBottom: 16 }}>
-          PD82 — session-bound profile; never send userId/role in the body.
-        </p>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
           <button type="button" disabled={busy} onClick={() => void refresh()}>
             Refresh

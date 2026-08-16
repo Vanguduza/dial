@@ -114,11 +114,7 @@ export default function AdminProjectsPage() {
       <h1 style={{ fontSize: "1.5rem", marginTop: "0.75rem" }}>
         Projects client toggle
       </h1>
-      <p style={{ color: dialTokens.color.brand.accent, lineHeight: 1.45 }}>
-        C-3 soft-launch: clients see &quot;coming soon&quot; until ops enables live
-        after labour-law review. Staff drafts stay internal. AI never writes
-        payable amounts.
-      </p>
+      
 
       <label style={{ display: "block", marginTop: "1rem" }}>
         INTERNAL_API_SECRET

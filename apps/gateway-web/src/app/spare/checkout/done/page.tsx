@@ -1,9 +1,9 @@
 /**
- * PD18 checkout done — place ERP spare order after pay; link to track.
+ * G2 / PD18 checkout done — order already placed by G2 spine; show track link + money evidence.
  */
 import Link from "next/link";
 import { dialTokens } from "@dial/design-tokens";
-import { getCart, placeSpareOrder } from "@dial/catalogue";
+import { getSpareOrder } from "@dial/catalogue";
 
 export default async function SpareCheckoutDonePage({
   searchParams,
@@ -13,42 +13,18 @@ export default async function SpareCheckoutDonePage({
     intentId?: string;
     codId?: string;
     cartId?: string;
+    orderId?: string;
+    jr?: string;
+    journal?: string;
   }>;
 }) {
-  const { method, intentId, codId, cartId } = await searchParams;
-  let orderId: string | null = null;
-  let soldBy: string | null = null;
-  if (cartId) {
-    const cart = getCart(cartId);
-    if (cart && cart.lines.length > 0) {
-      try {
-        const order = placeSpareOrder({
-          cart: {
-            id: cart.id,
-            currency: "USD",
-            totalUsdMinor: cart.total.amountMinor,
-            lines: cart.lines.map((l) => ({
-              offerId: l.offerId,
-              title: l.title,
-              qty: l.qty,
-              unitPriceUsdMinor: l.unitPrice.amountMinor,
-              lineTotalUsdMinor: l.lineTotal.amountMinor,
-              soldBy: l.soldBy,
-              supplierFormality: l.supplierFormality,
-            })),
-          },
-          payChoice: method === "cod" ? "cod" : "ecocash",
-        });
-        orderId = order.orderId;
-        soldBy = order.soldBySummary;
-      } catch {
-        /* cart may already be consumed in demos */
-      }
-    }
-  }
+  const { method, intentId, codId, orderId, jr, journal } = await searchParams;
+  const order = orderId ? getSpareOrder(orderId) : undefined;
+  const soldBy = order?.soldBySummary ?? null;
 
   return (
     <main
+      data-testid="spare-checkout-done"
       style={{
         minHeight: "100vh",
         background: dialTokens.color.brand.surface,
@@ -62,6 +38,7 @@ export default async function SpareCheckoutDonePage({
           style={{
             fontFamily: `${dialTokens.font.display}, Georgia, serif`,
             color: dialTokens.color.brand.primary,
+            fontSize: "clamp(1.5rem, 4vw, 2rem)",
           }}
         >
           Order placed
@@ -71,8 +48,10 @@ export default async function SpareCheckoutDonePage({
         </p>
         {intentId ? <p style={{ fontSize: 14 }}>Intent {intentId}</p> : null}
         {codId ? <p style={{ fontSize: 14 }}>COD {codId}</p> : null}
+        {jr ? <p style={{ fontSize: 14 }}>Job Reserve {jr}</p> : null}
+        {journal ? <p style={{ fontSize: 14 }}>Ledger journal {journal}</p> : null}
         {soldBy ? (
-          <p style={{ fontSize: 14 }}>Sold by {soldBy} (agency D-58)</p>
+          <p style={{ fontSize: 14 }}>Sold by {soldBy}</p>
         ) : null}
         {orderId ? (
           <p>

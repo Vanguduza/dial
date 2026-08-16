@@ -100,10 +100,7 @@ export default function AdminReturnsPage() {
         >
           Returns / refunds
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Admin queue for Spare return claims. Refund or replace is human-only —
-          AI never writes payable amounts.
-        </p>
+        
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
           Internal secret
           <input

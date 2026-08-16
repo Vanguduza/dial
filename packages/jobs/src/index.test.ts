@@ -353,6 +353,27 @@ test("PD136 checklist library tranche 3", async () => {
   assert.equal(out.payableFromAi, false);
 });
 
+test("Phase6-prep checklist library tranche 4 (≥32; ≠42)", async () => {
+  const { runPhase6PrepChecklistTranche4ThinVertical } = await import(
+    "./index.js"
+  );
+  const out = runPhase6PrepChecklistTranche4ThinVertical();
+  assert.ok(out.catalogSeedCount >= 32);
+  assert.equal(out.tranche4Present, true);
+  assert.equal(out.payableFromAi, false);
+});
+
+test("Phase6-prep Pack library 42 catalogIds seeded (not G6 claim)", async () => {
+  const { runPhase6PrepChecklistLibrary42SeedThinVertical } = await import(
+    "./index.js"
+  );
+  const out = runPhase6PrepChecklistLibrary42SeedThinVertical();
+  assert.equal(out.catalogSeedCount, 42);
+  assert.equal(out.library42Seeded, true);
+  assert.equal(out.g6Claimed, false);
+  assert.equal(out.payableFromAi, false);
+});
+
 test("PD31 Bluetooth ESC/POS print hook; not ZIMRA fiscal", async () => {
   const { runPd31BluetoothPrintThinVertical } = await import("./index.js");
   const out = await runPd31BluetoothPrintThinVertical({

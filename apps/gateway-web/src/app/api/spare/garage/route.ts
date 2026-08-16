@@ -16,24 +16,45 @@ import {
   setGarageReminderConsent,
   updateGarageVehicle,
 } from "@dial/catalogue";
+import { apiError, newRequestId, parseJsonBody } from "@dial/shared";
+import { z } from "zod";
+import {
+  assertResourceAccess,
+  requireSession,
+} from "../../../../lib/auth/session.js";
 
 export const runtime = "nodejs";
 
+async function ownerId(req: Request) {
+  const session = await requireSession(req);
+  return session;
+}
+
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const customerId = url.searchParams.get("customerId");
-  if (!customerId) {
-    return NextResponse.json({ error: "customerId required" }, { status: 400 });
+  const requestId = newRequestId(req.headers.get("x-request-id"));
+  const session = await ownerId(req);
+  if (!session) {
+    return NextResponse.json(apiError("session required", "unauthorized", requestId), {
+      status: 401,
+    });
   }
+  const url = new URL(req.url);
+  if (url.searchParams.has("customerId") && url.searchParams.get("customerId") !== session.userId) {
+    return NextResponse.json(
+      apiError("customerId from query rejected (D-47)", "identity_from_query", requestId),
+      { status: 400 },
+    );
+  }
+  const customerId = session.userId;
   const includeAudit = url.searchParams.get("includeAudit") === "1";
   const view = url.searchParams.get("view");
   if (view === "reminders") {
     return NextResponse.json({
+      requestId,
       customerId,
       reminders: listVehicleReminders(customerId),
       due: listDueVehicleReminders(customerId),
       payableFromAi: false,
-      note: "PD108 — Vehicle Hub reminders (consent-gated)",
     });
   }
   const vehicles = listGarageVehicles(customerId).map((v) => ({
@@ -41,6 +62,7 @@ export async function GET(req: Request) {
     browsePath: browsePathForGarageVehicle(v.vehicleId),
   }));
   return NextResponse.json({
+    requestId,
     vehicles,
     consentAudit: includeAudit ? listGarageConsentAudit(customerId) : undefined,
     reminders: listVehicleReminders(customerId),
@@ -48,16 +70,31 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const body = (await req.json()) as {
-    action?: string;
-    customerId?: string;
-    label?: string;
-    chassisHint?: string;
-    reminderConsent?: boolean;
-    vehicleId?: string;
-    kind?: string;
-    dueAt?: string;
-  };
+  const requestId = newRequestId(req.headers.get("x-request-id"));
+  const session = await requireSession(req);
+  if (!session) {
+    return NextResponse.json(apiError("session required", "unauthorized", requestId), {
+      status: 401,
+    });
+  }
+  const schema = z
+    .object({
+      action: z.string().optional(),
+      label: z.string().optional(),
+      chassisHint: z.string().optional(),
+      reminderConsent: z.boolean().optional(),
+      vehicleId: z.string().optional(),
+      kind: z.string().optional(),
+      dueAt: z.string().optional(),
+    })
+    .strict();
+  const parsed = await parseJsonBody(req, schema);
+  if (!parsed.ok) {
+    return NextResponse.json(apiError(parsed.error, parsed.code, requestId), {
+      status: 400,
+    });
+  }
+  const body = parsed.data;
   try {
     if (body.action === "schedule_reminder") {
       const reminder = scheduleVehicleReminder({
@@ -70,34 +107,42 @@ export async function POST(req: Request) {
           ? { kind: body.kind }
           : {}),
       });
+      if (reminder.customerId !== session.userId && session.role !== "ops_admin") {
+        assertResourceAccess({
+          session,
+          resourceOwnerId: reminder.customerId,
+          resourceKind: "vehicle",
+        });
+      }
       return NextResponse.json({
         ok: true,
+        requestId,
         reminder,
         due: listDueVehicleReminders(reminder.customerId),
         payableFromAi: false,
-        note: "PD108 — reminder scheduled (consent required)",
       });
     }
-    if (!body.customerId || !body.label) {
+    if (!body.label) {
       return NextResponse.json(
-        { error: "customerId and label required (or action=schedule_reminder)" },
+        apiError("label required (or action=schedule_reminder)", "invalid_body", requestId),
         { status: 400 },
       );
     }
     const vehicle = addGarageVehicle({
-      customerId: body.customerId,
+      customerId: session.userId,
       label: body.label,
       chassisHint: body.chassisHint ?? "",
       reminderConsent: body.reminderConsent === true,
     });
     return NextResponse.json({
       ok: true,
+      requestId,
       vehicle,
       browsePath: browsePathForGarageVehicle(vehicle.vehicleId),
     });
   } catch (e) {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "garage failed" },
+      apiError(e instanceof Error ? e.message : "garage failed", "bad_request", requestId),
       { status: 400 },
     );
   }
@@ -105,16 +150,29 @@ export async function POST(req: Request) {
 
 /** PD50 consent + PD75 set active + PD79 update. */
 export async function PATCH(req: Request) {
-  const body = (await req.json()) as {
-    vehicleId?: string;
-    reminderConsent?: boolean;
-    setActive?: boolean;
-    label?: string;
-    chassisHint?: string;
-  };
-  if (!body.vehicleId) {
-    return NextResponse.json({ error: "vehicleId required" }, { status: 400 });
+  const requestId = newRequestId(req.headers.get("x-request-id"));
+  const session = await requireSession(req);
+  if (!session) {
+    return NextResponse.json(apiError("session required", "unauthorized", requestId), {
+      status: 401,
+    });
   }
+  const schema = z
+    .object({
+      vehicleId: z.string(),
+      reminderConsent: z.boolean().optional(),
+      setActive: z.boolean().optional(),
+      label: z.string().optional(),
+      chassisHint: z.string().optional(),
+    })
+    .strict();
+  const parsed = await parseJsonBody(req, schema);
+  if (!parsed.ok) {
+    return NextResponse.json(apiError(parsed.error, parsed.code, requestId), {
+      status: 400,
+    });
+  }
+  const body = parsed.data;
   try {
     if (body.setActive === true) {
       const vehicle = setActiveGarageVehicle(body.vehicleId);
@@ -166,12 +224,19 @@ export async function PATCH(req: Request) {
 
 /** PD79 — delete vehicle (promotes another active if needed). */
 export async function DELETE(req: Request) {
+  const requestId = newRequestId(req.headers.get("x-request-id"));
+  const session = await requireSession(req);
+  if (!session) {
+    return NextResponse.json(apiError("session required", "unauthorized", requestId), {
+      status: 401,
+    });
+  }
   const url = new URL(req.url);
-  const vehicleId =
-    url.searchParams.get("vehicleId") ??
-    ((await req.json().catch(() => ({}))) as { vehicleId?: string }).vehicleId;
+  const vehicleId = url.searchParams.get("vehicleId");
   if (!vehicleId) {
-    return NextResponse.json({ error: "vehicleId required" }, { status: 400 });
+    return NextResponse.json(apiError("vehicleId required", "invalid_body", requestId), {
+      status: 400,
+    });
   }
   try {
     const result = deleteGarageVehicle(vehicleId);

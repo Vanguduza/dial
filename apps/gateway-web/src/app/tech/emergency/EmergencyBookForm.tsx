@@ -29,7 +29,7 @@ export function EmergencyBookForm() {
         return;
       }
       setStatus(
-        `Emergency job ${json.job?.id ?? ""} · AI pricing bypassed · rate_card draft only`,
+        `Emergency job ${json.job?.id ?? ""}`,
       );
     } catch (e) {
       setError(e instanceof Error ? e.message : "emergency book failed");

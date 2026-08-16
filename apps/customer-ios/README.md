@@ -25,11 +25,17 @@
 ```bash
 cd apps/customer-ios
 swift test                    # macOS / Linux with Swift 5.9+
+xcodegen generate             # regenerates DialCustomer.xcodeproj from project.yml
 ```
+
+Committed `DialCustomer.xcodeproj` is the archive/export target (`ExportOptions.plist`). Signing uses `APPLE_DEVELOPMENT_TEAM` / distribution cert from vault — no invented certs in git.
+
 
 CI host without Swift: Node contract `apps/gateway-web/src/lib/spare/pd20CustomerMobile.test.ts`.
 
-Simulator gateway: `DIAL_GATEWAY_BASE_URL=http://127.0.0.1:3000`.
+Simulator gateway: `GatewayBaseUrl.resolve()` → env `DIAL_GATEWAY_BASE_URL` → Info.plist `DialGatewayBaseURL` → `http://127.0.0.1:3000`.
+
+Phase 3 prep (not G3): set staging URL via env or plist — `GatewayBaseUrl.resolveForInternalTrack()` rejects loopback (TestFlight). See `docs/ops/phase3-native-store-readiness.md`.
 
 ## Out of scope
 

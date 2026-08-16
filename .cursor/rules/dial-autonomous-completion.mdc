@@ -1,0 +1,64 @@
+---
+description: Founder standing — auto-continue Completion Plan; secret phases stay honestly open; no fixture-only gate claims
+alwaysApply: true
+---
+
+# Autonomous Full ERP completion (founder standing)
+
+**Standing directive:** Keep EcoCash and other secret/key-open phases **honestly open**. Continue executing the Completion Plan **until the end** without waiting for the founder to say “continue.” Respect gates per `docs/planning/DIAL_Full_ERP_Completion_Plan.md`. Key-drop-in complements `.cursor/rules/dial-key-drop-in.mdc`.
+
+## Auto-continue (idle ban)
+
+- Auto-continue **eng-safe** work; never idle asking “continue?”
+- Allowed pause only when eng-safe backlog for open phases is exhausted **or** blocked solely on founder secrets / Appendix C — then write a clear **“paused on human secrets”** board in `DIAL_Build_Workplan_STATE.md` (not “waiting for continue”).
+- Cursor turns still end; prefer same-turn Build, living docs + STATE updates, or arm `/loop` — do not narrate “next is Phase N” and stop while eng-safe prep remains.
+
+## Secret-open honesty
+
+- Secret-blocked exit items stay **open** on the phase board (EcoCash, Meta templates ENH-021, ZIMRA ENH-022, escrow partner ENH-020, etc.).
+- Fail-closed without secrets ≠ integration done (anti-stub). Do not mark the phase gate green on fixture-only evidence.
+- When secrets appear mid-run (e.g. EcoCash in `.env`), finish that gate’s evidence and mark green **only** if DoD + anti-stub are met.
+
+## G2 EcoCash founder exception (encode + execute)
+
+**Founder exception — G2 only:** Eng may proceed with G2 sequencing and dependent phase **work** using **documented pretend / API-doc sandbox EcoCash credentials** (or Pack §6 keys + adapter `eco_sb_*` path with `ECOCASH_SANDBOX_HTTP` unset). Do **not** pause the whole Completion Plan on real EcoCash merchant secrets.
+
+| Label in STATE | Meaning |
+| --- | --- |
+| `G2: eng-exception (pretend/sandbox EcoCash)` | Eng sequencing unblocked; Meili + COD + EcoCash-pretend + durable JR/ledger/fiscal + B2B leak=0 evidenced |
+| Live / production EcoCash | Still **blocked_on_human** until founder drops real portal keys + live buy evidence |
+
+**Rules under this exception:**
+
+- Prefer Pack §6 names only (`ECOCASH_API_KEY`, `ECOCASH_MERCHANT_CODE`, `ECOCASH_WEBHOOK_SECRET`, `ECOCASH_ENVIRONMENT=sandbox`). Never invent alternate production secret names.
+- Prefer real adapter HTTP against published sandbox URLs **only** with portal sandbox keys (`ECOCASH_SANDBOX_HTTP=1`). With **pretend** keys: leave `ECOCASH_SANDBOX_HTTP` unset so `EcoCashDirectAdapter` returns documented `eco_sb_*` provider refs (verify + idempotency + ledger settle still exercised).
+- Never print/commit pretend or real secrets; never commit `.env`. Ops doc: `docs/ops/ecocash-pretend-sandbox.md`.
+- Other secret phases (Meta ENH-021, ZIMRA ENH-022, escrow ENH-020) stay **honestly open** unless founder excepts them too.
+- **Do not** claim live/production EcoCash green. After eng-exception DoD: STATE may set Phase 2 eng-exception green for sequencing and `next_stage` Phase 3; keep real EcoCash on `blocked_on_human`.
+
+## Gate discipline (no skip / no premature green)
+
+- Do **not** mark G2 / G8 / G9 / … **live/production** green until exit checklist + dependencies + anti-stub are evidenced (G2 **eng-exception** is a distinct STATE label — see above).
+- Do **not** skip dependency gates (e.g. no G3 claim before G2 eng-exception or live green; no G5 claim before G2).
+- No fixture-only exits. Thin vertical = build order only; phase exit = feature DoD 100% + evidence. G2 eng-exception may use documented pretend/sandbox EcoCash — not blank fail-closed / `eco_fx_*` alone.
+
+## Parallel prep while a phase is secret-open
+
+While the **current** phase stays open for secrets only, advance **prep** for later phases **only when the plan’s dependency graph allows**:
+
+| Example | Allowed? |
+| --- | --- |
+| Phase 4 prep on G1 (supplier/Factory shapes, migration, durable APIs) | Yes — **never claim G4** until G4 DoD |
+| Phase 5–12 key-drop-in (adapter shapes, fail-closed, fixture CI) | Yes — **never claim G3/G5/G8/…** without evidence |
+| Phase 3/5 work that **requires G2** (native checkout against sandbox rails, delivery from real orders) | Prep code/shapes OK; **G2 eng-exception** (pretend EcoCash) satisfies sequencing for Phase 3+ eng work — still **no G3/G5 claim** until that gate’s own DoD |
+
+## Hard bans (session + in-repo)
+
+- No helper text on UI. No liquor Build. No S99 / customer-open declaration. No print/paste secrets / `.env*`. No PD invent (PD139+).
+- Locks C-5, D-38…D-61. Money = `amountMinor`. Official WA only. MapLibre SoR. Agency only (D-58).
+
+## Commit / claim policy
+
+- Prefer leaving work **uncommitted** until a finite gate is honestly green (or batch at a natural eng stop when paused on secrets).
+- Commit + living docs + STATE when a gate is green and Dev Manager runbook rules apply.
+- Complements `docs/planning/DIAL_Dev_Manager_Autonomous_Runbook.md` §0 / §7 and `DIAL_Build_Workplan_STATE.md`.

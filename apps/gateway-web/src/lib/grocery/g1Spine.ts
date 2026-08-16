@@ -24,7 +24,17 @@ import {
   getActiveFxRate,
   type CheckoutPayChoice,
 } from "@dial/payments";
-import { createDeliveryJob } from "@dial/delivery";
+import {
+  acceptOffer,
+  capturePod,
+  createDeliveryJob,
+  getDeliveryJob,
+  postCourierLocation,
+  reconcileCodAfterPod,
+  setCourierAvailable,
+  startDeliveryDispatchWorkflow,
+  startTransit,
+} from "@dial/delivery";
 
 export type G1ThinResult = {
   cart: GroceryCart;
@@ -41,6 +51,8 @@ export type G1ThinResult = {
   webhook?: "captured" | "skipped_cod";
   currency: "USD";
   imttOnCheckoutLines: false;
+  /** Phase 10 exit still open — thin vertical ≠ G10 (D-52). */
+  g10Claimed: false;
 };
 
 /**
@@ -171,6 +183,50 @@ export async function runG1GroceryThinVertical(input: {
     webhook,
     currency: "USD",
     imttOnCheckoutLines: false,
+    g10Claimed: false,
+  };
+}
+
+/** G10 sandbox dogfood — food order → JR → delivery → POD (same module; g10Claimed=false). */
+export async function runG1GroceryFoodSandboxDogfood(input?: {
+  payChoice?: CheckoutPayChoice;
+  offerId?: string;
+}): Promise<
+  G1ThinResult & {
+    podStatus: string;
+    codReconciled: boolean;
+  }
+> {
+  const courierId = "cour_g10_dogfood";
+  setCourierAvailable(courierId, true);
+  const result = await runG1GroceryThinVertical({
+    offerId: input?.offerId ?? "groc_milk_1l",
+    payChoice: input?.payChoice ?? "ecocash",
+    buyerSegment: "b2c",
+    idempotencyKey: `g10-spine-${Date.now()}`,
+  });
+  startDeliveryDispatchWorkflow(result.deliveryJobId);
+  const job = getDeliveryJob(result.deliveryJobId)!;
+  const offerId = job.offerId!;
+  acceptOffer(offerId, courierId);
+  startTransit(result.deliveryJobId);
+  postCourierLocation({
+    courierId,
+    lat: -17.8252,
+    lng: 31.0335,
+    jobId: result.deliveryJobId,
+  });
+  capturePod(result.deliveryJobId, {
+    photoRef: "g10_pod_photo",
+    gpsLat: -17.8252,
+    gpsLng: 31.0335,
+  });
+  const cod = reconcileCodAfterPod(result.deliveryJobId);
+  const final = getDeliveryJob(result.deliveryJobId)!;
+  return {
+    ...result,
+    podStatus: final.status,
+    codReconciled: cod.reconciled,
   };
 }
 

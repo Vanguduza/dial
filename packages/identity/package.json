@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "node --import tsx --test src/**/*.test.ts",
+    "dogfood:auth": "node --import tsx scripts/dogfood-auth.mjs",
     "lint": "node -e \"process.exit(0)\""
   },
   "devDependencies": {

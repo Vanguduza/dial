@@ -55,20 +55,65 @@ export async function createVendorPaymentSession(input: {
   if (currency !== "USD" && currency !== "ZWG") {
     throw new Error(`Unsupported currency ${input.amount.currency}`);
   }
+  // Pack §6 / key-drop-in — prefer rail-specific RESULT/RETURN env; never invent secrets.
+  const defaults = defaultVendorUrls(input.method);
   return adapter.createPayment({
     reference: input.reference,
     money: { amountMinor: input.amount.amountMinor, currency },
     method: code,
     customer: input.customer ?? {},
-    returnUrl:
-      input.returnUrl ??
-      process.env.PAYNOW_RETURN_URL ??
-      "https://dialaspare.co.zw/checkout/return",
-    resultUrl:
-      input.resultUrl ??
-      process.env.PAYNOW_RESULT_URL ??
-      "https://api.example/webhooks/paynow",
+    returnUrl: input.returnUrl ?? defaults.returnUrl,
+    resultUrl: input.resultUrl ?? defaults.resultUrl,
     metadata: input.metadata ?? {},
     escrowPreferred: input.escrowPreferred ?? code === "psp_escrow",
   });
+}
+
+/** Pack §6 env names for hosted/result callbacks (key-drop-in; placeholders only). */
+function defaultVendorUrls(method: DomainPaymentMethodCode): {
+  returnUrl: string;
+  resultUrl: string;
+} {
+  switch (method) {
+    case "paynow_hosted":
+      return {
+        returnUrl:
+          process.env.PAYNOW_RETURN_URL?.trim() ||
+          "https://dialaspare.co.zw/checkout/return",
+        resultUrl:
+          process.env.PAYNOW_RESULT_URL?.trim() ||
+          "https://api.example/webhooks/paynow",
+      };
+    case "contipay":
+      return {
+        returnUrl:
+          process.env.CONTIPAY_SUCCESS_URL?.trim() ||
+          "https://dialaspare.co.zw/checkout/return",
+        resultUrl:
+          process.env.CONTIPAY_WEBHOOK_URL?.trim() ||
+          "https://api.example/webhooks/contipay",
+      };
+    case "paypal":
+      return {
+        returnUrl:
+          process.env.PAYNOW_RETURN_URL?.trim() ||
+          "https://dialaspare.co.zw/checkout/return",
+        resultUrl: "https://api.example/webhooks/paypal",
+      };
+    case "ecocash_direct":
+      return {
+        returnUrl: "https://dialaspare.co.zw/checkout/return",
+        resultUrl: "https://api.example/webhooks/ecocash",
+      };
+    case "escrow_hold":
+      return {
+        returnUrl: "https://dialaspare.co.zw/checkout/return",
+        resultUrl: "https://api.example/webhooks/escrow",
+      };
+    default:
+      return {
+        returnUrl: "https://dialaspare.co.zw/checkout/return",
+        resultUrl: "https://api.example/webhooks/paynow",
+      };
+  }
 }

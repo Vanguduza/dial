@@ -43,6 +43,8 @@ Ignores `.env*`, keys/certs, `node_modules`, build artifacts, large binaries, of
 | `dial-non-negotiables.mdc` | always | Money/AI/WA/maps/SoR locks (D-38…D-61) |
 | `dial-security-idor.mdc` | always | IDOR, no body identity, webhooks, secrets |
 | `dial-security-toolchain.mdc` | always | D-48 Threat Dragon / Semgrep / Checkov / Renovate / Strix pointers |
+| `dial-key-drop-in.mdc` | always | Founder standing — adapters key-ready; zero code after secrets; D-47 hygiene |
+| `dial-autonomous-completion.mdc` | always | Founder standing — auto-continue Completion Plan; secret phases honestly open; no fixture-only gate claims |
 | `dial-api-webhooks.mdc` | globs API / webhooks | Fail-closed internals, signature + idempotency, Zod at boundary |
 | `dial-money-fiscal.mdc` | globs payments/ledger/pricing/… | Integer minor units, outbox, FDMS virtual |
 | `dial-promotions.mdc` | globs `packages/promotions` | `computeActions` via pricing only |

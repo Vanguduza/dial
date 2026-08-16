@@ -19,6 +19,7 @@ import {
   __resetAuthForTests,
   createSession,
   sessionCookieName,
+  testAuthCookie,
 } from "../auth/session.js";
 import {
   GET as techGet,
@@ -84,6 +85,7 @@ test("PD108 vehicle reminders API + garage UI", async () => {
   assert.match(page, /Schedule service reminder|scheduleReminder/);
 
   __resetSpareCustomerForTests();
+  const cookie = testAuthCookie({ userId: "cust_pd108_api" });
   const vehicle = addGarageVehicle({
     customerId: "cust_pd108_api",
     label: "PD108 API",
@@ -93,7 +95,7 @@ test("PD108 vehicle reminders API + garage UI", async () => {
   const denied = await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         action: "schedule_reminder",
         vehicleId: vehicle.vehicleId,
@@ -111,7 +113,7 @@ test("PD108 vehicle reminders API + garage UI", async () => {
   const ok = await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         action: "schedule_reminder",
         vehicleId: vehicle.vehicleId,
@@ -122,9 +124,9 @@ test("PD108 vehicle reminders API + garage UI", async () => {
   );
   assert.equal(ok.status, 200);
   const list = await garageGet(
-    new Request(
-      "http://localhost/api/spare/garage?customerId=cust_pd108_api&view=reminders",
-    ),
+    new Request("http://localhost/api/spare/garage?view=reminders", {
+      headers: { cookie },
+    }),
   );
   assert.equal(list.status, 200);
   const body = (await list.json()) as { due: unknown[] };
@@ -188,10 +190,11 @@ test("PD110 return claim evidence API", async () => {
     payChoice: "cod",
   });
   const opened = openSpareReturnClaim({ orderId: order.orderId });
+  const cookie = testAuthCookie({ userId: "cust_pd110" });
   const attach = await returnsPost(
     new Request("http://localhost/api/spare/returns", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         action: "attach_evidence",
         claimId: opened.claimId,

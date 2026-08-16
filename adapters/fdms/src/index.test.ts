@@ -22,6 +22,23 @@ test("FDMS fixture: open → submit → close without keys", async () => {
   assert.ok((await signer.signReceiptPayload({ a: 1 })).signature.startsWith("cloudesd"));
 });
 
+test("key-drop-in verifyFdmsWebhook fixture admits + sandbox fail-closed", async () => {
+  const { verifyFdmsWebhook } = await import("./index.js");
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.FDMS_ACTIVATION_KEY;
+  const body = JSON.stringify({ eventId: "fdms_fx_1", type: "ack" });
+  const admitted = verifyFdmsWebhook({}, body);
+  assert.equal(admitted.eventId, "fdms_fx_1");
+
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.FDMS_ACTIVATION_KEY;
+  assert.throws(
+    () => verifyFdmsWebhook({}, body),
+    /FDMS_ACTIVATION_KEY unset/,
+  );
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
 test("S107 submitReceipt live-shape fields (amountMinor string, agency class)", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const gw = new ZimraVirtualGatewayAdapter();

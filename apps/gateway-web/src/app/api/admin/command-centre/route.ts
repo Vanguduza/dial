@@ -7,6 +7,7 @@ import {
   attemptCommandCentrePayout,
   commandCentreBanner,
   ensureDefaultMetricContracts,
+  executeRecommendedAction,
   listMetricTiles,
   setMetricObservedValue,
   type CommandCentreMode,
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
     action?: string;
     mode?: string;
     amountMinor?: string;
+    actionId?: string;
   };
   if ((body as { userId?: unknown }).userId !== undefined || (body as { role?: unknown }).role !== undefined) {
     return NextResponse.json(
@@ -105,6 +107,44 @@ export async function POST(req: Request) {
         banner: commandCentreBanner(mode),
         tiles: listMetricTiles(mode),
       });
+    }
+    if (action === "seed_alert_observations") {
+      ensureDefaultMetricContracts();
+      setMetricObservedValue("metric.money_outbox_depth", 55);
+      setMetricObservedValue("metric.dispatch_fifo_depth", 8);
+      setMetricObservedValue("metric.on_time_pod", 0.75);
+      return NextResponse.json({
+        ok: true,
+        tiles: listMetricTiles(mode),
+        note: "G11 dogfood — critical/warn KPI observations seeded",
+      });
+    }
+    if (action === "execute_recommended_action") {
+      const actionId = String(body.actionId ?? "").trim();
+      if (!actionId) {
+        return NextResponse.json({ error: "actionId required" }, { status: 400 });
+      }
+      bindLiveObservations();
+      try {
+        const result = executeRecommendedAction({ mode, actionId });
+        return NextResponse.json({
+          ok: true,
+          mode,
+          action: result.action,
+          autoPayAllowed: false,
+          payout: result.payout,
+        });
+      } catch (e) {
+        return NextResponse.json(
+          {
+            ok: false,
+            mode,
+            autoPayAllowed: false,
+            error: e instanceof Error ? e.message : "recommended action blocked",
+          },
+          { status: mode === "simulated" ? 403 : 400 },
+        );
+      }
     }
     return NextResponse.json({ error: `unknown action ${action}` }, { status: 400 });
   } catch (e) {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { dialTokens } from "@dial/design-tokens";
+import { DialMap } from "../../../components/map/DialMap";
 
 type TimelineEvent = { at: string; event: string; status: string };
 
@@ -83,9 +84,6 @@ export function GroceryTrackClient({ initialOrderId }: { initialOrderId: string 
           <p style={{ fontSize: 14 }}>
             USD {((Number(data.totalUsdMinor) || 0) / 100).toFixed(2)} · Sold by {data.soldBy}
           </p>
-          <p style={{ fontSize: 12, opacity: 0.55 }}>
-            liquorAllowed: {String(data.liquorAllowed)}
-          </p>
           {data.timeline && data.timeline.length > 0 ? (
             <div style={{ marginTop: dialTokens.space.md }}>
               <p style={{ fontSize: 13, fontWeight: 600 }}>Timeline</p>
@@ -101,6 +99,9 @@ export function GroceryTrackClient({ initialOrderId }: { initialOrderId: string 
               </ul>
             </div>
           ) : null}
+          <div style={{ marginTop: dialTokens.space.md }}>
+            <DialMap height="240px" center={[-17.829, 31.052]} zoom={12} />
+          </div>
         </section>
       ) : null}
     </div>

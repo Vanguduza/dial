@@ -30,14 +30,35 @@ export type Journal = {
   createdAt: string;
 };
 
-const journals = new Map<string, Journal>();
-const byIdem = new Map<string, string>();
-const moneyOutbox: Array<{
+function journals(): Map<string, Journal> {
+  const g = globalThis as { __dialLedgerJournals?: Map<string, Journal> };
+  if (!g.__dialLedgerJournals) g.__dialLedgerJournals = new Map();
+  return g.__dialLedgerJournals;
+}
+
+function byIdem(): Map<string, string> {
+  const g = globalThis as { __dialLedgerByIdem?: Map<string, string> };
+  if (!g.__dialLedgerByIdem) g.__dialLedgerByIdem = new Map();
+  return g.__dialLedgerByIdem;
+}
+
+function moneyOutbox(): Array<{
   id: string;
   kind: "ledger_posted" | "fiscal_queued";
   refId: string;
   createdAt: string;
-}> = [];
+}> {
+  const g = globalThis as {
+    __dialMoneyOutbox?: Array<{
+      id: string;
+      kind: "ledger_posted" | "fiscal_queued";
+      refId: string;
+      createdAt: string;
+    }>;
+  };
+  if (!g.__dialMoneyOutbox) g.__dialMoneyOutbox = [];
+  return g.__dialMoneyOutbox;
+}
 
 function id(prefix: string): string {
   return `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -47,7 +68,7 @@ export function enqueueMoneyOutbox(input: {
   kind: "ledger_posted" | "fiscal_queued";
   refId: string;
 }): void {
-  moneyOutbox.push({
+  moneyOutbox().push({
     id: id("obx"),
     kind: input.kind,
     refId: input.refId,
@@ -55,11 +76,16 @@ export function enqueueMoneyOutbox(input: {
   });
 }
 
-export function listMoneyOutbox(): readonly (typeof moneyOutbox)[number][] {
-  return moneyOutbox;
+export function listMoneyOutbox(): readonly MoneyOutboxRow[] {
+  return moneyOutbox();
 }
 
-export type MoneyOutboxRow = (typeof moneyOutbox)[number];
+export type MoneyOutboxRow = {
+  id: string;
+  kind: "ledger_posted" | "fiscal_queued";
+  refId: string;
+  createdAt: string;
+};
 
 /**
  * Drain money outbox (S114).
@@ -82,8 +108,9 @@ export async function drainMoneyOutbox(input?: {
     refId: string;
     status: "drained" | "fiscal_submitted" | "fiscal_failed" | "skipped";
   }> = [];
-  const pending = [...moneyOutbox];
-  moneyOutbox.length = 0;
+  const box = moneyOutbox();
+  const pending = [...box];
+  box.length = 0;
 
   const ledgerRows = pending.filter((r) => r.kind === "ledger_posted");
   const fiscalRows = pending.filter((r) => r.kind === "fiscal_queued");
@@ -138,9 +165,9 @@ export function postJournal(input: {
   idempotencyKey: string;
   lines: Array<{ account: LedgerAccount; amountMinor: bigint; memo: string }>;
 }): Journal {
-  const existingId = byIdem.get(input.idempotencyKey);
+  const existingId = byIdem().get(input.idempotencyKey);
   if (existingId) {
-    const existing = journals.get(existingId);
+    const existing = journals().get(existingId);
     if (existing) return existing;
   }
 
@@ -173,8 +200,8 @@ export function postJournal(input: {
     entries,
     createdAt,
   };
-  journals.set(journalId, journal);
-  byIdem.set(input.idempotencyKey, journalId);
+  journals().set(journalId, journal);
+  byIdem().set(input.idempotencyKey, journalId);
   enqueueMoneyOutbox({ kind: "ledger_posted", refId: journalId });
   return journal;
 }
@@ -255,11 +282,56 @@ export function postPspCaptureSimple(input: {
 }
 
 export function getJournal(id: string): Journal | undefined {
-  return journals.get(id);
+  return journals().get(id);
+}
+
+/**
+ * Sandbox/live read: memory first, then Postgres via PostgREST. Fixture stays
+ * in-process so CI does not need a database.
+ */
+export async function getJournalDurable(
+  id: string,
+): Promise<Journal | undefined> {
+  const mem = getJournal(id);
+  if (mem) return mem;
+  const { processedEventsIntegrationMode, durableRestSelect } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") return undefined;
+  const entries = await durableRestSelect<{
+    entry_id: string;
+    memo: string | null;
+    created_at: string;
+  }>("journal_entries", `entry_id=eq.${encodeURIComponent(id)}`);
+  const row = entries[0];
+  if (!row) return undefined;
+  const lines = await durableRestSelect<{
+    line_id: string;
+    account_id: string;
+    amount_minor: number | string;
+    currency: "USD" | "ZWG";
+  }>("journal_lines", `entry_id=eq.${encodeURIComponent(id)}`);
+  const journal: Journal = {
+    id: row.entry_id,
+    orderId: "",
+    createdAt: row.created_at,
+    entries: lines.map((line) => ({
+      id: line.line_id,
+      account: "cash_psp",
+      amountMinor: BigInt(line.amount_minor),
+      currency: line.currency,
+      journalId: row.entry_id,
+      idempotencyKey: row.entry_id,
+      memo: row.memo ?? "",
+      createdAt: row.created_at,
+    })),
+  };
+  journals().set(journal.id, journal);
+  return journal;
 }
 
 export function listJournals(): Journal[] {
-  return [...journals.values()].map((j) => ({
+  return [...journals().values()].map((j) => ({
     ...j,
     entries: j.entries.map((e) => ({ ...e })),
   }));
@@ -352,9 +424,9 @@ export function assertNoDialOwnedPath(): void {
 }
 
 export function __resetLedgerForTests(): void {
-  journals.clear();
-  byIdem.clear();
-  moneyOutbox.length = 0;
+  journals().clear();
+  byIdem().clear();
+  moneyOutbox().length = 0;
 }
 
 /**

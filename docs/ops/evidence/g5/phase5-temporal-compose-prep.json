@@ -1,0 +1,21 @@
+{
+  "date": "2026-08-16",
+  "temporalCompose": "docker compose --profile temporal up -d",
+  "containers": {
+    "up": [
+      "dial-temporal-1",
+      "dial-temporal-ui-1",
+      "dial-temporal-db-1",
+      "dial-redis-1",
+      "dial-meilisearch-1"
+    ],
+    "fix": "Removed DYNAMIC_CONFIG_FILE_PATH — auto-setup image lacks mounted development-sql.yaml"
+  },
+  "tests": {
+    "workerTemporal": "pnpm --filter @dial/worker-temporal test — 7/7 pass",
+    "phase5PrepOps": "apps/gateway-web/src/lib/delivery/phase5PrepOps.test.ts — 3/3 pass",
+    "g5SandboxDogfood": "apps/gateway-web/scripts/g5-sandbox-delivery-dogfood.mts — Temporal history + courier POD/COD durable"
+  },
+  "not_G5": true,
+  "residual": "ENH-013 maps Tier-2; admin MapLibre T+S+A; courier Android device PNG (G3 signing)"
+}

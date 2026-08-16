@@ -25,6 +25,7 @@ import {
   startFlow,
   verifyMetaSignature,
 } from "./index.js";
+import { listWaFlowRegistry, resolveWaFlow } from "./flowRegistry.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -252,6 +253,8 @@ test("Cloud API fixture send + webhook challenge (key-ready)", async () => {
   assert.ok(tpl.messageId.startsWith("wamid."));
   const txt = await api.sendSessionText({ toE164: "+263771234567", text: "hi" });
   assert.ok(txt.messageId.startsWith("wamid."));
+  const read = await api.markMessageRead({ messageId: txt.messageId });
+  assert.equal(read.ok, true);
   const ok = verifyWebhookChallenge({
     mode: "subscribe",
     token: "verify_fx",
@@ -362,7 +365,7 @@ test("PD12 sandbox thin vertical: Cloud Flow+buttons → same intents as web", a
     ecoKey: process.env.ECOCASH_API_KEY,
     ecoMerch: process.env.ECOCASH_MERCHANT_CODE,
   };
-  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
   process.env.WHATSAPP_TOKEN = "wa_token_pd12_test";
   process.env.WHATSAPP_PHONE_NUMBER_ID = "phone_pd12_test";
   process.env.ECOCASH_API_KEY = "eco_key_pd12";
@@ -370,13 +373,13 @@ test("PD12 sandbox thin vertical: Cloud Flow+buttons → same intents as web", a
   try {
     const { runPd12WaFlowsSandboxThinVertical } = await import("./index.js");
     const result = await runPd12WaFlowsSandboxThinVertical();
-    assert.equal(result.mode, "sandbox");
+    assert.equal(result.mode, "fixture");
     assert.equal(result.spare.intentMethod, "ecocash_direct");
+    assert.equal(result.spare.fiscalChannel, "wa");
     assert.equal(result.grocery.codCurrency, "USD");
+    assert.equal(result.grocery.fiscalChannel, "wa");
     assert.equal(result.grocery.liquorForbidden, true);
-    assert.ok(result.outboundKinds.includes("flow"));
-    assert.ok(result.outboundKinds.includes("buttons"));
-    assert.ok(result.outboundKinds.includes("template"));
+    assert.ok(result.fiscalOutboxWaCount >= 4);
   } finally {
     if (prev.mode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
     else process.env.DIAL_INTEGRATION_MODE = prev.mode;
@@ -420,4 +423,25 @@ test("PD109 web Chatwoot handoff thin vertical", async () => {
   assert.equal(out.statusFrom, "erp");
   assert.equal(out.payableFromAi, false);
   assert.ok(out.conversationKey);
+});
+
+test("Phase9-prep: Flow registry EcoCash|COD contracts + WA_FLOW_* override (no invent IDs)", () => {
+  const listed = listWaFlowRegistry({});
+  assert.ok(listed.length >= 11);
+  const checkout = resolveWaFlow("FLOW_SPARE_CHECKOUT", {});
+  assert.equal(checkout.requiresEcoCashCodButtons, true);
+  assert.equal(checkout.status, "stub");
+  const groceryPay = resolveWaFlow("FLOW_GROCERY_CHECKOUT", {});
+  assert.equal(groceryPay.requiresEcoCashCodButtons, true);
+  const track = resolveWaFlow("FLOW_SPARE_TRACK", {});
+  assert.equal(track.status, "stub");
+  const returns = resolveWaFlow("FLOW_SPARE_RETURNS", {});
+  assert.equal(returns.vertical, "spare");
+  const approved = resolveWaFlow("FLOW_SPARE_CHECKOUT", {
+    WA_FLOW_FLOW_SPARE_CHECKOUT: "meta_flow_id_from_ops",
+  });
+  assert.equal(approved.status, "approved");
+  assert.equal(approved.flowId, "meta_flow_id_from_ops");
+  assert.equal(CHECKOUT_PAY_BUTTONS.map((b) => b.id).includes("ecocash"), true);
+  assert.equal(CHECKOUT_PAY_BUTTONS.map((b) => b.id).includes("cod"), true);
 });

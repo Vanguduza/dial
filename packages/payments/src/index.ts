@@ -492,7 +492,7 @@ export type JobReserve = {
 const jobReserves = new Map<string, JobReserve>();
 const jobReservesByIdem = new Map<string, string>();
 
-/** Job Reserve authorize via escrow adapter — capture only on webhook. */
+/** Job Reserve authorize via canonical escrow adapter — capture only on webhook. */
 export async function authorizeJobReserve(input: {
   jobId: string;
   amountUsdMinor: bigint;
@@ -504,20 +504,25 @@ export async function authorizeJobReserve(input: {
     if (existing) return existing;
   }
   const amount = money(input.amountUsdMinor, "USD");
-  const psp = getPspAdapter("escrow_hold");
-  const initiated = await psp.initiate({
+  // Key-drop-in: EscrowPspAdapter (fixture/sandbox/live) — not EscrowPspStub.
+  const vendor = await createVendorPaymentSession({
+    method: "escrow_hold",
+    reference: input.jobId,
     amount,
-    orderId: input.jobId,
-    idempotencyKey: input.idempotencyKey,
+    metadata: {
+      jobId: input.jobId,
+      idempotencyKey: input.idempotencyKey,
+    },
   });
   const intent: PaymentIntent = {
     id: id("pi"),
     method: "escrow_hold",
     amount,
-    status: initiated.status,
+    status: "authorized",
     orderId: input.jobId,
     idempotencyKey: input.idempotencyKey,
     createdAt: new Date().toISOString(),
+    providerRef: vendor.providerRef,
   };
   intentStore().set(intent.id, intent);
   intentIdemStore().set(input.idempotencyKey, intent.id);
@@ -569,6 +574,24 @@ export function applyJobReserveWebhook(input: {
 
 export function getJobReserve(id: string): JobReserve | undefined {
   return jobReserves.get(id);
+}
+
+/**
+ * Resolve Job Reserve from webhook reserveId / jobId / hold providerRef.
+ * Key-drop-in: vendor holdId must map without further coding after keys.
+ */
+export function findJobReserveForWebhook(ref: string): JobReserve | undefined {
+  if (!ref) return undefined;
+  const byId = jobReserves.get(ref);
+  if (byId) return byId;
+  for (const reserve of jobReserves.values()) {
+    if (reserve.jobId === ref) return reserve;
+    if (reserve.intentId) {
+      const intent = intentStore().get(reserve.intentId);
+      if (intent?.providerRef === ref) return reserve;
+    }
+  }
+  return undefined;
 }
 
 /** Tech WHT — ITF263 clearance or 30% withhold (D-50). Never assume WHT disappears. */
@@ -664,8 +687,10 @@ export {
   createWhtRemittanceDraft,
   getWhtRemittance,
   listWhtRemittances,
+  persistWhtRemittanceDurable,
   serializeWhtRemittance,
   submitWhtRemittance,
+  whtRemittanceDurableRow,
   type WhtRemittanceBatch,
   type WhtRemittanceLine,
   type WhtRemittanceStatus,
@@ -1119,6 +1144,44 @@ export async function completePspCaptureSettlement(input: {
   enqueueMoneyOutbox({ kind: "fiscal_queued", refId: goods.id });
   enqueueMoneyOutbox({ kind: "fiscal_queued", refId: fee.id });
   settledPspCaptures.add(input.pspEventId);
+
+  // G2: durable journal + FiscalReceiptQueued outbox (sandbox/live; fixture no-op).
+  try {
+    const { persistJournalDurable, persistFdmsOutboxDurable } = await import(
+      "@dial/shared"
+    );
+    await persistJournalDurable({
+      entryId: journal.id,
+      memo: `psp_capture:${intent.orderId}`,
+      lines: journal.entries.map((e, i) => ({
+        lineId: `${journal.id}_l${i}`,
+        accountId: `acct_${e.account}`,
+        accountCode: e.account,
+        accountName: e.account,
+        amountMinor: e.amountMinor,
+        currency: e.currency,
+      })),
+    });
+    for (const fiscalId of [goods.id, fee.id]) {
+      const row =
+        fiscalId === goods.id
+          ? goods
+          : fee;
+      await persistFdmsOutboxDurable({
+        id: row.id,
+        orderId: row.orderId,
+        receiptClass: row.receiptClass,
+        amountMinor: row.amount.amountMinor,
+        currency: row.amount.currency,
+        channel: row.channel,
+        status: row.status,
+        gateway: row.gateway,
+      });
+    }
+  } catch (e) {
+    const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+    if (mode === "sandbox" || mode === "live") throw e;
+  }
 
   return {
     journalId: journal.id,
@@ -1639,10 +1702,105 @@ export function getPaymentIntent(id: string): PaymentIntent | undefined {
   return intentStore().get(id);
 }
 
+/** Sandbox/live: memory first, then Postgres `payment_intents`. Fixture stays in-process. */
+export async function getPaymentIntentDurable(
+  id: string,
+): Promise<PaymentIntent | undefined> {
+  const mem = getPaymentIntent(id);
+  if (mem) return mem;
+  const { processedEventsIntegrationMode, durableRestSelect, money } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") return undefined;
+  const rows = await durableRestSelect<{
+    intent_id: string;
+    method: PaymentMethodCode;
+    amount_minor: number | string;
+    currency: "USD" | "ZWG";
+    status: PaymentIntentStatus;
+    order_id: string;
+    idempotency_key: string;
+    fx_rate_id: string | null;
+  }>("payment_intents", `intent_id=eq.${encodeURIComponent(id)}`);
+  const row = rows[0];
+  if (!row) return undefined;
+  const intent: PaymentIntent = {
+    id: row.intent_id,
+    method: row.method,
+    amount: money(BigInt(row.amount_minor), row.currency),
+    status: row.status,
+    orderId: row.order_id,
+    idempotencyKey: row.idempotency_key,
+    createdAt: new Date().toISOString(),
+    ...(row.fx_rate_id ? { fxRateId: row.fx_rate_id } : {}),
+  };
+  intentStore().set(intent.id, intent);
+  return intent;
+}
+
+/**
+ * Resolve intent from webhook reference / orderId / providerRef.
+ * Key-drop-in: vendor callbacks may echo order id or session ref, not only pi_*.
+ */
+export function findPaymentIntentForWebhook(
+  ref: string,
+): PaymentIntent | undefined {
+  if (!ref) return undefined;
+  const byId = intentStore().get(ref);
+  if (byId) return byId;
+  for (const intent of intentStore().values()) {
+    if (intent.orderId === ref || intent.providerRef === ref) return intent;
+  }
+  return undefined;
+}
+
+export async function findPaymentIntentForWebhookDurable(
+  ref: string,
+): Promise<PaymentIntent | undefined> {
+  const mem = findPaymentIntentForWebhook(ref);
+  if (mem) return mem;
+  if (!ref) return undefined;
+  const byId = await getPaymentIntentDurable(ref);
+  if (byId) return byId;
+  const { processedEventsIntegrationMode, durableRestSelect, money } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") return undefined;
+  const rows = await durableRestSelect<{
+    intent_id: string;
+    method: PaymentMethodCode;
+    amount_minor: number | string;
+    currency: "USD" | "ZWG";
+    status: PaymentIntentStatus;
+    order_id: string;
+    idempotency_key: string;
+    fx_rate_id: string | null;
+  }>(
+    "payment_intents",
+    `or=(order_id.eq.${encodeURIComponent(ref)},idempotency_key.eq.${encodeURIComponent(ref)})`,
+  );
+  const row = rows[0];
+  if (!row) return undefined;
+  const intent: PaymentIntent = {
+    id: row.intent_id,
+    method: row.method,
+    amount: money(BigInt(row.amount_minor), row.currency),
+    status: row.status,
+    orderId: row.order_id,
+    idempotencyKey: row.idempotency_key,
+    createdAt: new Date().toISOString(),
+    ...(row.fx_rate_id ? { fxRateId: row.fx_rate_id } : {}),
+  };
+  intentStore().set(intent.id, intent);
+  return intent;
+}
+
 /** Frozen offer at checkout — AI cannot set payable (C-1). */
 export type OfferSnapshot = {
   offerSnapshotId: string;
   orderId: string;
+  /** Catalogue offer frozen at checkout (durable offer_snapshots.offer_id). */
+  offerId?: string;
   supplierDisplayName: string;
   /** Agency disclosure — Sold by {Supplier}. */
   soldBy: string;
@@ -1655,12 +1813,15 @@ const offerSnapshots = new Map<string, OfferSnapshot>();
 const processedPspEvents = new Set<string>();
 /** Ledger/fiscal settlement idempotency (PD4) — keyed by psp event id. */
 const settledPspCaptures = new Set<string>();
+/** COD placement settlement idempotency (G2) — keyed by orderId. */
+const settledCodPlacements = new Set<string>();
 
 export function freezeOfferSnapshot(input: {
   orderId: string;
   supplierDisplayName: string;
   formality: "formal" | "informal";
   amountUsdMinor: bigint;
+  offerId?: string;
   /** Rejected if provided — AI must not write payable. */
   aiSuggestedPayableMinor?: bigint;
 }): OfferSnapshot {
@@ -1673,6 +1834,7 @@ export function freezeOfferSnapshot(input: {
   const snap: OfferSnapshot = {
     offerSnapshotId: id("ofs"),
     orderId: input.orderId,
+    ...(input.offerId ? { offerId: input.offerId } : {}),
     supplierDisplayName: input.supplierDisplayName,
     soldBy: `Sold by ${input.supplierDisplayName}`,
     formality: input.formality,
@@ -1681,6 +1843,105 @@ export function freezeOfferSnapshot(input: {
   };
   offerSnapshots.set(snap.offerSnapshotId, snap);
   return snap;
+}
+
+export function getOfferSnapshot(id: string): OfferSnapshot | undefined {
+  return offerSnapshots.get(id);
+}
+
+/**
+ * G2 COD path — place-time ledger + FiscalReceiptQueued (USD settle D-60).
+ * No PSP capture webhook; deferred cash collection on delivery.
+ */
+export async function completeCodPlacementSettlement(input: {
+  orderId: string;
+  amountUsdMinor: bigint;
+  formality: "formal" | "informal";
+  dialFeeUsdMinor?: bigint;
+  channel?: "web" | "wa" | "native";
+}): Promise<{
+  journalId: string;
+  fiscalIds: string[];
+  duplicate: boolean;
+}> {
+  if (settledCodPlacements.has(input.orderId)) {
+    return { journalId: "", fiscalIds: [], duplicate: true };
+  }
+  if (typeof input.amountUsdMinor !== "bigint" || input.amountUsdMinor <= 0n) {
+    throw new TypeError("amountUsdMinor must be positive bigint");
+  }
+  const { postPspCaptureSimple, enqueueMoneyOutbox } = await import(
+    "@dial/ledger"
+  );
+  const { enqueueFiscalReceipt } = await import("@dial/tax");
+
+  const amount = money(input.amountUsdMinor, "USD");
+  const journal = postPspCaptureSimple({
+    orderId: input.orderId,
+    amount,
+    idempotencyKey: `cod_ledger_${input.orderId}`,
+  });
+
+  const channel = input.channel ?? "web";
+  const goodsClass =
+    input.formality === "formal" ? "GOODS_FORMAL" : "GOODS_INFORMAL";
+  const goods = enqueueFiscalReceipt({
+    orderId: input.orderId,
+    receiptClass: goodsClass,
+    amount,
+    channel,
+    idempotencyKey: `cod_fiscal_goods_${input.orderId}`,
+  });
+  const feeMinor = input.dialFeeUsdMinor ?? 100n;
+  const fee = enqueueFiscalReceipt({
+    orderId: input.orderId,
+    receiptClass: "DIAL_FEE",
+    amount: money(feeMinor, "USD"),
+    channel,
+    idempotencyKey: `cod_fiscal_fee_${input.orderId}`,
+  });
+  enqueueMoneyOutbox({ kind: "fiscal_queued", refId: goods.id });
+  enqueueMoneyOutbox({ kind: "fiscal_queued", refId: fee.id });
+  settledCodPlacements.add(input.orderId);
+
+  try {
+    const { persistJournalDurable, persistFdmsOutboxDurable } = await import(
+      "@dial/shared"
+    );
+    await persistJournalDurable({
+      entryId: journal.id,
+      memo: `cod_place:${input.orderId}`,
+      lines: journal.entries.map((e, i) => ({
+        lineId: `${journal.id}_l${i}`,
+        accountId: `acct_${e.account}`,
+        accountCode: e.account,
+        accountName: e.account,
+        amountMinor: e.amountMinor,
+        currency: e.currency,
+      })),
+    });
+    for (const row of [goods, fee]) {
+      await persistFdmsOutboxDurable({
+        id: row.id,
+        orderId: row.orderId,
+        receiptClass: row.receiptClass,
+        amountMinor: row.amount.amountMinor,
+        currency: row.amount.currency,
+        channel: row.channel,
+        status: row.status,
+        gateway: row.gateway,
+      });
+    }
+  } catch (e) {
+    const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+    if (mode === "sandbox" || mode === "live") throw e;
+  }
+
+  return {
+    journalId: journal.id,
+    fiscalIds: [goods.id, fee.id],
+    duplicate: false,
+  };
 }
 
 export function assertB2bMayPurchase(input: {
@@ -1809,6 +2070,7 @@ export function __resetPaymentsForTests(): void {
   offerSnapshots.clear();
   processedPspEvents.clear();
   settledPspCaptures.clear();
+  settledCodPlacements.clear();
   __resetIdempotencyForTests();
   jobReserves.clear();
   jobReservesByIdem.clear();

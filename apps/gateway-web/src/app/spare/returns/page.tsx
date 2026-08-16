@@ -129,9 +129,6 @@ export default function SpareReturnsPage() {
         >
           Returns
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          ERP refund_or_replace stub. AI never writes payable refund amounts.
-        </p>
         <Suspense fallback={<p>Loading…</p>}>
           <ReturnsInner />
         </Suspense>

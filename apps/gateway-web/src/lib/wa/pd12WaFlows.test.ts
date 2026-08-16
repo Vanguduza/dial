@@ -34,13 +34,19 @@ test("PD12 admin WA Flows UI exists (Cloud API, no Baileys/liquor)", () => {
   assert.match(page, /FLOW_GROCERY_/);
 });
 
-test("PD12 package thin vertical sandbox Spare+grocery Cloud API", async () => {
+/**
+ * Settlement writes through to the durable store in sandbox and fails closed
+ * without it (D-47), which CI has no target for. The flow wiring therefore runs
+ * in fixture here, and the same routine is exercised against real Postgres by
+ * the compose integration job and docs/ops/phase9-wa-sandbox-dogfood.md.
+ */
+test("PD12 package thin vertical Spare+grocery Cloud API", async () => {
   const prev = {
     mode: process.env.DIAL_INTEGRATION_MODE,
     token: process.env.WHATSAPP_TOKEN,
     phone: process.env.WHATSAPP_PHONE_NUMBER_ID,
   };
-  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
   process.env.WHATSAPP_TOKEN = "wa_token_pd12_gw";
   process.env.WHATSAPP_PHONE_NUMBER_ID = "phone_pd12_gw";
   process.env.ECOCASH_API_KEY = "eco_key_pd12_gw";
@@ -52,6 +58,24 @@ test("PD12 package thin vertical sandbox Spare+grocery Cloud API", async () => {
     const result = await runPd12WaFlowsSandboxThinVertical();
     assert.equal(result.spare.intentMethod, "ecocash_direct");
     assert.equal(result.grocery.codCurrency, "USD");
+
+    // Sandbox without a durable store must refuse rather than settle in memory.
+    process.env.DIAL_INTEGRATION_MODE = "sandbox";
+    const savedUrl = process.env.SUPABASE_URL;
+    const savedPublicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_URL;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    try {
+      await assert.rejects(
+        () => runPd12WaFlowsSandboxThinVertical(),
+        /fail closed/i,
+      );
+    } finally {
+      if (savedUrl !== undefined) process.env.SUPABASE_URL = savedUrl;
+      if (savedPublicUrl !== undefined) {
+        process.env.NEXT_PUBLIC_SUPABASE_URL = savedPublicUrl;
+      }
+    }
   } finally {
     if (prev.mode === undefined) delete process.env.DIAL_INTEGRATION_MODE;
     else process.env.DIAL_INTEGRATION_MODE = prev.mode;
@@ -99,23 +123,32 @@ test("PD12 admin API thin_vertical + webhook button_reply → EcoCash intent", a
     assert.equal(status.liquorFlows, false);
     assert.ok(status.flows.length >= 8);
 
-    const thinRes = await adminPost(
-      new Request("http://localhost/api/admin/wa/flows", {
-        method: "POST",
-        headers: {
-          "x-internal-secret": SECRET,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action: "thin_vertical" }),
-      }),
-    );
-    assert.equal(thinRes.status, 200);
-    const thin = (await thinRes.json()) as {
-      ok: boolean;
-      result: { spare: { intentMethod: string } };
-    };
-    assert.equal(thin.ok, true);
-    assert.equal(thin.result.spare.intentMethod, "ecocash_direct");
+    // No durable store configured in CI: the sandbox rail must refuse rather
+    // than report a green settlement it only made in memory.
+    const savedUrl = process.env.SUPABASE_URL;
+    const savedPublicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    delete process.env.SUPABASE_URL;
+    delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    try {
+      const thinRes = await adminPost(
+        new Request("http://localhost/api/admin/wa/flows", {
+          method: "POST",
+          headers: {
+            "x-internal-secret": SECRET,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ action: "thin_vertical" }),
+        }),
+      );
+      assert.equal(thinRes.status, 503);
+      const thin = (await thinRes.json()) as { error?: string };
+      assert.match(String(thin.error), /durable/i);
+    } finally {
+      if (savedUrl !== undefined) process.env.SUPABASE_URL = savedUrl;
+      if (savedPublicUrl !== undefined) {
+        process.env.NEXT_PUBLIC_SUPABASE_URL = savedPublicUrl;
+      }
+    }
 
     // Webhook interactive button path — fixture mode for durable processed_events (S102)
     process.env.DIAL_INTEGRATION_MODE = "fixture";

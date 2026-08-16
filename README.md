@@ -4,6 +4,12 @@ Zimbabwean multi-trade “certainty” platform: **Dial a Spare** (parts), **Dia
 
 This repository is the DIAL ERP monorepo (apps, packages, infra, adapters). Product and compliance truth live in the plan pack, not in ad-hoc README prose.
 
+## Eng completion spine
+
+**What eng does next:** [docs/planning/DIAL_Full_ERP_Completion_Plan.md](./docs/planning/DIAL_Full_ERP_Completion_Plan.md) (Phases 0–12). Live pointer: [docs/planning/DIAL_Build_Workplan_STATE.md](./docs/planning/DIAL_Build_Workplan_STATE.md). **Phase 3 native Spare in progress (not G3).** G2 eng-exception sequencing green; live EcoCash still open. Phase 3 store-readiness: [docs/ops/phase3-native-store-readiness.md](./docs/ops/phase3-native-store-readiness.md).
+
+Local production-like stack: [`docs/ops/local-production-environment.md`](./docs/ops/local-production-environment.md) — `pnpm secrets:local && pnpm stack:up && pnpm db:migrate`. Maps overlay: `pnpm stack:up:maps`.
+
 ## Authority (read in order)
 
 1. [`DIAL_Consolidated_Plan_v4.md`](./DIAL_Consolidated_Plan_v4.md) — product, compliance, architecture, D-log  
@@ -130,3 +136,4 @@ Env-group SoR: `INTEGRATION_ENV_GROUPS` + ordered `INTEGRATION_ENV_GROUP_LABELS`
 ## Licence / secrets
 
 Private proprietary project unless a root licence file says otherwise. Never commit `.env*`; never put service-role / PSP / WA secrets behind `NEXT_PUBLIC_` or `VITE_`.
+

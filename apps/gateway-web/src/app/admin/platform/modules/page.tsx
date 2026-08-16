@@ -94,6 +94,12 @@ export default function AdminDomainModulesPage() {
         <Link href="/admin/four-eyes">Four-eyes queue</Link>
         {" · "}
         <Link href="/admin/command-centre">Command Centre</Link>
+        {" · "}
+        <Link href="/admin/hr">HR / Payroll-ZW</Link>
+        {" · "}
+        <Link href="/admin/pricing">Pricing</Link>
+        {" · "}
+        <Link href="/admin/analytics">Analytics</Link>
         <h1
           style={{
             fontFamily: `${dialTokens.font.display}, Georgia, serif`,
@@ -103,10 +109,6 @@ export default function AdminDomainModulesPage() {
         >
           Domain modules
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD60 certification registry (D-53). Not Unleash. Draft / certified / dormant /
-          retired — not a public multi-phase MVP ladder.
-        </p>
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input
@@ -149,6 +151,15 @@ export default function AdminDomainModulesPage() {
               <span style={{ fontSize: 13, opacity: 0.75 }}>
                 {m.moduleId} · {m.certification} · by {m.updatedBy}
               </span>
+              {m.moduleId === "hr_payroll" ? (
+                <Link href="/admin/hr">Open shell</Link>
+              ) : null}
+              {m.moduleId === "pricing" ? (
+                <Link href="/admin/pricing">Open shell</Link>
+              ) : null}
+              {m.moduleId === "analytics" ? (
+                <Link href="/admin/analytics">Open shell</Link>
+              ) : null}
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {(["draft", "certified", "dormant", "retired"] as const).map((c) => (
                   <button

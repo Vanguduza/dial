@@ -1,6 +1,6 @@
 # Integration readiness (API-key drop-in)
 
-**Goal:** Eng shapes match Pack §6 / Stitch §2 so filling `.env` (from `.env.example`) enables sandbox/live without redesign.
+**Goal:** Eng shapes match Pack §6 / Stitch §2 so filling `.env` (from `.env.example`) enables sandbox/live **without further coding** (founder standing — `.cursor/rules/dial-key-drop-in.mdc`). Matrix: [`key-drop-in-readiness.md`](./key-drop-in-readiness.md).
 
 **Default:** `DIAL_INTEGRATION_MODE=fixture` — recorded/fixture paths, **no outbound vendor HTTP**, CI green without secrets.
 
@@ -92,14 +92,20 @@ Before switching `DIAL_INTEGRATION_MODE` to `sandbox` or `live`:
 | `temporal` | `TEMPORAL_ADDRESS`, `TEMPORAL_NAMESPACE` |
 | `redis` | `REDIS_URL` |
 | `internal` | `INTERNAL_API_SECRET` |
+| `supabase` | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
 
 Template overrides (not in health groups): `WA_TEMPLATE_*` — see ENH-021 / `docs/ops/meta-wa-template-ids.md`.
+Sandbox HTTP opt-in (not health keys): `ECOCASH_SANDBOX_HTTP`, `WA_SANDBOX_HTTP`, `FDMS_SANDBOX_HTTP` — see `.env.example` / `key-drop-in-readiness.md`.
 
 ## Still ops / credentials (eng continues either way)
 
 - Meta template IDs (`docs/ops/meta-wa-template-ids.md`, ENH-021)
 - Escrow partner contract (ENH-020)
 - ZIMRA device credentials field-map refine (ENH-022)
+
+## Phase 1 sandbox dogfood (G1)
+
+See [docs/ops/phase1-sandbox-dogfood.md](../ops/phase1-sandbox-dogfood.md) for Pack §6 credentials path, Meili non-fixture evidence, worker fail-closed, and Auth GoTrue dogfood.
 
 ## Local compose (S92+)
 
@@ -133,3 +139,4 @@ Schemas stay opaque for webhook bodies. **Webhook SoR (S196/S201):** OpenAPI `ta
 **Health `note` (S151/S152/S153/S156/S160/S165/S166/S172/S181/S187):** Response JSON `note` is built by `buildIntegrationsHealthNote(mode)` and includes `groups labels=` followed by the ordered `INTEGRATION_ENV_GROUP_LABELS` tuple (comma-separated). OpenAPI `IntegrationsHealth.note` description documents the same contract — never echoes secret values. Admin UIs (`/admin/integrations`, `/admin/cost-health`) display the note via `truncateIntegrationsHealthNote` capped by `INTEGRATIONS_HEALTH_NOTE_UI_MAX` (full string remains on the element `title` / health JSON) and expose a `note-builder-sor-hint` cross-link (`INTEGRATIONS_NOTE_BUILDER_SOR_HINT_ID`) to OpenAPI `x-dial-sor.healthNote` + Health JSON; docs pointer `INTEGRATIONS_NOTE_BUILDER_SOR_DOCS`. OpenAPI `info.x-dial-sor.healthNote` → builder; `info.x-dial-sor.healthNoteUiMax` → UI max; `info.x-dial-sor.noteBuilderHint` → HINT_ID; `info.x-dial-sor.noteBuilderDocs` → DOCS in `integrationsReadiness.ts`.
 
 **Ready≠groups admin hint (S202/S205/S207):** both admin pages expose `data-testid={INTEGRATIONS_READY_VS_GROUPS_HINT_ID}` (`ready-vs-groups-sor-hint`) citing `integrationsReady(probes)` ≠ `groups[].configured`; OpenAPI `info.x-dial-sor.readyVsGroupsHint` points at the constant.
+

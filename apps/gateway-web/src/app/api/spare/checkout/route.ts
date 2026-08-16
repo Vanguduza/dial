@@ -1,27 +1,38 @@
 /**
- * Spare checkout API — EcoCash|COD against @dial/payments (D-57).
+ * Spare checkout API — EcoCash|COD via G2 spine (D-57 / G2 durable path).
+ * Paynow remains optional hosted rail (PD112) — not G2 exit path.
  * PD96: promo draft on cart (not payable). PD97: Idempotency-Key required.
  */
 import { NextResponse } from "next/server";
-import { addToCart, createCart, getCart, getOffer } from "@dial/catalogue";
 import { getAppliedPromoDraft } from "@dial/promotions";
 import {
-  assertB2bMayPurchase,
-  createCheckoutPayment,
-  freezeOfferSnapshot,
-  getActiveFxRate,
   requireIdempotencyKey,
-  setDailyZigRate,
   type CheckoutPayChoice,
 } from "@dial/payments";
 import {
   getSessionFromToken,
   parseSessionCookie,
 } from "../../../../lib/auth/session";
+import {
+  runG2SparePaynowHosted,
+  runG2SpareThinVertical,
+} from "../../../../lib/spare/g2Spine";
+import { takeRouteRateLimit } from "../../../../lib/http/rateLimit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  const limited = await takeRouteRateLimit({
+    key: `checkout:${req.headers.get("x-forwarded-for") ?? "local"}`,
+    limit: 40,
+    windowMs: 60_000,
+  });
+  if (!limited.ok) {
+    return NextResponse.json(
+      { error: "rate_limited", retryAfterMs: limited.retryAfterMs },
+      { status: 429 },
+    );
+  }
   let idempotencyKey: string;
   try {
     idempotencyKey = requireIdempotencyKey(req.headers);
@@ -75,66 +86,77 @@ export async function POST(req: Request) {
   }
   const buyerSegment = session.buyerSegment === "b2b" ? "b2b" : "b2c";
 
+  if (!offerId && !cartId) {
+    return NextResponse.json({ error: "offerId or cartId required" }, { status: 400 });
+  }
+
   try {
-    let cart = cartId ? getCart(cartId) : undefined;
-    if (!cart) {
-      if (!offerId) {
-        return NextResponse.json({ error: "offerId or cartId required" }, { status: 400 });
-      }
-      const offer = getOffer(offerId);
-      if (!offer) {
-        return NextResponse.json({ error: "Unknown offer" }, { status: 404 });
-      }
-      assertB2bMayPurchase({
+    // Optional Paynow hosted rail — durable pending order; settle via webhook (not G2 exit).
+    if (choice === "paynow") {
+      const paynow = await runG2SparePaynowHosted({
+        ...(offerId ? { offerId } : {}),
+        ...(cartId ? { cartId } : {}),
+        qty,
         buyerSegment,
-        formality: offer.supplierFormality,
+        customerId: session.userId,
+        idempotencyKey,
       });
-      cart = createCart();
-      addToCart(cart.id, offerId, qty);
-      cart = getCart(cart.id)!;
-    }
-    if (cart.currency !== "USD") {
-      return NextResponse.json({ error: "Cart must be USD (D-57)" }, { status: 400 });
-    }
-    if (cart.lines.length === 0) {
-      return NextResponse.json({ error: "Cart empty" }, { status: 400 });
+      return NextResponse.json({
+        ok: true,
+        cartId: paynow.cart.id,
+        orderId: paynow.orderId,
+        currency: "USD",
+        cartTotalUsdMinor: paynow.cart.total.amountMinor.toString(),
+        snapshotId: paynow.snapshotId,
+        soldBy: paynow.soldBy,
+        intentId: paynow.intentId,
+        hostedUrl: paynow.hostedUrl,
+        providerRef: paynow.providerRef ?? null,
+        fxRateId: paynow.fxRateId,
+        displayPayableCurrency: paynow.displayPayableCurrency,
+        durable: paynow.durable,
+        b2bInformalLeaks: paynow.b2bInformalLeaks,
+        choice: "paynow",
+        imttOnCheckoutLines: false,
+        idempotencyKey,
+        payableFromAi: false,
+        note: paynow.note,
+      });
     }
 
-    if (!getActiveFxRate()) {
-      setDailyZigRate({ zigMinorPerUsd: 2500_00n, setBy: "spare_api_checkout_stub" });
-    }
-
-    const orderId = `ord_${cart.id}`;
-    const primary = cart.lines[0]!;
-    const offer = getOffer(primary.offerId);
-    const snapshot = freezeOfferSnapshot({
-      orderId,
-      supplierDisplayName: offer?.brand ?? "Marketplace supplier",
-      formality: offer?.supplierFormality ?? "formal",
-      amountUsdMinor: cart.total.amountMinor,
-    });
-
-    const promoDraft = getAppliedPromoDraft(cart.id);
-
-    const pay = await createCheckoutPayment({
-      choice,
-      orderId,
-      amountUsdMinor: cart.total.amountMinor,
+    const result = await runG2SpareThinVertical({
+      ...(offerId ? { offerId } : {}),
+      ...(cartId ? { cartId } : {}),
+      qty,
+      buyerSegment,
+      customerId: session.userId,
+      payChoice: choice,
       idempotencyKey,
+      simulateEcoCashWebhook: true,
     });
+
+    const promoDraft = getAppliedPromoDraft(result.cart.id);
 
     return NextResponse.json({
       ok: true,
-      cartId: cart.id,
+      cartId: result.cart.id,
+      orderId: result.orderId,
       currency: "USD",
-      cartTotalUsdMinor: cart.total.amountMinor.toString(),
-      snapshotId: snapshot.offerSnapshotId,
-      soldBy: snapshot.soldBy,
-      intentId: pay.intent?.id,
-      codOrderId: pay.codOrder?.id,
-      hostedUrl: pay.intent?.hostedUrl ?? null,
-      fxRateId: pay.intent?.fxRateId ?? pay.codOrder?.fxRateId,
-      displayPayableCurrency: pay.intent?.displayPayable?.currency,
+      cartTotalUsdMinor: result.cart.total.amountMinor.toString(),
+      snapshotId: result.snapshotId,
+      soldBy: result.soldBy,
+      intentId: result.intentId,
+      codOrderId: result.codOrderId,
+      providerRef: result.providerRef ?? null,
+      hostedUrl: null,
+      fxRateId: result.fxRateId,
+      displayPayableCurrency: result.displayPayableCurrency,
+      jobReserveId: result.jobReserveId,
+      journalId: result.journalId ?? null,
+      fiscalIds: result.fiscalIds ?? [],
+      webhook: result.webhook,
+      durable: result.durable,
+      b2bInformalLeaks: result.b2bInformalLeaks,
       choice,
       imttOnCheckoutLines: false,
       promoDraft: promoDraft
@@ -147,10 +169,6 @@ export async function POST(req: Request) {
         : null,
       idempotencyKey,
       payableFromAi: false,
-      note:
-        choice === "paynow"
-          ? "PD112 — optional Paynow hosted URL; EcoCash|COD remain required CTAs (D-57)"
-          : undefined,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : "checkout failed";

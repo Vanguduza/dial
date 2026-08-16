@@ -146,6 +146,13 @@ export function completeStopAndMaybeRun(input: {
 }
 
 export {
+  persistCourierLocationDurable,
+  persistDeliveryJobDurable,
+  persistDeliveryOfferDurable,
+  fetchDeliveryJobDurable,
+} from "./durableDelivery.js";
+
+export {
   createJobsFromMultiStopPlan,
   planMultiStopDeliveries,
   type MultiStopDispatchResult,
@@ -160,6 +167,12 @@ import {
   planMultiStopDeliveries,
   type MultiStopVendorLeg,
 } from "./multiStopPlan.js";
+import {
+  persistCourierLocationDurable,
+  fetchDeliveryJobDurable,
+  syncDeliveryJobDurable,
+  syncDeliveryOfferDurable,
+} from "./durableDelivery.js";
 
 export type CourierId = string;
 
@@ -355,6 +368,7 @@ export function createDeliveryJob(input: {
     job.codAmountUsd = money(input.codUsdMinor, "USD");
   }
   jobs.set(job.id, job);
+  syncDeliveryJobDurable(job);
   return { ...job };
 }
 
@@ -380,12 +394,33 @@ export async function createDeliveryJobWithMaps(input: {
     job.codAmountUsd = money(input.codUsdMinor, "USD");
   }
   jobs.set(job.id, job);
+  syncDeliveryJobDurable(job);
   return { ...job };
 }
 
 export function getDeliveryJob(jobId: string): DeliveryJob | undefined {
   const j = jobs.get(jobId);
   return j ? { ...j } : undefined;
+}
+
+export async function getDeliveryJobDurable(
+  jobId: string,
+): Promise<DeliveryJob | undefined> {
+  const mem = getDeliveryJob(jobId);
+  if (mem) return mem;
+  const row = await fetchDeliveryJobDurable(jobId);
+  if (!row) return undefined;
+  const job: DeliveryJob = {
+    id: row.job_id,
+    orderId: row.order_id,
+    status: row.status as DeliveryJobStatus,
+    createdAt: new Date().toISOString(),
+    ...(row.assigned_courier_id
+      ? { assignedCourierId: row.assigned_courier_id }
+      : {}),
+  };
+  jobs.set(job.id, job);
+  return { ...job };
 }
 
 /**
@@ -438,6 +473,8 @@ function offerToNextCourier(jobId: string): DeliveryOffer | undefined {
   offers.set(offer.id, offer);
   job.status = "offered";
   job.offerId = offer.id;
+  syncDeliveryJobDurable(job);
+  syncDeliveryOfferDurable(offer);
   recordAssignmentEvent({
     jobId,
     type: "offered",
@@ -466,6 +503,8 @@ export function acceptOffer(offerId: string, courierId: CourierId): DeliveryJob 
     actor: courierId,
   });
   openDeliveryRun({ jobId: job.id, courierId });
+  syncDeliveryJobDurable(job);
+  syncDeliveryOfferDurable(offer);
   return { ...job };
 }
 
@@ -650,6 +689,7 @@ export function startTransit(jobId: string): DeliveryJob {
   if (!job) throw new Error("Unknown job");
   if (job.status !== "assigned") throw new Error("Job not assigned");
   job.status = "in_transit";
+  syncDeliveryJobDurable(job);
   return { ...job };
 }
 
@@ -703,6 +743,7 @@ export function capturePod(
     wf.phase = "pod";
     wf.phase = "complete";
   }
+  syncDeliveryJobDurable(job);
   return { ...job };
 }
 
@@ -781,6 +822,13 @@ export function postCourierLocation(input: {
     ...(input.jobId ? { jobId: input.jobId } : {}),
   };
   courierLocations.set(input.courierId, loc);
+  void persistCourierLocationDurable({
+    locationId: `loc_${input.courierId}_${Date.now().toString(36)}`,
+    courierId: input.courierId,
+    ...(input.jobId ? { jobId: input.jobId } : {}),
+    lat: input.lat,
+    lng: input.lng,
+  }).catch(() => undefined);
   return { ...loc };
 }
 

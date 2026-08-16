@@ -210,9 +210,8 @@ export default function AdminFdmsPage() {
           FDMS Virtual Gateway
         </h1>
         <p style={{ fontSize: 14, opacity: 0.8 }}>
-          Agency receipts <code>DIAL_FEE</code> / <code>GOODS_FORMAL</code> /{" "}
-          <code>GOODS_INFORMAL</code> (D-59). Sandbox open/close day + money-outbox
-          submit — <strong>no physical printer</strong>.
+          Agency receipts: <code>DIAL_FEE</code> / <code>GOODS_FORMAL</code> /{" "}
+          <code>GOODS_INFORMAL</code>. No physical printer.
         </p>
 
         <div

@@ -50,9 +50,7 @@ export default async function SpareOrderTrackPage({
           Sold by {order.soldBySummary}
         </p>
         <p style={{ fontSize: 13, opacity: 0.7 }}>
-          Status from ERP (not Simulated). Cancellable until{" "}
-          {new Date(order.cancellableUntil).toLocaleString()} (7-day aware). No ZiG
-          on track (D-57).
+          Cancellable until {new Date(order.cancellableUntil).toLocaleString()}
         </p>
         {timeline.length > 0 ? (
           <div style={{ marginTop: dialTokens.space.md }}>

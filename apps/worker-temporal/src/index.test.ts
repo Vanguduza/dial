@@ -66,6 +66,46 @@ test("S101 Temporal SDK worker fixture registers without NativeConnection", asyn
   await sdk.stop();
 });
 
+test("Phase4-prep adjacent: Temporal sandbox start path fail-closed without secrets", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  delete process.env.TEMPORAL_ADDRESS;
+  delete process.env.INTERNAL_API_SECRET;
+  const { startDeliveryDispatch } = await import("./index.js");
+  await assert.rejects(
+    () =>
+      startDeliveryDispatch({
+        orderId: "ord_p4prep_fail",
+        from: "A",
+        to: "B",
+        courierId: "c_fail",
+      }),
+    /fail closed|TEMPORAL|INTERNAL/,
+  );
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+});
+
+test("Phase5-prep: sandbox path label is temporal when address+secret set (no live connect)", async () => {
+  // Contract only: createTemporalWorkerOptions + assertInternalSecret succeed;
+  // startDeliveryDispatch would dial Temporal — do not claim G5 without UI history.
+  process.env.DIAL_INTEGRATION_MODE = "sandbox";
+  process.env.TEMPORAL_ADDRESS = "127.0.0.1:7233";
+  process.env.INTERNAL_API_SECRET = "phase5_prep_test_secret";
+  process.env.TEMPORAL_NAMESPACE = "dial_p5prep";
+  const opts = createTemporalWorkerOptions();
+  assert.equal(opts.address, "127.0.0.1:7233");
+  assert.equal(opts.namespace, "dial_p5prep");
+  assert.ok(opts.workflows.includes(WORKFLOW_DELIVERY_DISPATCH));
+  assertInternalSecretForSideEffects();
+  const health = (await import("./index.js")).pingTemporalHealth();
+  assert.equal(health.ok, true);
+  assert.equal(health.mode, "sandbox");
+  assert.equal(health.addressConfigured, true);
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  delete process.env.TEMPORAL_ADDRESS;
+  delete process.env.INTERNAL_API_SECRET;
+  delete process.env.TEMPORAL_NAMESPACE;
+});
+
 test("S126 pingTemporalHealth fixture ok + sandbox fail-closed without address", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   delete process.env.TEMPORAL_ADDRESS;

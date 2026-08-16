@@ -1,0 +1,58 @@
+{
+  "date": "2026-08-16",
+  "g10Claimed": false,
+  "not_G10": true,
+  "liquorHidden": true,
+  "b2bLeaks": 0,
+  "spine": {
+    "g10Claimed": false,
+    "b2bLeaks": 0,
+    "b2bFormalOnly": true,
+    "liquorRejected": true,
+    "orderEco": {
+      "jobReserveId": "jr_msvu7vq0_r55cf8",
+      "deliveryJobId": "dj_msvu7vq0_epq1in",
+      "journal": true,
+      "webhook": "captured"
+    },
+    "pod": {
+      "status": "pod_captured",
+      "codReconciled": true
+    }
+  },
+  "desktop": {
+    "label": "desktop",
+    "notes": [
+      "auth=session_ok",
+      "fx=fx_seeded",
+      "prep=cart_slot_ready",
+      "liquor_absent=true",
+      "food_pantry=true",
+      "cart_empty=false",
+      "after_url=http://127.0.0.1:3000/grocery/track?orderId=gord_msvu8dzc_f9ua",
+      "track_page=true",
+      "track_has_order=true"
+    ],
+    "ok": true
+  },
+  "mobile": {
+    "label": "mobile",
+    "notes": [
+      "auth=session_ok",
+      "fx=fx_seeded",
+      "prep=cart_slot_ready",
+      "liquor_absent=true",
+      "food_pantry=true",
+      "cart_empty=false",
+      "after_url=http://127.0.0.1:3000/grocery/track?orderId=gord_msvu8sg9_fkxp",
+      "track_page=true",
+      "track_has_order=true"
+    ],
+    "ok": true
+  },
+  "residual": [
+    "G5 ENH-013 maps Tier-2 may block full G10 exit",
+    "Meili live grocery hits optional — memory spine exercised",
+    "Temporal workflow history not required for this prep pass"
+  ]
+}

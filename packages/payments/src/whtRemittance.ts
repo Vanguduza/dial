@@ -139,3 +139,45 @@ export function serializeWhtRemittance(b: WhtRemittanceBatch) {
     })),
   };
 }
+
+/**
+ * Phase 8 prep (not G8) — Postgres row shape for durable remittance (migration `0006`).
+ * In-memory store remains fixture SoR until sandbox tables applied.
+ */
+export function whtRemittanceDurableRow(
+  b: WhtRemittanceBatch,
+): Record<string, unknown> {
+  return {
+    batch_id: b.batchId,
+    year_of_assessment: b.yearOfAssessment,
+    status: b.status,
+    total_withheld_minor: Number(b.totalWithheldMinor),
+    currency: b.currency,
+    submitted_by: b.submittedBy,
+    created_at: b.createdAt,
+    submitted_at: b.submittedAt,
+    payable_from_ai: false,
+    lines_json: b.lines.map((l) => ({
+      technician_id: l.technicianId,
+      year_of_assessment: l.yearOfAssessment,
+      withheld_minor: l.withheldMinor.toString(),
+      currency: l.currency,
+    })),
+  };
+}
+
+/** Key-drop-in: sandbox/live persist when Supabase configured; fixture = no-op. */
+export async function persistWhtRemittanceDurable(
+  batch: WhtRemittanceBatch,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<"fixture_skip" | "accepted" | "duplicate"> {
+  const mode = (env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  if (mode === "fixture") return "fixture_skip";
+  const { persistWhtRemittanceBatchDurable } = await import(
+    "@dial/shared"
+  );
+  return persistWhtRemittanceBatchDurable(
+    whtRemittanceDurableRow(batch),
+    env,
+  );
+}

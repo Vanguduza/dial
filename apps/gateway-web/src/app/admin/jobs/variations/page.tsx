@@ -125,9 +125,7 @@ export default function AdminJobVariationsPage() {
         >
           Job variations
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD69 — human propose/approve draft deltas. AI cannot write payables.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

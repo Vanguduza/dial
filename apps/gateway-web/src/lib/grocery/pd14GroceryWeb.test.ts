@@ -14,6 +14,7 @@ import {
 } from "@dial/catalogue";
 import { __resetPaymentsForTests } from "@dial/payments";
 import { runPd14GroceryWebThinVertical } from "./pd14Spine.js";
+import { testAuthCookie } from "../auth/session.js";
 import { POST as cartPost } from "../../app/api/grocery/cart/route.js";
 import { POST as slotPost, GET as slotGet } from "../../app/api/grocery/slot/route.js";
 import { POST as checkoutPost } from "../../app/api/grocery/checkout/route.js";
@@ -71,6 +72,8 @@ test("PD14 APIs: cart → slot → checkout → track; B2B informal reject", asy
   assert.equal(add.status, 200);
   const addJson = (await add.json()) as { cartId: string };
   const cookie = add.headers.get("set-cookie") ?? "";
+  const sessionCookie = testAuthCookie({ userId: "cust_pd14" });
+  const authCookie = `${cookie}; ${sessionCookie}`;
 
   const informal = await cartPost(
     new Request("http://localhost/api/grocery/cart", {
@@ -93,7 +96,7 @@ test("PD14 APIs: cart → slot → checkout → track; B2B informal reject", asy
   const slotRes = await slotPost(
     new Request("http://localhost/api/grocery/slot", {
       method: "POST",
-      headers: { "content-type": "application/json", cookie },
+      headers: { "content-type": "application/json", cookie: authCookie },
       body: JSON.stringify({
         cartId: addJson.cartId,
         slotId: slots[0]!.slotId,
@@ -107,7 +110,7 @@ test("PD14 APIs: cart → slot → checkout → track; B2B informal reject", asy
       method: "POST",
       headers: {
         "content-type": "application/json",
-        cookie,
+        cookie: authCookie,
         "Idempotency-Key": "pd14-grocery-cod-1",
       },
       body: JSON.stringify({ cartId: addJson.cartId, choice: "cod" }),
@@ -124,6 +127,7 @@ test("PD14 APIs: cart → slot → checkout → track; B2B informal reject", asy
   const track = await trackGet(
     new Request(
       `http://localhost/api/grocery/track?orderId=${payJson.groceryOrderId}`,
+      { headers: { cookie: authCookie } },
     ),
   );
   assert.equal(track.status, 200);

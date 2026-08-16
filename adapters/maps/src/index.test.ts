@@ -4,12 +4,15 @@ import {
   estimateRouteOsrm,
   geocodeNominatim,
   planVroomJob,
+  reverseGeocodeNominatim,
 } from "./index.js";
 
 test("maps fixture: nominatim + osrm + vroom without keys", async () => {
   process.env.DIAL_INTEGRATION_MODE = "fixture";
   const p = await geocodeNominatim("Harare");
   assert.ok(p.lat < 0);
+  const rev = await reverseGeocodeNominatim(p);
+  assert.ok(rev.displayName.includes("Harare"));
   const route = await estimateRouteOsrm(p, { lat: -17.83, lon: 31.05 });
   assert.equal(route.provider, "fixture");
   assert.ok(route.distanceMeters > 0);

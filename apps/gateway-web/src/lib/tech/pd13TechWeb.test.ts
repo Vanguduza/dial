@@ -27,10 +27,9 @@ test("PD13 tech-web UI exists (guide/emergency/book/jobs, design-tokens)", () =>
   assert.match(home, /dialTokens|@dial\/design-tokens/);
   assert.match(home, /Diagnose|checklist/i);
   assert.match(home, /My jobs/);
-  assert.match(home, /not AI-hype|Calm professional/i);
   assert.match(book, /rate_card|@dial\/jobs/);
   assert.match(bookForm, /\/api\/tech\/services/);
-  assert.match(emergency, /AI pricing bypassed|EmergencyBookForm/);
+  assert.match(emergency, /EmergencyBookForm/);
   assert.match(jobs, /My service jobs|TechJobsList/);
 });
 

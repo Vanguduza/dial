@@ -89,7 +89,7 @@ export function TechJobDetail({ jobId }: { jobId: string }) {
       </p>
       <p style={{ fontSize: 14 }}>
         Status: <strong>{statusLabel ?? job.status}</strong>
-        {job.emergency ? " · emergency (AI pricing bypassed)" : ""}
+        {job.emergency ? " · emergency" : ""}
       </p>
       <p style={{ fontSize: 14 }}>Class: {job.jobClassId}</p>
       {job.intakeSummary ? (
@@ -126,8 +126,7 @@ export function TechJobDetail({ jobId }: { jobId: string }) {
         </p>
       ) : null}
       <p style={{ fontSize: 14 }}>
-        Draft USD {(Number(job.draftAmountUsdMinor) / 100).toFixed(2)} — rate_card only;
-        payableFromAi={String(job.payableFromAi)}
+        Draft USD {(Number(job.draftAmountUsdMinor) / 100).toFixed(2)}
       </p>
       {timeline.length > 0 ? (
         <div>

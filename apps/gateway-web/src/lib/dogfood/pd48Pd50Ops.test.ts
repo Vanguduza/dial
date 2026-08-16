@@ -28,6 +28,7 @@ import {
   PATCH as garagePatch,
   POST as garagePost,
 } from "../../app/api/spare/garage/route.js";
+import { testAuthCookie } from "../auth/session.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -181,12 +182,12 @@ test("PD50 Vehicle Hub deepen — consent audit + chassis browse", async () => {
   assert.equal(thin.payableFromAi, false);
 
   __resetSpareCustomerForTests();
+  const cookie = testAuthCookie({ userId: "cust_pd50_api" });
   const add = await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
-        customerId: "cust_pd50_api",
         label: "API Hilux",
         chassisHint: "KUN26",
         reminderConsent: true,
@@ -199,7 +200,7 @@ test("PD50 Vehicle Hub deepen — consent audit + chassis browse", async () => {
   const patch = await garagePatch(
     new Request("http://localhost/api/spare/garage", {
       method: "PATCH",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         vehicleId: added.vehicle.vehicleId,
         reminderConsent: false,
@@ -217,9 +218,9 @@ test("PD50 Vehicle Hub deepen — consent audit + chassis browse", async () => {
   assert.ok(patched.consentAudit.some((e) => e.action === "revoke"));
 
   const list = await garageGet(
-    new Request(
-      "http://localhost/api/spare/garage?customerId=cust_pd50_api&includeAudit=1",
-    ),
+    new Request("http://localhost/api/spare/garage?includeAudit=1", {
+      headers: { cookie },
+    }),
   );
   assert.equal(list.status, 200);
   const listed = (await list.json()) as {

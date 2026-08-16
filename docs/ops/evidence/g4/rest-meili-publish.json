@@ -1,0 +1,22 @@
+{
+  "date": "2026-08-16",
+  "ok": true,
+  "path": "REST catalogue_review_queue (approved formal) → publishStubOfferDirectToMeili → Meili search by offerId",
+  "script": "packages/search-indexer/scripts/phase4-sandbox-rest-meili-publish.mjs",
+  "latestPublishTaskUid": "65",
+  "latestOfferId": "off_formal_1786854886007",
+  "searchHits": 1,
+  "searchSource": "meili",
+  "b2bInformalHits": 0,
+  "skippedQueued": 6,
+  "dogfood": "scripts/phase4-sandbox-factory-dogfood.mjs",
+  "confirmSla": "apps/gateway-web/src/lib/dogfood/phase4PrepOps.test.ts",
+  "b2bProbe": "apps/gateway-web/scripts/g2-b2b-leak-probe.mts meiliSkipped=false",
+  "adminRecon": "apps/gateway-web/scripts/g4-admin-factory-recon.mts",
+  "screenshots": [
+    "docs/ops/evidence/g4/factory-desktop-initial.png",
+    "docs/ops/evidence/g4/factory-desktop-refreshed.png",
+    "docs/ops/evidence/g4/confirm-sla-desktop.png",
+    "docs/ops/evidence/g4/confirm-sla-desktop-loaded.png"
+  ]
+}

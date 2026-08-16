@@ -1,3 +1,7 @@
+/**
+ * Admin Catalogue Factory (PD15 / D-54) — CSV ingest, human review, Meili publish.
+ * No AI auto-publish: a human approves every offer. No liquor in any vertical.
+ */
 "use client";
 
 import Link from "next/link";
@@ -248,11 +252,7 @@ export default function AdminCatalogueFactoryPage() {
         >
           Catalogue Factory
         </h1>
-        <p style={{ opacity: 0.85, maxWidth: 640 }}>
-          CSV ingest → human approve → publish to Meili spare / grocery indexes.
-          No liquor. No AI auto-publish. Prices are ops/CSV integer minor units
-          only (D-49 / D-53 / D-54).
-        </p>
+        
 
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
           Internal API secret

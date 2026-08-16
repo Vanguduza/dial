@@ -139,10 +139,7 @@ export default function AdminDisputesPage() {
         >
           Disputes queue
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          PD53 — Value Score disputes. Uphold applies append-only compensating
-          delta. Never writes payable amounts or ledger.
-        </p>
+        
         <label style={{ display: "block", marginTop: 12 }}>
           Internal secret
           <input

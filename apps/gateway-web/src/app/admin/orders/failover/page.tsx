@@ -109,10 +109,7 @@ export default function AdminOrderFailoverPage() {
         >
           Order failover
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD71 — after confirm SLA breach, accept failover to an alternate
-          supplier.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

@@ -20,7 +20,9 @@
 
 **Human is optional observer, not a step in the loop.**
 
-**Idle ban:** Do **not** end a Dev Manager turn waiting for founder input while `current_stage` is incomplete or while a stage just went green. Always leave the session either (a) mid-build on the active stage, or (b) having opened+started the next stage. The only allowed pause is the §5 hard-stop list.
+**Idle ban:** Do **not** end a Dev Manager turn waiting for founder input while `current_stage` is incomplete or while a stage just went green. Always leave the session either (a) mid-build on the active stage, or (b) having opened+started the next stage. The only allowed pause is the §5 hard-stop list **or** eng-safe backlog exhausted with only founder secrets / Appendix C remaining (write a **“paused on human secrets”** board in STATE — never “waiting for continue”).
+
+**Founder standing (2026-08-16+):** Keep EcoCash and other secret/key-open phases **honestly open**. Continue the Full ERP Completion Plan until the end without asking “continue?” Respect anti-stub gates — no fixture-only exits; no claiming later gates green until dependencies + exit checklist + evidence. Key-drop-in: zero coding after secrets (`.cursor/rules/dial-key-drop-in.mdc`). Auto-continue rules: `.cursor/rules/dial-autonomous-completion.mdc`. While Phase 2 is open for EcoCash only, Phase 4 prep (and other dependency-safe prep) may advance — **never claim G4/G3/G5/…** without evidence.
 
 **Cursor / chat harness note:** Auto-advance does **not** mean a background process continues after the agent turn ends. Cursor only runs when a message (or loop wake) arrives. Ending a turn with “next is Sxx” and no further tool calls **is idle**. Prefer: continue Build in the same turn, or arm a recurring `/loop` wake that re-reads `DIAL_Build_Workplan_STATE.md` and continues.
 
@@ -119,12 +121,25 @@ Everything else: **decide via this runbook and continue.**
 
 ## 6. Session checklist (copy)
 
-- [ ] Read `DIAL_Build_Workplan_STATE.md` — know `current_stage`
+- [ ] Read `DIAL_Build_Workplan_STATE.md` — know `current_stage` (**Completion Plan** SoR, not PD invent)
 - [ ] PRIORITY 0 still green
-- [ ] Active issue linked; DoD/matrix in issue body
-- [ ] Working only on active ticket expand **or** auto-advancing to next stage (no wait)
-- [ ] No Baileys; USD browse; EcoCash\|COD buttons; `amountMinor`
-- [ ] Living docs + STATE.md in landing PR
-- [ ] Pushed to `Vanguduza/dial`
+- [ ] Active phase DoD / anti-stub checklist — no fixture-only gate claim
+- [ ] Working only on active phase expand **or** dependency-safe prep (never claim later G*)
+- [ ] Secret-open items stay open on STATE board (EcoCash, ENH-020…022, …)
+- [ ] No Baileys; USD browse; EcoCash\|COD buttons; `amountMinor`; no liquor; no S99
+- [ ] Living docs + STATE.md when landing meaningful prep or a green gate
+- [ ] Pushed to `Vanguduza/dial` when a finite gate is honestly green (prefer uncommitted otherwise)
+
+## 7. Completion Plan autonomy (founder standing 2026-08-16+)
+
+**SoR:** [`DIAL_Full_ERP_Completion_Plan.md`](./DIAL_Full_ERP_Completion_Plan.md) · rules: `dial-autonomous-completion.mdc` + `dial-key-drop-in.mdc`
+
+| Rule | Action |
+| --- | --- |
+| Auto-continue | Never ask “continue?”; keep eng-safe Build until stop criteria |
+| Secret honesty | EcoCash / Meta / ZIMRA / escrow stay **open** until keys + evidence |
+| Gate discipline | No G2/G8/G9/… green without exit checklist + anti-stub evidence |
+| Parallel prep | Phase 4 prep OK on G1; Phase 3/5 need G2 — shapes OK, **no G3/G5 claim** |
+| Stop | Eng-safe backlog exhausted **or** blocked solely on human secrets → STATE “paused on human secrets” board |
 
 *End of autonomous runbook.*

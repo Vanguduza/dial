@@ -39,6 +39,25 @@ export class EscrowPspAdapter implements PspAdapter {
         },
       };
     }
+    // Sandbox: Pack §6 keys required; inline hold unless PSP_ESCROW_SANDBOX_HTTP=1
+    // (ENH-020 live partner still blocked_on_human — pretend keys = eng JR shapes only).
+    if (
+      integrationMode() === "sandbox" &&
+      process.env.PSP_ESCROW_SANDBOX_HTTP?.trim() !== "1"
+    ) {
+      requireSecret("PSP_ESCROW_BASE_URL");
+      requireSecret("PSP_ESCROW_API_KEY");
+      return {
+        providerRef: `escrow_sb_${input.reference}`,
+        status: "pending",
+        customerAction: "wait_for_hold",
+        metadata: {
+          hold: "authorized_sandbox_inline",
+          supportsRelease: "true",
+          currency: input.money.currency,
+        },
+      };
+    }
     const base = requireSecret("PSP_ESCROW_BASE_URL");
     const key = requireSecret("PSP_ESCROW_API_KEY");
     const res = await fetch(`${base.replace(/\/$/, "")}/v1/holds`, {
@@ -67,6 +86,14 @@ export class EscrowPspAdapter implements PspAdapter {
     if (integrationMode() === "fixture") {
       return providerRefOrPollUrl.includes("paid") ? "paid" : "pending";
     }
+    if (
+      integrationMode() === "sandbox" &&
+      process.env.PSP_ESCROW_SANDBOX_HTTP?.trim() !== "1"
+    ) {
+      requireSecret("PSP_ESCROW_BASE_URL");
+      requireSecret("PSP_ESCROW_API_KEY");
+      return providerRefOrPollUrl.includes("paid") ? "paid" : "pending";
+    }
     const base = requireSecret("PSP_ESCROW_BASE_URL");
     const key = requireSecret("PSP_ESCROW_API_KEY");
     const res = await fetch(
@@ -88,6 +115,14 @@ export class EscrowPspAdapter implements PspAdapter {
   }): Promise<{ instructionId: string }> {
     if (integrationMode() === "fixture") {
       return { instructionId: `escrow_rel_${input.holdRef}` };
+    }
+    if (
+      integrationMode() === "sandbox" &&
+      process.env.PSP_ESCROW_SANDBOX_HTTP?.trim() !== "1"
+    ) {
+      requireSecret("PSP_ESCROW_BASE_URL");
+      requireSecret("PSP_ESCROW_API_KEY");
+      return { instructionId: `escrow_rel_sb_${input.holdRef}` };
     }
     const base = requireSecret("PSP_ESCROW_BASE_URL");
     const key = requireSecret("PSP_ESCROW_API_KEY");

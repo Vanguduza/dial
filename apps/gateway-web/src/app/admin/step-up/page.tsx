@@ -89,9 +89,7 @@ export default function AdminStepUpPage() {
         >
           Step-up auth
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD73 — session-bound step-up before money-sensitive admin actions (D-47).
-        </p>
+        
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
           <button
             type="button"

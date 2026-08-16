@@ -1,0 +1,58 @@
+{
+  "date": "2026-08-16",
+  "temporalAddress": "127.0.0.1:7233",
+  "temporalNamespace": "dial",
+  "internalSecretConfigured": true,
+  "supabaseConfigured": true,
+  "not_G5": true,
+  "checks": {
+    "mapsFailClosed": {
+      "ok": true,
+      "error": "NOMINATIM_URL / OSRM_URL unset — fail closed"
+    },
+    "temporalConnect": {
+      "ok": true,
+      "address": "127.0.0.1:7233"
+    },
+    "dialNamespace": {
+      "ok": true,
+      "namespace": "dial",
+      "created": false
+    },
+    "workerTemporal": {
+      "ok": true
+    },
+    "temporalWorkflowStart": {
+      "ok": true,
+      "path": "temporal",
+      "workflowId": "ddw_ord_g5_msvc90yu_msvc90zq"
+    },
+    "temporalWorkflowHistory": {
+      "ok": true,
+      "status": "RUNNING",
+      "historyLength": 2
+    },
+    "courierSandboxPath": {
+      "jobId": "dj_msvc9gis_caiiex",
+      "offerId": "dfo_msvc9gv5_0r48a4",
+      "assignmentEvents": 2,
+      "podStatus": "pod_captured",
+      "codReconciled": true,
+      "durableStatus": "pod_captured"
+    },
+    "timeoutReassign": {
+      "ok": true
+    },
+    "deliveryAndroidUnit": {
+      "ok": true,
+      "detail": "ocessResources NO-SOURCE\r\n> Task :core:network:classes UP-TO-DATE\r\n> Task :core:network:jar UP-TO-DATE\r\n> Task :core:network:compileTestKotlin UP-TO-DATE\r\n> Task :core:network:compileTestJava NO-SOURCE\r\n> Task :core:network:processTestResources NO-SOURCE\r\n> Task :core:network:testClasses UP-TO-DATE\r\n> Task :core:network:test UP-TO-DATE\r\n\r\nBUILD SUCCESSFUL in 20s\r\n4 actionable tasks: 4 up-to-date\r\n"
+    }
+  },
+  "residual": [
+    "ENH-013 maps Tier-2 hosting still ops-open",
+    "Courier Android device POD PNG — unit tests only; Play internal pending G3 signing",
+    "Admin MapLibre pin T+S+A screenshots — run g5-admin-delivery-recon when gateway up"
+  ],
+  "g5Claimed": false,
+  "summary": "Temporal + courier sandbox path exercised; G5 open until device/admin/maps evidence"
+}

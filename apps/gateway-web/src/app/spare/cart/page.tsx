@@ -37,7 +37,7 @@ export default async function SpareCartPage({
             color: dialTokens.color.brand.primary,
           }}
         >
-          Cart · USD only (D-57) · no ZiG lines
+          Cart
         </h1>
         {!cart || cart.lines.length === 0 ? (
           <p>Your cart is empty.</p>
@@ -60,17 +60,13 @@ export default async function SpareCartPage({
                     {(Number(line.lineTotal.amountMinor) / 100).toFixed(2)}
                   </div>
                   <div style={{ fontSize: 12, opacity: 0.75 }}>
-                    Sold by {line.soldBy} · {line.supplierFormality} · currency{" "}
-                    {cart.currency}
+                    Sold by {line.soldBy} · {line.supplierFormality}
                   </div>
                 </li>
               ))}
             </ul>
             <p style={{ fontWeight: 700, fontSize: "1.15rem" }}>
               Total USD {(Number(cart.total.amountMinor) / 100).toFixed(2)}
-            </p>
-            <p style={{ fontSize: 13, opacity: 0.7 }}>
-              No ZiG on this cart (D-57). Pay step converts with ops Daily ZiG rate.
             </p>
             <Link
               href={`/spare/checkout?cartId=${encodeURIComponent(cart.id)}`}

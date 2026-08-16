@@ -837,6 +837,42 @@ export function getGroceryOrder(orderId: string): GroceryOrder | undefined {
     : undefined;
 }
 
+export async function getGroceryOrderDurable(
+  orderId: string,
+): Promise<GroceryOrder | undefined> {
+  const mem = getGroceryOrder(orderId);
+  if (mem) return mem;
+  const { processedEventsIntegrationMode, durableRestSelect } = await import(
+    "@dial/shared"
+  );
+  if (processedEventsIntegrationMode() === "fixture") return undefined;
+  const rows = await durableRestSelect<{
+    order_id: string;
+    customer_id: string | null;
+    status: GroceryOrderStatus;
+    total_minor: number | string;
+    created_at: string;
+  }>("orders", `order_id=eq.${encodeURIComponent(orderId)}`);
+  const row = rows[0];
+  if (!row) return undefined;
+  const order: GroceryOrder = {
+    orderId: row.order_id,
+    cartId: "",
+    customerId: row.customer_id,
+    status: row.status,
+    currency: "USD",
+    totalUsdMinor: BigInt(row.total_minor),
+    payChoice: "cod",
+    soldBy: "Agency",
+    slotId: "",
+    deliveryJobId: null,
+    createdAt: row.created_at,
+    timeline: [{ at: row.created_at, event: "order_placed", status: row.status }],
+  };
+  store().orders.set(order.orderId, order);
+  return getGroceryOrder(orderId);
+}
+
 /** Admin ops queue — all grocery orders (Pack §9.5 / PD55). */
 export function listGroceryOrders(filter?: {
   customerId?: string | null;

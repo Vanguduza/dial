@@ -29,11 +29,7 @@ export default function GroceryCollectionsPage() {
         return;
       }
       setCollections(data.collections ?? []);
-      setMessage(
-        data.liquorAllowed === false
-          ? "Food/pantry collections — liquor hidden"
-          : null,
-      );
+      setMessage(null);
     } finally {
       setBusy(false);
     }
@@ -54,7 +50,6 @@ export default function GroceryCollectionsPage() {
         <Link href="/grocery/track">Track order</Link>
       </p>
       <h1>Grocery collections</h1>
-      <p>Browse by category — USD; no liquor.</p>
       <button type="button" disabled={busy} onClick={() => void load()}>
         Load collections
       </button>

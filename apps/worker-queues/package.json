@@ -13,6 +13,7 @@
     "@dial/ledger": "workspace:*",
     "@dial/queues": "workspace:*",
     "@dial/search-indexer": "workspace:*",
+    "@dial/shared": "workspace:*",
     "@dial/tax": "workspace:*"
   },
   "devDependencies": {

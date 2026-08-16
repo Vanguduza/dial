@@ -196,3 +196,41 @@ test("S139 INTEGRATION_ENV_GROUPS match OpenAPI label enum + .env.example keys",
   assert.equal(meili.presentCount, 1);
   assert.equal(meili.configured, false);
 });
+
+test("optional group keys are reported without affecting configured", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const { INTEGRATION_ENV_GROUPS, listIntegrationEnvGroupSnapshots } =
+    await import("./integrationsReadiness.js");
+
+  const envExample = readFileSync(
+    join(process.cwd(), "../../.env.example"),
+    "utf8",
+  );
+  for (const g of INTEGRATION_ENV_GROUPS) {
+    for (const key of g.optional) {
+      assert.ok(
+        envExample.includes(`${key}=`),
+        `.env.example missing optional ${key}`,
+      );
+    }
+    for (const key of g.optional) {
+      assert.ok(
+        !(g.keys as readonly string[]).includes(key),
+        `${key} cannot be both required and optional`,
+      );
+    }
+  }
+
+  // maps works on Nominatim + OSRM alone; VROOM is only needed for multi-stop.
+  const snaps = listIntegrationEnvGroupSnapshots({
+    NOMINATIM_URL: "http://127.0.0.1:8088",
+    OSRM_URL: "http://127.0.0.1:5000",
+  });
+  const maps = snaps.find((s) => s.label === "maps");
+  assert.ok(maps);
+  assert.equal(maps.configured, true);
+  assert.deepEqual(maps.missing, []);
+  assert.ok(maps.optionalMissing.includes("VROOM_URL"));
+  assert.equal(maps.optionalCount, 3);
+});

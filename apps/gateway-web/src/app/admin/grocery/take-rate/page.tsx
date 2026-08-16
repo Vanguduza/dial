@@ -133,9 +133,7 @@ export default function GroceryTakeRateAdminPage() {
         >
           Grocery take-rate
         </p>
-        <p style={{ opacity: 0.7, fontSize: 14 }}>
-          PD34 · integer bps from ops · payableFromAi=false · no liquor
-        </p>
+        
         <nav style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 8 }}>
           <Link href="/admin/command-centre">Command Centre</Link>
           <Link href="/admin/catalogue/factory">Catalogue Factory</Link>

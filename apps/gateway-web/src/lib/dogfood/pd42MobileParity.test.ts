@@ -15,6 +15,7 @@ import {
   __resetAuthForTests,
   createSession,
   sessionCookieName,
+  testAuthCookie,
 } from "../auth/session.js";
 import { GET as spareSearch } from "../../app/api/search/spare/route.js";
 import { GET as grocerySearch } from "../../app/api/search/grocery/route.js";
@@ -73,6 +74,7 @@ describe("PD42 mobile parity contracts", () => {
     const track = await groceryTrack(
       new Request(
         `http://localhost/api/grocery/track?orderId=${encodeURIComponent(order.orderId)}`,
+        { headers: { cookie: testAuthCookie({ userId: "pd42_cust" }) } },
       ),
     );
     assert.equal(track.status, 200);

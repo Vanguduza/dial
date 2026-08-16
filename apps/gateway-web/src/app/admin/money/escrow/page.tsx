@@ -135,10 +135,7 @@ export default function AdminEscrowSandboxPage() {
         >
           Escrow sandbox
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Job Reserve hold/release fixture path. Live partner contract remains
-          ENH-020 (human). Sandbox without keys fails closed.
-        </p>
+        
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
           Internal secret
           <input

@@ -108,10 +108,7 @@ export default function GroceryDemandGapPage() {
         >
           Grocery demand-gap
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          PD54 — Meili no-result rollup for Dial Groceries (food/pantry). Liquor
-          excluded. Human Factory ingest follows — no AI auto-publish.
-        </p>
+        
         <label style={{ display: "block", marginTop: 12 }}>
           Internal secret
           <input
@@ -140,10 +137,7 @@ export default function GroceryDemandGapPage() {
         {message ? <p role="status">{message}</p> : null}
         {gap ? (
           <section style={{ marginTop: 16 }}>
-            <p>
-              Count {gap.noResultCount} · vertical {gap.vertical} ·
-              payableFromAi={String(gap.payableFromAi)}
-            </p>
+            
             <h2 style={{ fontSize: 16 }}>Top queries</h2>
             <ul>
               {gap.topQueries.map((t) => (

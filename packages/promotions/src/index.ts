@@ -60,6 +60,7 @@ export {
   attemptCustomerPromoCashOut,
   getAppliedPromoDraft,
   getPromoCreditBalance,
+  getPromoCreditBalanceDurable,
   grantPromoCredit,
   registerPromoCode,
   runPd21CustomerMobilePromoThinVertical,

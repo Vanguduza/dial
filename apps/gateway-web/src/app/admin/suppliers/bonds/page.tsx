@@ -133,10 +133,7 @@ export default function AdminSupplierBondsPage() {
         >
           Supplier bonds
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD65 — hold/release USD amountMinor bonds on statements. AI never writes
-          payables.
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

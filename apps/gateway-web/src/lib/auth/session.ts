@@ -3,6 +3,7 @@
  * Never trust userId/email/role from request body (D-47).
  */
 import type { ProfileRole } from "@dial/identity";
+import type Redis from "ioredis";
 
 export type DialSession = {
   userId: string;
@@ -13,6 +14,8 @@ export type DialSession = {
 };
 
 const COOKIE = "dial_session";
+const REDIS_PREFIX = "dial:session:";
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 type SessionStore = Map<string, DialSession>;
 
@@ -24,6 +27,55 @@ function sessions(): SessionStore {
     g.__dialSessionStore = new Map();
   }
   return g.__dialSessionStore;
+}
+
+let redisPromise: Promise<Redis | null> | null = null;
+
+function redisEnabled(): boolean {
+  const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+  return Boolean(process.env.REDIS_URL?.trim()) && mode !== "fixture";
+}
+
+async function redisClient(): Promise<Redis | null> {
+  if (!redisEnabled()) return null;
+  if (!redisPromise) {
+    redisPromise = import("ioredis")
+      .then(({ default: RedisCtor }) => {
+        const client = new RedisCtor(process.env.REDIS_URL!, {
+          maxRetriesPerRequest: 1,
+          enableReadyCheck: false,
+        });
+        client.on("error", () => undefined);
+        return client;
+      })
+      .catch(() => null);
+  }
+  return redisPromise;
+}
+
+function persistSession(token: string, session: DialSession): void {
+  sessions().set(token, session);
+  void redisClient().then((client) => {
+    if (!client) return;
+    return client.set(
+      `${REDIS_PREFIX}${token}`,
+      JSON.stringify(session),
+      "EX",
+      SESSION_TTL_SECONDS,
+    );
+  });
+}
+
+async function loadSession(token: string): Promise<DialSession | null> {
+  const mem = sessions().get(token);
+  if (mem) return mem;
+  const client = await redisClient();
+  if (!client) return null;
+  const raw = await client.get(`${REDIS_PREFIX}${token}`);
+  if (!raw) return null;
+  const session = JSON.parse(raw) as DialSession;
+  sessions().set(token, session);
+  return session;
 }
 
 function dialRoleFromProfile(role: ProfileRole): DialSession["role"] {
@@ -49,13 +101,34 @@ export function createSession(input: {
     role: input.role ?? "customer",
     buyerSegment: input.buyerSegment ?? "b2c",
   };
-  sessions().set(token, session);
+  persistSession(token, session);
   return { token, session };
 }
 
 export function getSessionFromToken(token: string | undefined): DialSession | null {
   if (!token) return null;
   return sessions().get(token) ?? null;
+}
+
+export async function getSessionFromTokenDurable(
+  token: string | undefined,
+): Promise<DialSession | null> {
+  if (!token) return null;
+  return loadSession(token);
+}
+
+export async function requireSession(
+  req: Request,
+): Promise<DialSession | null> {
+  return getSessionFromTokenDurable(parseSessionCookie(req.headers.get("cookie")));
+}
+
+export async function requireAdminSession(
+  req: Request,
+): Promise<DialSession | null> {
+  const session = await requireSession(req);
+  if (!session || session.role !== "ops_admin") return null;
+  return session;
 }
 
 export function parseSessionCookie(cookieHeader: string | null): string | undefined {
@@ -103,6 +176,22 @@ export function userScopedCacheKey(userId: string, suffix: string): string {
 
 export function sessionCookieName(): string {
   return COOKIE;
+}
+
+/** Test helper — never used as a production identity source. */
+export function testAuthCookie(input: {
+  userId: string;
+  email?: string;
+  role?: DialSession["role"];
+  buyerSegment?: DialSession["buyerSegment"];
+}): string {
+  const { token } = createSession({
+    userId: input.userId,
+    email: input.email ?? `${input.userId}@dial.test`,
+    ...(input.role ? { role: input.role } : {}),
+    ...(input.buyerSegment ? { buyerSegment: input.buyerSegment } : {}),
+  });
+  return `${COOKIE}=${token}`;
 }
 
 export function __resetAuthForTests(): void {

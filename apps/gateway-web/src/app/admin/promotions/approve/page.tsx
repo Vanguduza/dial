@@ -112,10 +112,7 @@ export default function AdminPromoApprovePage() {
         >
           Promo approve
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD72 — SUPPLIER_COOP awaiting ops approve. Promo credit never cash-outs
-          (D-42).
-        </p>
+        
         <label style={{ display: "grid", gap: 6, fontSize: 14, marginTop: 16 }}>
           Internal API secret
           <input

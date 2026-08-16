@@ -44,11 +44,7 @@ export default function TechGuidePage() {
         return;
       }
       setChecklist(data.checklist ?? null);
-      setMessage(
-        data.payableFromAi === false
-          ? "Keyword diagnose only — quotes stay rate_card drafts"
-          : null,
-      );
+      setMessage(null);
     } finally {
       setBusy(false);
     }
@@ -79,10 +75,6 @@ export default function TechGuidePage() {
         >
           Calm diagnose guide
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.8 }}>
-          PD137 — describe the symptom; we map a checklist. AI never writes
-          payable amounts.
-        </p>
         <label style={{ display: "grid", gap: 6, marginTop: 16 }}>
           Symptom
           <textarea

@@ -1,6 +1,7 @@
 /**
  * G1 Grocery browse — USD only (D-57); food/pantry; session B2B formal filter (D-49).
  * PD35 — brand polish + formal KYC / food-safety cert badges (display only).
+ * Dial Groceries is food and pantry only: no liquor is listed or sellable here.
  */
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -68,8 +69,7 @@ export default async function GroceryBrowsePage({
           aria-hidden
         />
         <p style={{ opacity: 0.72, fontSize: 15, marginTop: dialTokens.space.sm }}>
-          Food & pantry · USD browse · agency marketplace ·{" "}
-          {sessionRole === "b2b" ? "B2B formal only" : "B2C"} · no liquor
+          Food & pantry · USD
         </p>
         {sessionRole === "b2b" ? (
           <p
@@ -85,8 +85,7 @@ export default async function GroceryBrowsePage({
               maxWidth: 640,
             }}
           >
-            B2B session: formal suppliers only (D-49). Informal stock is hidden
-            from search and blocked at cart — not checkout-only.
+            B2B: formal suppliers only. Informal stock is not available.
           </p>
         ) : null}
         <nav
@@ -240,17 +239,6 @@ export default async function GroceryBrowsePage({
           No grocery offers for “{q || "empty"}”.
         </p>
       ) : null}
-      <p
-        style={{
-          maxWidth: 960,
-          margin: `${dialTokens.space.lg} auto 0`,
-          fontSize: 11,
-          opacity: 0.45,
-        }}
-      >
-        PD35 · Dial Groceries brand · KYC / food-safety badges · USD browse ·
-        ZiG at checkout only · no liquor
-      </p>
     </main>
   );
 }

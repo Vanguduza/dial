@@ -129,11 +129,7 @@ export default function AdminPromotionsPage() {
         >
           Promotions & referrals
         </h1>
-        <p style={{ opacity: 0.85, maxWidth: 640 }}>
-          Create PLATFORM / FLASH / REFERRAL, approve SUPPLIER_COOP, hold fraud
-          edges, enforce budgets. Promo credit never cash-outs (@dial/promotions
-          only — D-42).
-        </p>
+        
 
         <label style={{ display: "block", marginTop: dialTokens.space.md }}>
           Internal API secret
@@ -380,10 +376,7 @@ export default function AdminPromotionsPage() {
                   ))}
                 </ul>
               )}
-              <p style={{ fontSize: 12, opacity: 0.7 }}>
-                PD46 · live SUPPLIER_COOP spend posts statement coop_spend · cash-out
-                always blocked (D-42)
-              </p>
+              
             </section>
 
             <section style={{ marginTop: dialTokens.space.md }}>

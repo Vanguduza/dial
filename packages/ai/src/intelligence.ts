@@ -450,6 +450,43 @@ export function attemptCommandCentrePayout(input: {
 }
 
 /**
+ * Execute a permissioned recommended action from an Actual/Simulated KPI tile.
+ * Actions always keep autoPay=false; Simulated never pays; Actual refuses money SoR.
+ */
+export function executeRecommendedAction(input: {
+  mode: CommandCentreMode;
+  actionId: string;
+}): {
+  action: RecommendedAction;
+  autoPay: false;
+  payout: { refused: true; reason: string };
+} {
+  const tiles = listMetricTiles(input.mode);
+  const action = tiles
+    .flatMap((t) => t.recommendedActions)
+    .find((a) => a.id === input.actionId);
+  if (!action) {
+    throw new Error(`Unknown recommended action ${input.actionId}`);
+  }
+  if (action.autoPay !== false) {
+    throw new Error("Recommended actions must keep autoPay=false (D-54)");
+  }
+  if (input.mode === "simulated") {
+    simulatedPayoutAttemptsBlocked += 1;
+    throw new Error("Simulated Command Centre must never auto-pay (D-54)");
+  }
+  return {
+    action,
+    autoPay: false,
+    payout: {
+      refused: true,
+      reason:
+        "Recommended action executed — Command Centre is not money SoR (Job Reserve / ledger)",
+    },
+  };
+}
+
+/**
  * PD17 thin vertical: shadow draft → Promptfoo → human → promote;
  * auto-publish blocked; Simulated never pays; draft never payable.
  */
@@ -582,6 +619,137 @@ export function runPd47CommandCentreActionsThinVertical(): {
     simulatedNeverPays: true,
     canDrivePayout: false,
   };
+}
+
+/**
+ * G11 sandbox evidence — Promptfoo fail blocks promote; Actual KPI action cannot pay;
+ * Simulated payout forbidden (D-54 / Completion Plan G11).
+ */
+export function runG11IntelligenceCommandCentreSandboxEvidence(): {
+  promptfooFailBlocksPromote: true;
+  promptfooPassThenHumanPromotes: true;
+  actualKpiRecommendedActionId: string;
+  actualKpiRecommendedActionCannotPay: true;
+  simulatedPayoutForbidden: true;
+  autoPublishForbidden: true;
+  everyRecommendedActionAutoPayFalse: true;
+} {
+  __resetIntelligenceForTests();
+
+  const shadow = createIntelligenceShadowRun({
+    kind: "guided_intake_eval",
+    title: "G11 guided intake eval draft",
+    body: "needsHumanQuote — human quote required; no fee fields in draft",
+  });
+
+  recordShadowPromptfooResult({
+    shadowId: shadow.shadowId,
+    passed: false,
+    reportId: "pf_g11_fail",
+  });
+  const failRun = shadows.get(shadow.shadowId)!;
+  if (failRun.status !== "blocked" || failRun.promptfooPassed !== false) {
+    throw new Error("G11 expected Promptfoo fail → blocked shadow");
+  }
+  assertPromoteBlocked(shadow.shadowId);
+  assertHumanApproveBlocked(shadow.shadowId);
+
+  recordShadowPromptfooResult({
+    shadowId: shadow.shadowId,
+    passed: true,
+    reportId: "pf_g11_pass",
+  });
+  humanApproveShadowRun({
+    shadowId: shadow.shadowId,
+    approver: "ops_g11",
+  });
+  const promoted = promoteShadowRun(shadow.shadowId);
+  if (!promoted.dataset.outcomeWeighted) {
+    throw new Error("G11 promote must write outcome-weighted dataset");
+  }
+
+  let autoBlocked = false;
+  try {
+    attemptAutoPublishShadow(shadow.shadowId);
+  } catch (e) {
+    if (
+      e instanceof Error &&
+      e.message === "auto_publish_forbidden_need_promptfoo_and_human"
+    ) {
+      autoBlocked = true;
+    } else {
+      throw e;
+    }
+  }
+  if (!autoBlocked) throw new Error("G11 expected auto-publish block");
+
+  ensureDefaultMetricContracts();
+  setMetricObservedValue("metric.money_outbox_depth", 55);
+  setMetricObservedValue("metric.on_time_pod", 0.75);
+  const actualTiles = listMetricTiles("actual");
+  const alertTiles = actualTiles.filter(
+    (t) => t.status === "warn" || t.status === "critical",
+  );
+  if (alertTiles.length < 1) {
+    throw new Error("G11 expected Actual KPI alert tile");
+  }
+  const actions = alertTiles.flatMap((t) => t.recommendedActions);
+  if (actions.length < 1) {
+    throw new Error("G11 expected recommended actions on Actual KPI alert");
+  }
+  if (actions.some((a) => a.autoPay !== false)) {
+    throw new Error("G11 recommended actions must keep autoPay=false");
+  }
+  const target = actions[0]!;
+  const executed = executeRecommendedAction({
+    mode: "actual",
+    actionId: target.id,
+  });
+  if (!executed.payout.refused || executed.autoPay !== false) {
+    throw new Error("G11 Actual recommended action must refuse payout");
+  }
+
+  assertThrowsSimulatedPayout();
+  try {
+    executeRecommendedAction({ mode: "simulated", actionId: target.id });
+    throw new Error("G11 expected simulated recommended action payout throw");
+  } catch (e) {
+    if (!(e instanceof Error) || !e.message.includes("never auto-pay")) {
+      throw e;
+    }
+  }
+
+  return {
+    promptfooFailBlocksPromote: true,
+    promptfooPassThenHumanPromotes: true,
+    actualKpiRecommendedActionId: target.id,
+    actualKpiRecommendedActionCannotPay: true,
+    simulatedPayoutForbidden: true,
+    autoPublishForbidden: true,
+    everyRecommendedActionAutoPayFalse: true,
+  };
+}
+
+function assertPromoteBlocked(shadowId: string): void {
+  try {
+    promoteShadowRun(shadowId);
+    throw new Error("expected promote block after Promptfoo fail");
+  } catch (e) {
+    if (!(e instanceof Error) || !/Promptfoo|human/i.test(e.message)) {
+      throw e;
+    }
+  }
+}
+
+function assertHumanApproveBlocked(shadowId: string): void {
+  try {
+    humanApproveShadowRun({ shadowId, approver: "ops_g11_early" });
+    throw new Error("expected human approve block before Promptfoo pass");
+  } catch (e) {
+    if (!(e instanceof Error) || !/Promptfoo/i.test(e.message)) {
+      throw e;
+    }
+  }
 }
 
 export function __resetIntelligenceForTests(): void {

@@ -1,19 +1,40 @@
 /**
- * T3 / PD43 pay-step — ZiG conversion only here (D-57).
+ * T3 / PD43 / G2 pay-step — ZiG conversion only here (D-57).
  * CPA §7.5 eighteen-item disclosure + review before EcoCash | COD.
+ * Checkout runs G2 spine (durable snapshot/order/JR/ledger/fiscal).
  */
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { dialTokens } from "@dial/design-tokens";
 import { EIGHTEEN_ITEM_DISCLOSURES } from "@dial/adapter-whatsapp";
 import { getCart } from "@dial/catalogue";
 import {
-  createCheckoutPayment,
   getActiveFxRate,
   setDailyZigRate,
   usdToZig,
 } from "@dial/payments";
 import { DisclosureReviewGate } from "../../../components/DisclosureReviewGate";
+import {
+  getSessionFromToken,
+  sessionCookieName,
+} from "../../../lib/auth/session";
+import { runG2SpareThinVertical } from "../../../lib/spare/g2Spine";
+
+/** Next.js `redirect()` / `notFound()` throw control-flow errors — must not be caught as pay failures. */
+function rethrowNextControlFlow(e: unknown): void {
+  if (
+    e &&
+    typeof e === "object" &&
+    "digest" in e &&
+    typeof (e as { digest?: unknown }).digest === "string"
+  ) {
+    const digest = (e as { digest: string }).digest;
+    if (digest.startsWith("NEXT_REDIRECT") || digest.startsWith("NEXT_NOT_FOUND")) {
+      throw e;
+    }
+  }
+}
 
 export default async function SpareCheckoutPage({
   searchParams,
@@ -24,30 +45,40 @@ export default async function SpareCheckoutPage({
   const cart = cartId ? getCart(cartId) : undefined;
   let rate = getActiveFxRate();
   if (!rate) {
-    rate = setDailyZigRate({
-      zigMinorPerUsd: 2500_00n,
-      setBy: "spare_checkout_stub",
-    });
+    const mode = (process.env.DIAL_INTEGRATION_MODE ?? "fixture").toLowerCase();
+    if (mode === "fixture" || process.env.DIAL_G2_ALLOW_FX_SEED?.trim() === "1") {
+      rate = setDailyZigRate({
+        zigMinorPerUsd: 2500_00n,
+        setBy: mode === "fixture" ? "spare_checkout_fixture" : "g2_spare_dogfood_seed",
+      });
+    }
   }
   const usdMinor = cart?.total.amountMinor ?? 0n;
-  const zigMinor = usdToZig(usdMinor, rate).amountMinor;
+  const zigMinor = rate ? usdToZig(usdMinor, rate).amountMinor : 0n;
 
   async function payEcoCash() {
     "use server";
     if (!cartId) redirect("/spare/cart");
-    const c = getCart(cartId);
-    if (!c || c.lines.length === 0) redirect("/spare/cart");
+    const jar = await cookies();
+    const session = getSessionFromToken(jar.get(sessionCookieName())?.value);
+    if (!session) {
+      const next = `/spare/checkout?cartId=${encodeURIComponent(cartId)}`;
+      redirect(`/?next=${encodeURIComponent(next)}`);
+    }
     try {
-      const { intent } = await createCheckoutPayment({
-        choice: "ecocash",
-        orderId: `ord_${cartId}`,
-        amountUsdMinor: c.total.amountMinor,
+      const result = await runG2SpareThinVertical({
+        cartId,
+        buyerSegment: session.buyerSegment === "b2b" ? "b2b" : "b2c",
+        customerId: session.userId,
+        payChoice: "ecocash",
         idempotencyKey: `web-ecocash-${cartId}`,
+        simulateEcoCashWebhook: true,
       });
       redirect(
-        `/spare/checkout/done?method=ecocash&intentId=${encodeURIComponent(intent?.id ?? "")}&cartId=${encodeURIComponent(cartId)}`,
+        `/spare/checkout/done?method=ecocash&orderId=${encodeURIComponent(result.orderId)}&intentId=${encodeURIComponent(result.intentId ?? "")}&cartId=${encodeURIComponent(cartId)}&jr=${encodeURIComponent(result.jobReserveId)}&journal=${encodeURIComponent(result.journalId ?? "")}`,
       );
     } catch (e) {
+      rethrowNextControlFlow(e);
       redirect(
         `/spare/checkout?cartId=${encodeURIComponent(cartId)}&error=${encodeURIComponent(e instanceof Error ? e.message : "pay failed")}`,
       );
@@ -57,44 +88,25 @@ export default async function SpareCheckoutPage({
   async function payCod() {
     "use server";
     if (!cartId) redirect("/spare/cart");
-    const c = getCart(cartId);
-    if (!c || c.lines.length === 0) redirect("/spare/cart");
+    const jar = await cookies();
+    const session = getSessionFromToken(jar.get(sessionCookieName())?.value);
+    if (!session) {
+      const next = `/spare/checkout?cartId=${encodeURIComponent(cartId)}`;
+      redirect(`/?next=${encodeURIComponent(next)}`);
+    }
     try {
-      const { intent, codOrder } = await createCheckoutPayment({
-        choice: "cod",
-        orderId: `ord_${cartId}`,
-        amountUsdMinor: c.total.amountMinor,
+      const result = await runG2SpareThinVertical({
+        cartId,
+        buyerSegment: session.buyerSegment === "b2b" ? "b2b" : "b2c",
+        customerId: session.userId,
+        payChoice: "cod",
         idempotencyKey: `web-cod-${cartId}`,
       });
       redirect(
-        `/spare/checkout/done?method=cod&intentId=${encodeURIComponent(intent?.id ?? "")}&codId=${encodeURIComponent(codOrder?.id ?? "")}&cartId=${encodeURIComponent(cartId)}`,
+        `/spare/checkout/done?method=cod&orderId=${encodeURIComponent(result.orderId)}&codId=${encodeURIComponent(result.codOrderId ?? "")}&cartId=${encodeURIComponent(cartId)}&jr=${encodeURIComponent(result.jobReserveId)}&journal=${encodeURIComponent(result.journalId ?? "")}`,
       );
     } catch (e) {
-      redirect(
-        `/spare/checkout?cartId=${encodeURIComponent(cartId)}&error=${encodeURIComponent(e instanceof Error ? e.message : "pay failed")}`,
-      );
-    }
-  }
-
-  async function payPaynow() {
-    "use server";
-    if (!cartId) redirect("/spare/cart");
-    const c = getCart(cartId);
-    if (!c || c.lines.length === 0) redirect("/spare/cart");
-    try {
-      const { intent } = await createCheckoutPayment({
-        choice: "paynow",
-        orderId: `ord_${cartId}`,
-        amountUsdMinor: c.total.amountMinor,
-        idempotencyKey: `web-paynow-${cartId}`,
-      });
-      if (intent?.hostedUrl) {
-        redirect(intent.hostedUrl);
-      }
-      redirect(
-        `/spare/checkout/done?method=paynow&intentId=${encodeURIComponent(intent?.id ?? "")}&cartId=${encodeURIComponent(cartId)}`,
-      );
-    } catch (e) {
+      rethrowNextControlFlow(e);
       redirect(
         `/spare/checkout?cartId=${encodeURIComponent(cartId)}&error=${encodeURIComponent(e instanceof Error ? e.message : "pay failed")}`,
       );
@@ -142,12 +154,15 @@ export default async function SpareCheckoutPage({
           Checkout — review & pay
         </h1>
         <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Cart stays USD. ZiG appears only on this pay step from ops Daily ZiG
-          rate ({rate.fxRateId}). Sold by agency supplier (D-58).
+          USD cart · ZiG at pay from Daily ZiG rate. Sold by agency supplier.
         </p>
         {!cart || cart.lines.length === 0 ? (
           <p>
             Cart missing — <Link href="/spare">return to browse</Link>.
+          </p>
+        ) : !rate ? (
+          <p role="alert" style={{ color: "#a33" }}>
+            Daily ZiG rate not set — ops must publish before EcoCash|COD.
           </p>
         ) : (
           <>
@@ -155,11 +170,19 @@ export default async function SpareCheckoutPage({
               USD {(Number(usdMinor) / 100).toFixed(2)}
             </p>
             <p style={{ fontSize: 14 }}>
-              Payable ZiG (indicative): {(Number(zigMinor) / 100).toFixed(2)} ZWG
+              Payable ZiG: {(Number(zigMinor) / 100).toFixed(2)} ZWG
             </p>
             {error ? (
               <p style={{ color: "#a33", fontSize: 14 }} role="alert">
-                {error}
+                {error}{" "}
+                {/sign in required/i.test(error) && cartId ? (
+                  <Link
+                    href={`/?next=${encodeURIComponent(`/spare/checkout?cartId=${cartId}`)}`}
+                    data-testid="checkout-sign-in"
+                  >
+                    Sign in to continue
+                  </Link>
+                ) : null}
               </p>
             ) : null}
             <DisclosureReviewGate disclosures={EIGHTEEN_ITEM_DISCLOSURES}>
@@ -173,6 +196,7 @@ export default async function SpareCheckoutPage({
                 <form action={payEcoCash}>
                   <button
                     type="submit"
+                    data-testid="pay-ecocash"
                     style={{
                       width: "100%",
                       padding: dialTokens.space.md,
@@ -191,6 +215,7 @@ export default async function SpareCheckoutPage({
                 <form action={payCod}>
                   <button
                     type="submit"
+                    data-testid="pay-cod"
                     style={{
                       width: "100%",
                       padding: dialTokens.space.md,
@@ -203,39 +228,10 @@ export default async function SpareCheckoutPage({
                       cursor: "pointer",
                     }}
                   >
-                    COD
-                  </button>
-                </form>
-                <form action={payPaynow}>
-                  <button
-                    type="submit"
-                    data-testid="pd112-paynow"
-                    style={{
-                      width: "100%",
-                      padding: dialTokens.space.md,
-                      borderRadius: 8,
-                      border: `1px solid ${dialTokens.color.brand.ink}`,
-                      background: "transparent",
-                      color: dialTokens.color.brand.ink,
-                      fontWeight: 600,
-                      fontSize: 16,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Paynow
+                    Cash on delivery (COD)
                   </button>
                 </form>
               </div>
-              <p
-                style={{
-                  fontSize: 12,
-                  opacity: 0.6,
-                  marginTop: dialTokens.space.md,
-                }}
-              >
-                Required pay CTAs (D-57 / PD43) — EcoCash | COD after CPA review.
-                Paynow is optional hosted rail (PD112).
-              </p>
             </DisclosureReviewGate>
           </>
         )}

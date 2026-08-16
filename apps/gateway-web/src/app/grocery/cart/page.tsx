@@ -37,9 +37,6 @@ export default async function GroceryCartPage() {
         >
           Grocery cart
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          USD only — no ZiG on cart (D-57). Agency sold-by on each line.
-        </p>
         {!cart || cart.lines.length === 0 ? (
           <p>
             Cart empty. <Link href="/grocery">Browse food & pantry</Link>

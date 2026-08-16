@@ -2,6 +2,7 @@
  * Temporal worker host (D-45 / D-61) — DeliveryDispatchWorkflow + money/fiscal hooks.
  * Fixture: in-process. Sandbox/live: Temporal client against TEMPORAL_ADDRESS.
  */
+import Long from "long";
 import { Connection, Client } from "@temporalio/client";
 import {
   acceptOffer,
@@ -128,6 +129,7 @@ export async function startDeliveryDispatch(
     return { workflowId: result.workflowId, path: "in_process" };
   }
 
+  assertInternalSecretForSideEffects(env);
   const opts = createTemporalWorkerOptions(env);
   const connection = await Connection.connect({ address: opts.address });
   try {
@@ -234,6 +236,93 @@ export async function createTemporalSdkWorker(
       await connection.close();
     },
   };
+}
+
+/**
+ * Live Temporal connection ping (G5 dogfood) — not used in CI health.
+ */
+export async function pingTemporalConnection(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ ok: boolean; address: string; error?: string }> {
+  const address = env.TEMPORAL_ADDRESS?.trim() || "127.0.0.1:7233";
+  try {
+    const connection = await Connection.connect({ address });
+    await connection.close();
+    return { ok: true, address };
+  } catch (e) {
+    return {
+      ok: false,
+      address,
+      error: e instanceof Error ? e.message : "connect failed",
+    };
+  }
+}
+
+/** Register namespace when missing (sandbox compose — auto-setup only creates default). */
+export async function ensureTemporalNamespace(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{ ok: boolean; namespace: string; created: boolean; error?: string }> {
+  const address = env.TEMPORAL_ADDRESS?.trim() || "127.0.0.1:7233";
+  const namespace = env.TEMPORAL_NAMESPACE?.trim() || "dial";
+  const connection = await Connection.connect({ address });
+  try {
+    await connection.workflowService.describeNamespace({ namespace });
+    return { ok: true, namespace, created: false };
+  } catch {
+    try {
+      await connection.workflowService.registerNamespace({
+        namespace,
+        description: "DIAL sandbox delivery",
+        workflowExecutionRetentionPeriod: {
+          seconds: Long.fromNumber(60 * 60 * 24 * 3),
+        },
+      });
+      return { ok: true, namespace, created: true };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "register failed";
+      if (/already exists/i.test(msg)) {
+        return { ok: true, namespace, created: false };
+      }
+      return { ok: false, namespace, created: false, error: msg };
+    }
+  } finally {
+    await connection.close();
+  }
+}
+
+/** Describe workflow execution for G5 evidence (history length > 0). */
+export async function describeDeliveryDispatchWorkflow(
+  workflowId: string,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<{
+  ok: boolean;
+  workflowId: string;
+  status?: string;
+  historyLength?: number;
+  error?: string;
+}> {
+  const address = env.TEMPORAL_ADDRESS?.trim() || "127.0.0.1:7233";
+  const namespace = env.TEMPORAL_NAMESPACE?.trim() || "dial";
+  const connection = await Connection.connect({ address });
+  try {
+    const client = new Client({ connection, namespace });
+    const handle = client.workflow.getHandle(workflowId);
+    const desc = await handle.describe();
+    return {
+      ok: true,
+      workflowId,
+      status: desc.status.name,
+      historyLength: desc.historyLength,
+    };
+  } catch (e) {
+    return {
+      ok: false,
+      workflowId,
+      error: e instanceof Error ? e.message : "describe failed",
+    };
+  } finally {
+    await connection.close();
+  }
 }
 
 export { DeliveryDispatchWorkflow } from "./workflows.js";

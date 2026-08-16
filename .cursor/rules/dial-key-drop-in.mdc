@@ -1,0 +1,29 @@
+---
+description: Founder standing — integrations must be key-drop-in complete (zero code after secrets)
+alwaysApply: true
+---
+
+# Key-drop-in integrations (founder standing)
+
+**Standing instruction:** Founder supplies keys/secrets later. Eng builds the full infrastructure from vendor API docs and research so **plugging in keys requires zero further coding**.
+
+## Eng obligations
+
+- Build **fixture** + **sandbox/live fail-closed** adapters to Pack / Stitch HTTP shapes from vendor API documentation (not invented live behaviour).
+- Env names = Pack §6 / `.env.example` / `INTEGRATION_ENV_GROUPS` only — never invent alternate secret names for production paths.
+- **Plugging keys must require zero further coding.** If a path needs code after keys arrive, that is a **bug** / incomplete Phase work.
+- Fail-closed without secrets ≠ integration done (Completion Plan anti-stub) — but **shapes must be key-ready** (HTTP client, webhook verify + idempotency, health probes).
+- Complements **ENH-030**, `docs/integrations/README.md`, `docs/integrations/key-drop-in-readiness.md`.
+
+## Secrets hygiene (D-47)
+
+- Never invent fake production secrets; never print/paste `.env*`; refer by name only.
+- Never put radioactive secrets behind `NEXT_PUBLIC_` / `VITE_` (service_role, PSP, WA tokens, FDMS activation, etc.).
+
+## Founder / ops
+
+- Secrets land in `.env` / vault by Pack §6 names when available.
+- EcoCash (or any rail) may stay fail-closed until keys exist — eng continues other key-ready work in parallel.
+- Secret-blocked exit items (Meta templates, ZIMRA, escrow partner, …) stay **honestly open** on the Completion Plan board — never mark G8/G9/… green without keys + evidence.
+- **G2 EcoCash founder exception:** documented pretend / API-doc sandbox keys may unblock G2 **eng sequencing** (`G2: eng-exception` in STATE) — see `dial-autonomous-completion.mdc` + `docs/ops/ecocash-pretend-sandbox.md`. Real portal keys still required for live/production EcoCash evidence; plugging them must need **zero further coding**.
+- Complements always-on `dial-autonomous-completion.mdc` (auto-continue eng-safe prep; no “continue?” idle; dependency-safe later-phase prep only).

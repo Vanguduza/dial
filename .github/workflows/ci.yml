@@ -20,5 +20,45 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm test
+      - name: UTF-8 encoding (no Windows-1252 mojibake)
+        run: node scripts/fix-text-encoding.mjs --check
+      - name: Promptfoo CI smoke (guidedIntake no-money)
+        run: pnpm --filter @dial/ai run eval:smoke
       - run: pnpm --filter @dial/design-tokens build
       - run: pnpm --filter @dial/gateway-web build
+
+  durable-schema:
+    name: Apply migrations against Postgres
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16.4-alpine
+        env:
+          POSTGRES_PASSWORD: ci
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply supabase/migrations
+        env:
+          DATABASE_URL: postgres://postgres:ci@127.0.0.1:5432/postgres
+        run: pnpm db:migrate
+      - name: Pack §7 table inventory
+        env:
+          DATABASE_URL: postgres://postgres:ci@127.0.0.1:5432/postgres
+        run: node scripts/check-pack7-schema.mjs

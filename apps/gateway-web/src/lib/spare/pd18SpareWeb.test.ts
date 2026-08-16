@@ -15,6 +15,7 @@ import {
 import { GET as ordersGet, POST as ordersPost } from "../../app/api/spare/orders/route.js";
 import { POST as returnsPost } from "../../app/api/spare/returns/route.js";
 import { POST as garagePost, GET as garageGet } from "../../app/api/spare/garage/route.js";
+import { testAuthCookie } from "../auth/session.js";
 
 const spareRoot = join(process.cwd(), "src/app/spare");
 
@@ -44,13 +45,14 @@ test("PD18 package thin vertical: order → track → return → garage", async 
 test("PD18 APIs: place order, return, garage consent", async () => {
   __resetCatalogueForTests();
   __resetSpareCustomerForTests();
+  const cookie = testAuthCookie({ userId: "cust_api" });
   const cart = createCart();
   addToCart(cart.id, "off_filter_oil_kun26", 1);
 
   const place = await ordersPost(
     new Request("http://localhost/api/spare/orders", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         cartId: cart.id,
         payChoice: "cod",
@@ -77,7 +79,7 @@ test("PD18 APIs: place order, return, garage consent", async () => {
   const ret = await returnsPost(
     new Request("http://localhost/api/spare/returns", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         action: "open",
         orderId: placeJson.order.orderId,
@@ -93,9 +95,8 @@ test("PD18 APIs: place order, return, garage consent", async () => {
   const garage = await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
-        customerId: "cust_api",
         label: "Fleet 1",
         chassisHint: "ZRE152",
         reminderConsent: true,
@@ -104,7 +105,9 @@ test("PD18 APIs: place order, return, garage consent", async () => {
   );
   assert.equal(garage.status, 200);
   const list = await garageGet(
-    new Request("http://localhost/api/spare/garage?customerId=cust_api"),
+    new Request("http://localhost/api/spare/garage", {
+      headers: { cookie },
+    }),
   );
   assert.equal(list.status, 200);
   const listJson = (await list.json()) as { vehicles: unknown[] };

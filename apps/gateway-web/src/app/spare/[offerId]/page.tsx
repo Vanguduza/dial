@@ -70,14 +70,13 @@ export default async function SparePdpPage({
         </p>
         <p style={{ fontSize: 14 }} data-testid="spare-pdp-attrs">
           Fitment {(offer.fitmentConfidence ?? 0.8).toFixed(2)} · Availability{" "}
-          {offer.availability ?? "available"} (state, not qty)
+          {offer.availability ?? "available"}
         </p>
         <p style={{ fontSize: "1.25rem", fontWeight: 700 }}>
           USD {(Number(offer.unitPriceUsdMinor) / 100).toFixed(2)}
         </p>
         <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Sold by {offer.brand} Agency (marketplace agency — D-58). Price shown in USD
-          (D-57). ZiG only at checkout pay step.
+          Sold by {offer.brand} Agency. Prices in USD; ZiG at checkout.
         </p>
         <form action={addToCartAction}>
           <button

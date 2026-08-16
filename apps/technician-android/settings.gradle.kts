@@ -18,3 +18,5 @@ rootProject.name = "dial-technician-android"
 
 include(":app")
 include(":core:network")
+include(":core:maps")
+project(":core:maps").projectDir = file("../delivery-android/core/maps")

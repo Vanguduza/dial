@@ -17,6 +17,7 @@ import {
   __resetAuthForTests,
   createSession,
   sessionCookieName,
+  testAuthCookie,
 } from "../auth/session.js";
 import {
   GET as garageGet,
@@ -39,12 +40,12 @@ test("PD75 set active garage vehicle", async () => {
   const thin = runPd75SetActiveGarageVehicleThinVertical();
   assert.equal(thin.activeCount, 1);
 
+  const cookie = testAuthCookie({ userId: "cust_pd75_api" });
   const a = await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
-        customerId: "cust_pd75_api",
         label: "A",
         chassisHint: "A1",
         reminderConsent: false,
@@ -55,9 +56,8 @@ test("PD75 set active garage vehicle", async () => {
   const b = await garagePost(
     new Request("http://localhost/api/spare/garage", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
-        customerId: "cust_pd75_api",
         label: "B",
         chassisHint: "B1",
         reminderConsent: false,
@@ -69,7 +69,7 @@ test("PD75 set active garage vehicle", async () => {
   const set = await garagePatch(
     new Request("http://localhost/api/spare/garage", {
       method: "PATCH",
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
       body: JSON.stringify({
         vehicleId: bodyB.vehicle.vehicleId,
         setActive: true,
@@ -78,9 +78,9 @@ test("PD75 set active garage vehicle", async () => {
   );
   assert.equal(set.status, 200);
   const list = await garageGet(
-    new Request(
-      "http://localhost/api/spare/garage?customerId=cust_pd75_api",
-    ),
+    new Request("http://localhost/api/spare/garage", {
+      headers: { cookie },
+    }),
   );
   assert.equal(list.status, 200);
   const listed = (await list.json()) as {

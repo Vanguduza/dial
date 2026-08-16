@@ -261,6 +261,18 @@ test("PD15 CSV Factory → Meili spare+grocery + demand-gap", async () => {
   assert.equal(out.groceryOfferId, "groc_pd15_oats");
 });
 
+test("Phase4-prep Factory CSV ingest approve durable + liquor reject", async () => {
+  process.env.DIAL_INTEGRATION_MODE = "fixture";
+  const { runPhase4PrepFactoryIngestApproveThinVertical } = await import("./index.js");
+  const out = await runPhase4PrepFactoryIngestApproveThinVertical();
+  assert.equal(out.offerId, "off_p4prep_formal");
+  assert.equal(out.liquorRejected, true);
+  assert.equal(out.durableMode, "fixture");
+  assert.equal(out.payableFromAi, false);
+  assert.equal(out.offerSource, "MARKETPLACE");
+  assert.equal(out.informalB2bLeaks, 0);
+});
+
 test("PD18 spare customer: Sold by on cart → order → return → garage", async () => {
   const { runPd18SpareWebThinVertical } = await import("./spareCustomer.js");
   const out = await runPd18SpareWebThinVertical();

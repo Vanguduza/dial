@@ -17,14 +17,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier.Modifier
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import zw.co.dial.technician.network.DialTechnicianClient
-import zw.co.dial.technician.network.MemoryCookieStore
+import zw.co.dial.technician.evidence.EvidenceCapture
+import zw.co.dial.shared.session.SecureSessionStore
 
 /**
  * Pack §9.7 thin UI: jobs → checklist runner → evidence → Take-Home WHT (D-50).
@@ -32,6 +33,7 @@ import zw.co.dial.technician.network.MemoryCookieStore
  */
 @Composable
 fun TechnicianApp(baseUrl: String) {
+    val gatewayError = SecureSessionStore.misconfiguredGateway(baseUrl, baseUrl.isNotBlank())
     val cookies = remember { MemoryCookieStore() }
     val client = remember { DialTechnicianClient(baseUrl, cookies) }
     var signedIn by remember { mutableStateOf(false) }
@@ -143,7 +145,7 @@ fun TechnicianApp(baseUrl: String) {
                 onClick = {
                     val jid = jobId ?: return@Button
                     run {
-                        client.uploadEvidence(jid, "photo", "data:image/jpeg;base64,pd9android")
+                        client.uploadEvidence(jid, "photo", EvidenceCapture.payloadRefForJob(jid))
                         status = "Evidence uploaded for $jid"
                     }
                 },
@@ -252,7 +254,9 @@ fun TechnicianApp(baseUrl: String) {
             ) { Text("Take-Home breakdown") }
         }
 
-        if (loading) CircularProgressIndicator()
+        if (gatewayError != null) {
+            Text(gatewayError, color = MaterialTheme.colorScheme.error)
+        }
         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }

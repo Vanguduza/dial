@@ -65,7 +65,7 @@ export default function AdminLedgerExplorerPage() {
         <Link href="/admin/money/outbox">Money outbox</Link>
       </p>
       <h1>Ledger explorer</h1>
-      <p>Read-only journals (Formance Console UX pattern — never Formance SoR).</p>
+      
       <label>
         Internal secret{" "}
         <input

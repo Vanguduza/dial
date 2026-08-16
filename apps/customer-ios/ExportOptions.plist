@@ -1,0 +1,8 @@
+{
+  "compileBitcode": false,
+  "method": "debugging",
+  "signingStyle": "automatic",
+  "stripSwiftSymbols": true,
+  "teamID": "APPLE_DEVELOPMENT_TEAM",
+  "thinning": "<none>"
+}

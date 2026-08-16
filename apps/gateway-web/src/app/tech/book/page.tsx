@@ -31,17 +31,11 @@ export default async function TechBookPage() {
         >
           Book a tech
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Rate-card draft ({quote.source}) via <code>@dial/jobs</code>. Not payable until human +
-          pricing engine confirm. Slots from Cal.com
-          {slots[0]?.source === "calcom_fixture" ? " (fixture)" : ""}.
-        </p>
         <p>
           Job class: <strong>{quote.jobClassId}</strong>
         </p>
         <p>
-          Draft USD {(Number(quote.draftAmountUsdMinor) / 100).toFixed(2)}{" "}
-          <span style={{ fontSize: 12, opacity: 0.6 }}>(indicative)</span>
+          Draft USD {(Number(quote.draftAmountUsdMinor) / 100).toFixed(2)}
         </p>
         <TechProfileCards />
         <h2 style={{ fontSize: "1.1rem", marginTop: dialTokens.space.lg }}>Available slots</h2>

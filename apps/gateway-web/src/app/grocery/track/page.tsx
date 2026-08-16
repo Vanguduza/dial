@@ -32,9 +32,7 @@ export default async function GroceryTrackPage({
         >
           Track grocery order
         </h1>
-        <p style={{ fontSize: 14, opacity: 0.75 }}>
-          Status from DIAL grocery SoR (ERP). Food/pantry only.
-        </p>
+        
         <GroceryTrackClient initialOrderId={orderId ?? ""} />
       </div>
     </main>

@@ -54,4 +54,13 @@ describe("PD34 grocery take-rate", () => {
     assert.equal(r.payableFromAi, false);
     assert.equal(r.liquorAllowed, false);
   });
+
+  it("Phase4-prep take-rate durable fixture + sandbox fail-closed", async () => {
+    const { runPhase4PrepTakeRateDurableThinVertical } = await import("./takeRate.js");
+    const out = await runPhase4PrepTakeRateDurableThinVertical();
+    assert.equal(out.resolvedBps, 550);
+    assert.equal(out.persisted, "fixture_skip");
+    assert.equal(out.payableFromAi, false);
+    assert.equal(out.liquorAllowed, false);
+  });
 });

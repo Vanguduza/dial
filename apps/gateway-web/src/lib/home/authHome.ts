@@ -64,13 +64,13 @@ export function buildAuthHomeSnapshot(session: DialSession): AuthHomeSnapshot {
       id: "spare",
       label: "Spare parts",
       href: "/spare",
-      description: "Browse USD catalogue · Sold by supplier (agency)",
+      description: "Parts catalogue",
     },
     {
       id: "grocery",
       label: "Groceries",
       href: "/grocery",
-      description: "Food browse · EcoCash or COD at checkout",
+      description: "Food & pantry",
     },
   ];
   if (session.buyerSegment === "b2b" || session.role === "ops_admin") {
@@ -78,7 +78,7 @@ export function buildAuthHomeSnapshot(session: DialSession): AuthHomeSnapshot {
       id: "supplier",
       label: "Supplier desk",
       href: "/supplier",
-      description: "Vendor panel · formal offers",
+      description: "Vendor panel",
     });
   }
 
@@ -87,19 +87,19 @@ export function buildAuthHomeSnapshot(session: DialSession): AuthHomeSnapshot {
       id: "tech_book",
       label: "Book a technician",
       href: "/tech/book",
-      description: "Cal.com slots · rate_card drafts only",
+      description: "Book a visit",
     },
     {
       id: "tech_emergency",
       label: "Emergency",
       href: "/tech/emergency",
-      description: "Deterministic triage checklist",
+      description: "Urgent help",
     },
     {
       id: "tech_jobs",
       label: "My jobs",
       href: "/tech/jobs",
-      description: "Status and evidence",
+      description: "Job status",
     },
   ];
 
@@ -113,13 +113,13 @@ export function buildAuthHomeSnapshot(session: DialSession): AuthHomeSnapshot {
       {
         id: "shop",
         title: "Shop",
-        blurb: "Parts and groceries — marketplace agency",
+        blurb: "Parts and groceries",
         destinations: shopDestinations,
       },
       {
         id: "services",
         title: "Services",
-        blurb: "Technicians and jobs — never AI payable amounts",
+        blurb: "Technicians and jobs",
         destinations: servicesDestinations,
       },
     ],

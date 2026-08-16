@@ -43,11 +43,7 @@ export default function GrocerySearchPage() {
         return;
       }
       setHits(data.hits ?? []);
-      setMessage(
-        data.liquorAllowed === false
-          ? "Food/pantry search — liquor hidden · USD browse"
-          : null,
-      );
+      setMessage(null);
     } finally {
       setBusy(false);
     }
@@ -70,7 +66,6 @@ export default function GrocerySearchPage() {
         <Link href="/grocery/track">Track</Link>
       </p>
       <h1>Grocery search</h1>
-      <p>Filter by brand / cold chain — USD; no liquor.</p>
       <div style={{ display: "grid", gap: 8, maxWidth: 420 }}>
         <label>
           Query

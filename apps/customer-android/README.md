@@ -22,7 +22,10 @@ cd apps/customer-android
 ./gradlew :app:assembleDebug   # requires Android SDK
 ```
 
-Emulator gateway default: `BuildConfig.DIAL_GATEWAY_BASE_URL` = `http://10.0.2.2:3000` (host Next.js).
+Emulator gateway default: flavor `local` → `BuildConfig.DIAL_GATEWAY_BASE_URL` = `http://10.0.2.2:3000`.
+
+Staging (Phase 3 prep — not G3): `./gradlew :app:assembleStagingDebug -Pdial.gateway.baseUrl=https://YOUR_STAGING_GATEWAY`  
+Empty staging URL → `DIAL_GATEWAY_URL_CONFIGURED=false` (fail-closed). Store-readiness: `docs/ops/phase3-native-store-readiness.md`.
 
 Windows CI without SDK: `apps/gateway-web/src/lib/spare/pd20CustomerMobile.test.ts`.
 

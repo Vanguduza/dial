@@ -7,10 +7,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { dialTokens } from "@dial/design-tokens";
-import { EIGHTEEN_ITEM_DISCLOSURES } from "@dial/adapter-whatsapp";
 import { DisclosureReviewGate } from "../../../components/DisclosureReviewGate";
 
-export function GroceryCheckoutForm({ cartId }: { cartId: string }) {
+export function GroceryCheckoutForm({
+  cartId,
+  disclosures,
+}: {
+  cartId: string;
+  disclosures: readonly string[];
+}) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -51,7 +56,7 @@ export function GroceryCheckoutForm({ cartId }: { cartId: string }) {
 
   return (
     <DisclosureReviewGate
-      disclosures={EIGHTEEN_ITEM_DISCLOSURES}
+      disclosures={disclosures}
       testId="grocery-cpa-disclosure-review"
     >
       <div style={{ display: "grid", gap: dialTokens.space.sm, maxWidth: 320 }}>
