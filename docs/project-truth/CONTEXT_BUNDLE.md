@@ -30,6 +30,8 @@ If historical prose conflicts with this bundle/registries, **do not average the 
 - **M-12/M-13:** Dial a Tech is hybrid: direct booking/matching/emergency plus Opportunity Marketplace. Qualified technicians can express interest/propose without a per-bid/pay-to-rank toll at launch. Post-award, every path converges into the canonical DIAL Job/Job Reserve workflow.
 - **M-14:** **repository-resident project memory.** Conversation/session memory is temporary working memory only. Durable decisions, gates, evidence, active work and handoffs must live in `docs/project-truth/` so Codex, Claude Code and other approved harnesses can resume from the same truth.
 - **M-15:** **concise UI + human-readable references.** Do not clutter screens with helper text that repeats obvious labels/actions. Raw UUIDs, hashes and long generated IDs are internal; normal UI uses meaningful entity names and short public references such as `JOB-02481` or `ORD-18452`.
+- **M-16:** **automatic development bootstrap.** Normal install/dev commands and supported Claude/Codex SessionStart hooks automatically validate Project Truth, generate local dev credentials when absent, run context-drift checks, establish active session context and verify Git hooks. Do not rely on a human remembering a setup checklist.
+- **M-17:** **plugin memory isolation.** Headroom, plugins, MCP caches and model-native memory may optimize or advise but cannot silently edit/override Project Truth, evidence gates or authority. Learned rules are promoted only through explicit review.
 - **D-58:** agency-only Spare model; D-51 DIAL-owned/principal stock is discarded.
 - **D-50:** retain technician ITF263/WHT controls.
 - **D-40:** official WhatsApp Cloud API/Flows only.
@@ -47,6 +49,8 @@ If historical prose conflicts with this bundle/registries, **do not average the 
 - missing production credentials = engineering blocker.
 - donor payment/auth/job/catalogue/delivery databases as runtime DIAL SoRs.
 - conversation history as the only location of durable project decisions.
+- manual setup as the only way Project Truth/context controls are initialized.
+- plugins/proxies writing durable authority without explicit review.
 - raw UUID/long random identifiers as ordinary customer-facing names/references.
 - filler helper copy added merely to make an AI-generated screen look complete.
 
@@ -82,14 +86,17 @@ Detailed evidence is in `evidence-registry.json`. A repository migration must ca
 
 ## 6. Context-drift and rate-limit protocol
 
-At the **start** of work:
+At development/session **startup**, `scripts/dev-bootstrap.mjs` is expected to run automatically through normal pnpm development entrypoints and supported Claude/Codex hooks. It writes `.dial/ACTIVE_SESSION_CONTEXT.md` and fails if required project-memory controls are missing or drifted.
 
-1. Read this bundle + JSON registries.
-2. Identify the Feature ID(s) being changed.
-3. State the current gate and inherited evidence.
-4. List relevant non-negotiable IDs.
-5. Identify whether the task changes project truth or merely implements it.
-6. For substantial work, generate a compact pack with `pnpm context:pack -- <FEATURE_ID>` and avoid loading the full master unless needed.
+At the **start** of material work:
+
+1. Confirm bootstrap is green (`pnpm dev:bootstrap` is the manual fallback).
+2. Read this bundle + JSON registries.
+3. Identify the Feature ID(s) being changed.
+4. State the current gate and inherited evidence.
+5. List relevant non-negotiable IDs.
+6. Identify whether the task changes project truth or merely implements it.
+7. For substantial work, generate a compact pack with `pnpm context:pack -- <FEATURE_ID>` and avoid loading the full master unless needed.
 
 During work:
 
@@ -100,7 +107,9 @@ During work:
 - preserve requirement/evidence IDs in tickets, commits or PR notes;
 - when a donor is used, record donor revision/licence/adaptation boundary;
 - reserve expensive/deep reasoning for complex or critical work rather than mechanical edits;
-- avoid unnecessary parallel high-cost agents.
+- avoid unnecessary parallel high-cost agents;
+- keep the always-on plugin set small and load task-specific tools on demand;
+- treat Headroom/shared plugin memory as cache only; never as authority.
 
 At **handoff/end of session**:
 
@@ -109,6 +118,8 @@ At **handoff/end of session**:
 - record changed files/features, gate movement, new evidence, open dependencies and decisions;
 - run `pnpm context:check`;
 - never write “done” when an applicable gate remains open.
+
+Tool/plugin policy: `docs/project-truth/AI_TOOLING_PROFILE.md`.
 
 ## 7. UI language rule
 
@@ -137,6 +148,7 @@ Stop and re-read truth if any task proposes or implies:
 - replacing the FixItNow wholesale strategy with a cheap recreation;
 - Opportunity Marketplace creating a second post-award job/payment workflow;
 - relying on an old conversation as the only source of a project decision;
+- a plugin/proxy/memory tool directly rewriting shared authority;
 - exposing UUID-like technical IDs or filler AI naming in normal customer/staff UI.
 
 If one appears, run the `dial-context-drift-check` skill before continuing.
