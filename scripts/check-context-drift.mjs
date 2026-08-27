@@ -46,13 +46,30 @@ function uniqueIds(items, label) {
   return seen;
 }
 
+function uniqueCapabilities(items, label) {
+  const seen = new Set();
+  for (const item of items ?? []) {
+    if (!item?.capability) {
+      fail(`${label} contains an item without capability`);
+      continue;
+    }
+    if (seen.has(item.capability)) fail(`${label} contains duplicate capability ${item.capability}`);
+    seen.add(item.capability);
+  }
+  return seen;
+}
+
 const truth = readJson('docs/project-truth/project-truth.json');
 const featureRegistry = readJson('docs/project-truth/feature-registry.json');
 const evidenceRegistry = readJson('docs/project-truth/evidence-registry.json');
+const pluginProfile = readJson('docs/project-truth/plugin-profile.json');
 const bundle = readText('docs/project-truth/CONTEXT_BUNDLE.md');
 readText('docs/project-truth/SESSION_HANDOFF_TEMPLATE.md');
+readText('docs/project-truth/AI_TOOLING_PROFILE.md');
+readText('docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md');
 readText('.cursor/rules/dial-context-drift.mdc');
 readText('.cursor/skills/dial-context-drift-check/SKILL.md');
+const gitignore = readText('.gitignore');
 
 if (truth && truth.authorityVersion !== 'vNext.1') {
   fail(`Expected authorityVersion vNext.1, got ${truth.authorityVersion}`);
@@ -69,7 +86,6 @@ if (!gateRank.has('THIN_SLICE_REQUIRED') || !gateRank.has('INTEGRATION_GREEN') |
 }
 
 const featureById = new Map((featureRegistry?.features ?? []).map((f) => [f.id, f]));
-const evidenceById = new Map((evidenceRegistry?.records ?? []).map((e) => [e.id, e]));
 
 for (const feature of featureRegistry?.features ?? []) {
   if (!gateRank.has(feature.currentGate)) {
@@ -101,6 +117,59 @@ for (const evidence of evidenceRegistry?.records ?? []) {
   }
 }
 
+// Approved AI plugin profile is part of the context-control plane.
+if (pluginProfile) {
+  if (!pluginProfile.profileVersion || typeof pluginProfile.profileVersion !== 'string') {
+    fail('plugin-profile.json must define a string profileVersion');
+  }
+  const policy = pluginProfile.policy ?? {};
+  if (policy.autoInstallRequired !== true) {
+    fail('plugin-profile policy must keep autoInstallRequired=true');
+  }
+  if (policy.autoInstallOptional !== false) {
+    fail('plugin-profile policy must keep autoInstallOptional=false; optional plugins are task-gated');
+  }
+  if (policy.allowUnapprovedSubstitutes !== false) {
+    fail('plugin-profile policy must forbid unapproved substitutes');
+  }
+  if (policy.projectTruthPrecedence !== true) {
+    fail('plugin-profile policy must keep projectTruthPrecedence=true');
+  }
+  if (policy.receiptPath !== '.dial/state/plugin-bootstrap.json') {
+    fail('plugin-profile receiptPath must remain .dial/state/plugin-bootstrap.json');
+  }
+
+  for (const harnessName of ['claudeCode', 'codex']) {
+    const harness = pluginProfile[harnessName];
+    if (!harness) {
+      fail(`plugin-profile is missing ${harnessName}`);
+      continue;
+    }
+    const requiredCaps = uniqueCapabilities(harness.required, `plugin-profile.${harnessName}.required`);
+    const optionalCaps = uniqueCapabilities(harness.optionalOnDemand, `plugin-profile.${harnessName}.optionalOnDemand`);
+
+    for (const item of harness.required ?? []) {
+      if (!Array.isArray(item.preferredIdentifiers) || item.preferredIdentifiers.length === 0) {
+        fail(`Required plugin capability ${harnessName}.${item.capability} must list preferredIdentifiers`);
+      }
+      if (!Array.isArray(item.sourcePreference) || item.sourcePreference.length === 0) {
+        fail(`Required plugin capability ${harnessName}.${item.capability} must list sourcePreference`);
+      }
+      if (!item.reason) fail(`Required plugin capability ${harnessName}.${item.capability} must explain its DIAL value`);
+    }
+
+    for (const cap of requiredCaps) {
+      if (optionalCaps.has(cap)) {
+        fail(`Plugin capability ${harnessName}.${cap} cannot be both required and optional`);
+      }
+    }
+  }
+}
+
+if (!gitignore.split(/\r?\n/).some((line) => line.trim() === '.dial/')) {
+  fail('.gitignore must contain .dial/ so machine-specific plugin/session state cannot be committed');
+}
+
 for (const guarded of truth?.guardedFiles ?? []) {
   const text = readText(guarded.path);
   for (const marker of guarded.mustContain ?? []) {
@@ -130,7 +199,7 @@ const tripwires = [
 function walk(dir, out = []) {
   if (!fs.existsSync(dir)) return out;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (['node_modules', '.git', '.next', 'dist', 'build', '.turbo', '.tmp'].includes(entry.name)) continue;
+    if (['node_modules', '.git', '.next', 'dist', 'build', '.turbo', '.tmp', '.dial'].includes(entry.name)) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
     else if (/\.(ts|tsx|js|jsx|mjs|cjs|kt|kts|swift)$/.test(entry.name)) out.push(full);
@@ -160,4 +229,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Context drift check passed: ${decisionIds.size} decisions, ${featureIds.size} features, ${evidenceIds.size} evidence records validated.`);
+console.log(`Context drift check passed: ${decisionIds.size} decisions, ${featureIds.size} features, ${evidenceIds.size} evidence records, plugin profile ${pluginProfile?.profileVersion ?? 'unknown'} validated.`);
