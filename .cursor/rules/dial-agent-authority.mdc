@@ -1,14 +1,29 @@
 ---
-description: DIAL doc authority order and mandatory reading for agents
+description: DIAL vNext.1 authority order, project truth and mandatory reading for agents
 alwaysApply: true
 ---
 
-# Agent authority & reading order
+# Agent authority & context drift control
 
-**Conflict order:** (1) `DIAL_Consolidated_Plan_v4.md` → (2) `DIAL_Development_Agent_Pack.md` → (3) Blueprint / checklists / stitch / WA / promotions / **D-53/D-54/D-55/D-61** companions → (4) these `.cursor/rules` (**D-47** + **D-48** toolchain rule).
+**Conflict order:**
 
-Before scaffolding or behaviour changes, follow Agent Pack §1 reading order. Prefer `.cursor/skills/dial-*` for money, IDOR/RLS, and PspAdapter reviews. Catalog: `DIAL_Cursor_Rules_and_Skills.md`. AppSec CI: `DIAL_Security_Toolchain.md` / `dial-security-toolchain.mdc`. v7-2 absorb: `DIAL_v7_2_Adopted_Platform_Extensions.md` (**D-53** / **D-54**) — never the v7 master draft as SoR. External skills: `DIAL_External_Skills_Repos_Utilization.md` (**D-55**). Plan-phase grill + AI capability merge: Pack §2.2 / **D-56**. Spare USD browse / ZiG-at-checkout / WA EcoCash+COD buttons: **D-57** / v4 §4.3. **D-58:** D-2 agency; D-51 owned-stock discarded. **D-59:** agency FDMS receipt model + in-house Gateway. **D-61:** AI Kernel/Prime absorb via `DIAL_AI_Kernel_Prime_Agent_Adopted.md` — **Dev Manager** = Build manager throughout; **Prime** = mandatory harness hosting it (before workspace); prod = capability pipeline + Temporal/BullMQ (no adapter); §5.3 affirmed.
+1. `docs/project-truth/CONTEXT_BUNDLE.md` + machine-readable `docs/project-truth/*.json` (**vNext.1 current truth**)
+2. `DIAL_Consolidated_Plan_v4.md` for non-conflicting detailed product/commercial/architecture requirements
+3. `DIAL_Development_Agent_Pack.md`
+4. Blueprint / checklists / stitch / WA / promotions / D-53/D-54/D-55/D-61 companions
+5. local `.cursor/rules` and skills as enforcement/process
+6. current code/runtime state as implementation evidence, **not permission to silently override project truth**
 
-**Do not reopen:** C-5 Expo/RN customer shells, Baileys/unofficial WA, Google/Mapbox as map/distance SoR, second money/promo SoR, AI writing payable amounts, Fleetbase as delivery job engine, marketplace-wide principal flip or informal→B2B visibility (**D-49**), designing tech payouts as if 30% WHT disappears (**D-50**), reintroducing discarded D-51 owned-stock principal (**D-58**), treating tracer/stub as MVP-complete or merging without feature DoD (**D-52** / `dial-tracer-slice`), v7 as SoR / Train 0–10 / Unleash or OR-Tools as SoR / CERTIFIED–DORMANT as public MVP ladder (**D-53**), auto-publish checklist/AI without human+Promptfoo / Command Centre Simulated as live money control / ad-hoc KPIs without MetricContract (**D-54**), full agency-agents / anthropics/skills / diagram-design asset tree dumps or Anthropic ToS document-skill vendoring (**D-55**), skipping plan-phase grill or merging `packages/ai` without `dial-ai-capability-review` (**D-56**), dual-displaying ZiG on Spare browse/cart or converting without ops-audited daily rate / skipping WA EcoCash+COD checkout buttons (**D-57**), peer AI kernel / self-host inference via Kernel proposal / Prime as production or parallel Factory SoR / prod agent adapter or alternate prod agent framework / bypassing LiteLLM→Gemini (**D-61**).
+Before material scaffolding or behaviour changes, agents must read `docs/project-truth/CONTEXT_BUNDLE.md`, `project-truth.json`, `feature-registry.json`, and `evidence-registry.json`. Use `.cursor/rules/dial-context-drift.mdc` and `.cursor/skills/dial-context-drift-check/SKILL.md`. Run `pnpm context:check` before merge/sign-off.
 
-Cite v4 / D-log section IDs in PRs for behavioural changes. Escalate conflicts; do not invent a fourth stack.
+**Context drift rule:** if historical prose, code, donor behavior or remembered session context conflicts with vNext.1 truth, do not average them. Current truth wins unless a new explicit decision is approved and the truth/feature/evidence registries are updated in the same work unit.
+
+**Evidence rule:** E1a/E1b/E2a/E3a/E4a and normalized E6a have inherited evidence and begin at Integration Green. Do not repeat their thin-slice stages because of branch/repository migration. E5a and OM-0 begin at Thin Slice Required. Any evidence invalidation requires an explicit record explaining why the previous result is no longer representative.
+
+**Current vNext.1 founder additions:** live credentials never block engineering; integrations must be zero-code key-drop-in; generic AI frontend screens are prohibited; FixItNow is the wholesale Dial a Tech application donor; Dial a Tech adds a pre-award Opportunity Marketplace but post-award converges into the same DIAL Job/Job Reserve workflow; qualified technicians do not pay a per-bid/pay-to-rank toll at launch.
+
+Prefer `.cursor/skills/dial-*` for context drift, money, IDOR/RLS, PspAdapter and high-risk reviews. Catalog: `DIAL_Cursor_Rules_and_Skills.md`. AppSec CI: `DIAL_Security_Toolchain.md` / `dial-security-toolchain.mdc`. v7-2 absorb: `DIAL_v7_2_Adopted_Platform_Extensions.md` (D-53 / D-54) — never the v7 master draft as SoR. External skills: `DIAL_External_Skills_Repos_Utilization.md` (D-55). Plan-phase grill + AI capability merge: Pack §2.2 / D-56. Spare USD browse / ZiG-at-checkout / WA EcoCash+COD buttons: D-57. D-58: agency-only; D-51 owned-stock discarded. D-59: agency FDMS receipt model + in-house Gateway. D-61: Prime is development harness, not product SoR.
+
+**Do not reopen:** C-5 Expo/RN customer shells where native is locked; Baileys/unofficial WA; donor/Google/Mapbox/Fleetbase/Cal.com/Chatwoot/Meili/BI as transaction SoR; second money/job/delivery/catalogue SoR; AI writing payable amounts; informal→B2B visibility; dropping tech WHT; discarded D-51 owned-stock principal; tracer/stub as feature-complete; v7 as SoR; auto-publish checklist/AI without human+evaluation; Command Centre Simulated as live money control; unaudited FX; missing credentials as engineering blocker; repeating accepted slices after migration; generic shared customer storefront skin; cheap FixItNow recreation instead of wholesale port; Opportunity Marketplace becoming a parallel post-award Job/payment system.
+
+For behavioural changes, cite current vNext.1 decision/Feature IDs in PRs and the older D-log section only when it supplies non-conflicting detail. Escalate real conflicts; do not invent another stack.
