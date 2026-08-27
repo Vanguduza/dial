@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "authorityVersion": "vNext.1",
+  "purpose": "Portable machine-readable DIAL project truth used to prevent context drift across agents, sessions and repository migrations.",
+  "contextProtocol": {
+    "readBeforeWork": [
+      "docs/project-truth/CONTEXT_BUNDLE.md",
+      "docs/project-truth/project-truth.json",
+      "docs/project-truth/feature-registry.json",
+      "docs/project-truth/evidence-registry.json",
+      "AGENTS.md"
+    ],
+    "rules": [
+      "Do not infer current truth from historical documents when a supersession exists.",
+      "Do not downgrade a feature below an inherited evidence gate without an explicit evidence invalidation record.",
+      "Do not invent a new source of truth, payment engine, job engine, catalogue authority or delivery authority.",
+      "When context is incomplete, re-read the Context Bundle and registries before continuing.",
+      "At session handoff, record changed decisions, feature gates, evidence and unresolved items."
+    ]
+  },
+  "nonNegotiables": [
+    {"id":"M-01","title":"Key-late development","rule":"Missing live API keys or partner credentials never block feature development or engineering tests; use fixture/contract/sandbox paths and keep live gates honestly open."},
+    {"id":"M-02","title":"Zero-code key drop-in","rule":"Adding real credentials later must require configuration only, not feature coding."},
+    {"id":"M-03","title":"Evidence inheritance","rule":"Accepted vertical-slice evidence survives repository migration and is not repeated merely because the repository changes."},
+    {"id":"M-04","title":"Gate inheritance","rule":"Green historical slices start at Integration Green; untested new features start at Thin Slice Required."},
+    {"id":"M-05","title":"Frontend quality","rule":"Generic AI-generated screens are prohibited; significant frontend work requires intentional design and visual evidence."},
+    {"id":"M-06","title":"Wholesale donor porting","rule":"Repositories designated PORT-WHOLESALE are copied wholesale into controlled import/quarantine, then customized to DIAL instead of cheaply recreated."},
+    {"id":"M-07","title":"DIAL remains SoR","rule":"Donor auth, payments, jobs, ledger, catalogue, delivery and other authorities never replace DIAL domain SoRs."},
+    {"id":"M-08","title":"Feature Realization Contract","rule":"A feature must map outcome, actors, screens, domain owner, data, state, API, events, integrations, security, tests and release gates."},
+    {"id":"M-09","title":"Build broad launch selectively","rule":"Branches may be Production Green or Certified Dormant without commercial activation."},
+    {"id":"M-10","title":"No silent feature loss","rule":"Refactors, repo migrations, donor imports and document rewrites cannot remove accepted requirements without an explicit decision record."},
+    {"id":"M-11","title":"FixItNow wholesale","rule":"FixItNow is the mandated wholesale application donor for Dial a Tech; preserve the mature application/UI, then replace donor SoRs with DIAL contracts. Licence/permission remains a production release gate."},
+    {"id":"M-12","title":"Hybrid Tech sourcing","rule":"Dial a Tech supports direct booking/matching/emergency dispatch plus an Opportunity Marketplace; post-award all modes converge into the same canonical DIAL Job/Job Reserve workflow."},
+    {"id":"M-13","title":"Free expression of interest","rule":"Qualified technicians may express interest/propose without a per-bid or pay-to-rank toll at launch; monetize successful/protected value instead."},
+    {"id":"D-58","title":"Agency only","rule":"DIAL-owned/principal Spare inventory path is discarded; no DIAL_OWNED or owned COGS runtime path."},
+    {"id":"D-50","title":"Tech WHT control","rule":"Technician payout architecture must retain ITF263/30% WHT controls where legally applicable."},
+    {"id":"D-40","title":"Official WhatsApp only","rule":"Official WhatsApp Cloud API/Flows only; no Baileys or unofficial WhatsApp clients."},
+    {"id":"D-44","title":"Maps stack","rule":"MapLibre plus approved OSS routing/geocoding stack; donor map choices do not become DIAL SoR."},
+    {"id":"D-45","title":"Delivery SoR","rule":"DIAL packages/delivery owns delivery-job truth; Fleetbase or donor runtimes do not."},
+    {"id":"AI-MONEY","title":"AI never writes money","rule":"AI may classify/draft/recommend but cannot set a binding payable amount, post ledger entries or release funds."},
+    {"id":"SIM-NOPAY","title":"Simulation cannot pay","rule":"Commercial Simulation and Command Centre Simulated mode cannot mutate production money."}
+  ],
+  "supersessions": [
+    {"old":"D-51 DIAL-owned stock / dual-capacity principal path","new":"D-58 agency-only","status":"DISCARDED"},
+    {"old":"v7/v7-2 master as architecture SoR","new":"Only explicitly adopted D-53/D-54 extensions","status":"HISTORICAL"},
+    {"old":"One generic shared DIAL storefront skin","new":"Branch-specific visual identities with shared engineering foundations","status":"DISCARDED"},
+    {"old":"Partial/cheap FixItNow recreation","new":"M-11 FixItNow wholesale port and DIAL customization","status":"SUPERSEDED"},
+    {"old":"Thin slice equals feature done","new":"Thin Slice -> Integration -> Staging -> Production gate ladder","status":"DISCARDED"},
+    {"old":"Missing live credentials blocks engineering","new":"M-01/M-02 key-late, key-drop-in development","status":"DISCARDED"}
+  ],
+  "sourcesOfTruth": {
+    "money":"packages/ledger + packages/payments",
+    "customerPrice":"deterministic pricing package/rate versions",
+    "jobs":"packages/jobs",
+    "delivery":"packages/delivery",
+    "catalogue":"approved DIAL catalogue/catalogue-factory records",
+    "search":"Meilisearch projection only",
+    "identity":"DIAL identity/Supabase auth boundary",
+    "tax":"DIAL tax/FDMS outbox and gateway",
+    "ai":"DIAL packages/ai capability boundary; recommendations only",
+    "branchReadiness":"DIAL feature/certification registry"
+  },
+  "guardedFiles": [
+    {"path":"AGENTS.md","mustContain":["project-truth/CONTEXT_BUNDLE.md","dial-context-drift","vNext.1"]},
+    {"path":".cursor/rules/dial-agent-authority.mdc","mustContain":["project-truth/CONTEXT_BUNDLE.md","vNext.1","context drift"]}
+  ]
+}
