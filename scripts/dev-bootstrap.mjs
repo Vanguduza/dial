@@ -30,6 +30,9 @@ const required = [
   'docs/project-truth/evidence-registry.json',
   'docs/project-truth/ACTIVE_WORK.md',
   'docs/project-truth/SESSION_HANDOFF_TEMPLATE.md',
+  'docs/project-truth/AI_TOOLING_PROFILE.md',
+  'docs/project-truth/plugin-profile.json',
+  'docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md',
   'scripts/check-context-drift.mjs',
   'scripts/build-context-pack.mjs',
 ];
@@ -50,13 +53,37 @@ const contextDir = path.join(dialDir, 'context-packs');
 fs.mkdirSync(stateDir, { recursive: true });
 fs.mkdirSync(contextDir, { recursive: true });
 
-function runNode(script, scriptArgs = [], { required = true } = {}) {
+function readJson(rel) {
+  try {
+    return JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+function readText(rel) {
+  try {
+    return fs.readFileSync(path.join(root, rel), 'utf8');
+  } catch {
+    return '';
+  }
+}
+
+function gitValue(gitArgs, fallback = 'unknown') {
+  try {
+    return execFileSync('git', gitArgs, { cwd: root, encoding: 'utf8' }).trim() || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function runNode(script, scriptArgs = [], { required: isRequired = true } = {}) {
   const result = spawnSync(process.execPath, [path.join(root, script), ...scriptArgs], {
     cwd: root,
     encoding: 'utf8',
     stdio: quiet ? 'pipe' : 'inherit',
   });
-  if (result.status !== 0 && required) {
+  if (result.status !== 0 && isRequired) {
     failures.push(`${script} failed with exit ${result.status ?? 'unknown'}${result.stderr ? `: ${result.stderr.trim()}` : ''}`);
   }
   return result;
@@ -85,26 +112,64 @@ if (lefthook && fs.existsSync(path.join(root, '.git'))) {
   if (r.status === 0) notes.push('lefthook installed/verified');
 }
 
-function readJson(rel) {
-  try { return JSON.parse(fs.readFileSync(path.join(root, rel), 'utf8')); } catch { return null; }
-}
-function readText(rel) {
-  try { return fs.readFileSync(path.join(root, rel), 'utf8'); } catch { return ''; }
-}
-function gitValue(args, fallback = 'unknown') {
-  try { return execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim() || fallback; } catch { return fallback; }
-}
-
 const truth = readJson('docs/project-truth/project-truth.json');
 const features = readJson('docs/project-truth/feature-registry.json');
 const evidence = readJson('docs/project-truth/evidence-registry.json');
+const pluginProfile = readJson('docs/project-truth/plugin-profile.json');
+const pluginReceipt = readJson('.dial/state/plugin-bootstrap.json');
 const contextBundle = readText('docs/project-truth/CONTEXT_BUNDLE.md');
 const activeWork = readText('docs/project-truth/ACTIVE_WORK.md');
 
 const branch = gitValue(['branch', '--show-current']);
 const commit = gitValue(['rev-parse', '--short', 'HEAD']);
 const authorityVersion = truth?.authorityVersion ?? 'unknown';
+const pluginProfileVersion = pluginProfile?.profileVersion ?? 'unknown';
 const activeFeatureRows = activeWork.split(/\r?\n/).filter((line) => /^\|/.test(line) && /`[A-Za-z0-9-]+`/.test(line));
+
+const normalizedHarness = hookTarget === 'claude'
+  ? 'claude'
+  : hookTarget === 'codex'
+    ? 'codex'
+    : null;
+const harnessReceipt = normalizedHarness ? pluginReceipt?.harnesses?.[normalizedHarness] : null;
+const pluginBootstrapRequired = Boolean(
+  normalizedHarness &&
+  pluginProfileVersion !== 'unknown' &&
+  harnessReceipt?.verifiedProfileVersion !== pluginProfileVersion,
+);
+
+if (pluginBootstrapRequired) {
+  notes.push(`AI plugin bootstrap required for ${normalizedHarness} profile ${pluginProfileVersion}`);
+} else if (normalizedHarness && pluginProfileVersion !== 'unknown') {
+  notes.push(`AI plugin profile ${pluginProfileVersion} already verified for ${normalizedHarness}`);
+}
+
+const pluginContext = normalizedHarness
+  ? [
+      '## AI plugin bootstrap',
+      '',
+      `- Harness: ${normalizedHarness}`,
+      `- Approved profile version: ${pluginProfileVersion}`,
+      `- Status: ${pluginBootstrapRequired ? 'PLUGIN_BOOTSTRAP_REQUIRED' : 'PLUGIN_PROFILE_VERIFIED'}`,
+      '',
+      ...(pluginBootstrapRequired
+        ? [
+            '**Before material work**, execute `docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md` for this harness.',
+            'Automatically install/verify all available `required` entries from `docs/project-truth/plugin-profile.json` using the current harness native plugin manager.',
+            'Do not install unapproved substitutes. Batch OAuth/admin approvals into one concise user request. Write the local receipt to `.dial/state/plugin-bootstrap.json`.',
+          ]
+        : [
+            'Required plugins were previously verified for this profile. Do a lightweight presence check; do not reinstall without cause.',
+          ]),
+      '',
+    ].join('\n')
+  : [
+      '## AI plugin bootstrap',
+      '',
+      `- Approved profile version: ${pluginProfileVersion}`,
+      '- Plugin installation is performed by Claude Code/Codex SessionStart, not by ordinary application runtime startup.',
+      '',
+    ].join('\n');
 
 const sessionContext = [
   '# DIAL Automatic Session Context',
@@ -114,7 +179,9 @@ const sessionContext = [
   `- Commit: ${commit}`,
   `- Registered features: ${features?.features?.length ?? 0}`,
   `- Accepted evidence records: ${evidence?.records?.length ?? 0}`,
+  `- Approved plugin profile: ${pluginProfileVersion}`,
   '',
+  pluginContext,
   '## Active work',
   '',
   activeFeatureRows.length ? activeFeatureRows.join('\n') : '_No active feature rows detected._',
@@ -139,6 +206,8 @@ const state = {
   node: process.versions.node,
   hookTarget,
   checkpoint,
+  pluginProfileVersion,
+  pluginBootstrapRequired,
   failures,
   notes,
 };
@@ -166,6 +235,7 @@ if (hookTarget) {
     console.log(`\nDIAL development bootstrap green (${authorityVersion}, ${branch}@${commit})`);
     for (const note of notes) console.log(`- ${note}`);
     console.log('- active session context: .dial/ACTIVE_SESSION_CONTEXT.md');
+    console.log(`- approved AI plugin profile: ${pluginProfileVersion} (verified at Claude/Codex SessionStart)`);
   }
 }
 
