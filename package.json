@@ -10,6 +10,7 @@
     "test": "turbo run test",
     "build": "turbo run build",
     "lint": "turbo run lint --continue",
+    "context:check": "node scripts/check-context-drift.mjs",
     "dev:gateway": "pnpm --filter @dial/gateway-web dev",
     "dev:worker": "pnpm --filter @dial/worker-temporal start",
     "dev:queues": "pnpm --filter @dial/worker-queues start",
