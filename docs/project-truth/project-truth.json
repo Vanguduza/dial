@@ -17,7 +17,8 @@
       "Do not invent a new source of truth, payment engine, job engine, catalogue authority or delivery authority.",
       "When context is incomplete, re-read the Context Bundle and registries before continuing.",
       "At session handoff, record changed decisions, feature gates, evidence and unresolved items.",
-      "Conversation history is working memory only; durable project memory must live in repository Project Truth/evidence/handoff artifacts."
+      "Conversation history is working memory only; durable project memory must live in repository Project Truth/evidence/handoff artifacts.",
+      "External plugin, proxy, compressor and model-native memory is cache/advisory context only unless an approved record is promoted into Project Truth."
     ]
   },
   "nonNegotiables": [
@@ -36,6 +37,8 @@
     {"id":"M-13","title":"Free expression of interest","rule":"Qualified technicians may express interest/propose without a per-bid or pay-to-rank toll at launch; monetize successful/protected value instead."},
     {"id":"M-14","title":"Repository-resident project memory","rule":"Durable DIAL memory lives in Project Truth, feature/evidence registries, active-work and handoff artifacts shared by Codex, Claude Code and other approved harnesses; conversation history is never the sole memory of a project decision."},
     {"id":"M-15","title":"Concise UI and human-readable identifiers","rule":"User-facing screens avoid unnecessary helper text and never use raw UUIDs, hashes or long generated technical IDs as normal names/references; use meaningful titles and short public reference codes while keeping internal IDs internal."},
+    {"id":"M-16","title":"Automatic development bootstrap","rule":"Project memory, drift checks, local development credentials, hook installation and active session context are initialized automatically through normal install/dev entrypoints and Claude/Codex SessionStart hooks; developers must not depend on remembering a manual setup ritual."},
+    {"id":"M-17","title":"Plugin memory isolation","rule":"Plugins, Headroom/context compressors, MCP caches and model-native memories may optimize or advise but cannot silently write or override DIAL Project Truth, evidence gates or authority files."},
     {"id":"D-58","title":"Agency only","rule":"DIAL-owned/principal Spare inventory path is discarded; no DIAL_OWNED or owned COGS runtime path."},
     {"id":"D-50","title":"Tech WHT control","rule":"Technician payout architecture must retain ITF263/30% WHT controls where legally applicable."},
     {"id":"D-40","title":"Official WhatsApp only","rule":"Official WhatsApp Cloud API/Flows only; no Baileys or unofficial WhatsApp clients."},
@@ -52,7 +55,9 @@
     {"old":"Thin slice equals feature done","new":"Thin Slice -> Integration -> Staging -> Production gate ladder","status":"DISCARDED"},
     {"old":"Missing live credentials blocks engineering","new":"M-01/M-02 key-late, key-drop-in development","status":"DISCARDED"},
     {"old":"Conversation/session history as primary project memory","new":"M-14 repository-resident Project Truth and handoff memory","status":"DISCARDED"},
-    {"old":"Raw UUIDs/long generated IDs and filler helper copy in normal UI","new":"M-15 concise UI + human-readable public references","status":"DISCARDED"}
+    {"old":"Raw UUIDs/long generated IDs and filler helper copy in normal UI","new":"M-15 concise UI + human-readable public references","status":"DISCARDED"},
+    {"old":"Manual memory/bootstrap ritual before coding","new":"M-16 automatic install/dev/session bootstrap","status":"DISCARDED"},
+    {"old":"Agent/plugin learned memory silently editing authority","new":"M-17 plugin memory isolation and explicit promotion into Project Truth","status":"DISCARDED"}
   ],
   "sourcesOfTruth": {
     "money":"packages/ledger + packages/payments",
@@ -71,6 +76,10 @@
     {"path":"AGENTS.md","mustContain":["project-truth/CONTEXT_BUNDLE.md","dial-context-drift","vNext.1"]},
     {"path":"CLAUDE.md","mustContain":["project-truth/CONTEXT_BUNDLE.md","context:pack","raw UUIDs"]},
     {"path":".cursor/rules/dial-agent-authority.mdc","mustContain":["project-truth/CONTEXT_BUNDLE.md","vNext.1","context drift"]},
-    {"path":".cursor/rules/dial-ui-language-identifiers.mdc","mustContain":["No raw technical identifiers","Helper text","publicReference"]}
+    {"path":".cursor/rules/dial-ui-language-identifiers.mdc","mustContain":["No raw technical identifiers","Helper text","publicReference"]},
+    {"path":"scripts/dev-bootstrap.mjs","mustContain":["ACTIVE_SESSION_CONTEXT.md","check-context-drift.mjs","gen-local-secrets.mjs"]},
+    {"path":".claude/settings.json","mustContain":["SessionStart","dev-bootstrap.mjs"]},
+    {"path":".codex/hooks.json","mustContain":["SessionStart","dev-bootstrap.mjs"]},
+    {"path":"docs/project-truth/AI_TOOLING_PROFILE.md","mustContain":["Headroom","Plugin admission rule","Automatic bootstrap"]}
   ]
 }
