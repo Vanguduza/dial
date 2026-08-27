@@ -18,6 +18,9 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 
+# DIAL local AI/session bootstrap state — never commit machine-specific plugin/auth state
+.dial/
+
 # Android / Gradle
 **/local.properties
 **/.gradle/
