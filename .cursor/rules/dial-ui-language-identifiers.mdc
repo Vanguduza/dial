@@ -1,0 +1,157 @@
+---
+description: DIAL UI copy, helper-text and public identifier rules
+alwaysApply: true
+---
+
+# DIAL UI language and identifier guardrails
+
+## 1. UI is not an explanation layer
+
+Screens must be concise and task-oriented.
+
+Do **not** add helper text merely because an AI-generated layout looks empty.
+
+Helper text is allowed only when it materially:
+
+- prevents a likely mistake;
+- explains a non-obvious input or constraint;
+- explains a safety/legal/compliance consequence;
+- clarifies money, tax, FX, settlement or irreversible behavior;
+- explains why sensitive/unusual information is required.
+
+Helper text must not:
+
+- restate the field label;
+- narrate an obvious action;
+- explain what a plainly named button does;
+- duplicate a heading/subheading;
+- add generic marketing filler;
+- expose internal architecture or implementation detail;
+- become a paragraph where progressive disclosure is better.
+
+### Example
+
+Reject:
+
+```text
+Registration number
+Enter your vehicle registration number in the field below.
+```
+
+Prefer:
+
+```text
+Registration number
+```
+
+Useful exception:
+
+```text
+VIN
+17 characters. Used to verify compatible parts.
+```
+
+## 2. No raw technical identifiers in normal UI
+
+Never use raw UUIDs, database primary keys, hashes, trace IDs or long random identifiers as user-facing names or routine references.
+
+Internal identifiers remain valid for storage, joins and authorization. User-facing surfaces use a separate immutable `publicReference` / `displayCode`.
+
+Recommended patterns:
+
+- `JOB-02481`
+- `REQ-00641`
+- `ORD-18452`
+- `PAY-10482`
+- `RET-00317`
+- `PRJ-00128`
+- `SUP-00843`
+
+Do not use public references as authorization secrets.
+
+Raw UUIDs may appear only in explicitly technical developer/admin diagnostics when genuinely useful, visually secondary, and never as the primary entity name.
+
+## 3. Human names before reference codes
+
+Entity headings should describe the entity:
+
+- `Alternator replacement — 2018 Toyota Hilux`
+- `Kitchen DB board fault`
+- `Brake pads — front axle`
+
+A short reference can appear underneath or alongside when support/disambiguation needs it.
+
+Reject:
+
+- `Job 8c7d9b82-5720-4ad7-9722-...`
+- `Request_0099284882`
+- `AI Job 4488339201`
+- `Record 28384828384`
+- `Item 1`
+
+## 4. Avoid generic AI naming
+
+Do not manufacture generic labels because a meaningful domain label has not yet been retrieved.
+
+Forbidden as normal production UI patterns:
+
+- `Smart Insight #...`
+- `AI Generated Job`
+- `AI Recommendation 00042`
+- `User UUID`
+- `Record ID`
+- `Transaction UUID`
+- `Entity 1`
+- `New Item`
+
+Use the domain language the user already understands.
+
+## 5. Button/action copy
+
+Prefer short verbs tied to the actual state transition:
+
+- `Post job`
+- `Express interest`
+- `Submit proposal`
+- `Shortlist`
+- `Award job`
+- `Fund job`
+- `Approve variation`
+- `Mark ready`
+
+Avoid explanatory buttons such as `Click here to submit your proposal now`.
+
+## 6. Status copy
+
+Use concise domain states in human language. Technical enum values may remain internal.
+
+Example:
+
+- internal: `AWARD_OFFERED`
+- UI: `Award sent`
+
+- internal: `SUPPLIER_VERIFICATION_REQUIRED`
+- UI: `Supplier confirmation needed`
+
+## 7. Empty states
+
+Empty states should explain the next useful action, not provide a product essay.
+
+Good:
+
+`No proposals yet`  
+`Qualified technicians will appear here as they respond.`
+
+If the next action is obvious, omit the second line.
+
+## 8. Enforcement in design review
+
+Before frontend sign-off ask:
+
+1. Can any helper line be removed without reducing understanding or safety?
+2. Is any technical identifier exposed unnecessarily?
+3. Does every entity have a human-readable title/reference?
+4. Is any copy generic AI filler rather than product language?
+5. Are labels/buttons shorter without becoming ambiguous?
+
+If yes to 1–4, repair before Visual Green.
