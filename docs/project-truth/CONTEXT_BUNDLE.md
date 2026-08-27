@@ -1,6 +1,6 @@
 # DIAL vNext.1 — Context Bundle
 
-**Purpose:** mandatory first-read context for every coding/review agent and every resumed session. This file is deliberately short. Machine-readable truth lives beside it in `project-truth.json`, `feature-registry.json`, and `evidence-registry.json`.
+**Purpose:** mandatory first-read context for every coding/review agent and every resumed session. This file is deliberately short. Machine-readable truth lives beside it in `project-truth.json`, `feature-registry.json`, `evidence-registry.json`, and `plugin-profile.json`.
 
 ## 1. Authority
 
@@ -12,9 +12,10 @@ Before changing behavior, read in this order:
 2. `docs/project-truth/project-truth.json`
 3. `docs/project-truth/feature-registry.json`
 4. `docs/project-truth/evidence-registry.json`
-5. `docs/project-truth/ACTIVE_WORK.md` for current execution only
-6. `AGENTS.md` / `CLAUDE.md` as tool entrypoints
-7. v4/Agent Pack/companions only for detail that is not superseded by the vNext.1 truth registry.
+5. `docs/project-truth/plugin-profile.json`
+6. `docs/project-truth/ACTIVE_WORK.md` for current execution only
+7. `AGENTS.md` / `CLAUDE.md` as tool entrypoints
+8. v4/Agent Pack/companions only for detail that is not superseded by the vNext.1 truth registry.
 
 If historical prose conflicts with this bundle/registries, **do not average the two**. Follow the current truth and record a decision if the conflict is new.
 
@@ -31,7 +32,8 @@ If historical prose conflicts with this bundle/registries, **do not average the 
 - **M-14:** **repository-resident project memory.** Conversation/session memory is temporary working memory only. Durable decisions, gates, evidence, active work and handoffs must live in `docs/project-truth/` so Codex, Claude Code and other approved harnesses can resume from the same truth.
 - **M-15:** **concise UI + human-readable references.** Do not clutter screens with helper text that repeats obvious labels/actions. Raw UUIDs, hashes and long generated IDs are internal; normal UI uses meaningful entity names and short public references such as `JOB-02481` or `ORD-18452`.
 - **M-16:** **automatic development bootstrap.** Normal install/dev commands and supported Claude/Codex SessionStart hooks automatically validate Project Truth, generate local dev credentials when absent, run context-drift checks, establish active session context and verify Git hooks. Do not rely on a human remembering a setup checklist.
-- **M-17:** **plugin memory isolation.** Headroom, plugins, MCP caches and model-native memory may optimize or advise but cannot silently edit/override Project Truth, evidence gates or authority. Learned rules are promoted only through explicit review.
+- **M-17:** **plugin/tool memory isolation.** Plugins, connected apps, MCP caches and model-native memory may optimize or advise but cannot silently edit/override Project Truth, evidence gates or authority. Learned rules are promoted only through explicit review.
+- **M-18:** **approved automatic plugin bootstrap.** Claude Code and Codex automatically verify the versioned `plugin-profile.json` at session startup and install/verify missing required approved plugins through their current native manager when permitted. Unapproved substitutes are forbidden; optional plugins remain task-gated; OAuth/admin approvals are batched into one concise user action.
 - **D-58:** agency-only Spare model; D-51 DIAL-owned/principal stock is discarded.
 - **D-50:** retain technician ITF263/WHT controls.
 - **D-40:** official WhatsApp Cloud API/Flows only.
@@ -50,7 +52,8 @@ If historical prose conflicts with this bundle/registries, **do not average the 
 - donor payment/auth/job/catalogue/delivery databases as runtime DIAL SoRs.
 - conversation history as the only location of durable project decisions.
 - manual setup as the only way Project Truth/context controls are initialized.
-- plugins/proxies writing durable authority without explicit review.
+- plugins/connected apps writing durable authority without explicit review.
+- manual/ad-hoc plugin selection that silently varies the mandatory engineering toolchain between sessions.
 - raw UUID/long random identifiers as ordinary customer-facing names/references.
 - filler helper copy added merely to make an AI-generated screen look complete.
 
@@ -82,21 +85,36 @@ Detailed evidence is in `evidence-registry.json`. A repository migration must ca
 - tax: DIAL tax/FDMS outbox/gateway;
 - AI: `packages/ai` capability boundary, advisory only;
 - readiness: feature/evidence/certification registries;
-- project memory: `docs/project-truth/` with `AGENTS.md`/`CLAUDE.md` as tool-specific entrypoints.
+- project memory: `docs/project-truth/` with `AGENTS.md`/`CLAUDE.md` as tool-specific entrypoints;
+- approved AI tool profile: `docs/project-truth/plugin-profile.json`.
 
-## 6. Context-drift and rate-limit protocol
+## 6. Context-drift, plugin and rate-limit protocol
 
 At development/session **startup**, `scripts/dev-bootstrap.mjs` is expected to run automatically through normal pnpm development entrypoints and supported Claude/Codex hooks. It writes `.dial/ACTIVE_SESSION_CONTEXT.md` and fails if required project-memory controls are missing or drifted.
+
+For a Claude Code/Codex session, the bootstrap compares `plugin-profile.json` with local `.dial/state/plugin-bootstrap.json`. If the profile for that harness is not current, the injected session context says `PLUGIN_BOOTSTRAP_REQUIRED` and the agent must execute `docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md` before material work.
+
+Plugin setup rules:
+
+- automatically install/verify approved `required` plugins using the current native harness mechanism when possible;
+- discover exact current identifier/publisher before installation;
+- never substitute an unapproved similarly named plugin;
+- batch installs and require at most one restart;
+- batch OAuth/admin approvals into one concise user request;
+- do not auto-install optional plugins unless the current task needs them;
+- do not store secrets in `.dial/state/plugin-bootstrap.json`;
+- plugin state never becomes product/architecture truth.
 
 At the **start** of material work:
 
 1. Confirm bootstrap is green (`pnpm dev:bootstrap` is the manual fallback).
-2. Read this bundle + JSON registries.
-3. Identify the Feature ID(s) being changed.
-4. State the current gate and inherited evidence.
-5. List relevant non-negotiable IDs.
-6. Identify whether the task changes project truth or merely implements it.
-7. For substantial work, generate a compact pack with `pnpm context:pack -- <FEATURE_ID>` and avoid loading the full master unless needed.
+2. Confirm the approved plugin profile is verified for the active AI harness, or complete the injected plugin-bootstrap prompt.
+3. Read this bundle + JSON registries.
+4. Identify the Feature ID(s) being changed.
+5. State the current gate and inherited evidence.
+6. List relevant non-negotiable IDs.
+7. Identify whether the task changes project truth or merely implements it.
+8. For substantial work, generate a compact pack with `pnpm context:pack -- <FEATURE_ID>` and avoid loading the full master unless needed.
 
 During work:
 
@@ -108,8 +126,8 @@ During work:
 - when a donor is used, record donor revision/licence/adaptation boundary;
 - reserve expensive/deep reasoning for complex or critical work rather than mechanical edits;
 - avoid unnecessary parallel high-cost agents;
-- keep the always-on plugin set small and load task-specific tools on demand;
-- treat Headroom/shared plugin memory as cache only; never as authority.
+- keep the **active** plugin/tool set task-specific even though required plugins are installed;
+- treat plugin/connected-app memory as cache only, never as authority.
 
 At **handoff/end of session**:
 
@@ -148,7 +166,8 @@ Stop and re-read truth if any task proposes or implies:
 - replacing the FixItNow wholesale strategy with a cheap recreation;
 - Opportunity Marketplace creating a second post-award job/payment workflow;
 - relying on an old conversation as the only source of a project decision;
-- a plugin/proxy/memory tool directly rewriting shared authority;
+- a plugin/connected app/memory tool directly rewriting shared authority;
+- an unapproved plugin substitute being installed because its name looks similar;
 - exposing UUID-like technical IDs or filler AI naming in normal customer/staff UI.
 
 If one appears, run the `dial-context-drift-check` skill before continuing.
