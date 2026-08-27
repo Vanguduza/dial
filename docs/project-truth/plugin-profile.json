@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "profileVersion": "2026-08-28.1",
+  "purpose": "Machine-readable approved plugin profile for DIAL coding harnesses. Required plugins are installed and verified automatically at AI session startup when the harness permits it.",
+  "policy": {
+    "autoInstallRequired": true,
+    "autoInstallOptional": false,
+    "preferOfficialOrVendorMaintained": true,
+    "allowUnapprovedSubstitutes": false,
+    "discoverExactIdentifierBeforeInstall": true,
+    "oauthOrAdminApprovalRequiresUserAction": true,
+    "batchRestartOnceAfterInstall": true,
+    "neverStoreSecretsInReceipt": true,
+    "projectTruthPrecedence": true,
+    "receiptPath": ".dial/state/plugin-bootstrap.json",
+    "unavailablePluginPolicy": "record_pending_unavailable_and_continue_without_inventing_a_substitute",
+    "installationFailurePolicy": "retry_once_then_record_pending_with_exact_reason"
+  },
+  "claudeCode": {
+    "required": [
+      {
+        "capability": "frontend-design",
+        "preferredIdentifiers": ["frontend-design"],
+        "sourcePreference": ["anthropic-official", "vendor-maintained"],
+        "activation": "frontend-tasks",
+        "reason": "Intentional production-grade UI generation under DIAL frontend rules."
+      },
+      {
+        "capability": "browser-e2e-visual-evidence",
+        "preferredIdentifiers": ["playwright"],
+        "sourcePreference": ["official", "vendor-maintained"],
+        "activation": "web-frontend-and-e2e",
+        "reason": "Browser interaction, screenshots and release evidence."
+      },
+      {
+        "capability": "figma-design-context",
+        "preferredIdentifiers": ["figma"],
+        "sourcePreference": ["figma-official", "official"],
+        "activation": "frontend-design-and-design-review",
+        "connectionMayRequireUserApproval": true,
+        "reason": "Figma design inspection, component context and design-to-code workflows."
+      },
+      {
+        "capability": "structured-feature-development",
+        "preferredIdentifiers": ["feature-dev"],
+        "sourcePreference": ["anthropic-official"],
+        "activation": "complex-features",
+        "reason": "Structured discovery, implementation and review after DIAL Project Truth preflight."
+      },
+      {
+        "capability": "deterministic-agent-guardrails",
+        "preferredIdentifiers": ["hookify"],
+        "sourcePreference": ["anthropic-official"],
+        "activation": "always-available",
+        "reason": "Local guardrails for recurring prohibited patterns and workflow mistakes."
+      },
+      {
+        "capability": "security-guidance",
+        "preferredIdentifiers": ["security-guidance"],
+        "sourcePreference": ["anthropic-official"],
+        "activation": "security-sensitive-work",
+        "reason": "Security-oriented review for auth, payments, webhooks and API boundaries."
+      },
+      {
+        "capability": "linear-work-tracking",
+        "preferredIdentifiers": ["linear"],
+        "sourcePreference": ["linear-official", "official"],
+        "activation": "planning-and-delivery",
+        "connectionMayRequireUserApproval": true,
+        "reason": "Execution tracking while Project Truth remains architecture/evidence authority."
+      },
+      {
+        "capability": "typescript-language-server",
+        "preferredIdentifiers": ["typescript-lsp"],
+        "sourcePreference": ["anthropic-official", "official"],
+        "activation": "typescript-work",
+        "reason": "Symbol navigation and diagnostics for the TypeScript/Next.js workspace."
+      },
+      {
+        "capability": "kotlin-language-server",
+        "preferredIdentifiers": ["kotlin-lsp"],
+        "sourcePreference": ["anthropic-official", "official"],
+        "activation": "android-work",
+        "reason": "Native Android/Kotlin navigation and diagnostics."
+      },
+      {
+        "capability": "swift-language-server",
+        "preferredIdentifiers": ["swift-lsp"],
+        "sourcePreference": ["anthropic-official", "official"],
+        "activation": "ios-work",
+        "reason": "Native iOS/Swift navigation and diagnostics."
+      }
+    ],
+    "optionalOnDemand": [
+      {
+        "capability": "independent-code-review",
+        "preferredIdentifiers": ["code-review", "pr-review-toolkit"],
+        "selection": "install_or_enable_at_most_one",
+        "reason": "Independent PR review without overlapping expensive reviewers."
+      },
+      {
+        "capability": "deep-security-scan",
+        "preferredIdentifiers": ["claude-security"],
+        "reason": "Use at security milestones/staging gates rather than every edit."
+      },
+      {
+        "capability": "version-specific-library-docs",
+        "preferredIdentifiers": ["context7"],
+        "reason": "Current framework/library documentation when local docs are insufficient."
+      },
+      {
+        "capability": "runtime-observability",
+        "preferredIdentifiers": ["sentry"],
+        "reason": "Install when Sentry is actually adopted/configured."
+      },
+      {
+        "capability": "alternative-development-methodology",
+        "preferredIdentifiers": ["superpowers"],
+        "reason": "Optional methodology; DIAL FRC, Dev Manager and gates remain authoritative."
+      }
+    ]
+  },
+  "codex": {
+    "required": [
+      {
+        "capability": "github-repository-collaboration",
+        "preferredIdentifiers": ["github"],
+        "sourcePreference": ["openai-official", "github-official"],
+        "activation": "always-available",
+        "connectionMayRequireUserApproval": true,
+        "reason": "Repository, PR, issue and CI interaction."
+      },
+      {
+        "capability": "figma-design-context",
+        "preferredIdentifiers": ["figma"],
+        "sourcePreference": ["openai-official", "figma-official"],
+        "activation": "frontend-design-and-design-review",
+        "connectionMayRequireUserApproval": true,
+        "reason": "Design-to-code, component context and design-system workflows."
+      },
+      {
+        "capability": "security-analysis",
+        "preferredIdentifiers": ["codex-security"],
+        "sourcePreference": ["openai-official"],
+        "activation": "security-gates-and-r3-work",
+        "reason": "Independent security scan and investigation support."
+      },
+      {
+        "capability": "web-application-development",
+        "preferredIdentifiers": ["build-web-apps"],
+        "sourcePreference": ["openai-official"],
+        "activation": "web-development",
+        "reason": "Web construction and browser QA under DIAL architecture/frontend constraints."
+      },
+      {
+        "capability": "linear-work-tracking",
+        "preferredIdentifiers": ["linear"],
+        "sourcePreference": ["openai-official", "linear-official"],
+        "activation": "planning-and-delivery",
+        "connectionMayRequireUserApproval": true,
+        "reason": "Execution tracking while Project Truth remains architecture/evidence authority."
+      }
+    ],
+    "optionalOnDemand": [
+      {
+        "capability": "alternative-development-methodology",
+        "preferredIdentifiers": ["superpowers"],
+        "reason": "Optional planning/TDD/debugging methodology under DIAL precedence."
+      },
+      {
+        "capability": "stakeholder-knowledge",
+        "preferredIdentifiers": ["notion"],
+        "reason": "Stakeholder-readable research/specs; never the only copy of a project lock."
+      },
+      {
+        "capability": "runtime-observability",
+        "preferredIdentifiers": ["sentry"],
+        "reason": "Install when Sentry is actually adopted/configured."
+      },
+      {
+        "capability": "deployment-platform",
+        "preferredIdentifiers": [],
+        "reason": "Select only after DIAL hosting platform is locked; no premature platform dependency."
+      }
+    ]
+  }
+}
