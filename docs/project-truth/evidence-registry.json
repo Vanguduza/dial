@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "records": [
+    {
+      "id":"EV-E1A",
+      "featureId":"E1a",
+      "status":"ACCEPTED",
+      "executedAt":"2026-08-12",
+      "signedOffBy":"Dev Manager S11",
+      "sourceRepository":"Vanguduza/dial",
+      "sourceRef":"build/t4-tech-ui",
+      "evidenceRefs":["docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md","docs/agent-audits/money-path-S11-E1a-2026-08-12.md"],
+      "proves":["OfferSnapshot amountMinor/currency freeze","agency seller disclosure","B2B informal rejection","verified webhook before settlement mutation","duplicate webhook no-op","no DIAL_OWNED path","WHT/ITF263 path","agency fiscal queue","PSP adapter registry","AI cannot set payable"],
+      "knownLimits":["Live PSP/escrow and ZIMRA credentials are later integration/production evidence, not reasons to repeat the thin slice."],
+      "minimumGate":"INTEGRATION_GREEN"
+    },
+    {
+      "id":"EV-E1B",
+      "featureId":"E1b",
+      "status":"ACCEPTED",
+      "executedAt":"2026-08-12",
+      "signedOffBy":"Dev Manager S12",
+      "sourceRepository":"Vanguduza/dial",
+      "sourceRef":"build/t4-tech-ui",
+      "evidenceRefs":["docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md"],
+      "proves":["USD browse/cart","ZiG conversion at pay step","fx_rate_id persistence contract","admin daily rate audit","EcoCash ZiG display","USD rails stay USD","COD USD plus indicative ZiG"],
+      "knownLimits":["Production FX operations/payment rails still require later environment evidence."],
+      "minimumGate":"INTEGRATION_GREEN"
+    },
+    {
+      "id":"EV-E2A",
+      "featureId":"E2a",
+      "status":"ACCEPTED",
+      "executedAt":"2026-08-12",
+      "signedOffBy":"Dev Manager S10",
+      "sourceRepository":"Vanguduza/dial",
+      "sourceRef":"build/t4-tech-ui",
+      "evidenceRefs":["docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md"],
+      "proves":["official Cloud webhook signature/idempotency structure","Spare search/cart/checkout shared ERP path","EcoCash and COD CTA contract","daily-rate ZiG handling","Tech intake/emergency handoff contracts","no unofficial WhatsApp dependency"],
+      "knownLimits":["Live Meta WABA tokens and approved template IDs are later credential/production gates."],
+      "minimumGate":"INTEGRATION_GREEN"
+    },
+    {
+      "id":"EV-E3A",
+      "featureId":"E3a",
+      "status":"ACCEPTED",
+      "executedAt":"2026-08-13",
+      "signedOffBy":"Dev Manager",
+      "sourceRepository":"Vanguduza/dial",
+      "sourceRef":"build/t4-tech-ui",
+      "evidenceRefs":["docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md","packages/delivery/src/index.test.ts"],
+      "proves":["DIAL delivery job ownership","offer/accept/reject/timeout/requeue lifecycle","FIFO concept","OSRM/VROOM boundary","POD","COD reconcile hook"],
+      "knownLimits":["Live maps/routing infrastructure and full native/UI integration remain later gates."],
+      "minimumGate":"INTEGRATION_GREEN"
+    },
+    {
+      "id":"EV-E4A",
+      "featureId":"E4a",
+      "status":"ACCEPTED",
+      "executedAt":"2026-08-13",
+      "signedOffBy":"Dev Manager",
+      "sourceRepository":"Vanguduza/dial",
+      "sourceRef":"build/t4-tech-ui",
+      "evidenceRefs":["docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md","packages/ai/src/index.test.ts","docs/agent-audits/ai-capability-E4a-2026-08-13.md"],
+      "proves":["structured guided intake","identity omitted from model egress","no payable amount in customer assessment","human approval required for ops draft quote","no AI ledger write"],
+      "knownLimits":["Live-model/Promptfoo/staging evidence remains later gates."],
+      "minimumGate":"INTEGRATION_GREEN"
+    },
+    {
+      "id":"EV-E6A",
+      "featureId":"E6a",
+      "status":"ACCEPTED_CODE_EVIDENCE",
+      "executedAt":"2026-08-16",
+      "signedOffBy":"Evidence normalization pending formal historical sign-off record",
+      "sourceRepository":"Vanguduza/dial",
+      "sourceRef":"build/t4-tech-ui",
+      "evidenceRefs":["packages/ai/src/index.test.ts"],
+      "proves":["MetricContract registry","outcome-weighted dataset marker","Promptfoo alone cannot promote","human promotion required","Simulated cannot auto-pay","Command Centre is not money SoR"],
+      "knownLimits":["Normalize into the migrated repository evidence store before claiming staging/production status."],
+      "minimumGate":"INTEGRATION_GREEN"
+    }
+  ]
+}
