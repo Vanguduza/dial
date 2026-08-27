@@ -1,0 +1,25 @@
+name: Context Drift Guard
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - build/**
+
+jobs:
+  context-drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate project truth, gates and runtime tripwires
+        run: node scripts/check-context-drift.mjs
