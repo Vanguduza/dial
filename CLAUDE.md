@@ -2,6 +2,14 @@
 
 @docs/project-truth/CONTEXT_BUNDLE.md
 
+## Automatic session bootstrap
+
+Project `.claude/settings.json` runs `scripts/dev-bootstrap.mjs` at SessionStart and checkpoints around compaction/session end. The bootstrap validates Project Truth, creates development-only local stack credentials if absent, runs the context-drift gate, verifies Lefthook when available and writes `.dial/ACTIVE_SESSION_CONTEXT.md`.
+
+If a Claude host/version does not fire project hooks correctly, run `pnpm dev:bootstrap` before material work. Do not continue after a failed bootstrap by deleting or bypassing Project Truth controls.
+
+Tool/plugin policy: `docs/project-truth/AI_TOOLING_PROFILE.md`.
+
 ## Mandatory preflight
 
 Before material design, architecture, implementation, refactor or review:
@@ -22,6 +30,7 @@ Do not reconstruct current truth from old chat/session history. Repository Proje
 - Use `/status` to watch usage and context pressure.
 - Before switching session, model, harness or developer, write a handoff using `docs/project-truth/SESSION_HANDOFF_TEMPLATE.md`.
 - Never spend premium context re-reading the entire master plan when the Context Bundle + relevant Feature/Evidence records are sufficient.
+- Treat Headroom/plugin/model-native memory as optional cache only; never let it silently edit Project Truth or evidence gates.
 
 ## Rate-limit discipline
 
@@ -30,6 +39,7 @@ Do not reconstruct current truth from old chat/session history. Repository Proje
 - Avoid multiple expensive parallel agents unless the tasks are genuinely independent.
 - Checkpoint work in Git and the handoff file before approaching usage limits.
 - If a subscription limit is reached, another approved harness may resume from repository memory; do not rebuild context from conversation transcripts.
+- Keep the always-on plugin set small; load Figma/Playwright/security/docs tools when the task needs them instead of materializing every MCP/tool schema in every session.
 
 ## UI copy and identifiers
 
