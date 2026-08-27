@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "gateOrder": ["PLANNED","THIN_SLICE_REQUIRED","THIN_SLICE_GREEN","INTEGRATION_GREEN","STAGING_GREEN","PRODUCTION_GREEN","CERTIFIED_DORMANT","ACTIVE"],
+  "features": [
+    {"id":"E1a","name":"Money spine / Job Reserve / agency FDMS","currentGate":"INTEGRATION_GREEN","evidence":["EV-E1A"],"nextWork":"Integrate durable services/adapters and progress to staging; do not repeat thin slice."},
+    {"id":"E1b","name":"Daily ZiG FX / EcoCash checkout conversion","currentGate":"INTEGRATION_GREEN","evidence":["EV-E1B"],"nextWork":"Integrate durable FX storage and payment sandbox/live path; do not repeat thin slice."},
+    {"id":"E2a","name":"WhatsApp Spare checkout","currentGate":"INTEGRATION_GREEN","evidence":["EV-E2A"],"nextWork":"Integrate deployed WhatsApp/ERP path; Meta production templates/tokens remain later configuration gates."},
+    {"id":"E3a","name":"Delivery dispatch and POD","currentGate":"INTEGRATION_GREEN","evidence":["EV-E3A"],"nextWork":"Integrate durable Temporal/maps/native delivery surfaces; do not repeat thin slice."},
+    {"id":"E4a","name":"AI guided intake","currentGate":"INTEGRATION_GREEN","evidence":["EV-E4A"],"nextWork":"Integrate live capability gateway/evals while retaining no-money/privacy invariants; do not repeat thin slice."},
+    {"id":"E5a","name":"Catalogue Factory publish / B2B informal filtering","currentGate":"THIN_SLICE_REQUIRED","evidence":[],"nextWork":"Run first accepted slice: ingest CSV -> human approve -> publish -> B2C visible -> B2B informal excluded."},
+    {"id":"E6a","name":"Intelligence Factory and Command Centre controls","currentGate":"INTEGRATION_GREEN","evidence":["EV-E6A"],"nextWork":"Normalize evidence and integrate durable datasets/evals/metrics; no thin-slice rebuild."},
+    {"id":"OM-0","name":"Dial a Tech Opportunity Marketplace pre-award sourcing","currentGate":"THIN_SLICE_REQUIRED","evidence":[],"nextWork":"Client posts JobRequest -> qualified tech interest -> proposal -> client award -> tech accept -> canonical existing Job created."},
+    {"id":"TECH-FIXITNOW","name":"FixItNow wholesale Dial a Tech application port","currentGate":"PLANNED","evidence":[],"nextWork":"Wholesale import selected FixItNow application, preserve visual/application structure, replace donor auth/DB/payment/job SoRs with DIAL contracts; licence/permission is production release gate."},
+    {"id":"FLEET-CORE","name":"Dial Fleet core workflow","currentGate":"THIN_SLICE_REQUIRED","evidence":[],"nextWork":"Define Feature Realization Contract then first vertical slice."},
+    {"id":"VEHICLE-HUB","name":"Vehicle Hub lifecycle","currentGate":"THIN_SLICE_REQUIRED","evidence":[],"nextWork":"Define Feature Realization Contract then first vertical slice."},
+    {"id":"CARE-CORE","name":"Dial Care entitlement lifecycle","currentGate":"THIN_SLICE_REQUIRED","evidence":[],"nextWork":"Define Feature Realization Contract then first vertical slice."},
+    {"id":"ASSIST-CORE","name":"Dial Assist emergency/roadside workflow","currentGate":"THIN_SLICE_REQUIRED","evidence":[],"nextWork":"Define safety-first Feature Realization Contract then first vertical slice."},
+    {"id":"PROJECTS-CORE","name":"Projects milestone/team workflow","currentGate":"THIN_SLICE_REQUIRED","evidence":[],"nextWork":"Define Feature Realization Contract then first vertical slice."}
+  ]
+}
