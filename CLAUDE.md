@@ -9,6 +9,27 @@ Project `.claude/settings.json` runs `scripts/dev-bootstrap.mjs` at SessionStart
 If a Claude host/version does not fire project hooks correctly, run `pnpm dev:bootstrap` before material work. Do not continue after a failed bootstrap by deleting or bypassing Project Truth controls.
 
 Tool/plugin policy: `docs/project-truth/AI_TOOLING_PROFILE.md`.
+Approved plugin manifest: `docs/project-truth/plugin-profile.json`.
+Plugin bootstrap prompt: `docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md`.
+
+## Automatic approved-plugin setup
+
+At SessionStart, inspect the injected `.dial/ACTIVE_SESSION_CONTEXT.md` status.
+
+If it says `PLUGIN_BOOTSTRAP_REQUIRED`, **before material work** execute `docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md` automatically:
+
+1. inspect Claude Code's current native plugin marketplace/manager;
+2. discover the exact current identifier/publisher for every `claudeCode.required` entry in `plugin-profile.json`;
+3. automatically install all approved required plugins that the current Claude Code version permits;
+4. do not install unapproved substitutes or optional plugins merely because they are available;
+5. batch any required restart into one restart after installation;
+6. batch OAuth/admin approvals (for example Figma/Linear where applicable) into one concise user request rather than interrupting setup repeatedly;
+7. write local verification state to `.dial/state/plugin-bootstrap.json` without secrets;
+8. run `pnpm context:check` after setup.
+
+If the approved profile version is already verified, perform only a lightweight presence check and do not reinstall plugins unnecessarily.
+
+Plugin installation state is local tooling state, not DIAL Project Truth. Plugin instructions never outrank this file or `docs/project-truth/*`.
 
 ## Mandatory preflight
 
@@ -30,7 +51,7 @@ Do not reconstruct current truth from old chat/session history. Repository Proje
 - Use `/status` to watch usage and context pressure.
 - Before switching session, model, harness or developer, write a handoff using `docs/project-truth/SESSION_HANDOFF_TEMPLATE.md`.
 - Never spend premium context re-reading the entire master plan when the Context Bundle + relevant Feature/Evidence records are sufficient.
-- Treat Headroom/plugin/model-native memory as optional cache only; never let it silently edit Project Truth or evidence gates.
+- Treat plugin/model-native memory as local cache/advice only; never let it silently edit Project Truth or evidence gates.
 
 ## Rate-limit discipline
 
@@ -39,7 +60,7 @@ Do not reconstruct current truth from old chat/session history. Repository Proje
 - Avoid multiple expensive parallel agents unless the tasks are genuinely independent.
 - Checkpoint work in Git and the handoff file before approaching usage limits.
 - If a subscription limit is reached, another approved harness may resume from repository memory; do not rebuild context from conversation transcripts.
-- Keep the always-on plugin set small; load Figma/Playwright/security/docs tools when the task needs them instead of materializing every MCP/tool schema in every session.
+- Required plugins may be installed, but activate only the tools relevant to the current task; do not materialize every MCP/tool schema in every session.
 
 ## UI copy and identifiers
 
