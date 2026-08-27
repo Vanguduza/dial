@@ -1,0 +1,113 @@
+---
+description: Prevent DIAL context drift across agents, sessions, branches and repo migrations
+alwaysApply: true
+---
+
+# DIAL context-drift guardrail
+
+## Mandatory context preflight
+
+Before any material design, architecture, implementation, refactor or review:
+
+1. Read `docs/project-truth/CONTEXT_BUNDLE.md`.
+2. Read `docs/project-truth/project-truth.json`.
+3. Read `docs/project-truth/feature-registry.json`.
+4. Read `docs/project-truth/evidence-registry.json`.
+5. Identify affected Feature IDs, their current gates and inherited evidence.
+6. Identify relevant non-negotiable decision IDs.
+
+Do not rely on remembered chat/session context when these files are available.
+
+## Authority rule
+
+The current machine-readable vNext.1 truth registry is the context anchor. Historical v4/Pack/companion documents remain detailed specifications only where not superseded.
+
+If code, an old plan, a donor repo or a previous agent note conflicts with current project truth:
+
+- do not average/merge the conflicting interpretations;
+- do not silently choose the implementation that is easiest;
+- current truth wins unless an explicit new decision is approved;
+- record any approved change in the truth/feature/evidence registries in the same work unit.
+
+## Evidence preservation
+
+Accepted engineering evidence is durable project state.
+
+- Never repeat E1a/E1b/E2a/E3a/E4a thin-slice stages merely because files or repositories moved.
+- E6a retains inherited code evidence and begins at Integration Green after evidence normalization.
+- E5a and OM-0 are new/unproven and begin at Thin Slice Required.
+- Never downgrade a feature below the minimum gate asserted by accepted evidence without an explicit invalidation record explaining why the prior evidence is no longer representative.
+
+## Feature preservation
+
+A refactor, donor port, document rewrite or repo migration cannot silently remove functionality.
+
+Before changing a feature family:
+
+- identify its Feature Realization Contract / requirements;
+- identify all applicable surfaces;
+- preserve or deliberately supersede every requirement;
+- update `feature-registry.json` when gate/status meaningfully changes.
+
+## Integration context
+
+Missing live credentials never means “stop development.”
+
+- Continue fixture/contract/sandbox/key-ready implementation.
+- Keep live/production evidence gates honestly open.
+- Adding the eventual key must require configuration only, not feature code.
+
+## Donor context
+
+- FixItNow is the wholesale Dial a Tech application donor.
+- PORT-WHOLESALE means preserve the mature application/UI structure, then replace donor SoRs with DIAL contracts.
+- Donor auth, payments, jobs, catalogue, delivery, tax and storage never silently become DIAL authority.
+- Record donor revision/licence/adaptation boundary in the work evidence.
+
+## Frontend context
+
+Do not let a new agent reinterpret frontend requirements as “make something modern.”
+
+For material UI work, retain:
+
+- user outcome and workflow;
+- branch visual identity;
+- reference/Figma/design-system context;
+- required screen states;
+- visual evidence and accessibility criteria.
+
+Generic AI-generated screens are a context-drift failure because they discard intentional product/design decisions.
+
+## Checkpoints
+
+Checkpoint context after:
+
+- new architecture decision;
+- feature scope change;
+- donor/adaptor substitution;
+- release-gate movement;
+- new accepted evidence;
+- new external dependency;
+- major UI/art-direction change.
+
+At handoff/end of session, use `docs/project-truth/SESSION_HANDOFF_TEMPLATE.md`.
+
+## Drift tripwires
+
+Immediately run `dial-context-drift-check` if work proposes or implies any of:
+
+- DIAL-owned/principal Spare inventory;
+- AI binding payable amounts or ledger writes;
+- unofficial WhatsApp;
+- a second money/job/delivery/catalogue SoR;
+- Fixture == Production Green;
+- missing API key == engineering blocker;
+- a repeated inherited thin slice;
+- generic cross-branch storefront skin;
+- cheap recreation replacing FixItNow wholesale;
+- Opportunity Marketplace creating a parallel post-award Job/Payment system;
+- removing an accepted feature because it is inconvenient during migration/refactor.
+
+## Required command
+
+Run `pnpm context:check` before merge or any claim that a significant feature/gate is complete.
