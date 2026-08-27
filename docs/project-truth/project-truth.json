@@ -8,14 +8,16 @@
       "docs/project-truth/project-truth.json",
       "docs/project-truth/feature-registry.json",
       "docs/project-truth/evidence-registry.json",
-      "AGENTS.md"
+      "AGENTS.md",
+      "CLAUDE.md"
     ],
     "rules": [
       "Do not infer current truth from historical documents when a supersession exists.",
       "Do not downgrade a feature below an inherited evidence gate without an explicit evidence invalidation record.",
       "Do not invent a new source of truth, payment engine, job engine, catalogue authority or delivery authority.",
       "When context is incomplete, re-read the Context Bundle and registries before continuing.",
-      "At session handoff, record changed decisions, feature gates, evidence and unresolved items."
+      "At session handoff, record changed decisions, feature gates, evidence and unresolved items.",
+      "Conversation history is working memory only; durable project memory must live in repository Project Truth/evidence/handoff artifacts."
     ]
   },
   "nonNegotiables": [
@@ -32,6 +34,8 @@
     {"id":"M-11","title":"FixItNow wholesale","rule":"FixItNow is the mandated wholesale application donor for Dial a Tech; preserve the mature application/UI, then replace donor SoRs with DIAL contracts. Licence/permission remains a production release gate."},
     {"id":"M-12","title":"Hybrid Tech sourcing","rule":"Dial a Tech supports direct booking/matching/emergency dispatch plus an Opportunity Marketplace; post-award all modes converge into the same canonical DIAL Job/Job Reserve workflow."},
     {"id":"M-13","title":"Free expression of interest","rule":"Qualified technicians may express interest/propose without a per-bid or pay-to-rank toll at launch; monetize successful/protected value instead."},
+    {"id":"M-14","title":"Repository-resident project memory","rule":"Durable DIAL memory lives in Project Truth, feature/evidence registries, active-work and handoff artifacts shared by Codex, Claude Code and other approved harnesses; conversation history is never the sole memory of a project decision."},
+    {"id":"M-15","title":"Concise UI and human-readable identifiers","rule":"User-facing screens avoid unnecessary helper text and never use raw UUIDs, hashes or long generated technical IDs as normal names/references; use meaningful titles and short public reference codes while keeping internal IDs internal."},
     {"id":"D-58","title":"Agency only","rule":"DIAL-owned/principal Spare inventory path is discarded; no DIAL_OWNED or owned COGS runtime path."},
     {"id":"D-50","title":"Tech WHT control","rule":"Technician payout architecture must retain ITF263/30% WHT controls where legally applicable."},
     {"id":"D-40","title":"Official WhatsApp only","rule":"Official WhatsApp Cloud API/Flows only; no Baileys or unofficial WhatsApp clients."},
@@ -46,7 +50,9 @@
     {"old":"One generic shared DIAL storefront skin","new":"Branch-specific visual identities with shared engineering foundations","status":"DISCARDED"},
     {"old":"Partial/cheap FixItNow recreation","new":"M-11 FixItNow wholesale port and DIAL customization","status":"SUPERSEDED"},
     {"old":"Thin slice equals feature done","new":"Thin Slice -> Integration -> Staging -> Production gate ladder","status":"DISCARDED"},
-    {"old":"Missing live credentials blocks engineering","new":"M-01/M-02 key-late, key-drop-in development","status":"DISCARDED"}
+    {"old":"Missing live credentials blocks engineering","new":"M-01/M-02 key-late, key-drop-in development","status":"DISCARDED"},
+    {"old":"Conversation/session history as primary project memory","new":"M-14 repository-resident Project Truth and handoff memory","status":"DISCARDED"},
+    {"old":"Raw UUIDs/long generated IDs and filler helper copy in normal UI","new":"M-15 concise UI + human-readable public references","status":"DISCARDED"}
   ],
   "sourcesOfTruth": {
     "money":"packages/ledger + packages/payments",
@@ -58,10 +64,13 @@
     "identity":"DIAL identity/Supabase auth boundary",
     "tax":"DIAL tax/FDMS outbox and gateway",
     "ai":"DIAL packages/ai capability boundary; recommendations only",
-    "branchReadiness":"DIAL feature/certification registry"
+    "branchReadiness":"DIAL feature/certification registry",
+    "projectMemory":"docs/project-truth plus AGENTS.md/CLAUDE.md entrypoints"
   },
   "guardedFiles": [
     {"path":"AGENTS.md","mustContain":["project-truth/CONTEXT_BUNDLE.md","dial-context-drift","vNext.1"]},
-    {"path":".cursor/rules/dial-agent-authority.mdc","mustContain":["project-truth/CONTEXT_BUNDLE.md","vNext.1","context drift"]}
+    {"path":"CLAUDE.md","mustContain":["project-truth/CONTEXT_BUNDLE.md","context:pack","raw UUIDs"]},
+    {"path":".cursor/rules/dial-agent-authority.mdc","mustContain":["project-truth/CONTEXT_BUNDLE.md","vNext.1","context drift"]},
+    {"path":".cursor/rules/dial-ui-language-identifiers.mdc","mustContain":["No raw technical identifiers","Helper text","publicReference"]}
   ]
 }
