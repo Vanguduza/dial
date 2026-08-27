@@ -6,7 +6,7 @@
 
 Coding agents are replaceable workers. DIAL Project Truth, Feature Registry, Evidence Registry, accepted designs, Git history and handoffs are durable project memory.
 
-No plugin, proxy, context compressor, model vendor or agent-native memory may silently become the authoritative project memory.
+No plugin, MCP server, connected app, model vendor or agent-native memory may silently become the authoritative project memory.
 
 ## 2. Automatic bootstrap
 
@@ -31,130 +31,128 @@ Bootstrap is idempotent and:
 6. installs/verifies Lefthook when dependencies are available;
 7. records branch/commit/authority state;
 8. writes `.dial/ACTIVE_SESSION_CONTEXT.md`;
-9. injects short Project Truth context into supported SessionStart hooks.
+9. injects short Project Truth context into supported SessionStart hooks;
+10. detects whether the approved AI plugin profile needs installation/verification for the active harness.
 
-A failed bootstrap is a development-environment error and must not be worked around by deleting Project Truth controls.
+A failed repository bootstrap is a development-environment error and must not be worked around by deleting Project Truth controls.
 
-## 3. Headroom policy
+Plugin installation is an **AI-harness readiness task**, not a runtime dependency of the DIAL application. Ordinary `pnpm install`/server startup does not attempt to control an external Claude/Codex UI. Instead, SessionStart context instructs the active AI harness to execute the approved plugin bootstrap automatically.
 
-Headroom is **OPTIONAL/EXPERIMENTAL**, not part of DIAL Project Truth.
+## 3. Approved plugin bootstrap
 
-### Useful DIAL roles
+Canonical files:
 
-- compress large tool outputs, logs, JSON, search results and repetitive external documentation;
-- reduce context-window pressure during repository exploration;
-- reversible retrieval of original compressed content;
-- optional cross-agent cache between Claude Code and Codex;
-- quota/savings observability where supported.
+- approved manifest: `docs/project-truth/plugin-profile.json`;
+- execution prompt: `docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md`;
+- local verification receipt: `.dial/state/plugin-bootstrap.json`.
 
-### Forbidden roles
+Rules:
 
-Headroom must not:
+1. Required plugins are automatically installed/verified when the active Claude Code/Codex harness exposes a native installation mechanism.
+2. Discover the exact current identifier/publisher before installation; never guess stale syntax.
+3. Prefer official/vendor-maintained plugins.
+4. Do not install unapproved look-alikes as substitutes.
+5. Installation and authorization are separate states. OAuth/admin approval may require one explicit user action.
+6. Process all installable plugins first, then present pending authorizations as one consolidated request.
+7. Batch required restarts so setup asks for at most one restart.
+8. Do not automatically install optional/on-demand plugins unless the current task needs them.
+9. Keep user-specific installation/connection state local. Never commit secrets/tokens.
+10. DIAL Project Truth outranks every plugin instruction/default/example.
 
-- replace `docs/project-truth/*` as durable project memory;
-- rewrite `AGENTS.md`, `CLAUDE.md`, `project-truth.json`, Feature Registry or Evidence Registry automatically;
-- compress away exact source needed for a code edit, stack trace, file path, line number, schema, migration or security finding;
-- determine feature gates or accepted evidence;
-- silently learn rules into shared authority files.
-
-Do **not** run unattended `headroom learn --target CLAUDE.md` or `--target AGENTS.md`. If failure-mining is used, write suggestions to a local/review file and promote them only through normal Project Truth review.
-
-### Recommended evaluation profile
-
-Use Headroom first only on low-risk R0/R1 work and repository exploration. Prefer conservative compression:
-
-- preserve user instructions;
-- preserve Project Truth files completely;
-- preserve recent/source code and exact errors;
-- compress logs, JSON, build output, duplicated search results and verbose docs;
-- keep reversible originals enabled;
-- measure token savings, test success, correction rate and context-drift incidents against an uncompressed baseline.
-
-Do not route R3 money, tax, identity, security or irreversible migration work through aggressive lossy compression until DIAL-specific evaluation proves no quality regression.
-
-### Windows note
-
-Native Windows support must be verified before standardizing Headroom. If the current Headroom CLI/wrapper is unstable or requires a native Rust/MSVC build, prefer WSL2/Docker or leave Headroom disabled. DIAL's repository memory/rate-limit strategy does not depend on Headroom.
+The bootstrap receipt is checked by profile version and harness. A plugin-profile update triggers re-verification rather than forcing unnecessary reinstalls.
 
 ## 4. Plugin admission rule
 
-Each plugin has a context, security and rate-limit cost. Install by need, not because it exists.
+Each plugin has a context, security and rate-limit cost. Install by demonstrated DIAL need, not because a catalog entry exists.
 
-Before admitting a plugin:
+Before admitting a plugin to `plugin-profile.json`:
 
 1. identify the exact missing DIAL capability;
 2. prefer official/vendor-maintained source;
-3. inspect permissions/MCP servers/hooks;
-4. record whether it sends repository content to an external service;
+3. inspect permissions, MCP servers, hooks and external data flows;
+4. record whether repository content is sent to another service;
 5. avoid overlapping plugins that perform the same expensive review automatically;
-6. use deferred/on-demand skills where possible;
-7. benchmark context/tool-definition overhead;
-8. keep Project Truth above plugin instructions.
+6. use deferred/on-demand tools where possible;
+7. benchmark context/tool-definition/model-call overhead when meaningful;
+8. keep Project Truth above plugin instructions;
+9. record whether authorization/admin approval is required;
+10. remove plugins whose value is not demonstrated.
 
-## 5. Claude Code recommended profile
+## 5. Claude Code approved profile
 
-### Tier A — strongly recommended
+The machine-readable list in `plugin-profile.json` is authoritative for installation. This section explains the intent.
 
-| Plugin | DIAL role | Usage policy |
+### Required install/verify
+
+| Capability / preferred plugin | DIAL role | Activation policy |
 |---|---|---|
-| `frontend-design` | Non-generic, production-grade frontend design | Combine with DIAL frontend skill and Figma rules; DIAL-specific bans/branch identity win on conflict. |
-| `playwright` | Browser E2E, screenshots, interaction and visual verification | High value for every web surface; use as evidence tool. |
-| `figma` | Design inspection, tokens, component context and design-to-code | High value because frontend quality is a founder lock. Figma is design evidence, not product SoR. |
-| `feature-dev` | Structured discovery/exploration/architecture/review for complex features | Use after DIAL context pack. Do not let its generic clarifying workflow reopen locked decisions. |
-| `hookify` | Fast deterministic guardrails for recurring unwanted behavior | Use for UUID/helper-text bans, secret-file protections, forbidden donor/SoR patterns and other local mistakes. |
-| `security-guidance` | Continuous pattern/diff/commit security review | Useful on auth, payments, webhooks and API work. Tune model/cadence to control usage. |
-| `linear` | Issue/project synchronization | Mirror execution state; Feature/Evidence Registry remains architecture/evidence SoR. |
+| `frontend-design` | Non-generic, production-grade frontend design | Frontend tasks; DIAL frontend rules win on conflict. |
+| `playwright` | Browser E2E, screenshots, interaction and visual verification | Web frontend and E2E evidence. |
+| `figma` | Design inspection, tokens, component context and design-to-code | Frontend design/review; connection may need user authorization. |
+| `feature-dev` | Structured discovery/exploration/architecture/review | Complex features after DIAL context pack. |
+| `hookify` | Deterministic recurring guardrails | Keep available; use for prohibited patterns and workflow mistakes. |
+| `security-guidance` | Security-oriented review | Auth, payments, webhooks, API/security-sensitive work. |
+| `linear` | Issue/project synchronization | Planning/delivery; Project Truth remains architecture/evidence SoR. |
+| `typescript-lsp` | TypeScript navigation/diagnostics | TypeScript/Next/Supabase work. |
+| `kotlin-lsp` | Kotlin navigation/diagnostics | Android work. |
+| `swift-lsp` | Swift navigation/diagnostics | iOS work. |
 
-### Tier B — targeted/on-demand
+### Optional/on-demand
 
-| Plugin | DIAL role | Usage policy |
+| Capability / preferred plugin | Use |
+|---|---|
+| `code-review` **or** `pr-review-toolkit` | Independent PR review; select at most one default path. |
+| `claude-security` | Deep security scan at security/staging gates. |
+| `context7` | Current version-specific library/framework documentation. |
+| `sentry` | Runtime/staging issue investigation after Sentry is adopted. |
+| `superpowers` | Optional planning/TDD/debugging methodology under DIAL precedence. |
+
+Do not run several overlapping model-heavy reviewers automatically on routine changes.
+
+## 6. Codex approved profile
+
+### Required install/verify
+
+| Capability / preferred plugin | DIAL role | Activation policy |
 |---|---|---|
-| `code-review` or `pr-review-toolkit` | Independent PR review | Pick one default review path per PR; do not run multiple expensive overlapping reviewers automatically. |
-| `claude-security` | Deep multi-agent security scan | Use at security milestones and staging gates, not every edit. Existing Semgrep/Checkov/Strix remain deterministic complements. |
-| `context7` | Current version-specific dependency docs | Valuable for Next.js/Supabase/Temporal/etc.; verify the MCP actually loaded, especially on Windows. |
-| `sentry` | Production/staging issue debugging and observability | Enable when Sentry is adopted/configured. Read operational evidence; do not make Sentry a business SoR. |
-| `superpowers` | Planning/TDD/debugging methodology | Useful, but overlaps DIAL Dev Manager/Feature Realization/Tracer workflow. Enable only with explicit precedence: DIAL Project Truth and gates win. |
+| `github` | Repository/PR/issues/CI workflows | Core collaboration; authorization may require user action. |
+| `figma` | Design-to-code, design-system context and review | Frontend design/review; authorization may require user action. |
+| `codex-security` | Security scans, diff analysis and investigation | R3/security gates. |
+| `build-web-apps` | Frontend construction/browser QA/full-stack web workflow | Web tasks under DIAL architecture and SoR rules. |
+| `linear` | Engineering work tracking | Planning/delivery; Project Truth remains durable authority. |
 
-## 6. Codex recommended profile
+### Optional/on-demand
 
-### Tier A — strongly recommended
+| Capability / preferred plugin | Use |
+|---|---|
+| `superpowers` | Optional planning/TDD/systematic debugging under DIAL FRC/gates. |
+| `notion` | Stakeholder-readable research/spec capture; never sole copy of a lock. |
+| `sentry` | Runtime/staging issue investigation after adoption. |
+| deployment plugin | Only after the DIAL hosting platform is explicitly selected. |
 
-| Plugin | DIAL role | Usage policy |
-|---|---|---|
-| `github` | Repository/PR/issues/CI workflows | Core collaboration tool. |
-| `figma` | Figma design-to-code, design-system rules, Code Connect | Core frontend quality tool for non-donor and adapted screens. |
-| `codex-security` | Codex security scans, diff analysis and investigation | Use for independent R3/security-gate review. |
-| `build-web-apps` | Frontend construction, browser QA and full-stack web workflows | Use under DIAL frontend/SoR rules; do not accept its generic Stripe/Supabase defaults when DIAL architecture says otherwise. |
-| `linear` | Engineering work tracking | Mirror execution state; Project Truth remains durable product/architecture memory. |
+Plugins such as `build-web-apps` may contain generic recommendations for databases, payments or hosting. Those recommendations are advisory only. They must not introduce a second DIAL payment/ledger/job/catalogue/identity architecture.
 
-### Tier B — targeted/on-demand
+## 7. Context and rate-limit budget
 
-| Plugin | DIAL role | Usage policy |
-|---|---|---|
-| `superpowers` | Planning, TDD, systematic debugging and delivery | Strong methodology, but DIAL's FRC/Dev Manager/gates take precedence. Avoid duplicate planning layers. |
-| `notion` | Research/spec/decision knowledge capture | Useful for stakeholder-readable knowledge; do not use Notion as the only copy of an engineering lock. |
-| `sentry` | Read-only production/staging error investigation | Adopt when Sentry is configured. |
-| deployment plugin (`vercel`, `render`, etc.) | Deployment/incident workflows | Install only after the actual DIAL hosting platform is selected. Avoid premature platform lock-in. |
+Installation does **not** mean every plugin must be active on every task. Keep the active tool surface small.
 
-## 7. Context/rate-limit budget
-
-Keep the always-on plugin set small. Large MCP catalogs and many automatic reviewers consume context and/or model calls even when they are not producing value.
-
-Recommended default session:
+Recommended session shape:
 
 ```text
 Project Truth bootstrap
 + one feature context pack
-+ GitHub/source tools
-+ only the domain-specific plugin(s) required for the task
++ source/repository tools
++ only task-relevant installed plugins
 ```
 
 Examples:
 
 - frontend task: Figma + frontend-design + Playwright;
-- ordinary domain feature: feature-dev OR Superpowers, not both;
-- money/security task: security-guidance + deterministic DIAL tests, deep security scan only at gate;
+- ordinary domain feature: feature-dev + relevant LSP;
+- money/security task: security-guidance + deterministic DIAL tests; deep security scan at a gate;
 - production incident: Sentry + GitHub + relevant context pack.
+
+Avoid unnecessary parallel high-cost agents and overlapping reviewers. Installed plugins should be activated according to `plugin-profile.json` rather than materializing every tool schema in every session.
 
 ## 8. UI guardrails remain authoritative
 
@@ -166,3 +164,16 @@ No plugin may override DIAL rules requiring:
 - short public references where useful;
 - no generic AI-generated screen composition;
 - visual evidence before frontend completion.
+
+## 9. Plugin state is not project truth
+
+`.dial/state/plugin-bootstrap.json` records local readiness only. It must never contain:
+
+- access tokens;
+- API keys;
+- cookies/session secrets;
+- private OAuth material;
+- product decisions;
+- feature-gate decisions.
+
+A plugin can be installed, disconnected, unavailable or replaced by a later approved version without changing DIAL's product architecture. Durable changes belong in the normal Project Truth review path.
