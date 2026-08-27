@@ -8,13 +8,35 @@ Before using historical plans, code state, chat/session memory or donor reposito
 2. **`docs/project-truth/project-truth.json`** — machine-readable non-negotiables, supersessions and SoRs.
 3. **`docs/project-truth/feature-registry.json`** — current feature gates and exact next work.
 4. **`docs/project-truth/evidence-registry.json`** — inherited engineering evidence that must survive repo/session migration.
-5. This `AGENTS.md`.
+5. **`docs/project-truth/plugin-profile.json`** — versioned approved Claude Code/Codex plugin profile.
+6. This `AGENTS.md`.
 
 Always-on enforcement: **`.cursor/rules/dial-context-drift.mdc`**. Audit skill: **`.cursor/skills/dial-context-drift-check/SKILL.md`**. Run **`pnpm context:check`** before merge/sign-off. Session/harness changes use `docs/project-truth/SESSION_HANDOFF_TEMPLATE.md`.
 
-**Conflict order now:** vNext.1 project truth/context registries → existing v4/Agent Pack/companions for non-conflicting detail → runtime code/tests. Code does not silently override product truth; stale code is repaired unless an explicit new decision changes truth.
+**Conflict order now:** vNext.1 project truth/context registries → existing v4/Agent Pack/companions for non-conflicting detail → runtime code/tests → plugin/tool generic defaults. Code or a plugin does not silently override product truth; stale code/tool guidance is repaired/ignored unless an explicit new decision changes truth.
 
 **Critical inherited state:** E1a/E1b/E2a/E3a/E4a and normalized E6a start at **Integration Green** and are not repeated as thin-slice milestones after repository migration. E5a and new OM-0 start at **Thin Slice Required**. FixItNow is the **wholesale Dial a Tech application donor**; Opportunity Marketplace is pre-award sourcing only and converges into the same post-award DIAL Job/Job Reserve system.
+
+## Automatic approved-plugin setup
+
+Approved plugin manifest: **`docs/project-truth/plugin-profile.json`**.  
+Execution prompt: **`docs/prompts/DIAL_AI_PLUGIN_BOOTSTRAP_PROMPT.md`**.  
+Local verification receipt: **`.dial/state/plugin-bootstrap.json`**.
+
+At Codex SessionStart, `scripts/dev-bootstrap.mjs --hook=codex` injects the approved profile status where project hooks are supported. If `.dial/ACTIVE_SESSION_CONTEXT.md` says `PLUGIN_BOOTSTRAP_REQUIRED`, execute the plugin-bootstrap prompt **before material work**:
+
+1. inspect the current Codex native plugin/app catalog;
+2. discover the exact current identifier/publisher for every `codex.required` capability;
+3. automatically install/enable approved required plugins when the current Codex host permits it;
+4. never install an unapproved similarly named substitute;
+5. process all installable plugins first, then surface OAuth/admin approvals once as a concise batch;
+6. request at most one restart after the installation batch;
+7. record verification locally in `.dial/state/plugin-bootstrap.json` with no secrets;
+8. run `pnpm context:check` after setup.
+
+If direct plugin installation is only possible through a Codex UI unavailable to the running agent, complete everything automatable and present one consolidated exact action request. Do not turn plugin setup into repeated interruptions.
+
+The same manifest governs Claude Code. Plugin installation/connection state is tooling state only and never becomes product/architecture authority.
 
 ---
 
@@ -31,7 +53,7 @@ Cursor (and other harnesses that read `AGENTS.md`) should load the detailed hist
 
 **Development orchestration (D-61):** **DIAL Dev Manager** (Blueprint §8 / §8.0) is the **managerial authority for the entire development process** — Plan→Build→Done throughout Build: ticket hygiene, **D-52** feature DoD, **responsive web UX** (§8.0.1), **living root docs** in the same PR (§8.0.2 — `README.md`, `CHANGELOG.md`, `ENHANCEMENTS.md`, `BUGS.md`; reject “docs later”), and train sequencing. vNext.1 feature/evidence registries override stale historical ticket sequencing when a slice is already accepted. **Prime Agent** is the mandatory session/runtime harness that hosts Dev Manager; Prime is **not** product/manager SoR and does not replace project truth.
 
-**Living docs:** Keep root `README.md` / `CHANGELOG.md` / `ENHANCEMENTS.md` / `BUGS.md` current with meaningful landings. Keep `docs/project-truth/*` current whenever truth, gate or accepted evidence changes. **Responsive web:** desktop + mobile usability and applicable design-system/branch identity rules before Done on web tickets.
+**Living docs:** Keep root `README.md` / `CHANGELOG.md` / `ENHANCEMENTS.md` / `BUGS.md` current with meaningful landings. Keep `docs/project-truth/*` current whenever truth, gate, accepted evidence or approved plugin profile changes. **Responsive web:** desktop + mobile usability and applicable design-system/branch identity rules before Done on web tickets.
 
 **v7-2 architecture draft:** `DIAL_Master_Development_and_Ecosystem_Architecture_v7-2.md` is **not** authoritative. Absorb only via classified evaluation **`DIAL_v7-2_Adjustment_Expansion_Evaluation.md`** → locked companion **`DIAL_v7_2_Adopted_Platform_Extensions.md` (D-53 platform extensions; D-54 Intelligence Factory + Command Centre metric contracts)** and current vNext.1 truth.
 
@@ -45,8 +67,8 @@ Cursor (and other harnesses that read `AGENTS.md`) should load the detailed hist
 
 **D-61 AI Kernel / Prime Agent:** absorb only via **`DIAL_AI_Kernel_Prime_Agent_Adopted.md`** where not superseded — Dev Manager = Build managerial authority; Prime = harness; production multi-step = `packages/ai` capabilities + LiteLLM→Gemini + Temporal/BullMQ; no production agent host as parallel SoR.
 
-**Current vNext.1 additions that older files may not contain:** key-late development; evidence/gate inheritance; FixItNow wholesale port; hybrid Tech sourcing with Opportunity Marketplace; free technician expression of interest at launch; explicit frontend anti-generic guardrails; repository-independent evidence preservation.
+**Current vNext.1 additions that older files may not contain:** key-late development; evidence/gate inheritance; FixItNow wholesale port; hybrid Tech sourcing with Opportunity Marketplace; free technician expression of interest at launch; explicit frontend anti-generic guardrails; repository-independent evidence preservation; repository-resident project memory; concise UI/public references; automatic development bootstrap; approved automatic Claude/Codex plugin bootstrap.
 
-**Do not** reopen locked decisions: official WhatsApp only; MapLibre/approved OSS maps; AI never writes money; D-58 agency-only / no discarded D-51 owned-stock principal; informal→B2B visibility; dropping tech WHT; stub-as-MVP; v7 as SoR; second money/job/delivery/catalogue SoR; auto-publish checklist/AI without human+evaluation; Command Centre Simulated as live money control; unaudited FX; missing credentials as development blocker; repeating accepted thin slices due repo migration; generic cross-branch storefront skin; cheap FixItNow recreation instead of wholesale; or Opportunity Marketplace as a second post-award job/payment system.
+**Do not** reopen locked decisions: official WhatsApp only; MapLibre/approved OSS maps; AI never writes money; D-58 agency-only / no discarded D-51 owned-stock principal; informal→B2B visibility; dropping tech WHT; stub-as-MVP; v7 as SoR; second money/job/delivery/catalogue SoR; auto-publish checklist/AI without human+evaluation; Command Centre Simulated as live money control; unaudited FX; missing credentials as development blocker; repeating accepted thin slices due repo migration; generic cross-branch storefront skin; cheap FixItNow recreation instead of wholesale; Opportunity Marketplace as a second post-award job/payment system; or plugins silently overriding Project Truth.
 
 Attribution detail: `.cursor/rules/SOURCES.md` and `DIAL_Cursor_Rules_and_Skills.md`.
