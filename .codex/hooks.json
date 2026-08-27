@@ -1,0 +1,29 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/dev-bootstrap.mjs --hook=codex",
+            "timeout": 30,
+            "statusMessage": "Loading DIAL Project Truth"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node scripts/dev-bootstrap.mjs --checkpoint=session-end --quiet",
+            "timeout": 30,
+            "statusMessage": "Checkpointing DIAL session state"
+          }
+        ]
+      }
+    ]
+  }
+}
