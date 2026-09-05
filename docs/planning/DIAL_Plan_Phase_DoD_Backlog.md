@@ -163,8 +163,6 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 ---
 
----
-
 ## E7 — Hermes Business Agent Fabric + R2 + Provider Bridge + Quantum Intelligence (D-61)
 
 | Field | Content |

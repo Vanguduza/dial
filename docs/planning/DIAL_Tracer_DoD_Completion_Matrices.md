@@ -119,8 +119,6 @@ Locks: C-1, D-32, D-54, D-56
 
 ---
 
----
-
 ## Matrix E — D-61 Hermes Business Agent Fabric foundation (E7)
 
 Locks: D-61 + D-32/D-47/D-48/D-52/D-54
