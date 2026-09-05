@@ -25,11 +25,11 @@ Methodology note, inherited from v4 §5.13: every tool and repo below was checke
 
 **Entry is authentication-first, not a public storefront wall.** The main gateway's landing screen is a sign-in screen (create-account link at the bottom); only after authentication does a customer see the **Shop | Services** split into the two sub-domains above (v4 §1.4, §6.2). This is a deliberate, founder-locked reversal of the more common "browse first, sign in at checkout" pattern, and it should not be second-guessed during the build — see §2 for why it is nonetheless worth one specific mitigation.
 
-**Money never comes from a model.** A deterministic pricing engine (v4 §4.1) computes every customer-facing amount from rate cards, supplier costs, delivery bands and taxes; AI (Gemini, v4 §5.15) may **draft** a quote for ops to approve, or classify/triage a job, but it can never itself become a payable amount. Customer money sits in a **Job Reserve** — a ledger entry in DIAL's books, backed by funds actually held by a licensed **payment-service-provider escrow partner**, not DIAL's own bank account (v4 §2B-3, §4.2, §7.3). This single design choice is what keeps DIAL out of an unlicensed-deposit-taking problem under the National Payment Systems Act.
+**Money never comes from a model.** A deterministic pricing engine (v4 §4.1) computes every customer-facing amount from rate cards, supplier costs, delivery bands and taxes; AI (through the D-61 provider-configurable `packages/ai`/Hermes fabric) may **draft** a quote for ops to approve, or classify/triage a job, but it can never itself become a payable amount. Customer money sits in a **Job Reserve** — a ledger entry in DIAL's books, backed by funds actually held by a licensed **payment-service-provider escrow partner**, not DIAL's own bank account (v4 §2B-3, §4.2, §7.3). This single design choice is what keeps DIAL out of an unlicensed-deposit-taking problem under the National Payment Systems Act.
 
 **The catalogue is DIAL's actual moat, and it is deliberately not built on scraped OEM data.** Fitment is keyed on **chassis code** (`KUN26`, `ZRE152`, …) rather than make/model/year, because 92% of the Zimbabwean parc is grey-import Japanese-domestic-market stock that Western VIN-based catalogues do not decode. Fitment is stored as an **evidence-weighted claim** (source + confidence + corroboration count), not a boolean, and every delivered, unreturned order is itself a fitment confirmation (v4 §3.2). This is the single most defensible technical decision in the whole plan, and the research in §3/§7 of this document independently confirms there is no shortcut around it — every free or cheap JDM-chassis data source found is a proprietary web service scraping government registries, not an open, redistributable dataset.
 
-**The AI layer is one package, one brain, many organs.** All AI lives in `packages/ai`. **Gemini** is the sole reasoning model (Claude exists only as a gateway-outage fallback, never a parallel brain). Around it sit deterministic and small-model "organs" that run on ordinary CPU or rented per-call inference — never an owned GPU (v4 §5.3, §5.15). The composition is: Policy → Privacy (strip identity fields, redact photos) → Sensors (OCR/vision, optional) → Deterministic match (`pg_trgm`/RapidFuzz — never an LLM for part numbers) → Context pack (pgvector RAG) → Gemini → Zod-validated structured output → Langfuse/Promptfoo observability → back to the ERP, which is the only thing authoritative for money. Every invocation and every human correction is logged (`AiInvocation`), which is the flywheel this document's §6 builds out concretely for troubleshooting checklists specifically.
+**The AI layer is one governed DIAL fabric, not one hardcoded model.** `packages/ai` remains the typed model-capability layer. **D-61 supersedes the old Gemini-only restriction:** the persistent business-agent layer is Hermes behind a deterministic DIAL Hermes Supervisor, with a provider-configurable bridge for approved API-key and subscription-backed paths. Around it remain deterministic "organs" for policy/privacy, OCR/vision, deterministic part matching, RAG/context, schemas and evaluation. The canonical flow is Gateway → identity/purpose → Privacy Context Compiler/Egress Firewall → Supervisor → Hermes/approved provider → typed H0–H4 DIAL tools → authoritative ERP services → Zod/evidence/Langfuse/Promptfoo. Models never become money/catalogue/order/job/identity/health truth. Every invocation, tool action, approval and correction is auditable. See master §6.24.
 
 **The compliance backbone is not a footnote — it decides the data model.** Four facts drive large parts of the build: VAT/fiscalisation via ZIMRA's FDMS is mandatory from the first invoice (v4 §7.1); withholding tax on payouts is **30%**, not the commonly assumed 10%, triggering at US$1,000/payee/year (v4 §7.2); holding customer money directly is high-legal-risk, hence the PSP-escrow Job Reserve (v4 §7.3); and sending any customer photo or voice note to a foreign AI model is a cross-border personal-data transfer requiring POTRAZ notification, authorisation and **express, separate consent** (v4 §5.7, §7.6). All of this is why `packages/tax`, `packages/legal` and the privacy layer of `packages/ai` are first-class packages, not afterthoughts, in v4 §6.12.
 
@@ -396,6 +396,8 @@ One table, all categories, for quick lookup during the build.
 
 ## 8. The Cursor build prompt
 
+> **D-61 NOTE (2026-09-05):** §8 remains useful historical development-manager context, but **§9 below is the canonical current-state resume prompt**. Where §8 contains older provider/AI wording, master §6.24 / D-61 and §9 win. Do not paste §8 alone for new sessions.
+
 Everything above exists to make the following prompt executable rather than aspirational. Paste the block below into Cursor (Agent mode) at the root of the DIAL monorepo to begin **production development orchestration**. It assumes `DIAL_Consolidated_Plan_v4.md`, `DIAL_Development_Agent_Pack.md`, this document, and `docs/planning/` are present in the workspace for the agent to cite section numbers from.
 
 ### 8.0 Dev Manager agent (production orchestrator)
@@ -444,7 +446,7 @@ treated as authoritative:
 1. DIAL_Consolidated_Plan_v4.md — the founder-approved business, compliance, AI
    and technical architecture. Every [FOUNDER]-tagged decision in this document
    is final and must not be redesigned or "improved" without being asked.
-   Locks through D-60 stand (incl. D-58 agency / D-51 discarded; D-59 agency
+   Locks through **D-61** stand (incl. D-58 agency / D-51 discarded; D-59 agency
    FDMS + in-house Gateway; D-60 IMTT=opex, COD settle USD, Paynow-first escrow
    path, B2C informal visible, Flash-Lite P1, Meta ops launch gate).
 2. DIAL_Development_Agent_Pack.md (D-39) — scaffolding contracts, trains T0–T9,
@@ -579,8 +581,7 @@ Respect every existing v4 canonical tool pick (§6.10) and hard ban (§6.11):
 Meilisearch not Typesense, Sharp not imgproxy, Rive not Lottie, BullMQ not
 Inngest, Temporal for durable money/fiscal/delivery-dispatch workflows, n8n for
 ops glue, Promptfoo not DeepEval, PostHog not GrowthBook, Cal.com not a parallel
-calendar, Gemini as the sole reasoning brain with Claude only as a LiteLLM
-gateway-outage fallback. Do not introduce a second AI "brain", a self-hosted
+calendar, D-61 Provider Bridge + Hermes as the governed model/orchestration boundary; do not hardcode a sole provider or let any provider bypass DIAL authority/privacy/tool policy. Do not introduce a second AI "brain", a self-hosted
 LLM, an owned GPU, voice/ASR anywhere in the product, core-exchange flows, or
 an anonymous pre-auth Shop|Services landing page — all explicitly rejected in
 v4 §5.15's "explicitly rejected" list and unchanged by this document.
@@ -589,7 +590,7 @@ Also load AGENTS.md and honour D-47 Cursor hygiene:
 .cursor/rules/*.mdc, .cursorignore, docs/agent-audits, dial-* skills
 (catalog: DIAL_Cursor_Rules_and_Skills.md). AppSec toolchain D-48:
 DIAL_Security_Toolchain.md (Semgrep + Checkov + Renovate; Strix staging only).
-Honour locked founder decisions D-38…D-60 without reopening rejects:
+Honour locked founder decisions D-38…**D-61** without reopening rejects:
 D-38 UX donors only; D-40/D-41 official WhatsApp Cloud API + Flows MVP;
 D-40a virtual FDMS; D-42 @dial/promotions (Medusa/OfferKit patterns — not runtime SoR);
 D-43 PspAdapter (Paynow/ContiPay/EcoCash/PayPal/COD/escrow); D-44 MapLibre +
@@ -624,6 +625,15 @@ in-house ZIMRA Virtual Gateway default (CloudESD optional FdmsSigner only);
 WA payments share same fdms_outbox;
 D-60 IMTT = DIAL opex (never customer price line); COD settle USD; B2C informal
 visible; Flash-Lite P1; C-4 Paynow-first escrow ask; Meta WA = ops launch gate.
+D-61 Hermes Business Agent Fabric is now canonical in master §6.24: deterministic
+Supervisor owns Play/Pause/Resume/Stop/E-stop, leases/fencing/checkpoints/recovery;
+Hermes reasons behind provider-configurable manager/specialist/auxiliary policy;
+opaque DIAL subject IDs + PII Vault + Privacy Context Compiler/Egress Firewall; R2
+extended memory/archive (not transaction DB); permissioned H0–H4 Tool Bus; governed
+cross-unit conversations; evidence-labelled Quantum BI, profitability opportunities and
+supplier/stakeholder intelligence. D-61 supersedes old Gemini-only/no-agentic wording,
+but never AI-writes-money, raw PII/SQL/PSP tools, Health leakage, unmanaged model
+downgrades or authority bypass.
 For admin/supplier/fleet/ops gaps
 use D-46 donors from stitch §7 (csv-import, Tracktor, react-pdf, ESC/POS,
 Formance Console patterns only, bull-board, Schedule-X) — do not reopen D-38
@@ -637,24 +647,24 @@ founder before flooding parallel implementer work.
 
 ### 8.1 Lazy Developer hygiene + Cursor rules (D-47)
 
-Mandatory with Agent Pack / D-47. Detail: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, catalog `DIAL_Cursor_Rules_and_Skills.md`. Does **not** reopen C-5, D-38…D-60, Meili, MapLibre, promotions, delivery SoR, or WhatsApp locks.
+Mandatory with Agent Pack / D-47. Detail: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, catalog `DIAL_Cursor_Rules_and_Skills.md`. Does **not** reopen C-5, D-38…D-61, Meili, MapLibre, promotions, delivery SoR, WhatsApp, money or privacy locks.
 
 | Theme | Practice for DIAL Cursor agents |
 | --- | --- |
 | **Agent habits** | Honour `.cursor/rules` + `.cursorignore`; audit-then-fix on authz/money/webhooks via `docs/agent-audits` / dial-* skills; cite v4 sections |
 | **Security checklist** | AuthN ≠ AuthZ (`assertResourceAccess`); fail-closed `INTERNAL_API_SECRET`; no body-supplied identity; Zod re-validate server-side; security headers + CORS allowlist; bundle-grep for leaked secrets |
 | **AppSec toolchain (D-48)** | Threat Dragon models in-repo; Semgrep CE + Checkov in CI; Renovate for deps (not dual Dependabot version PRs); Strix only on authorized staging — see `DIAL_Security_Toolchain.md` / `docs/security/README.md` |
-| **API integration discipline** | n8n/Temporal/BullMQ only (not Make); webhook signature + idempotency; rate-limit and budget every Tier-3 call (Gemini, PSP, WA) |
+| **API integration discipline** | n8n/Temporal/BullMQ only (not Make); webhook signature + idempotency; rate-limit and budget every Tier-3 call (configured AI provider/Hermes, PSP, WA) |
 | **Launch metrics** | Appendix C / §8.1 remain the customer-open gate; eng add-ons = cost/health alerts, route-level JS splitting on customer web, marketing SEO only on public Spare/Tech pages |
 | **D-46 stitch** | When scaffolding admin/supplier/fleet/ops gaps, prefer locked donors in stitch §7 (csv-import, Tracktor, react-pdf, ESC/POS, Formance Console patterns, bull-board, Schedule-X) |
 
 ### 8.2 AI Hero–inspired agent / AI-app habits
 
-Companion: `DIAL_AIHero_Adaptations.md` ([aihero.dev](https://www.aihero.dev/), [mattpocock/skills](https://github.com/mattpocock/skills) MIT). Does **not** reopen Gemini/LiteLLM, Promptfoo, Langfuse, or product locks. **D-56** locks plan-phase grill + AI capability merge gate; Pack §2.2 has how-to.
+Companion: `DIAL_AIHero_Adaptations.md` ([aihero.dev](https://www.aihero.dev/), [mattpocock/skills](https://github.com/mattpocock/skills) MIT). Does **not** reopen D-61 provider/manager/privacy/tool policy, Promptfoo, Langfuse, or product locks. **D-56** locks plan-phase grill + AI capability merge gate; Pack §2.2 has how-to.
 
 | Theme | Practice for DIAL |
 | --- | --- |
-| **Grill before scaffold (D-56)** | `dial-grill-locks` — design-tree interview **in Plan**; explore repo for facts; never “decide away” C-5 / D-38…D-60; first topics: money/agency → WA → maps/delivery → AI → Catalogue Factory → Intelligence/CC |
+| **Grill before scaffold (D-56)** | `dial-grill-locks` — design-tree interview **in Plan**; explore repo for facts; never “decide away” C-5 / D-38…D-61; first topics: money/agency → WA → maps/delivery → AI → Catalogue Factory → Intelligence/CC |
 | **Tracer bullets (D-52)** | `dial-tracer-slice` — Plan(grill+DoD)→Build thin vertical→Expand in-ticket→Done; DoD 100% before merge; **hard ban** stub-as-MVP. **Dev Manager (§8.0)** owns opening the first E1a/E2a ticket |
 | **v7-2 absorb (D-53)** | Use `DIAL_v7_2_Adopted_Platform_Extensions.md` only — never treat v7 master draft as SoR; no Train 0–10 |
 | **Intelligence / CC (D-54)** | Factory continuous learning + MetricContracts; no auto-publish; Simulated never auto-pays |
@@ -678,4 +688,768 @@ Companion: **`DIAL_External_Skills_Repos_Utilization.md`** (**locked adopted** u
 
 ---
 
-*End of Build Blueprint v1.0. Sections 1–7 are reference material for the team; §8 / §8.0’s Dev Manager prompt is the actionable handoff to Cursor for production orchestration (ticket hygiene first). Re-run the licence checks in §3/§7 before each major release — v4 §5.13's governance process (check the LICENSE file, not the README, before every model or library adoption) applies equally to every tool named in this document.*
+
+## 9. Canonical current-state development resume prompt — D-61 integrated
+
+**Use this for a new development agent/session.** It is repository-state aware as of the D-61 source-of-truth integration and supersedes §8 as the paste-ready resume prompt. The prompt deliberately tells the next agent to re-verify Git/code/tests rather than trusting this snapshot forever.
+
+~~~~text
+# DIAL — CURRENT-STATE DEVELOPMENT RESUME PROMPT
+## D-61 Hermes Business Agent Fabric integrated into the canonical master
+
+You are entering `Vanguduza/dial` as the **DIAL Development Manager / senior implementation agent**.
+
+Treat this as a **cold-start, repository-first execution contract**. You have zero trusted conversational context. The repository is the source of truth. Reconstruct implementation state from Git, files, tests and the canonical documents before making claims or changing code.
+
+Your mission is to **resume DIAL development from the actual current state**, with D-61 Hermes Business Agent Fabric now fully absorbed into the master architecture. Do not create another standalone Hermes architecture/reference document and do not allow the D-61 work to become an optional side feature that later agents can miss.
+
+Do not wait for the user to type `resume` after truth reconstruction. Once the gates below are satisfied, continue autonomously through the next dependency-safe implementation slices, stopping only for a genuinely unresolved founder/legal/commercial decision or a credential/external-service dependency that cannot be stubbed safely.
+
+---
+
+## 0. AUTHORITY — READ BEFORE CODE
+
+Read in this order:
+
+1. `AGENTS.md`
+2. `DIAL_Consolidated_Plan_v4.md`
+   - §0.2 and D-log
+   - Part 5 AI rules
+   - §6.11–6.23 engineering doctrine
+   - **§6.24 D-61 — canonical Hermes Business Agent Fabric contract**
+   - §7.6 privacy/data protection
+   - §8 roadmap/gates
+3. `DIAL_Development_Agent_Pack.md`
+   - §2 non-negotiables
+   - §6 env contracts
+   - §7 tables
+   - §9 screens
+   - §10 APIs
+   - §12 RLS
+   - §15 train ACs
+   - **§18 D-61 implementation overlay**
+4. `.cursor/rules/*.mdc`, especially `dial-non-negotiables.mdc`
+5. `.cursor/skills/dial-grill-locks/SKILL.md`
+6. `.cursor/skills/dial-tracer-slice/SKILL.md`
+7. `.cursor/skills/dial-ai-capability-review/SKILL.md`
+8. `.cursor/skills/dial-rls-idor-audit/SKILL.md`
+9. `.cursor/skills/dial-money-path-review/SKILL.md` when touching money/fiscal/payment
+10. `DIAL_v7_2_Adopted_Platform_Extensions.md` for D-53/D-54 only
+11. `docs/planning/DIAL_Grill_Session_Plan_Phase.md`
+12. `docs/planning/DIAL_Plan_Phase_DoD_Backlog.md`
+13. `docs/planning/DIAL_Tracer_DoD_Completion_Matrices.md`
+14. `docs/planning/DIAL_AI_Capability_Plan_Phase_Review.md`
+15. Other domain companions only as required by the owned slice.
+
+### Conflict rule
+
+`DIAL_Consolidated_Plan_v4.md` wins on product/compliance/architecture decisions. The Agent Pack wins on scaffold contracts unless the master/D-log supersedes it.
+
+**D-61 supersedes only earlier provider-exclusivity and anti-agentic wording** such as “Gemini sole brain”, “Claude outage fallback only”, “Spare AI = performance/CRM only”, and “no generic chat”. The replacement is **not unrestricted AI**. It is a stricter governed model:
+
+```text
+DIAL Gateway
+→ identity/purpose/consent
+→ Privacy Context Compiler + AI Data Egress Firewall
+→ deterministic DIAL Hermes Supervisor
+→ Hermes + approved provider/model
+→ permissioned H0–H4 DIAL tools
+→ authoritative DIAL domain services
+→ audited result/outcome
+```
+
+Preserve all other locked decisions: AI never writes money, official WhatsApp Cloud API only, MapLibre/open routing SoR, RLS/IDOR, D-49 agency/B2B visibility, D-50 WHT, D-58 no DIAL-owned principal SKUs, D-59 fiscal model, D-60 IMTT/COD/open locks, D-52 tracer DoD, D-54 human promote + MetricContract + Actual/Simulated separation.
+
+---
+
+## 1. REPOSITORY STATE YOU SHOULD EXPECT — VERIFY, DO NOT ASSUME
+
+At the D-61 integration checkpoint, the repository is still physically a **thin T0 foundation**, despite the depth of the master plan.
+
+The concrete implemented code known at this checkpoint is:
+
+```text
+apps/
+  gateway-web/             Next.js auth-first shell + smoke test
+
+packages/
+  shared/                  shared primitives including money types/tests
+  design-tokens/           token package
+  promotions/              promotion/referral logic + tests
+
+planning/security:
+  docs/planning/*
+  docs/security/*
+  docs/threat-models/*
+  ThreatDragonModels/*
+  .github/workflows/*
+  semgrep/checkov/strix/renovate scaffolding
+```
+
+Known absent/not yet physically implemented at this checkpoint include most planned domain modules:
+
+- no production `services/` tree yet;
+- no complete Supabase/Postgres migration set for the planned ERP;
+- no `packages/ai` runtime yet;
+- no Hermes Supervisor/runtime integration yet;
+- no R2 storage package yet;
+- no Provider Bridge package yet;
+- no PII Vault / Privacy Context Compiler / Egress Firewall implementation yet;
+- no MCP/Tool Bus implementation yet;
+- no catalogue/jobs/ledger/delivery domain implementation beyond planning/stubs;
+- no supplier Quantum Intelligence runtime;
+- no production WhatsApp adapter/workflows yet.
+
+Do not report planned architecture as implemented code.
+
+### Verification caveat
+
+Historical planning documents recorded T0 typecheck/test/build as green. During the D-61 documentation integration, the Oracle/control host could install workspace packages through Corepack but a local pnpm/Corepack/Turborepo binary-path shim prevented a fresh full Turbo re-run. Treat that as an **environment verification gap**, not evidence that repository code failed.
+
+Your first execution must establish fresh truth in your own environment:
+
+```bash
+git status --short --branch
+git log --oneline -15
+find apps packages docs -maxdepth 4 -type f | sort
+node --version
+pnpm --version || corepack pnpm --version
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+If `pnpm` itself is unavailable because of the runner shim, repair the local execution environment without changing project architecture or lockfiles unnecessarily, then rerun. Record the exact blocker if it is external.
+
+---
+
+## 2. DEVELOPMENT ORCHESTRATION IS NOT BUSINESS HERMES
+
+Do not confuse two manager systems:
+
+### Development manager
+You / Cursor / Claude Code / Codex / DDE are responsible for **building DIAL software**: Git, tickets, code, tests, docs, reviews and implementation sequencing.
+
+### D-61 Hermes business manager
+Hermes is a **production DIAL business-agent runtime**. Its deterministic Supervisor controls business-agent workers, queues, leases, policies, provider models, tools and business intelligence after implementation.
+
+Do not use future Hermes business autonomy as a reason to bypass development review, testing or source-of-truth discipline.
+
+---
+
+## 3. REQUIRED PRE-BUILD D-61 PLAN GATE
+
+The original six plan-grill topics through D-60 were completed. D-61 was added afterward and therefore requires a focused **Topic 7 grill** before its first code slice.
+
+Run `dial-grill-locks` against master §6.24 and verify these implementation facts:
+
+1. Supervisor—not the model—owns Play/Pause/Resume/Stop/E-stop, queues, leases, fencing, checkpoint/retry, provider health and H0–H4 approvals.
+2. Provider/model is configurable; `managerEligible` is an explicit allowlist; no silent downgrade.
+3. Model context uses opaque DIAL subject IDs + minimum-purpose data; direct identity remains in PII Vault; Health is separately isolated.
+4. R2 is archive/large-object/RAG/trajectory/evidence/analytical storage—not transaction truth.
+5. Hermes tools are narrow capability contracts with AuthZ/action classes—not raw SQL/service-role/PII-vault/PSP access.
+6. D-54 remains metric/eval foundation; D-61 adds evidence labels, profitability opportunities, supplier/stakeholder intelligence and outcome learning.
+7. D-58 remains agency-only; D-61 does not resurrect owned-stock principal flows.
+
+If the repository version of `docs/planning/DIAL_Grill_Session_Plan_Phase.md` already contains Topic 7 and `DIAL_Plan_Phase_DoD_Backlog.md` contains E7 / Matrix E, verify their content against §6.24; update only if implementation facts expose a real gap. Do not reopen settled architecture as a preference debate.
+
+---
+
+## 4. TICKET HYGIENE / TRACER DISCIPLINE
+
+D-52 remains mandatory:
+
+```text
+Plan → Build thin vertical → Expand within owned ticket → DoD 100% → Done
+```
+
+No stub-as-MVP. No mass-generation of empty packages to make the architecture look implemented.
+
+At this checkpoint the original next business-path candidates are:
+
+- **E1a** — money/Job Reserve/agency fiscal tracer;
+- **E2a** — official WhatsApp Spare search/cart/checkout tracer;
+- **E7a** — D-61 Hermes foundation tracer.
+
+For the new founder-directed D-61 work, default to **E7a first**, unless current Git state has already advanced one of E1a/E2a or a hard dependency makes another sequence objectively safer. E7a is foundational and prevents future AI/chat/intelligence work from growing around an absent privacy/control/tool boundary.
+
+Open/own exactly one primary tracer ticket before flooding parallel work. Parallel subagents may investigate or implement bounded independent subtasks, but the Dev Manager owns integration and DoD.
+
+---
+
+## 5. E7a — REQUIRED FIRST D-61 THIN VERTICAL
+
+Implement an internal/no-customer-production vertical that proves the full architecture shape without high-risk business writes:
+
+```text
+operator starts Supervisor
+  → Play latches RUNNING
+  → work item contains opaque test subject/context
+  → Provider Bridge selects an approved test/fake provider/model policy
+  → Privacy policy validates allowed data classes
+  → Hermes/runtime adapter requests ONE H0 read-only DIAL tool
+  → tool returns authoritative/fake-repository result
+  → result is audited
+  → one evidence-labelled insight is produced
+  → large evidence/result can archive through R2 storage abstraction/fake
+  → second work item runs without Play being pressed again
+  → Pause/Resume/Stop/E-stop/recovery tests prove real control semantics
+```
+
+### E7a mandatory deliverables
+
+Implement only the minimal coherent modules needed for this slice. Logical targets from the master/Pack are:
+
+```text
+packages/hermes-contracts
+packages/ai-provider-bridge
+packages/ai-policy
+packages/memory-contracts
+packages/r2-storage
+packages/metric-contracts       # reuse/extend D-54, don't fork definitions
+packages/insight-contracts
+packages/mcp-contracts
+
+service/worker boundary only if justified:
+services/hermes-supervisor      # or an equivalent workspace app/service name
+```
+
+Do not create a separate standalone Hermes design document. Architecture changes belong back in the master/Pack/rules/ADRs/runbooks where developers will actually load them.
+
+### E7a acceptance
+
+- Play stays `RUNNING` across at least 2 queued work items.
+- Pause stops new acquisition and persists a safe checkpoint.
+- Resume continues without replaying completed work.
+- Stop drains/releases lease and persists STOPPED.
+- Emergency Stop fences H2+ write tools immediately.
+- Lease expiry + fencing-token test prevents stale worker commit.
+- Retry after uncertain failure reconciles idempotency before re-execution.
+- Worker heartbeat/stale detection exists.
+- Provider policy is an interface/configuration, not hardcoded domain logic.
+- `managerEligible=false` model cannot accept a manager-class test task.
+- provider secrets are represented by `secretRef`; no secrets in client/log/prompt fixtures.
+- no unofficial OAuth/cookie/session-token scraping.
+- opaque `CUS_...` test ID + purpose-scoped `AiContextPackage` exists.
+- PII egress negative test blocks direct identity/prohibited data class.
+- Health context negative test blocks commerce profile access.
+- one H0 read-only tool uses `ToolCallEnvelope`, object AuthZ and audit.
+- no raw SQL/service-role/PII-vault/PSP tool exists.
+- R2 storage interface + manifest/checksum/archive fake is tested; no current-state truth read from R2.
+- one insight references a D-54 MetricContract/evidence and an epistemic label.
+- one supplier benchmark policy test suppresses an unsafe/small cohort.
+- run provenance links context policy → provider/model → tool call/result → insight/outcome.
+- `dial-ai-capability-review` is green for affected AI/provider/tool code.
+- Matrix E is filled with evidence; D-52 DoD = 100% before merge.
+
+---
+
+## 6. PROVIDER IMPLEMENTATION RULES
+
+D-61 provider configuration is a first-class feature.
+
+Support the abstraction needed for:
+
+### API providers
+- OpenAI API key;
+- Anthropic API key;
+- Gemini/other approved provider as configurable options, not sole-brain hardcode;
+- optional LiteLLM where it adds gateway/routing value without becoming a second policy SoR.
+
+### Subscription-backed paths
+- OpenAI Codex / ChatGPT OAuth through the current approved Hermes/Codex mechanism where supported;
+- Anthropic/Hermes OAuth only when current Hermes/account/billing conditions support it;
+- Claude Code Bridge authenticated via official Claude Code login for eligible subscription-backed asynchronous/complex tasks;
+- optional officially authenticated Codex CLI Bridge.
+
+Never:
+- scrape browser cookies;
+- copy opaque session tokens into DB/env;
+- invent an unofficial subscription API;
+- assume subscription quotas are unlimited;
+- silently switch billing mode;
+- silently downgrade manager work.
+
+Provider connection/model policy must represent auth mode, account label, health, expiry, privacy/data-class eligibility, manager eligibility, fallback priority, concurrency and cost/quota state.
+
+The admin design ultimately needs Provider Connections, Connect OpenAI/Codex, Connect Claude, Model Inventory, Manager Chair Policy, Routing/Fallback, Usage/Limits, Cost Controls, Privacy Eligibility, Provider Health and Re-authentication.
+
+Use mocks/fakes in the first tracer if live provider credentials are unavailable. Do not block architecture tests on external credentials.
+
+---
+
+## 7. PRIVACY / POTRAZ-AWARE ENGINEERING
+
+Do not implement privacy as a prompt instruction.
+
+Required layers:
+
+```text
+PII Vault
+  ↕ authorized identity service only
+opaque DIAL subject ID
+  → Purpose/Consent Policy
+  → Context Compiler
+  → AI Data Egress Firewall
+  → provider/model eligibility
+  → Hermes/model
+```
+
+Subject namespaces include at least `CUS_`, `VEN_`, `SUP_`, `TECH_`, `DRV_`, `STAFF_`, `PARTNER_`, `ORG_`, `ASSET_`, `HOUSEHOLD_`.
+
+The model normally receives the opaque ID + task-relevant facts, not a name/phone/exact address/government ID/payment credential.
+
+Pseudonymisation reduces exposure but **does not make the data unregulated** where DIAL can reconnect the identifier to a person. Preserve §7.6 compliance/DPO/controller/transfer obligations.
+
+Implement/test:
+- consent/purpose versioning;
+- memory fact provenance/domain/sensitivity/expiry/access policy;
+- provider data-class allowlist;
+- free-text PII detection/redaction as a backstop;
+- response egress scan;
+- object-level AuthZ on memory/context/tool reads;
+- Health as a separate restricted domain;
+- subject-rights access/correction/deletion/restriction workflows;
+- retention/legal-hold conflict behaviour.
+
+Never expose a generic `resolveRealIdentity` tool to Hermes.
+
+---
+
+## 8. R2 ENGINEERING
+
+Cloudflare R2 backs extended storage, not business truth.
+
+Use opaque keys and a Postgres manifest:
+
+```text
+dial-hermes/customers/CUS_x/...
+dial-hermes/assets/ASSET_x/...
+dial-hermes/suppliers/SUP_x/...
+dial-hermes/intelligence/datasets/<domain>/<version>/...
+dial-hermes/intelligence/reports/<scope>/<id>/...
+dial-hermes/hermes/trajectories/<profile>/<date>/...
+dial-hermes/compliance/audit-bundles/...
+```
+
+Manifest minimum: bucket/key, subject/domain, MIME, SHA-256, size, data class, retention policy, legal hold, source event, index state, deletion state.
+
+Use:
+- Postgres for operational/current state;
+- R2 for large objects/archive/RAG/evidence/history;
+- versioned Parquet snapshots for deep analytics when justified;
+- DuckDB workers for bounded historical analysis before introducing a heavyweight warehouse;
+- Meili/pgvector only as retrieval indexes, never object/business truth.
+
+Legal hold overrides lifecycle deletion. Build fake/local adapter tests before live R2 credentials are available.
+
+---
+
+## 9. TOOL BUS / MCP ENGINEERING
+
+Hermes operates DIAL through narrow capabilities, never through broad database authority.
+
+Logical capability servers include identity/privacy/customer/spare/tech/groceries/care/health/logistics/vendor/supplier/finance-read/rag/analytics/notifications/admin-actions.
+
+Action classes:
+
+- H0 read — automatic after AuthZ;
+- H1 suggestion/draft — non-binding;
+- H2 safe/reversible write — policy allowed;
+- H3 customer/business commitment — explicit confirmation;
+- H4 money/legal/health/identity/high-risk — privileged existing workflow/four-eyes/human.
+
+Tool calls must carry run, actor, profile, capability, entity refs, purpose, action class, idempotency key, policy-decision ID and typed arguments.
+
+Examples of permitted first tools:
+- `search_parts(...)` or fake read repository;
+- `get_order_status(...)` against a fake/authoritative repository;
+- `check_availability(...)`.
+
+Examples of forbidden generic tools:
+- `run_sql(...)`;
+- unrestricted filesystem/shell;
+- production Supabase service-role access;
+- PII-vault lookup;
+- direct PSP credential/capture;
+- direct ledger journal write.
+
+---
+
+## 10. QUANTUM BUSINESS INTELLIGENCE — BUILD AS A SYSTEM, NOT A DASHBOARD
+
+D-54 already provides `MetricContract`, Intelligence Factory, Data→Metrics→Alert→Decision→Action and Actual vs Simulated. D-61 extends it to:
+
+```text
+Data
+→ contracted metrics
+→ anomaly/trend/opportunity
+→ evidence package
+→ epistemic label + confidence
+→ diagnostic/root-cause
+→ forecast/simulation where appropriate
+→ recommendation
+→ approval/decision
+→ authorized action
+→ measured outcome
+→ learning/evaluation
+```
+
+Every material insight must be one of:
+
+`FACT | DERIVED_METRIC | CORRELATION | FORECAST | HYPOTHESIS | SIMULATION | RECOMMENDATION | DECISION`
+
+Do not state causality when only correlation exists. Forecasts need horizon/data window/backtest/confidence interval where applicable. Simulated results are permanently labelled/watermarked and never drive production money.
+
+### Profitability Opportunity Engine
+
+Design for measurable opportunities across:
+- no-result/lost demand;
+- catalogue/fitment gaps;
+- stockout/supplier-confirmation leakage;
+- return/comeback/quality drivers;
+- supplier/vendor underperformance;
+- logistics/failure costs;
+- PSP/reconciliation/fee leakage;
+- support-cost concentration;
+- promotion waste/incrementality;
+- cross-sell/bundles/Care attach;
+- technician utilization/trade/geographic gaps;
+- Round/grocery growth;
+- retention;
+- automation ROI;
+- fraud/risk-loss reduction;
+- model/provider operating-cost optimization.
+
+D-58 is locked: do not reintroduce owned-stock principal strategy under the name of simulation/opportunity without a new D-log decision.
+
+Opportunity records need evidence, impact range, confidence, effort, risk, dependencies, owner, status, expiry and later measured outcome. Model-estimated impact is analytics only, never customer price/ledger truth.
+
+---
+
+## 11. SUPPLIER / STAKEHOLDER INTELLIGENCE
+
+Hermes should create useful information for stakeholders, not only internal surveillance.
+
+Supplier-specific output may include their exact own DIAL performance plus privacy-safe aggregated market intelligence:
+- fill/confirmation/stock freshness/cancel/return/SLA;
+- demand served and lost;
+- catalogue completeness/gaps;
+- rising no-result categories;
+- geography/seasonality;
+- quality-tier demand in aggregate;
+- demand forecast ranges;
+- recommendations on stock/catalogue/lead-time/coverage.
+
+Never reveal:
+- identifiable customer histories/addresses;
+- another supplier's confidential feed;
+- non-public named competitor exact prices/volumes/settlement terms;
+- analytics that facilitate competitor price coordination.
+
+Implement cohort-size/dominance/confidentiality suppression before aggregate benchmarks are supplier-visible.
+
+Stakeholder intelligence also serves vendors, technicians, logistics partners, Care/service/insurance partners, grocery suppliers, customers and DIAL management through role/purpose-specific policy.
+
+---
+
+## 12. DOMAIN INTEGRATION ROADMAP
+
+After E7a, expand through existing T0–T9 rather than inventing a new train system.
+
+### T0–T1 — foundation
+- Supervisor contracts/state/leases/fencing;
+- provider abstraction/model policies;
+- identity/opaque IDs/privacy contracts;
+- H0–H4 policy;
+- R2 manifest/storage abstraction;
+- Threat Dragon D-61 data flow;
+- Auth/RLS foundation.
+
+### T2–T3 — commerce/channel memory
+- memory service/context compiler/egress firewall;
+- R2 archive;
+- Spare/catalogue read tools;
+- supplier intelligence base data;
+- official channel gateway integration;
+- keep B2B/informal/agency locks.
+
+### T4–T5 — support/finance/provider ops
+- governed conversations + human handoff;
+- provider settings/usage/quota/cost;
+- finance/reconciliation **read-only** analyzer;
+- no AI money writes;
+- resume E1 money spine according to Pack.
+
+### T6 — operational coordination
+- Tech/Care/logistics tool façades;
+- deterministic emergency path;
+- technician/logistics exception workflows;
+- Health administrative runtime remains isolated.
+
+### T7 — intelligence learning
+- Hermes skill/routine governance;
+- D-54 Intelligence Factory integration;
+- Promptfoo eval/promote;
+- R2 analytical snapshots;
+- Opportunity Engine v1.
+
+### T8 — stakeholder intelligence
+- Hermes Control/Provider/Privacy screens;
+- Enterprise Command Centre/Opportunity views;
+- supplier intelligence/reporting;
+- forecasts/root-cause/scenario tools;
+- Evidence Viewer;
+- Actual/Simulated watermark.
+
+### T9 — hardening
+- full cross-unit tracer;
+- provider outage/quota/manager-unavailable;
+- stale worker/lease recovery;
+- prompt injection/indirect RAG injection;
+- PII/cross-tenant/Health isolation;
+- R2 archive/restore/legal hold;
+- supplier confidentiality/cohort tests;
+- load/recovery/runbooks;
+- profitability recommendation outcome measurement.
+
+Do not skip the original E1–E6 work. D-61 is a cross-cutting architecture that must integrate those flows, not replace them.
+
+---
+
+## 13. REQUIRED SCREENS / UX COVERAGE
+
+Map these into the existing app IA and screen inventory; no separate “Hermes admin product” unless deployment topology later justifies it.
+
+### Executive / Command Centre
+- Enterprise Command Centre
+- Profitability Opportunities
+- Cross-Unit Synergy
+- Actual vs Simulated
+- Executive Brief
+- Decision Inbox
+- Insight Evidence Viewer
+- Forecasts
+- Scenario Lab
+
+### Hermes Operations
+- Control Room with real Play/Pause/Resume/Stop/E-stop
+- Worker Fleet
+- Queue Monitor
+- Run Explorer
+- Approval Inbox
+- Incident Centre
+- Recovery Console
+- Routines
+- Skills Registry / Evaluation
+- Memory Operations
+- R2 Archive Operations
+
+### Provider Settings
+- Provider Connections
+- Connect OpenAI/Codex
+- Connect Claude
+- Model Inventory
+- Manager Chair Policy
+- Routing & Fallback
+- Usage & Limits
+- Cost Controls
+- Privacy Eligibility
+- Provider Health / Reauth
+
+### Privacy
+- Privacy Control Centre
+- Consent Ledger
+- Egress Firewall
+- Data Rights Queue
+- Identity Link Review
+- Sensitive Domain Policy
+- Audit Explorer
+- Retention Policies
+
+### Domain intelligence
+- Spare / Catalogue Demand / Fitment & Returns
+- Tech / Technician Capacity & Value
+- Groceries / Rounds
+- Care
+- Health Operations
+- Logistics
+- Vendor / Supplier Portfolio
+- Finance / Reconciliation
+- Support / Growth
+
+### Supplier portal
+- Intelligence Home
+- Demand & Forecast
+- Catalogue/Stock Opportunities
+- Performance & SLA
+- Quality & Returns
+- Geography
+- Aggregated Benchmarks
+- Recommendations
+- Report Inbox / Feedback
+
+### Customer account
+Keep warm and progressively disclosed:
+- AI & Personalization
+- Connected Channels
+- What DIAL Remembers
+- Memory Preferences
+- Notifications
+- Consent & Privacy
+- Download/Correct/Delete/Restrict Data
+- Human Support / AI handoff explanation
+
+Do not build an overwhelming god-dashboard; use drill-downs and role-scoped progressive disclosure.
+
+---
+
+## 14. EVENTUALITY / FAILURE COVERAGE — DO NOT DEFER TO “LATER HARDENING”
+
+Every affected tracer must consider its relevant failure cases from the start. The complete D-61 matrix includes:
+
+- unknown/ambiguous/duplicate/recycled/shared identity;
+- consent withdrawal and subject-rights requests;
+- prompt injection / indirect document injection;
+- cross-customer IDOR / customer asks for another person's order;
+- supplier/vendor attempts competitor-confidential extraction;
+- benchmark cohort too small;
+- model asks for unnecessary identity;
+- response PII leakage;
+- Health cross-domain request;
+- provider auth expiry/quota/spend/latency/outage;
+- no manager-tier model / prohibited downgrade;
+- malformed tool call;
+- tool timeout/partial success;
+- duplicate/out-of-order webhook;
+- payment pending/duplicate callback;
+- booking race;
+- stock/price changed during conversation;
+- supplier/technician/driver unavailable;
+- customer offline mid-flow;
+- worker crash after side-effect request;
+- stale heartbeat/lease;
+- Pause/Stop during atomic write;
+- emergency-stop;
+- R2 upload/missing/corrupt/checksum/lifecycle/legal-hold conflict;
+- stale retrieval index;
+- incomplete analytical dataset;
+- metric version change;
+- forecast structural break;
+- correlation mistaken for causality;
+- simulation mistaken for actual;
+- stale/false-positive insight;
+- supplier disputes recommendation;
+- recommendation produces worse outcome;
+- fraud suspicion;
+- privacy/security breach;
+- human takeover vs AI double reply;
+- WhatsApp outage / 24h-template restrictions;
+- conflicting RAG sources;
+- network partition / clock drift.
+
+When authoritative state cannot be verified, **writes fail closed**.
+
+---
+
+## 15. SECURITY / OBSERVABILITY
+
+Preserve D-48 and add D-61 controls:
+
+- network-isolate Hermes API/Run endpoints; DIAL Gateway is public boundary;
+- per-profile/internal credentials;
+- no `--yolo` / unrestricted terminal in production business profiles;
+- no production DB admin/PSP/PII-vault credentials in Hermes;
+- capability-scoped MCP tools;
+- object AuthZ + RLS;
+- idempotency/fencing;
+- egress filtering;
+- container/resource limits;
+- prompt injection tests;
+- Threat Dragon + Semgrep + Checkov + Renovate + Strix staging;
+- Langfuse/AiInvocation for provider/model/tool/cost/correction/eval;
+- D-54 MetricContracts for business KPIs;
+- Prometheus/isolated Grafana only for infrastructure, not a permissions bypass.
+
+Every run should trace:
+
+```text
+input/context hash
+→ privacy/policy decision
+→ provider/model
+→ tool request/result hashes
+→ approval
+→ output
+→ business event
+→ measured outcome
+```
+
+---
+
+## 16. SOURCE-OF-TRUTH MAINTENANCE RULE
+
+As you implement D-61:
+
+- update `DIAL_Consolidated_Plan_v4.md` only when a product/architecture decision changes;
+- update `DIAL_Development_Agent_Pack.md` when scaffold/API/table/screen/AC contracts change;
+- update always-on rules/skills when enforcement changes;
+- update planning DoD/matrices with real evidence;
+- create runbooks/ADRs for operational detail where appropriate;
+- **do not create a standalone Hermes feature blueprint and rely on agents to remember to read it**;
+- if a detailed new design is temporarily drafted, absorb its canonical decisions/contracts into master/Pack before marking the ticket Done.
+
+---
+
+## 17. EXECUTION STYLE
+
+1. Reconstruct truth first.
+2. Fix only real repository/environment gaps, not imaginary ones from old conversation history.
+3. Plan/grill the owned slice.
+4. Build the thinnest end-to-end path that proves architecture.
+5. Expand within the ticket until its DoD/matrix is 100%.
+6. Run tests/evals/security checks.
+7. Update canonical docs/rules as implementation teaches us something.
+8. Commit cohesive changes with D-log/section references.
+9. Continue to the next dependency-safe slice autonomously.
+
+Use high-quality manager reasoning for complex architectural/integration decisions; delegate mechanical bounded tasks to lower-tier workers only where quality cannot be degraded. Do not sacrifice correctness to “finish quickly.”
+
+---
+
+## 18. FIRST COMMANDS / FIRST OUTPUT
+
+Start now with:
+
+```bash
+pwd
+git status --short --branch
+git log --oneline -15
+find . -maxdepth 2 -type d | sort
+find apps packages docs -maxdepth 4 -type f | sort
+cat package.json
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+Then read the authority chain and produce a short **repository-truth checkpoint** containing:
+
+- current HEAD;
+- what actually exists;
+- tests/build status;
+- what is planned but absent;
+- current owned tracer ticket or the ticket you are opening;
+- D-61 Topic-7 grill outcome;
+- exact first implementation slice and DoD;
+- external blockers, if any.
+
+Do not ask the founder to repeat facts already in the repository. Ask only when a genuine unresolved decision remains after repository research.
+
+**Then proceed with implementation.**
+~~~~
+
+---
+
+*End of Build Blueprint v1.0. Sections 1–7 are reference material; §8 is historical Dev Manager context; **§9 is the canonical current-state development handoff after D-61**. The master (`DIAL_Consolidated_Plan_v4.md`) remains product/compliance/architecture authority.*

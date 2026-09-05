@@ -1,6 +1,6 @@
-# DIAL Cursor Rules & Skills Catalog (D-47 / D-55 / D-56)
+# DIAL Cursor Rules & Skills Catalog (D-47 / D-55 / D-56 / D-61)
 
-**Locked by D-47** (Cursor pack) **+ D-48** (AppSec toolchain pointers) **+ D-55** (external skills utilization) **+ D-56** (plan-phase grill + AI capability merge gate). Indexes the applied Cursor pack. Architecture authority: `DIAL_Consolidated_Plan_v4.md` → `DIAL_Development_Agent_Pack.md` → companions. Rationale: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`, `DIAL_External_Skills_Repos_Utilization.md`. Security tools: `DIAL_Security_Toolchain.md`.
+**Locked by D-47** (Cursor pack) **+ D-48** (AppSec toolchain pointers) **+ D-55** (external skills utilization) **+ D-56** (plan-phase grill + AI capability merge gate) **+ D-61** (Hermes/provider/privacy/R2/tool/intelligence enforcement). Indexes the applied Cursor pack. Architecture authority: `DIAL_Consolidated_Plan_v4.md` → `DIAL_Development_Agent_Pack.md` → companions. Rationale: `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`, `DIAL_External_Skills_Repos_Utilization.md`. Security tools: `DIAL_Security_Toolchain.md`.
 
 ## How agents should use this
 
@@ -40,7 +40,7 @@ Ignores `.env*`, keys/certs, `node_modules`, build artifacts, large binaries, of
 | File | Apply | Purpose |
 | --- | --- | --- |
 | `dial-agent-authority.mdc` | always | Doc authority + reading order |
-| `dial-non-negotiables.mdc` | always | Money/AI/WA/maps/SoR locks (D-38…D-56) |
+| `dial-non-negotiables.mdc` | always | Money/AI/WA/maps/SoR + D-61 Hermes/provider/privacy/R2 locks (D-38…D-61) |
 | `dial-security-idor.mdc` | always | IDOR, no body identity, webhooks, secrets |
 | `dial-security-toolchain.mdc` | always | D-48 Threat Dragon / Semgrep / Checkov / Renovate / Strix pointers |
 | `dial-api-webhooks.mdc` | globs API / webhooks | Fail-closed internals, signature + idempotency, Zod at boundary |
@@ -73,13 +73,31 @@ Does **not** replace dial-* skills or Appendix A.1. Detail: `DIAL_Security_Toolc
 | `dial-money-path-review` | Payments, Job Reserve, pricing, fiscal — audit before fix; webhook-as-truth / idempotency (**D-55**) |
 | `dial-rls-idor-audit` | Routes with object ids; RLS/IDOR reviews |
 | `dial-psp-adapter-completeness` | PspAdapter / D-43 webhook completeness |
-| `dial-grill-locks` | **D-56** — design-tree interview in Plan before scaffold; hard-stops on C-5 / D-38…D-56 |
+| `dial-grill-locks` | **D-56 + D-61** — design-tree interview before scoped build, including Hermes Supervisor/provider/privacy/R2/tool/Quantum Intelligence Topic 7; hard-stops on C-5 / D-38…D-61 |
 | `dial-tracer-slice` | **D-52** — Plan→Build→Expand→DoD 100% + Reality Checker evidence (**D-55**); ban stub-as-MVP |
-| `dial-ai-capability-review` | **D-56** — `packages/ai` merge gate: Zod, D-32, no money writes, Promptfoo/Langfuse |
+| `dial-ai-capability-review` | **D-56 + D-61** — AI/Hermes/provider/tool/memory merge gate: Zod, D-32/D-61 privacy, manager eligibility, no money/raw SQL, H0–H4, Promptfoo/Langfuse/evidence |
 | `dial-diagram-editorial` | **D-55** — DIAL diagram type→domain map (layer stack, delivery swimlane, JR state machine, Factory loop, dual capacity, CC Actual vs Simulated) |
 | `dial-webapp-recon` | **D-55** — Playwright recon-then-action for admin/customer web smoke (Apache-2.0 pattern) |
 
 Optional personal install (not required in-repo): ECC Cursor adapter via upstream `install.sh --profile minimal --target cursor`, or [cminn10/ecc2cursor](https://github.com/cminn10/ecc2cursor); or `npx skills add mattpocock/skills` (MIT); or personal diagram-design / Agency with deny-list — keep DIAL rules authoritative on conflicts.
+
+
+---
+
+## D-61 enforcement map
+
+D-61 is **not** a standalone companion. Canonical architecture is master §6.24; Pack §18 carries scaffold contracts; Blueprint §9 is the current-state resume prompt.
+
+| D-61 concern | Enforcement |
+| --- | --- |
+| Supervisor owns runtime state/leases/recovery | `dial-non-negotiables`, D-61 E7a Matrix E, tests |
+| Provider/manager eligibility | `dial-ai-capability-review`, provider-policy tests |
+| Opaque IDs / context compiler / Health isolation | `dial-ai-capability-review`, RLS/IDOR audit, Promptfoo privacy cases |
+| R2 not transaction truth | Pack §18 + storage contract/integration tests |
+| H0–H4 Tool Bus / no raw SQL | AI review + object AuthZ + tool schema tests |
+| Quantum insight evidence/epistemic labels | D-54 MetricContract + D-61 insight contracts |
+| Supplier confidentiality/cohort policy | supplier intelligence tests + RLS/IDOR |
+| Development vs business orchestration | `AGENTS.md` + Blueprint §9 |
 
 ---
 

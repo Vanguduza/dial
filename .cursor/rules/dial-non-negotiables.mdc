@@ -1,5 +1,5 @@
 ---
-description: DIAL non-negotiables — money, AI, WA, maps, SoR locks D-38–D-60
+description: DIAL non-negotiables — money, AI, WA, maps, SoR locks D-38–D-61
 alwaysApply: true
 ---
 
@@ -29,5 +29,6 @@ alwaysApply: true
 22. **D-2 agency confirmed (D-58)** — agent characterisation; agency FDMS/e-invoices reflect tax; WA payments share ERP fiscal outbox; do not reintroduce owned-stock principal without new D-log.
 23. **Agency FDMS + in-house Gateway (D-59)** — `DIAL_FEE` / `GOODS_FORMAL` / `GOODS_INFORMAL` receipt rules from tax discussion; build ZIMRA Virtual Gateway; CloudESD optional adapter only; no GMV VAT split-pot.
 24. **IMTT = DIAL opex (D-60)** — never customer checkout line; COD settle USD; B2C informal visible; Flash-Lite P1.
+25. **Hermes Business Agent Fabric (D-61)** — `packages/ai` is provider-independent typed capability layer; deterministic DIAL Hermes Supervisor owns control/leases/recovery; Hermes reasons/orchestrates only through permissioned H0–H4 tools; opaque subject IDs + Privacy Context Compiler/Egress Firewall; R2 is archive/large-object/analytics, never transaction truth; managerEligible models only for manager chair; no raw PII/SQL/PSP secrets; Health isolated; D-54 MetricContract/evidence/Actual-vs-Simulated rules preserved and extended by profitability/supplier intelligence.
 
-Full checklist: Agent Pack §2. Locks summary: D-38…D-50 + **D-51 discarded (D-58)** + **D-52**…**D-60**.
+Full checklist: Agent Pack §2. Locks summary: D-38…D-50 + **D-51 discarded (D-58)** + **D-52**…**D-61**.

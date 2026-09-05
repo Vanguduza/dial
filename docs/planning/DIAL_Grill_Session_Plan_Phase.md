@@ -1,9 +1,10 @@
 # DIAL grill session — plan phase (D-56)
 
-**Date:** 2026-08-11  
-**Skill:** `.cursor/skills/dial-grill-locks`  
-**Authority:** `DIAL_Consolidated_Plan_v4.md` D-38…D-60 + §0.2; `DIAL_Development_Agent_Pack.md` §2 / §2.2; `AGENTS.md`; `.cursor/rules/dial-non-negotiables.mdc`  
-**Mode:** Plan diligence **complete** (D-56). Product locks through **D-60**. Build orchestration = **Dev Manager** (Blueprint §8.0) — ticket hygiene first.
+**Date:** 2026-08-11
+**Skill:** `.cursor/skills/dial-grill-locks`
+**Authority:** `DIAL_Consolidated_Plan_v4.md` D-38…**D-61** + §0.2 + §6.24; `DIAL_Development_Agent_Pack.md` §2 / §2.2; `AGENTS.md`; `.cursor/rules/dial-non-negotiables.mdc`
+**D-61 extension:** 2026-09-05
+**Mode:** Original six-topic plan diligence through D-60 complete. **D-61 adds Topic 7 below; it must be confirmed before Hermes implementation.** Build orchestration = Dev Manager (Blueprint §9 current-state prompt) — current-state verification + ticket hygiene first.
 
 **Legend**
 
@@ -91,7 +92,7 @@ Money SoR
 
 ### Topic 1 verdict
 
-Product/money locks: **frontier empty — locks confirmed** (C-4, D-40a, D-43, D-49, D-50, **D-58**, **D-59**, **D-60**, amountMinor, AI-never-writes-money).  
+Original product/money frontier: **empty through D-60** (C-4, D-40a, D-43, D-49, D-50, **D-58**, **D-59**, **D-60**, amountMinor, AI-never-writes-money).
 **Remaining commercial (not product reopen):** signed PSP contract, ZIMRA field map at integrate, optional IMTT counsel on leg *opex*.
 
 ---
@@ -134,7 +135,7 @@ Customer channels
 
 ### Topic 2 verdict
 
-**Frontier empty — locks confirmed** (D-40, D-40a cross-link, D-41, D-41a promotions via ERP not WA SoR).  
+**Frontier empty — locks confirmed** (D-40, D-40a cross-link, D-41, D-41a promotions via ERP not WA SoR).
 **OPEN:** Meta template approval + RoA rates (#5) — ops go-live, not product reopen.
 
 ---
@@ -223,7 +224,7 @@ packages/ai
 
 ### Topic 4 verdict
 
-Capability / privacy / money boundaries: **frontier empty — locks confirmed** (C-1, §5.7–5.15, D-32, D-54, D-56).  
+Capability / privacy / money boundaries: **frontier empty — locks confirmed** (C-1, §5.7–5.15, D-32, D-54, D-56).
 **OPEN:** Flash-Lite timing (#8). Plan-phase capability review notes: `DIAL_AI_Capability_Plan_Phase_Review.md`.
 
 ---
@@ -238,7 +239,7 @@ Catalogue
 ├── demand-gap / search_no_result_events
 ├── AI candidates never auto-publish to Meili
 ├── B2B filter: supplierFormality / informal excluded (D-49)
-├── offerSource MARKETPLACE | DIAL_OWNED (D-51) on offers + Meili
+├── offerSource = MARKETPLACE agency only (D-58; D-51 DIAL_OWNED discarded)
 └── Reject: v7 as SoR; CERTIFIED–DORMANT as public MVP ladder
 ```
 
@@ -262,7 +263,7 @@ Catalogue
 
 ### Topic 5 verdict
 
-**Frontier empty — locks confirmed** (D-49, **D-58** agency-only / no DIAL_OWNED, D-53 Catalogue Factory).  
+**Frontier empty — locks confirmed** (D-49, **D-58** agency-only / no DIAL_OWNED, D-53 Catalogue Factory).
 **B2C informal:** visible at launch — **FACT (locked)** D-60.
 
 ---
@@ -304,11 +305,94 @@ Intelligence + CC
 
 ---
 
+
+## Topic 7 — D-61 Hermes Business Agent Fabric / Provider Bridge / Privacy / R2 / Quantum Intelligence
+
+**D-61 status:** founder architecture is already locked in master §6.24. This topic confirms implementation boundaries and the first tracer; it does **not** reopen whether Hermes/provider configurability/privacy-by-design/Quantum Intelligence are adopted.
+
+### Design tree
+
+```text
+D-61 Hermes Business Agent Fabric
+├── deterministic Supervisor
+│   ├── Play/Pause/Resume/Stop/E-stop
+│   ├── queues + leases + fencing + checkpoints + idempotency
+│   └── provider health + manager eligibility + H0–H4 approvals
+├── provider bridge
+│   ├── API-key providers
+│   ├── approved OpenAI Codex/ChatGPT OAuth path
+│   ├── approved Anthropic/Claude path / supervised Claude Code bridge
+│   └── no unofficial cookie/session-token automation
+├── privacy + memory
+│   ├── opaque DIAL subject IDs + PII Vault
+│   ├── purpose/consent + Context Compiler + Egress Firewall
+│   ├── domain/sensitivity-scoped memory
+│   └── Health deny-by-default cross-domain isolation
+├── R2 extended memory
+│   ├── archive / media / RAG / evidence / trajectories / Parquet snapshots
+│   └── Postgres/domain services remain transaction truth
+├── MCP / Tool Bus
+│   ├── narrow typed capabilities + object AuthZ
+│   └── H0 read → H4 high-risk; no raw SQL/service_role/PSP/PII-vault tools
+└── D-54 intelligence extension
+    ├── MetricContract + evidence + epistemic labels
+    ├── Profitability Opportunity Engine + measured outcomes
+    └── privacy-safe supplier/stakeholder intelligence
+```
+
+### Round 1 — implementation frontier
+
+❓ **Q1 — Runtime authority:** May Hermes or the current model decide for itself whether the business-agent process is running, paused or stopped?
+
+➡️ **No.** The deterministic **DIAL Hermes Supervisor** owns `RUNNING/PAUSED/STOPPED`, queues, leases/fencing, checkpoints/retry, provider health, H0–H4 approvals and emergency stop. **Play remains latched across work items/batches until a real Pause/Stop/policy/incident condition.** **FACT (D-61 §6.24.3).**
+
+❓ **Q2 — Provider strategy:** Should implementation restore a single hardcoded “Gemini brain” for simplicity?
+
+➡️ **No.** D-61 supersedes provider exclusivity. Provider/model is configuration and policy: approved API-key providers plus approved subscription-backed paths. Only `managerEligible=true` models may occupy manager-class work; no silent downgrade. **FACT (D-61 §6.24.4).**
+
+❓ **Q3 — Subscription integration:** May the system scrape browser cookies/session tokens to reuse Claude/ChatGPT subscriptions?
+
+➡️ **Hard stop.** Use approved Hermes OAuth where supported or a supervised officially authenticated Claude Code/Codex CLI bridge. Never invent an unofficial subscription API or copy opaque browser/session credentials into DIAL. **FACT (D-61 §6.24.4).**
+
+❓ **Q4 — Identity and customer memory:** Can Hermes receive the full customer profile because DIAL needs personalized service?
+
+➡️ **No.** Direct identity stays in the PII Vault. Models normally receive an opaque `CUS_...` plus the minimum purpose-scoped facts compiled through the Privacy Context Compiler/Egress Firewall. A pseudonymous DIAL ID is still treated as personal data where DIAL can re-identify it. **FACT (D-32 + D-61 §6.24.5 + §7.6).**
+
+❓ **Q5 — Health memory:** Can the same universal memory blob be shared across Spare/Groceries/Care/Health?
+
+➡️ **No.** Health is separately restricted and ordinary commerce profiles are denied by default. Cross-domain memory requires explicit policy/purpose. **FACT (D-61).**
+
+❓ **Q6 — R2 role:** Can R2 become Hermes' primary database so the Oracle host stays light?
+
+➡️ **No.** R2 is extended large-object/archive/RAG/evidence/trajectory/analytical storage. Current orders, inventory, identity, consent, payment, entitlement, booking and conversation state remain in authoritative DIAL services/Postgres. Manifest/checksum/retention/legal-hold govern R2 objects. **FACT (D-61 §6.24.6).**
+
+❓ **Q7 — Tool power:** Give Hermes raw SQL or service-role access so it can “do anything”?
+
+➡️ **Hard stop.** Hermes gets narrow, typed DIAL capabilities only. Every action maps H0–H4, object AuthZ and idempotency. H4 money/legal/health/identity actions invoke existing privileged/four-eyes/human workflows. **FACT (D-61 §6.24.8).**
+
+❓ **Q8 — Business intelligence depth:** Is a narrative dashboard summary enough?
+
+➡️ **No.** D-61 extends D-54 into evidence-backed descriptive → diagnostic → predictive → prescriptive → simulation → measured-outcome intelligence. Material insights cite `MetricContract`/evidence and carry an epistemic label (`FACT`, `DERIVED_METRIC`, `CORRELATION`, `FORECAST`, `HYPOTHESIS`, `SIMULATION`, `RECOMMENDATION`, `DECISION`). **FACT (D-61 §6.24.10).**
+
+❓ **Q9 — Supplier value:** May supplier intelligence simply expose broad marketplace/competitor data?
+
+➡️ **No.** Give suppliers their exact own performance plus safe aggregate demand/catalogue/geography/forecast recommendations. Protect customer identity and competitor confidential prices, volumes, feeds and settlement terms; suppress unsafe/small benchmark cohorts. **FACT (D-61 §6.24.12).**
+
+❓ **Q10 — First implementation slice:** Mass-scaffold every Hermes profile/service now?
+
+➡️ **No.** D-52 tracer discipline applies. Start with **E7a**: Supervisor + provider-policy stub + opaque context/privacy gate + one H0 read tool + R2 manifest/archive fake + audited evidence-labelled insight. Prove control/recovery/privacy/tool boundaries before expanding. **FACT/required sequencing (Pack §18; E7/Matrix E).**
+
+### Topic 7 verdict
+
+**Implementation frontier empty — D-61 boundaries confirmed.** The only remaining external inputs are operational credentials/accounts/contracts (provider auth, R2 credentials, POTRAZ/processor/transfer approvals, etc.); these do not reopen architecture. **E7a is the recommended D-61 foundation tracer.**
+
+---
+
 ## Cross-cutting hard stops (all topics)
 
 Refused if proposed during grill (cite lock; offer compliant alternative only):
 
-Expo/RN customer shell (C-5); Baileys; Google/Mapbox map SoR; AI payable amounts; Medusa/OfferKit/Formance money SoR; marketplace-wide principal; informal→B2B; drop tech WHT; reintroduce discarded D-51 owned-stock (D-58); stub-as-MVP / skip DoD (D-52); v7 SoR / Train 0–10 / Unleash-OR-Tools SoR; auto-publish AI; Simulated auto-pays; full upstream skill tree dumps (D-55); skip plan grill or `packages/ai` merge without capability review (D-56); ZiG on Spare browse/cart or unaudited FX / skip WA EcoCash+COD buttons (D-57); IMTT as customer checkout line (D-60).
+Expo/RN customer shell (C-5); Baileys; Google/Mapbox map SoR; AI payable amounts; Medusa/OfferKit/Formance money SoR; marketplace-wide principal; informal→B2B; drop tech WHT; reintroduce discarded D-51 owned-stock (D-58); stub-as-MVP / skip DoD (D-52); v7 SoR / Train 0–10 / Unleash-OR-Tools SoR; auto-publish AI; Simulated auto-pays; full upstream skill tree dumps (D-55); skip plan grill or `packages/ai` merge without capability review (D-56); ZiG on Spare browse/cart or unaudited FX / skip WA EcoCash+COD buttons (D-57); IMTT as customer checkout line (D-60); **hardcoded sole provider, unmanaged manager downgrade, raw PII/SQL/PSP tools, R2-as-DB, Health memory leakage, supplier-confidential analytics, model/simulation-as-fact, or confusing business Hermes with development orchestration (D-61).**
 
 ---
 
@@ -322,7 +406,8 @@ Expo/RN customer shell (C-5); Baileys; Google/Mapbox map SoR; AI payable amounts
 | 4 packages/ai | Locks confirmed; Flash-Lite P1 | §5.15, D-32, D-54, D-56, D-60 |
 | 5 Catalogue + B2B | Locks confirmed | D-49, D-53, D-58, D-60 |
 | 6 Factory / CC | Locks confirmed | D-54 |
+| 7 Hermes / provider / privacy / R2 / Quantum Intelligence | Implementation boundaries confirmed; E7a tracer | D-61 §6.24, D-32, D-52, D-54 |
 
-**Human confirmation:** Product locks stand through **D-60**. Customer-open still Appendix C / §8.1. DoD backlog + completion matrices **filled** (tracer Phase B). **Next:** Dev Manager (Blueprint §8.0) closes **ticket hygiene** — open owned **E2a** (default) or **E1a** with DoD + owner before parallel trains.
+**Human confirmation:** Product/platform locks stand through **D-61**; original six-topic matrices remain valid and Topic 7/E7a is added. Customer-open still Appendix C / §8.1. DoD backlog + completion matrices **filled** (tracer Phase B). **Next:** Dev Manager uses **Blueprint §9**: fresh repo verification → D-61 Topic-7 confirmation → own the next dependency-safe tracer (**E7a recommended for D-61 foundation; E2a/E1a remain valid business-path slices**) before parallel work.
 
 **Artifacts:** this file; `docs/planning/diagrams/`; AI capability plan review; Promptfoo outline; today queue; DoD backlog; completion matrices; session handoff.

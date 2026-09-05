@@ -10,7 +10,7 @@ Consolidation of:
 | `DIAL_Ecosystem_PRD.pdf` | v1.0.0, 2026-08-07 | Product requirements, scope phasing, code contracts, acceptance criteria |
 | `DIAL_Follow_Up_Architecture_and_Execution_Blueprint-5.docx` | Aug 2026, Second Follow-Up | Job classes, AI estimation, job reserve, project jobs, AI gateway, Hugging Face strategy |
 
-Status: **founder decisions applied (conflict resolutions C-1…C-5, dual-domain gateway, Meilisearch, messaging, automation stack, keyed operating choices, locked storefront/marketplace UX stitch kit D-38 / §6.2.1, Development Agent Pack D-39 / Part 9, payment-method expansion D-43, Delivery Android + maps stitch D-44, delivery dispatch/assignment D-45, complementary ERP OSS D-46, Cursor engineering hygiene pack D-47, security toolchain D-48, agency + B2B formal-only D-49, tech hire 30% WHT enforcement D-50, DIAL-owned stock dual capacity D-51 discarded by D-58, tracer sequencing + feature DoD D-52, v7-2 adopted platform extensions D-53, Intelligence Factory + Command Centre metric contracts D-54, external skills utilization D-55, plan-phase grill + AI capability merge gate D-56, Spare USD browse + ZiG-at-checkout + WA EcoCash/COD checkout buttons D-57, D-2 agency confirmed + owned-stock discarded D-58, agency FDMS receipt model + in-house Gateway D-59, open-issue locks IMTT-as-opex + COD USD settle + Paynow-first escrow path + B2C informal visible + Flash-Lite P1 D-60)**. This document is written to replace all three as the single source of truth. Everything marked `[NEW]` did not appear in any source document. Everything marked `[CHANGED]` contradicts or materially revises a source document or a prior draft recommendation, with the reasoning given.
+Status: **founder decisions applied (conflict resolutions C-1…C-5, dual-domain gateway, Meilisearch, messaging, automation stack, keyed operating choices, locked storefront/marketplace UX stitch kit D-38 / §6.2.1, Development Agent Pack D-39 / Part 9, payment-method expansion D-43, Delivery Android + maps stitch D-44, delivery dispatch/assignment D-45, complementary ERP OSS D-46, Cursor engineering hygiene pack D-47, security toolchain D-48, agency + B2B formal-only D-49, tech hire 30% WHT enforcement D-50, DIAL-owned stock dual capacity D-51 discarded by D-58, tracer sequencing + feature DoD D-52, v7-2 adopted platform extensions D-53, Intelligence Factory + Command Centre metric contracts D-54, external skills utilization D-55, plan-phase grill + AI capability merge gate D-56, Spare USD browse + ZiG-at-checkout + WA EcoCash/COD checkout buttons D-57, D-2 agency confirmed + owned-stock discarded D-58, agency FDMS receipt model + in-house Gateway D-59, open-issue locks IMTT-as-opex + COD USD settle + Paynow-first escrow path + B2C informal visible + Flash-Lite P1 D-60, **Hermes Business Agent Fabric + deterministic Supervisor + Privacy Context Compiler + R2 extended memory + provider bridge + Quantum Business Intelligence D-61**)**. This document is written to replace all three as the single source of truth. Everything marked `[NEW]` did not appear in any source document. Everything marked `[CHANGED]` contradicts or materially revises a source document or a prior draft recommendation, with the reasoning given.
 
 **Development hand-off:** Scaffolding may begin against v4 + `DIAL_Development_Agent_Pack.md` + checklist/blueprint companions. Customer-open launch remains gated by Appendix C and §8.1 (escrow, fiscalisation, POTRAZ, etc.).
 
@@ -35,7 +35,7 @@ None of these are cosmetic. Each one changes what gets built in the first six mo
 
 1. A **problem register** (§2) that keeps all problems from the three sources, upgrades the solution for each, and adds 40 problems none of the documents identified — with the tax, licensing, currency and labour-law items that would otherwise be discovered the hard way.
 2. A **commercial architecture** (§4) with an actual multi-currency ledger design, a take-rate strategy, and a unit-economics skeleton. The source documents describe revenue lines but contain no numbers, no cost of ops, and no FX handling.
-3. An **AI architecture** (§5) that answers the question directly: one ERP package `packages/ai`, **Gemini as the sole reasoning brain**, other accepted components as organs — with the composition model in §5.15 as the canonical description, plus per-task routing, licence checks, cost ceilings, evaluation gates and a privacy boundary.
+3. An **AI + business-agent architecture** (§5 + **§6.24 / D-61**) with `packages/ai` as the typed model-capability layer and **Hermes as the persistent business-agent orchestration layer behind a deterministic DIAL Supervisor**. Model providers are configurable through the Provider Bridge (API-key and approved subscription-backed paths); DIAL domain services remain authoritative. The architecture includes per-task routing, manager-seat eligibility, licence/cost gates, privacy context compilation, R2 extended memory, tool policy, evaluation and outcome learning. `[CHANGED]` `[FOUNDER]`
 4. A **compliance chapter** (§7) covering fiscalisation, withholding tax, funds-holding, data protection, consumer protection, insurance, labour and trade licensing — plus a first-class **legal compliance module** in product/ops (§3.8) for education, implications, and Terms & Conditions.
 5. A **decision log** (§8.5) that replaces the PRD's open-questions list with owners, deadlines and the cost of deciding late. Founder resolutions for C-1…C-5 are reflected throughout.
 6. A **dual-domain customer gateway** (§1.4, §6.2): **landing = sign-in** (create-account option at bottom); **Shop** | **Services** only on the **authenticated** home → `dialaspare.co.zw` / `dialatech.co.zw`. Optional session restore + respectful welcome-back; animation may support auth home or light branded sign-in — **not** anonymous Shop|Services. **No voice** across product. `[CHANGED]` `[FOUNDER]`
@@ -68,6 +68,7 @@ None of these are cosmetic. Each one changes what gets built in the first six mo
 33. **D-2 agency confirmed; owned-stock discarded (D-58):** Characterisation = **agent** for Dial marketplace (Spare + Tech third-party supply). Unblocks **agency-model FDMS** design (virtual API D-40a; commission VAT; e-invoices/receipts reflect tax per agency rules; WA payments share same ERP fiscal outbox). **Discard D-51** owned-stock principal track entirely for current plan — do not reintroduce DIAL-owned title SKUs without a fresh counsel-backed D-log row. Entity-split question for owned stock is **moot**. `[NEW]` `[FOUNDER]`
 34. **Agency FDMS receipt model + in-house Gateway (D-59):** locks the open FDMS buy-vs-build / invoice-mechanics gap from the founder tax discussion (agency preserve; registered VAT-inclusive; no goods VAT / no principal VAT on informal; B2B formal-only; partners meet own tax; DIAL VAT on commission/fees). **Build** `packages/tax` + ZIMRA **Virtual Fiscalisation Gateway API** adapter in-house (D-40a) as default — durable `fdms_outbox`, fiscal-day machine, buyer TIN, portal reconcile. **CloudESD/PSP signing** = optional `FdmsSigner` adapter only if Gateway onboarding delayed — **not** fiscal SoR. Receipt types: (a) **DIAL_FEE** lines (commission, DIAL delivery/service fees) → FDMS in DIAL’s name + VAT on fee; (b) **GOODS_FORMAL** → supplier is deemed seller; VAT-inclusive goods; supplier meets goods VAT (contracts); DIAL may submit **one** fiscal invoice **on supplier’s behalf** with buyer TIN for B2B Valid claims — never double-invoice; (c) **GOODS_INFORMAL** → **no** goods VAT fiscal line from DIAL; B2C only; never B2B. E-invoices / Resend / WA receipt links must reflect these tax lines. WA payments share same outbox (**D-58**). Does **not** reopen D-51. `[NEW]` `[FOUNDER]`
 35. **Open-issue locks (D-60):** (a) **IMTT = DIAL operating cost** — never a customer checkout / displayed price line (pricing competitiveness). Book to dedicated IMTT expense in the GL; from 2026 may be CIT-deductible if compliance conditions met (counsel). Escrow/PSP: licensed intermediaries that mediate electronic transfers are in the IMTT net; FIs remit and may recover from customers — so distribution legs typically attract IMTT economically on the float/payer side; negotiate fee schedule; still seek counsel on leg count to minimise *opex*, not to invent a customer surcharge. (b) **C-4:** Paynow escrow-like first ask; else licensed equivalent; scaffold on PspAdapter stub until signed. (c) **B2C informal** remains visible at launch; B2B hide stays (D-49). (d) **Flash-Lite** stays P1 / post-dogfood. (e) **COD settle currency = USD** (ZiG on confirm = indicative only per D-57). (f) Meta WA templates/rates = launch ops gate, not product redesign. `[NEW]` `[FOUNDER]`
+36. **Hermes Business Agent Fabric (D-61):** consolidate Hermes into DIAL's operating architecture—not a standalone bot/module document. Deterministic Supervisor owns Play/Pause/Resume/Stop/E-stop, leases/fencing/checkpoints/recovery; Hermes owns reasoning/memory/skills/routines; DIAL services own facts and writes. Add opaque subject IDs + PII Vault + Privacy Context Compiler/Egress Firewall, R2 institutional memory, permissioned MCP/Tool Bus H0–H4, configurable API/subscription provider bridge (OpenAI Codex/ChatGPT OAuth + approved Claude/Claude Code paths), cross-business conversational orchestration, Quantum Business Intelligence, profitability Opportunity Engine, and privacy-safe supplier/stakeholder intelligence. **Supersedes only** provider exclusivity / anti-agentic restrictions in D-18/D-30/D-33/D-36/§5.14–5.15; preserves AI-never-writes-money, D-32, D-40, D-44, D-47/48, D-49/50/58/59/60, D-52/54 and human/publish gates. Canonical technical contract: **§6.24**. `[NEW]` `[FOUNDER]`
 
 ---
 
@@ -843,7 +844,7 @@ Consent and unsubscribe follow the consumer-law notes already in this plan (§2B
 
 This is the direct answer to the question *"how do we integrate AI into the DIAL ERP without training a model, adopting open-source Hugging Face tools and powering them with an API model?"*
 
-The Follow-Up Blueprint already got the shape right — an AI Gateway, provider abstraction, deterministic ERP authority, RAG over pgvector, phased Hugging Face adoption, cost routing, human-in-the-loop. This Part turns that into specific choices, specific boundaries and specific gates. **Canonical composition:** one ERP package `packages/ai`, Gemini as sole reasoning brain, organs + typed public capabilities — **§5.15**.
+The Follow-Up Blueprint already got the shape right — an AI Gateway, provider abstraction, deterministic ERP authority, RAG over pgvector, cost routing and human-in-the-loop. **D-61 deepens and supersedes the earlier provider-exclusivity wording:** `packages/ai` remains the typed capability/model boundary, while **Hermes + the DIAL Hermes Supervisor** provide the persistent conversational/business-agent orchestration described in §6.24. Models are provider-configurable; deterministic DIAL services remain authoritative.
 
 ### 5.1 The seven rules
 
@@ -892,7 +893,7 @@ The gateway's job list, from the Blueprint and complete as written: provider/mod
 Two implementation notes:
 
 - **Build the gateway as a thin service DIAL owns, and let it delegate.** The provider-abstraction and cost-accounting plumbing is a solved problem — use an existing self-hostable proxy for the provider fan-out and observability rather than writing it, and keep DIAL's own code to the parts that are DIAL-specific: task routing, schema contracts, redaction, budget policy, and the fallback-to-human decision. Specific tooling choices in §5.12.
-- **One typed interface per capability, not one generic "ask the AI" endpoint.** Public surface is the capability API in §5.15 (`guidedIntake`, `clientAssessment`, `opsDraftQuote`, `productPerformance` / `crmInsight`, optional `translateProblemText`) — **no generic chat**. Internal helpers (OCR, match, redact, parse) stay private to the module. Each capability has a schema, a budget, an eval set and an owner. A generic endpoint is how AI cost and AI risk become untraceable.
+- **Typed capabilities behind a governed conversation fabric — never an unrestricted generic model endpoint.** Existing capability APIs remain typed and evaluated. D-61 permits customer/staff/vendor/supplier conversational experiences **only through the DIAL gateway → identity/purpose → Privacy Context Compiler → Hermes Supervisor → Hermes → permissioned Tool Bus**. There is still no raw `ask-the-model` endpoint that bypasses schemas, budgets, policy, tool action classes, evidence or audit.
 
 ### 5.3 Hosting model and division of labour `[NEW]`
 
@@ -1277,7 +1278,7 @@ Four details that cut failure rates before any retry logic: put `.describe()` on
 
 #### The commercial model tier `[CHANGED]` `[FOUNDER]`
 
-**Gemini is the sole reasoning brain.** Route through LiteLLM aliases so the model SKU is a configuration change, not a deploy. Other commercial models appear only as **gateway fallback** on outage — not as co-equal brains, and not as a second product path.
+**D-61 supersedes the earlier Gemini-only decision.** Route inference through the DIAL Provider Bridge / Hermes provider abstraction so provider/model is configuration and policy, not domain code. Approved API-key providers and approved subscription-backed paths may coexist. Manager-tier work uses only `managerEligible` models; lower-tier models handle bounded specialist/auxiliary work. Provider health, privacy eligibility, quota, cost and fallback are explicit. See §6.24.4.
 
 | Alias | Use | Primary | Fallback (outage only) |
 | --- | --- | --- | --- |
@@ -1331,9 +1332,9 @@ The rule underneath all of it: **check the weights, not the README, and check wh
 
 ### 5.14 Dial a Spare AI scope, internal agents, and how DIAL ships software `[CHANGED]` `[FOUNDER]`
 
-**Canonical description:** the single-module composition model in **§5.15** (`packages/ai`, Gemini sole brain, typed public capabilities). This section only scopes Spare vs Tech vs shipping process.
+**Canonical description after D-61:** §5.15 remains the typed `packages/ai` capability/model composition; **§6.24 is the canonical persistent Hermes business-agent/control/memory/tool/intelligence composition**. They are complementary, not competing stacks.
 
-**Custom AI module in the ERP.** One package `packages/ai` — Gemini as the sole reasoning brain; accepted HF/CPU tools and deterministic match as organs; LiteLLM for egress; privacy omit-identity + Presidio (§5.7). **No AI price to customers** until §5.9 gates pass (C-1). Claude appears only as a **LiteLLM gateway fallback** on Gemini outage — not a co-equal brain.
+**Typed AI/model module in the ERP.** `packages/ai` owns structured model capabilities, privacy/eval hooks and deterministic grounding. D-61 adds Hermes above this layer for persistent cross-business conversation/orchestration and provider configuration. **No model/Hermes path writes payable amounts**; pricing/ledger remain authoritative. Direct identity is omitted/minimized through §5.7 + §6.24.5.
 
 **Dial a Spare — narrow AI.** Spare is a **direct storefront**. AI on Spare is **only** for:
 - product / listing performance analysis (`productPerformance`)
@@ -1351,7 +1352,7 @@ AI is **not** on the search or selling critical path (Meilisearch + catalogue ru
 
 This section is the **canonical** description of how DIAL wires AI. Earlier Part 5 sections remain the detail (tiers, models, gates, privacy); when wording conflicts, prefer this composition.
 
-**One ERP package:** `packages/ai`. **Gemini** is the sole reasoning brain. Other accepted components are **organs** — they sense, redact, match, and ground; they do not reason over messy jobs or talk to customers as a free-form chat.
+**One typed model-capability package:** `packages/ai`. Deterministic sensors/redaction/matching/grounding remain organs. **D-61 supersedes Gemini exclusivity and the prohibition on governed conversational agents:** configured approved models may reason behind Hermes, but every conversation is policy-scoped, privacy-compiled, tool-bounded and audited. `packages/ai` does not become a second business SoR, and Hermes does not bypass it/domain authority.
 
 #### Composition layers (left → right)
 
@@ -1400,7 +1401,7 @@ ERP / n8n / Temporal / internal agents
    ERP core (pricing, ledger, dispatch) — authoritative
 ```
 
-#### Public capability API only — no generic chat
+#### Typed capability APIs + governed Hermes conversations — no unrestricted model endpoint `[CHANGED D-61]`
 
 | Capability | Audience | Role |
 | --- | --- | --- |
@@ -1443,13 +1444,13 @@ Ship **excellent structured assessments** (schema-aligned, confidence-aware, hon
 
 #### Explicitly rejected — do not reintroduce
 
-Voice / Whisper in product; tokenising CRM identity to send abroad; agentic storefront monorepos; Typesense (Meili chosen); AI as Spare search; custom training / owned GPUs; core exchange; buffer SKUs; anonymous Shop \| Services landing (auth-first — §1.4, §6.2); **Expo / React Native as the customer app shell** (C-5 native Android + iOS — §6.2.1); **overlapping tool duplicates** (§6.10): Lottie, imgproxy, Inngest, DeepEval, GrowthBook, parallel in-house booking calendar beside Cal.com, standalone Ragas.
+Voice / Whisper in product; tokenising/directly forwarding CRM identity; **unrestricted agentic storefronts that bypass D-61 Supervisor/privacy/tool/domain authority**; Typesense (Meili chosen); AI as Spare search; custom training / owned GPUs; core exchange; buffer SKUs; anonymous Shop \| Services landing (auth-first — §1.4, §6.2); **Expo / React Native as the customer app shell** (C-5 native Android + iOS — §6.2.1); **overlapping tool duplicates** (§6.10): Lottie, imgproxy, Inngest, DeepEval, GrowthBook, parallel in-house booking calendar beside Cal.com, standalone Ragas.
 
 ### 5.16 Launch-mandatory experience enhancers (full polish) `[CHANGED]` `[FOUNDER]`
 
 **Founder bar:** one polished customer launch; these are **not** a Phase 2 backlog. Ship at **full functionality** before open access; post-launch work is small tweaks only. Internal build may use parallel trains, but customers never see a thin v1.
 
-All obey composition rules: OSS/shipable, **no voice**, **no owned GPUs**, **no agentic shop**, omit-identity privacy, Gemini-only brain. Canonical tool where an “or” existed — §6.10.
+All obey composition rules: OSS/shipable, **no voice**, **no owned GPUs**, privacy-by-purpose, deterministic authority and D-61 governed Hermes orchestration. Conversational commerce may operate through Hermes, but storefront search/fitment/pricing/cart/order truth stays in DIAL services; no autonomous model may bypass those services.
 
 | # | Enhancer | Canonical tool / approach | Polished launch meaning |
 | --- | --- | --- | --- |
@@ -1502,7 +1503,7 @@ The Blueprint's service list is adopted and extended. Additions are marked; each
 | **HR / People** | Staff + contractor register, credentials clock, leave/contracts shells; **ZW payroll rules in-repo** | `[NEW]` (§6.17) |
 | **Company Finance** | Operating GL alongside Job Reserve liability books; settlements; Metabase feeds | Extended (§4.2, §6.17) |
 | Notification | Push, SMS, WhatsApp, **email (Resend transactional + Brevo promo/CRM)**, with consent + budget enforcement | Extended (§4.6) `[CHANGED]` `[FOUNDER]` |
-| AI Gateway / `packages/ai` | Composition §5.15: Policy → Privacy → Sensors → Match → Context → **Gemini** (LiteLLM) → Zod → Langfuse/evals; public capabilities only (guidedIntake, clientAssessment, opsDraftQuote, Spare performance/CRM, optional translate); ops + internal agents share the module; **Spare AI = performance/CRM only**; safe-self-help allowlist (C-1) | From source, canonical in §5.15 `[CHANGED]` `[FOUNDER]` `[NEW]` |
+| AI / Hermes Business Agent Fabric | `packages/ai` typed capabilities + **D-61 Supervisor/Hermes/provider/privacy/memory/tool/intelligence layers (§6.24)**. Governed conversations may span Spare/Tech/Groceries/Care/Health/Logistics/Support; deterministic DIAL services remain SoR; no money authority | `[CHANGED D-61]` `[FOUNDER]` |
 | **Trust & Risk** | Fraud signals, duplicate media detection, anomaly scoring, review queues | `[NEW]` (§2B-28…33) |
 | **Analytics** | Event ingestion, taxonomy, warehouse, dashboards | `[NEW]` (§2B-35) |
 | **Search (Meilisearch)** | Customer-facing Spare catalogue search / facets; reindex via queue | `[CHANGED]` `[FOUNDER]` (§3.2, §6.4) |
@@ -1754,7 +1755,7 @@ When two tools did the same job, DIAL keeps **one** — the stronger feature fit
 | Non-emergency booking slots | **Cal.com** | Parallel in-house calendar | Polished slots without building a second calendar product |
 | Transactional email | **Resend** | (kept; different from Brevo) | Critical notifications |
 | Promo / CRM email | **Brevo** | (kept; different from Resend) | Journeys + campaigns |
-| LLM brain | **Gemini** | Multi-brain / peer Claude product path | Sole reasoning model; gateway fallback only if needed |
+| Business AI provider layer | **D-61 Provider Bridge + Hermes** | Hardcoded single-provider domain code | API keys + approved subscription-backed paths; managerEligible allowlist; privacy/cost/health routing |
 | AI gateway | **LiteLLM** | Portkey as required peer | OSS control already in composition |
 | Spare web storefront UX donor | **Mercur B2C marketplace storefront** | Single-seller-only starters as *primary*; Expo/RN as customer shell | Multi-vendor shape matches Dial a Spare; UI-only (§6.2.1) |
 | Spare web visual polish | **Your Next Store *or* Nimara** | Aceternity-paid / FSL-primary storefronts as locked donors | MIT/BSD polish bar without locking FSL into the core |
@@ -1845,7 +1846,14 @@ packages/
   notifications/        Resend / Brevo / WhatsApp / push / SMS adapters
   trust-risk/           fraud signals, media fingerprints, review queues
   analytics/            event taxonomy → PostHog / warehouse
-  ai/                   §5.15 composition — Gemini sole brain
+  ai/                   §5.15 typed model capabilities; provider-independent after D-61
+  hermes-contracts/      Supervisor/run/tool/profile contracts (D-61)
+  ai-provider-bridge/    provider auth/model/routing policy (D-61)
+  ai-policy/             privacy/action-class/provider eligibility (D-61)
+  memory-contracts/      scoped semantic memory (D-61)
+  r2-storage/            R2 manifests/archive abstraction (D-61)
+  insight-contracts/     evidence/insight/opportunity types (D-61)
+  mcp-contracts/         permissioned Tool Bus contracts (D-61)
   media/                Sharp pipeline, signed URLs, retention
   shared/               money types, ids, errors, outbox, state-machine kit
 
@@ -2233,7 +2241,7 @@ Admin (`apps/admin-web`) is queue-first and keyboard-driven. Modules below are *
 ```text
 packages/payments  → adapters/psp/*        (Paynow / ContiPay / EcoCash direct / PayPal / COD / escrow partner — D-43)
 packages/tax       → adapters/fdms/*       (ZIMRA Virtual Gateway default — D-59; optional CloudESD FdmsSigner)
-packages/ai        → adapters/gemini/*     (via LiteLLM gateway)
+packages/ai / ai-provider-bridge → adapters/ai-provider/* (D-61 provider-configurable; API/OAuth/approved bridges)
 packages/notifications → adapters/whatsapp, resend, brevo
 packages/delivery  → adapters/maps/*       (Nominatim/OSRM/VROOM; MapLibre tiles — D-44; dispatch SoR D-45)
 ```
@@ -2336,7 +2344,7 @@ export interface PayslipDraft {
 
 | Failure | Behaviour |
 | --- | --- |
-| Gemini / LiteLLM down | Guided intake → structured form; opsDraftQuote → human blank quote; emergency unaffected |
+| Configured manager/provider unavailable | Supervisor marks degraded; route only to an approved eligible fallback; high-impact work waits/fails closed if none; structured/manual path remains; emergency deterministic and unaffected |
 | Meilisearch down | Storefront degrades to Postgres filtered browse (slower); no silent empty catalogue |
 | PSP webhook delay | Outbox + Temporal wait; UI shows payment pending; no double capture (idempotency) |
 | FDMS device fault | Block new fiscalising sales in that channel or queue with visible fault; never drop receipt |
@@ -2358,7 +2366,7 @@ Order of implementation so dependencies never run dry:
 2. **catalogue + suppliers + search-indexer + Sharp** (Spare sellable)
 3. **orders + delivery + tax outbox** (fulfil → POD → fiscal)
 4. **jobs + matching + technicians + pricing** (Tech path)
-5. **packages/ai** behind gates (ops draft + guided intake; no customer prices until §5.9)
+5. **packages/ai + D-61 foundation** behind gates: typed model capabilities plus Supervisor/provider/privacy/memory/tool contracts; no customer prices/money authority
 6. **notifications + legal/consent** (compliant messaging)
 7. **guarantee + disputes + trust-risk** (certainty product)
 8. **projects module + admin toggle** (design-complete; client off)
@@ -2367,6 +2375,663 @@ Order of implementation so dependencies never run dry:
 11. **Metabase + reconciliation + eval CI** (operability)
 
 This sequence keeps the engine rule: **nothing customer-visible sells certainty without ledger + evidence + deterministic pricing behind it.**
+
+---
+
+### 6.24 D-61 — Hermes Business Agent Fabric, Privacy-Preserving Customer Intelligence, R2 Extended Memory, Provider Bridge & Quantum Business Intelligence `[NEW]` `[FOUNDER]`
+
+This section is the **canonical, consolidated D-61 implementation contract**. It is part of this master source of truth; agents must not depend on a separate Hermes feature document to discover it. Where older sections say **Gemini sole brain**, **Claude fallback only**, **Spare AI = analytics only**, or **no generic chat**, D-61 supersedes only that provider-exclusivity / anti-agentic limitation. The preserved rule is stronger and more precise: **no unrestricted AI endpoint may bypass DIAL identity, privacy, policy, typed tools, deterministic sources of truth, approval gates, or audit.**
+
+D-61 extends D-54 rather than replacing it. D-54 remains authoritative for Intelligence Factory promotion, `MetricContract`, Data→Metrics→Alert→Decision→Action, and Actual vs Simulated. D-61 adds a persistent Hermes business-agent runtime, a deterministic Supervisor, R2 institutional memory, provider configuration, privacy-preserving customer/stakeholder memory, cross-domain tool orchestration, profitability opportunity discovery, and supplier/stakeholder intelligence.
+
+#### 6.24.1 Architectural role and hard boundary
+
+```text
+CUSTOMER / STAFF / SUPPLIER / TECH / DRIVER / PARTNER / MANAGER
+                              │
+                              ▼
+     WhatsApp Cloud | Web | Native Apps | Staff/Vendor Portals
+                              │
+                              ▼
+                 DIAL Conversation/Event Gateway
+                              │
+                    Identity + Purpose + Consent
+                              │
+                              ▼
+       Privacy Context Compiler + AI Data Egress Firewall
+                              │
+                              ▼
+                    DIAL HERMES SUPERVISOR
+            state | leases | policy | approval | recovery
+                              │
+                              ▼
+                         HERMES AGENT
+       reasoning | memory | skills | routines | subagents
+                              │
+                              ▼
+                      DIAL MCP / TOOL BUS
+                              │
+      ┌──────────┬──────────┬─┴─┬─────────┬─────────┬──────────┐
+      ▼          ▼          ▼   ▼         ▼         ▼          ▼
+    Spare       Tech     Grocery Care    Health  Logistics  Finance ...
+      └──────────┴──────────┴───┴─────────┴─────────┴──────────┘
+                              │
+                              ▼
+                    AUTHORITATIVE DIAL SYSTEMS
+  Postgres | catalogue | orders | jobs | pricing | ledger | PSP | tax
+                              │
+             ┌────────────────┴────────────────┐
+             ▼                                 ▼
+      R2 extended memory                 D-54 metrics / BI
+```
+
+**Authority split:**
+
+| Concern | Owner |
+| --- | --- |
+| Business facts and durable business state | DIAL domain services / Postgres |
+| Money, payable amounts, Job Reserve, journals, payouts | DIAL money spine + deterministic workflows |
+| Runtime execution state and safe autonomous continuation | **DIAL Hermes Supervisor** |
+| Reasoning, task decomposition, tool selection, synthesis | Hermes + configured approved model |
+| Large documents/media/history/evidence/analytical snapshots | R2 |
+| Privacy identity resolution | DIAL Identity / PII Vault, not the model |
+| Customer/stakeholder semantic memory | DIAL Memory Service, policy-scoped |
+| Metrics | D-54 `MetricContract` registry |
+| Analytics conclusions | Evidence-backed D-61 Insight / Opportunity records |
+| Simulation | Read-only simulation services; never production money authority |
+
+Hermes **must not** become a second ERP, ledger, catalogue, payment system, order system, inventory system, fitment authority, entitlement authority, route optimiser, health record, identity vault, tax engine, or pricing authority.
+
+#### 6.24.2 Quantum depth/breadth contract
+
+Every material Hermes capability is specified and verified across Q0–Q9:
+
+| Level | Requirement |
+| --- | --- |
+| Q0 Intent | stakeholder goal + business value |
+| Q1 Feature | capabilities + user-visible behaviour |
+| Q2 Flow | happy path + cross-domain + human handoff |
+| Q3 Contract | APIs, events, DTOs, schemas, permissions |
+| Q4 State | machines, leases, retries, idempotency, checkpoints |
+| Q5 Eventuality | failures, stale state, duplicates, abuse, offline/conflict |
+| Q6 Trust | privacy, security, legal, audit, approvals |
+| Q7 Intelligence | metrics, evidence, evals, profitability, stakeholder value |
+| Q8 Operability | screens, observability, runbooks, cost/usage controls |
+| Q9 Verification | tests, adversarial tests, evidence, rollback, DoD |
+
+A capability is not Done because a model can answer a demo prompt. D-52 tracer DoD remains mandatory.
+
+Every material analytical capability carries a reproducibility package: `researchPackageId`, capability, business question, source versions/hashes, metric IDs, data window, data-quality score, privacy class, assumptions, limitations, dataset version, model/provider, prompt/skill version, reproducibility query/job, reviewer and promotion state.
+
+All generated intelligence carries an epistemic label:
+
+`FACT | DERIVED_METRIC | CORRELATION | FORECAST | HYPOTHESIS | SIMULATION | RECOMMENDATION | DECISION`
+
+Hermes must never present a hypothesis/correlation as established fact or a simulated value as an actual value.
+
+#### 6.24.3 Deterministic Supervisor — lessons from DIAL image-pipeline orchestration
+
+The model is **not its own process controller**. A deterministic Supervisor owns:
+
+- `RUNNING | PAUSING | PAUSED | STOPPING | STOPPED | DEGRADED | SAFE_MODE | INCIDENT_LOCK`;
+- work queues, leases, lease expiry and fencing tokens;
+- idempotency and duplicate suppression;
+- checkpoints and recovery;
+- provider/model health and manager-seat eligibility;
+- retries/backoff/circuit breakers;
+- H0–H4 action classes and approval resolution;
+- concurrency and usage budgets;
+- write-tool fencing and emergency stop;
+- immutable execution/audit provenance.
+
+Control semantics are real, not decorative:
+
+| Control | Required behaviour |
+| --- | --- |
+| Play | Latches autonomous `RUNNING`; work continues across batches/routines until Pause, Stop, policy gate or incident. A batch boundary is never an implicit stop. |
+| Pause | Stops acquiring new work; current atomic operation reaches safe checkpoint/compensation; persists `PAUSED`. |
+| Resume | Continues from durable checkpoint; completed work is not replayed. |
+| Stop | Cooperative drain, checkpoint, lease release, `STOPPED`. |
+| Emergency Stop | Immediately fences all write-capable tools; read-only diagnosis may remain available; privileged recovery required. |
+
+Work-item minimum contract:
+
+```text
+workItemId, queue, state, leaseOwner, leaseExpiresAt, fencingToken,
+attempt, idempotencyKey, checkpointVersion, policyClass, actionClass,
+createdAt, startedAt, completedAt
+```
+
+Worker heartbeat minimum:
+
+```text
+workerId, profileId, providerId, modelId, status, currentRunId,
+currentWorkItemId, lastHeartbeatAt, memoryStatus, mcpStatus, r2Status,
+providerHealth, usageWindow
+```
+
+A stale worker may not commit after recovery by another worker because the fencing token has changed. External writes must use business idempotency keys and reconcile before retry after uncertain failure.
+
+#### 6.24.4 Configurable provider/model bridge
+
+DIAL becomes **provider-configurable**. Domain code must not hardcode one model vendor.
+
+Supported architecture classes:
+
+1. **API-key providers** — production-friendly service-to-service inference (OpenAI, Anthropic and approved compatible gateways).
+2. **OpenAI Codex / ChatGPT subscription OAuth** — Hermes-supported authenticated Codex path where available; quota/auth health must be surfaced rather than guessed.
+3. **Anthropic/Claude approved paths** — Anthropic API as robust production path; Hermes-supported Anthropic OAuth only where current Hermes/account/billing requirements permit it.
+4. **Claude Code Bridge** — supervised external worker authenticated using official Claude Code login for eligible subscription-backed complex/asynchronous work. No browser-cookie scraping, copied opaque session tokens, or invented unofficial subscription API.
+5. **Codex CLI Bridge** — optional supervised worker for bounded tasks where officially authenticated Codex CLI is preferable to direct API inference.
+
+Manager-seat policy is explicit:
+
+```text
+MANAGER       = complex cross-domain planning/delegation/high-impact analysis
+SPECIALIST    = bounded domain investigation/reasoning
+AUXILIARY     = extraction/classification/compression/tagging/cheap transforms
+```
+
+Only models configured `managerEligible=true` may occupy the business manager chair. Auxiliary/specialist models cannot silently promote themselves. If no approved manager is available for a task whose policy requires one, the task waits/fails closed or requests operator intervention; quality is preferred over accidental completion.
+
+Provider connection records must include authentication mode (`API_KEY | OAUTH | CLI_BRIDGE | CUSTOM`), secret reference, health, expiry, allowed data classes, manager eligibility, fallback priority, concurrency, spend/usage policy, and metadata. **Raw secrets never enter model prompts, R2 archives, analytics exports or logs.**
+
+The UI exposes Provider Connections, OpenAI/Codex connection, Claude connection, Model Inventory, Manager Chair Policy, Routing & Fallback, Usage/Limits, Cost Controls, Privacy Eligibility, Provider Health and Re-authentication.
+
+#### 6.24.5 Identity, PII Vault, consent and model-safe memory
+
+DIAL assigns opaque subject IDs, including:
+
+`CUS_ | VEN_ | SUP_ | TECH_ | DRV_ | STAFF_ | PARTNER_ | ORG_ | ASSET_ | HOUSEHOLD_`
+
+The **PII Vault** contains direct identifiers (legal name, phone, email, exact address, government identifier where required, verification evidence and direct channel identifiers). It is separately encrypted/permissioned.
+
+Hermes does **not** receive a general-purpose `resolve_real_identity(subjectId)` tool.
+
+Before every model call:
+
+```text
+authoritative data
+  → actor + purpose + domain + permission + sensitivity
+  → Privacy Context Compiler
+  → minimum context package
+  → AI Data Egress Firewall
+  → provider/model policy check
+  → model
+```
+
+Data classes include `PUBLIC`, `INTERNAL`, `PSEUDONYMIZED_CUSTOMER`, `CONFIDENTIAL_COMMERCIAL`, `FINANCIAL_RESTRICTED`, `IDENTITY_RESTRICTED`, `HEALTH_RESTRICTED`, `LEGAL_RESTRICTED`, `SECRET`.
+
+Customer memory is split rather than stored as one giant transcript blob:
+
+- identity memory — normally model-inaccessible;
+- transaction memory — scoped to relevant business operation;
+- preference memory — personalization where purpose permits;
+- asset memory — vehicles/equipment/service context;
+- interaction summaries — minimum useful history;
+- sensitive memory — separate high-restriction domains.
+
+Each memory fact carries `subjectId`, domain, purpose, sensitivity, provenance/source, created/expiry, legal/consent basis, AI eligibility, allowed roles/tools and version.
+
+Cross-domain sensitive access defaults to deny. A Groceries agent cannot retrieve Health memory; a vendor cannot inspect unrelated Care history; a technician sees only assigned-job context.
+
+Consent is purpose-specific and versioned. At minimum distinguish service processing, personalization, conversational memory, marketing WhatsApp/email, analytics/learning, supplier-facing aggregation and health-domain processing. Data-subject rights are first-class workflows, not manual searches across databases.
+
+A pseudonymous DIAL ID is a risk-reduction control, **not an exemption from Zimbabwe data-protection obligations** if DIAL can re-identify the subject. §7.6 remains applicable.
+
+#### 6.24.6 R2 extended storage — institutional memory, not transactional truth
+
+Cloudflare R2 is adopted for large, durable objects:
+
+- customer/stakeholder attachments and archived conversations;
+- media, generated documents/reports and evidence bundles;
+- supplier/vendor documents and catalogue source files;
+- RAG source objects;
+- Hermes trajectories and evaluation artefacts;
+- immutable analytical dataset snapshots (e.g. Parquet where useful);
+- old case archives and audit evidence.
+
+Postgres remains current transactional truth. R2 must never become the live order, inventory, booking-lock, payment, identity, entitlement, consent or current conversation-state database.
+
+Object keys use opaque IDs, never names:
+
+```text
+dial-hermes/customers/CUS_x/...
+dial-hermes/assets/ASSET_x/...
+dial-hermes/suppliers/SUP_x/...
+dial-hermes/intelligence/datasets/<domain>/<version>/...
+dial-hermes/intelligence/reports/<scope>/<id>/...
+dial-hermes/hermes/trajectories/<profile>/<date>/...
+dial-hermes/compliance/audit-bundles/...
+```
+
+`r2_object_manifest` records bucket/key, subject/domain, content type, SHA-256, bytes, encryption/data class, retention policy, legal hold, source event, index state and deletion state. Lifecycle rules are mapped to ratified retention policy; legal hold overrides lifecycle deletion.
+
+Deep history is queried via authorized metadata/semantic retrieval and bounded analytics. Initial architecture: Postgres for operational hot metrics; R2 Parquet for deep history; DuckDB workers for bounded analytical scans when useful; Meili/pgvector for retrieval indexes. Do not build a heavy warehouse before measured scale requires it.
+
+#### 6.24.7 Hermes business profiles
+
+Canonical profiles are role-scoped views over the same DIAL policy/tool fabric, not independent data silos:
+
+- `dial-manager`
+- `dial-concierge`
+- `dial-spare`
+- `dial-tech`
+- `dial-groceries`
+- `dial-care`
+- `dial-health` (restricted)
+- `dial-logistics`
+- `dial-vendor`
+- `dial-supplier-intelligence`
+- `dial-support`
+- `dial-finance-analyst` (read/investigate; never money authority)
+- `dial-catalogue-steward`
+- `dial-growth-analyst`
+- `dial-risk-auditor`
+- `dial-executive`
+
+Hermes profile isolation is useful but **not itself an authorization boundary**. DIAL policy independently evaluates actor + profile + domain + entity + action + data class + purpose + approval requirement.
+
+#### 6.24.8 DIAL MCP / Tool Bus and action classes
+
+Hermes talks to narrow capabilities, not production SQL.
+
+Recommended logical capability servers:
+
+`dial-identity-mcp`, `dial-privacy-mcp`, `dial-customer-mcp`, `dial-spare-mcp`, `dial-tech-mcp`, `dial-groceries-mcp`, `dial-care-mcp`, `dial-health-mcp`, `dial-logistics-mcp`, `dial-vendor-mcp`, `dial-supplier-mcp`, `dial-finance-read-mcp`, `dial-rag-mcp`, `dial-analytics-mcp`, `dial-notifications-mcp`, `dial-admin-actions-mcp`.
+
+Action classes:
+
+| Class | Meaning | Examples | Default |
+| --- | --- | --- | --- |
+| H0 | authorized read | order status, search, availability | automatic |
+| H1 | suggestion/draft | draft reply, recommendation, scenario | automatic/non-binding |
+| H2 | reversible safe write | support ticket, CRM note, reminder | policy-allowed automatic |
+| H3 | customer/business commitment | book/reschedule/cancel, place order | explicit subject/operator confirmation |
+| H4 | money/legal/health/identity/high-risk | refund, reserve release, suspension, identity disclosure | existing privileged workflow/four-eyes/human |
+
+Every tool call carries run/tool call ID, actor, profile, capability, entity refs, purpose, action class, idempotency key, policy decision and arguments. No generic `run_sql`, unrestricted filesystem/terminal, service-role, PSP-secret or PII-vault tool is exposed to customer-facing profiles.
+
+#### 6.24.9 Business-unit capability map
+
+| Domain | Hermes capabilities | Intelligence value |
+| --- | --- | --- |
+| Spare | asset/vehicle context, natural-language part intent, deterministic fitment/search tool orchestration, compare/explain tiers, stock/price read, cart/checkout handoff, order/return, Tech installation handoff | no-result demand, fitment/return clusters, stockout loss, supplier reliability, margin leakage, bundles, geography, catalogue gaps |
+| Tech | symptom intake, emergency short-circuit, asset history, evidence prompts, eligible-tech/availability, booking/reschedule, Care entitlement, job status, completion/comeback support | time-to-assign, utilization, recurring faults, capability gaps, comeback, job economics, unserved trade/geography, training opportunity |
+| Groceries/Rounds | basket construction, repeat preferences, substitutions, Round discovery/status/vote assistance/cart support/delivery | basket margin, repeat, substitution, stockout loss, Round conversion/retention, city/category demand, promotion incrementality |
+| Care | plan/asset entitlement, maintenance schedule, reminders, service bundle, renewal/admin support | attach, renewal, utilization, preventive completion, cost-to-serve, service outcome, cross-unit value |
+| Health | service/provider navigation, appointment/admin support, benefits, reminders, approved knowledge | capacity, wait/no-show, admin resolution, provider SLA; no exploitative individual health profiling |
+| Logistics | readiness, assignment status, ETA/status, exception/reschedule/POD/COD context, capacity recommendation | dispatch latency, utilization, late/failed root cause, zone economics, cross-unit driver capacity |
+| Vendor/Supplier | onboarding, document/catalogue completeness, feed/stock health, SLA, settlement-status explanation, demand-gap recommendation | demand, lost demand, catalogue gaps, geographic opportunity, fulfilment/quality performance |
+| Finance | ledger/PSP read-only investigation, reconciliation break triage, evidence collection | settlement mismatch, fee/IMTT leakage, exception concentration, cash timing forecast; never journal write |
+| Support/CRM | classify, retrieve authorized state, safe resolution, ticket/handoff/follow-up, lead intent/next action | first-contact resolution, repeat contact, support cost concentration, complaint/root cause |
+
+Cross-unit orchestration is first-class. Example: a customer asks for a Hilux repair → Hermes can coordinate Spare fitment/stock, Care entitlement, Tech availability, deterministic quote sources, checkout and logistics without duplicating any source of truth.
+
+Rounds governance, financial entitlements, health decisions, fitment, pricing and money remain deterministic/human-governed as already locked.
+
+#### 6.24.10 Quantum Business Intelligence Engine
+
+D-61 expands D-54 into a closed outcome loop:
+
+```text
+DATA
+ → CONTRACTED METRICS
+ → ANOMALY / TREND / OPPORTUNITY
+ → EVIDENCE PACKAGE
+ → EPISTEMIC LABEL + CONFIDENCE
+ → ROOT-CAUSE / FORECAST / SIMULATION
+ → RECOMMENDATION
+ → APPROVAL / DECISION
+ → AUTHORIZED ACTION
+ → MEASURED OUTCOME
+ → INTELLIGENCE FACTORY LEARNING
+```
+
+Analytics layers: descriptive (what), diagnostic (why), predictive (likely next), prescriptive (safe options), simulation (what-if), and outcome learning (did it work?).
+
+Seed metric domains extend D-54 and must still use one `MetricContract` per KPI:
+
+- enterprise: GMV, DIAL revenue, gross/contribution margin, take rate, cost-to-serve, payment/logistics/support/return/promotion/supplier-failure cost, unit economics, cross-unit attach, repeat value;
+- customer funnel: inquiry/search → view → cart/request → checkout → payment → fulfilment → successful outcome → repeat;
+- catalogue: no-result, demand-gap value, fitment ambiguity, stale price/stock, review SLA, return-by-fitment;
+- suppliers: fill, acknowledgement, failure/cancel, stock freshness, return/quality, catalogue completeness, demand served/lost, settlement exception, contribution after operational cost;
+- technicians: eligible supply, response/acceptance, arrival, completion, evidence, comeback, utilization, idle capacity, geographic/trade shortage;
+- logistics: prep/dispatch/arrival, late/failed, stops/hour, distance/order, driver utilization, zone profitability;
+- Groceries/Rounds: basket margin, substitution, stockout, Round conversion/retention, delivery cost/basket, supplier fulfilment, promotion incrementality;
+- Care: attach, renewal, utilization, preventive completion, cost-to-serve, outcome;
+- Health operations: appointment demand, wait, capacity, no-show, admin resolution/escalation, provider SLA;
+- support: first-contact resolution, AI resolution, escalation, repeat contact, mean-time-to-resolution, backlog, complaint severity;
+- Hermes: tool success/retry, policy denial, human correction/reversal, privacy redaction/block, evidence failure, cost per resolved case, latency, failover, manager availability, memory usefulness, insight adoption/uplift.
+
+#### 6.24.11 Profitability Opportunity Engine
+
+Hermes continuously searches for measurable revenue, margin, cost, retention and risk-adjusted opportunities, including:
+
+- lost demand / no-result demand;
+- catalogue and fitment gaps;
+- stockout and supplier-confirmation leakage;
+- return/quality/comeback drivers;
+- supplier/vendor underperformance;
+- delivery/failed-delivery cost;
+- PSP/reconciliation/fee leakage;
+- support-cost concentration;
+- promotion waste/incrementality;
+- cross-sell/bundle and Care attach;
+- technician idle capacity / trade/geography supply gap;
+- Round/grocery growth and city/category gaps;
+- retention opportunity;
+- process-automation ROI;
+- fraud/risk loss reduction;
+- AI/provider operating-cost optimization.
+
+D-58 remains locked: D-61 does **not** create an owned-stock principal path. Any future principal/owned-stock scenario requires a new counsel-backed D-log decision before even simulation is treated as a strategic option.
+
+Each opportunity records evidence/metric IDs, epistemic status, expected revenue/cost/margin impact range, confidence, implementation effort, risk, dependencies, recommended action keys, owner, expiry and outcome tracking. Forecast opportunity values are analytical estimates only—never customer prices or journal entries.
+
+Priority scoring must be transparent/versioned, e.g. impact × evidence confidence × strategic fit × reversibility ÷ effort ÷ risk. Management may override with recorded reason.
+
+#### 6.24.12 Supplier and stakeholder intelligence — create value, not just surveillance
+
+DIAL shall produce supplier/stakeholder intelligence valuable enough to improve their own operations while protecting confidentiality and privacy.
+
+Supplier views may show their exact own DIAL metrics plus safe aggregate market intelligence:
+
+- sales/fill/confirmation/stock freshness/cancellations/returns/fulfilment latency;
+- catalogue completeness and listing-quality gaps;
+- demand served vs demonstrably lost through no stock/no listing;
+- rising no-result categories and product families;
+- geographic demand and seasonality;
+- quality-tier preferences in aggregate;
+- demand forecasts with confidence intervals;
+- recommendations on what to stock, where, catalogue fields to improve and fulfilment bottlenecks.
+
+Never disclose identifiable customer history, exact customer addresses, another supplier's confidential feed, non-public competitor exact prices/volumes/settlement terms, or information designed to coordinate competitors' prices. Benchmark cohorts require minimum configurable population/cohort thresholds and dominance checks; suppress a benchmark when confidentiality cannot be protected.
+
+Stakeholder outputs also cover vendors, technicians, logistics partners, Care/service/insurance partners, grocery suppliers, customers and DIAL management—each through purpose/tenant/data-class policy.
+
+#### 6.24.13 Canonical data additions
+
+Reuse an existing equivalent table if one already exists; do not fork schemas.
+
+```text
+# Supervisor
+hermes_control_state
+hermes_workers
+hermes_work_items
+hermes_work_item_attempts
+hermes_runs
+hermes_run_steps
+hermes_run_checkpoints
+hermes_approvals
+
+# Provider bridge
+ai_provider_connections
+ai_model_policies
+ai_routing_policies
+ai_usage_rollups
+ai_provider_health
+
+# Privacy / memory / R2
+subject_aliases
+privacy_tokens
+ai_context_packages
+ai_egress_decisions
+memory_facts
+memory_fact_versions
+memory_access_events
+r2_object_manifest
+
+# Skills / routines
+hermes_skill_versions
+hermes_skill_evaluations
+hermes_skill_promotions
+hermes_routines
+hermes_routine_runs
+
+# Intelligence
+metric_contracts              # D-54 contract SoR
+metric_observations
+operational_alerts
+business_insights
+insight_evidence
+business_opportunities
+opportunity_outcomes
+forecast_runs
+simulation_runs
+stakeholder_reports
+stakeholder_report_recipients
+supplier_benchmark_cohorts
+```
+
+`business_insights` stores domain/type/title/narrative, epistemic label, metric IDs/scope, evidence strength/confidence, probable causes, contradictory evidence, recommendations/expected impact, visibility, provider/model/prompt-skill/dataset versions, generated/expiry and validation status.
+
+#### 6.24.14 Canonical API groups
+
+Routes use DIAL AuthZ/audit/DTO conventions. These are capability contracts, not permission to create a second monolith.
+
+**Supervisor/control:**
+
+```text
+GET  /internal/hermes/control/status
+POST /internal/hermes/control/play|pause|resume|stop|emergency-stop|recover
+GET  /internal/hermes/workers
+GET  /internal/hermes/queues
+POST /internal/hermes/work-items/:id/retry|cancel
+GET  /internal/hermes/runs/:id
+GET  /internal/hermes/runs/:id/events
+POST /internal/hermes/runs/:id/steer
+POST /internal/hermes/runs/:id/approval
+```
+
+**Provider/model:**
+
+```text
+GET/POST /admin/ai/providers
+POST /admin/ai/providers/:id/test|connect/oauth|reauth|disable
+DELETE /admin/ai/providers/:id
+GET /admin/ai/models
+PATCH /admin/ai/models/:id/policy
+GET/PUT /admin/ai/routing
+GET /admin/ai/usage|limits
+POST /admin/ai/failover/test
+```
+
+**Identity/privacy:**
+
+```text
+POST /internal/identity/resolve|verify|link-channel|unlink-channel
+POST /internal/privacy/tokenize|compile-context|evaluate-egress|evaluate-tool-call
+GET/PUT /privacy/me/consents[/ :purpose]
+POST /privacy/me/access-request|correction-request|deletion-request|restrict-processing
+GET /privacy/me/request-status/:id
+```
+
+**Memory/R2:**
+
+```text
+GET/POST /internal/memory/:subjectId/context|facts
+PATCH/DELETE /internal/memory/facts/:id
+POST /internal/memory/search|summarize|archive|forget
+POST /internal/storage/presign-upload|presign-download|archive|restore|legal-hold
+GET/DELETE /internal/storage/objects/:id
+```
+
+**Profiles/skills/routines:**
+
+```text
+GET/POST/PATCH /admin/hermes/profiles...
+GET /admin/hermes/skills
+POST /internal/hermes/skills/propose
+POST /admin/hermes/skills/:id/evaluate|promote|rollback
+GET/POST/PATCH /admin/hermes/routines...
+POST /admin/hermes/routines/:id/run|pause|resume
+```
+
+**MCP/tools:**
+
+```text
+GET/POST /admin/mcp/servers
+POST /admin/mcp/servers/:id/test
+GET /admin/mcp/servers/:id/tools
+PUT /admin/mcp/servers/:id/tool-policy
+POST /internal/tools/execute|dry-run
+GET /internal/tools/:capability/schema|policy
+```
+
+**Conversations/handoff:**
+
+```text
+POST /internal/conversations
+GET /internal/conversations/:id
+POST /internal/conversations/:id/messages|summarize|handoff|takeover|return-to-ai|close
+GET /staff/conversations/inbox
+```
+
+**Intelligence:**
+
+```text
+GET/POST /admin/intelligence/metric-contracts
+GET /admin/intelligence/metrics/:id
+POST /internal/intelligence/query
+GET /admin/intelligence/insights[/:id]
+POST /admin/intelligence/insights/:id/validate|accept|reject|action
+GET /admin/intelligence/opportunities[/:id]
+POST /internal/intelligence/opportunities/generate
+POST /internal/intelligence/anomalies/scan|forecast|root-cause|scenarios
+GET /admin/intelligence/scenarios/:id
+GET /admin/intelligence/evidence/:id
+POST /admin/intelligence/reports
+GET /admin/intelligence/reports/:id
+POST /admin/intelligence/reports/:id/publish
+```
+
+**Supplier intelligence:**
+
+```text
+GET /supplier/intelligence/overview|demand|catalogue-gaps|stock-opportunities
+GET /supplier/intelligence/performance|quality|geography|forecast|recommendations|benchmarks
+POST /supplier/intelligence/recommendations/:id/feedback
+GET /supplier/intelligence/reports
+POST /internal/stakeholder-reports/generate
+```
+
+Domain Hermes façades exist under `/internal/hermes/{spare|tech|groceries|care|health|logistics|vendor|finance|support}/*` and call existing domain services; they do not duplicate business rules.
+
+#### 6.24.15 Event catalogue additions
+
+Typed event families include:
+
+```text
+customer.created|verified|channel.linked|consent.updated|memory.updated
+privacy.request.created|completed|egress.blocked
+conversation.started|message.received|intent.detected|tool.requested|handoff.requested|human.took_over|returned_to_ai|resolved
+search.no_result
+supplier.feed.received|stock.stale|confirmation.failed|sla.breached|catalogue.gap.detected|insight.generated|report.published
+asset.maintenance.due|care.entitlement.checked|care.plan.renewal_due
+round.member.joined|vote.updated|vote.closed|cart.finalized|member.opted_out
+delivery.delayed|failed|capacity.changed
+reconciliation.break.detected
+metric.threshold.crossed|anomaly.detected|insight.generated|validated|accepted
+opportunity.generated|actioned|outcome.measured
+forecast.generated|simulation.completed|stakeholder.report.generated
+hermes.control.played|paused|resumed|stopped|emergency_stop
+hermes.worker.stale|lease.recovered|provider.degraded|provider.failed_over|manager.unavailable
+```
+
+Existing order/job/payment/delivery/fiscal events remain authoritative and are consumed rather than redefined.
+
+#### 6.24.16 Required screens and progressive disclosure
+
+Do not make one information-dense god dashboard. High-density detail lives behind drill-downs; customer screens remain warm, simple and progressively disclosed.
+
+**Executive/Command Centre:** Enterprise Command Centre; Profitability Opportunities; Cross-Unit Synergy; Actual vs Simulated; Executive Brief; Decision Inbox; Insight Evidence Viewer; Forecasts; Scenario Lab.
+
+**Hermes Operations:** Hermes Control Room; Worker Fleet; Queue Monitor; Run Explorer; Approval Inbox; Incident Centre; Recovery Console; Routines; Skills Registry; Skill Evaluation; Memory Operations; R2 Archive Operations.
+
+**Provider Settings:** Provider Connections; Connect OpenAI/Codex; Connect Claude; Model Inventory; Manager Chair Policy; Routing & Fallback; Usage & Limits; Cost Controls; Privacy Eligibility; Provider Health; Re-authentication.
+
+**Privacy/Governance:** Privacy Control Centre; Consent Ledger; Egress Firewall; Data Rights Queue; Identity Link Review; Sensitive-Domain Policy; Audit Explorer; Retention Policies.
+
+**Business intelligence:** Spare Intelligence; Catalogue Demand Gap; Fitment/Return Intelligence; Tech Operations; Technician Capacity/Value; Groceries; Rounds; Care; Health Operations; Logistics; Vendor; Supplier Portfolio; Finance/Reconciliation; Customer Support; Growth/Funnel.
+
+**Supplier portal:** Intelligence Home; Demand & Forecast; Catalogue Opportunities; Lost Demand/Stockout; Performance & SLA; Quality & Returns; Geography; Aggregated Benchmarks; Recommendations; Report Inbox; recommendation feedback.
+
+**Customer account:** AI & Personalization; Connected Channels; What DIAL Remembers; Memory Preferences; Notification Preferences; Consent & Privacy; Download/Correct/Delete/Restrict Data; Human Support/AI Handoff explanation.
+
+Hermes is also embedded contextually in order, booking, asset, cart, vendor catalogue, technician job, dispatch, reconciliation, support and alert detail screens. It inherits the authorized entity scope of the screen.
+
+#### 6.24.17 Core workflows
+
+**Conversational service/commerce:** message → verified channel → subject resolution → purpose/consent → context compiler → Hermes → tool plan → policy → authoritative read → user choice → H3/H4 confirmation where needed → authoritative write → notification → outcome → memory update.
+
+**Autonomous exception:** business event → metric/alert → Hermes investigation → evidence → action class → H0-H2 execute if allowed / H3-H4 approval → outcome → close/escalate.
+
+**Profitability loop:** detect leakage/opportunity → impact range → root-cause/evidence → scenario options → recommend → manager decision → authorized domain action → measurement window → actual vs expected uplift → learning/evaluation.
+
+**Supplier intelligence:** scheduled rollup → privacy/competition aggregation → demand/performance/forecast → evidence validation → supplier-scoped report → publish → supplier feedback → measured outcome.
+
+**Skill learning:** repeated successful workflow → candidate → lint/policy review → frozen replay/Promptfoo → human promote → versioned skill → live outcome monitoring → rollback on regression. Self-improvement may never silently rewrite business policy.
+
+Human/AI conversation ownership is explicit:
+
+`AI_ACTIVE | AI_WAITING_APPROVAL | HUMAN_ACTIVE | AI_ASSISTING_HUMAN | WAITING_CUSTOMER | RESOLVED | CLOSED`
+
+This prevents AI and human from sending competing replies.
+
+#### 6.24.18 Eventuality matrix — minimum required coverage
+
+Before production, tests/runbooks cover at least:
+
+- unknown/ambiguous identity, duplicate accounts, recycled number, shared household number, phone change, failed verification;
+- consent withdrawal, deletion/restriction request, retention/legal-hold conflict;
+- direct/indirect prompt injection, malicious supplier/RAG document, customer supplying another person's identity, cross-customer IDOR;
+- vendor/supplier asking for another tenant/competitor confidential data; benchmark cohort too small;
+- model requesting direct identity unnecessarily; response containing suspected PII; Health context requested from ordinary commerce profile;
+- provider authentication expiry, subscription quota/rate limit, spend cap, latency spike, malformed tool call, total outage, no manager-tier model, prohibited model downgrade;
+- tool timeout/partial success, duplicate/out-of-order webhook, uncertain external write, stale business state;
+- payment pending/duplicate callback, booking race, stock/price change mid-conversation, supplier confirmation failure, technician/driver unavailable;
+- customer offline mid-flow, human takeover during model/tool work, human/AI double-send;
+- worker crash after tool request, stale heartbeat, expired lease, pause/stop during atomic write, emergency-stop fencing;
+- R2 upload failure, missing/corrupt object, checksum mismatch, lifecycle vs legal hold, stale retrieval index;
+- incomplete analytics dataset, changed MetricContract, forecast structural break, weak causal evidence, false-positive anomaly, stale insight, supplier disagreement;
+- simulated value mistaken for actual (persistent banner/watermark and export mark);
+- recommendation produces worse outcome (record outcome, lower confidence/review skill/model);
+- suspected fraud (separate risk workflow; never autonomous accusation);
+- privacy/security incident (incident lock, evidence preservation, §7.6 response process);
+- WhatsApp outage/out-of-window template rules; conflicting RAG sources; network partition/system clock drift.
+
+Writes fail closed when authoritative state cannot be verified.
+
+#### 6.24.19 Security, observability and evidence
+
+Hermes' own security controls are additive, not sufficient. DIAL requires network isolation, per-profile credentials, capability-scoped MCP tools, no production DB-admin/PSP/PII-vault credentials in Hermes, H0–H4 enforcement, egress scanning, container/resource limits, prompt-injection testing, D-48 Threat Dragon/Semgrep/Checkov/Renovate/Strix staging, RLS/IDOR and immutable audit.
+
+Hermes API/Run endpoints bind internally/loopback/private network; DIAL Gateway is the public boundary. No unrestricted/yolo terminal mode in production customer/stakeholder profiles.
+
+Observability remains separated:
+
+- Infrastructure: Prometheus / isolated Grafana where used;
+- AI: Langfuse / `AiInvocation`, model/provider/latency/tokens/cost/tool calls/corrections/evals;
+- Business: D-54 `MetricContract`, operational queues, profitability, stakeholder outcomes.
+
+Every run trace links: input context hash → privacy/policy decision → provider/model call → tool request/result hashes → approval → response → business events → outcome. Material insights link metric contracts and reproducibility evidence.
+
+#### 6.24.20 D-61 T0–T9 overlay and Definition of Done
+
+Do **not** renumber existing trains.
+
+| Train | D-61 overlay |
+| --- | --- |
+| T0–T1 | D-61 contracts; Supervisor state/leases; provider abstraction; identity/privacy contracts; H0–H4; R2 manifest; threat model/API skeleton |
+| T2–T3 | Memory service; Privacy Context Compiler/Egress Firewall; R2 archival; Spare/catalogue read tools; supplier intelligence data foundation; channel gateway |
+| T4–T5 | Finance read-only analyst/reconciliation evidence; provider settings/quota/cost; conversation/handoff; no money authority |
+| T6 | Tech/Care/logistics tools; operational events and exception orchestration |
+| T7 | skills/routines governance; D-54 Intelligence Factory integration; Promptfoo gates; R2 analytical snapshots; Opportunity Engine v1 |
+| T8 | Hermes Command Centre; supplier/stakeholder intelligence; reports; forecasts; root-cause/scenario tooling |
+| T9 | full cross-unit orchestration; profitability outcome loop; adversarial privacy/security; failover/recovery/load; launch runbooks |
+
+D-61 cannot be called green until real Play/Pause/Resume/Stop/E-stop controls work; leases/fencing/recovery are tested; provider API/subscription paths have health/usage visibility; manager eligibility prevents silent downgrade; model context uses opaque IDs/minimum purpose; Health isolation passes; R2 manifests/lifecycle/legal hold/archive/restore work; no raw SQL/PII vault/PSP secrets are exposed; every tool is H0–H4; MetricContract/epistemic/evidence rules are enforced; opportunity outcomes are measured; supplier intelligence protects privacy/confidentiality; Actual/Simulated cannot cross; and Promptfoo/D-48/IDOR/recovery tests plus D-52 tracer matrices are 100%.
 
 ---
 
@@ -2515,7 +3180,7 @@ Applied to DIAL: a photograph of a damaged part, a vehicle with a visible plate,
 
 **What is not known: whether POTRAZ has issued any adequacy determinations, how long authorisation takes, whether it is granted per recipient or per category, and whether one has ever been refused.** [Unverified] This is the largest single unknown in the plan.
 
-Which is precisely why §5.7 is designed the way it is. The engineering mitigations reduce exposure regardless of how POTRAZ responds, and they should be built either way: strip EXIF and GPS at upload; blur or crop faces and plates client-side before any external call; never send identity documents, tax clearances or bank details abroad; **omit customer name / phone / address / ID from outbound AI payloads entirely**; scrub accidental free-text PII with **Presidio only** (do not tokenise CRM identity fields and send them); contract for no-training and zero-retention; and prefer **self-hosted open-weights inference on infrastructure DIAL controls**, which changes the analysis from "transfer to a third party" to "transfer to your own processor" and is much easier to paper. Add a **separate, unbundled consent toggle** with a functioning manual fallback, and keep a transfer register recording categories, recipients, countries, legal bases and safeguards. `[CHANGED]` `[FOUNDER]`
+Which is precisely why §5.7 and **D-61 §6.24.5** are designed the way they are. The engineering mitigations reduce exposure regardless of provider choice and must be built either way: strip EXIF/GPS where not needed; blur/crop faces and plates where the task does not require them; never send identity documents, tax clearances, bank/payment credentials or unrelated Health data to a model; keep direct identity in the **PII Vault**; give models an opaque DIAL subject ID plus the **minimum purpose-scoped context** produced by the Privacy Context Compiler; scrub accidental free-text PII with Presidio/egress scanning; enforce provider/model **data-class eligibility**; contract for appropriate no-training/retention/processor safeguards; maintain a transfer register and impact/authorisation evidence; and provide a manual/human fallback where consent or provider use is unavailable. D-61 permits configured external providers and approved subscription-backed paths, but provider convenience never overrides this legal/privacy boundary. A pseudonymous `CUS_...` identifier is still personal data for risk/compliance purposes where DIAL can re-identify the person; pseudonymisation is a minimisation/security control, not a way around POTRAZ obligations. `[CHANGED D-61]` `[FOUNDER]`
 
 ### 7.7 Insurance distribution — the aggregator route
 
@@ -2649,7 +3314,7 @@ Everything required for open Harare launch in one release train, including:
 - Auth-first gateway (**Rive** welcome-back) + Shop (`dialaspare` / Meilisearch / **Sharp**) + Services (`dialatech` guide + deterministic emergency).
 - Escrow Job Reserve, ledger, FX, tax, **ZIMRA fiscalisation**, COD+ban, used-spares rules, mechanic channel, Projects (toggle / coming soon as decided).
 - **Customer Android + iOS + web + WhatsApp**; technician Android; admin; **Resend + Brevo**.
-- **`packages/ai`** (§5.15) polished: Gemini, privacy, schemas, gates, safe-self-help; Spare AI = performance/CRM only.
+- **`packages/ai` + D-61 Hermes Business Agent Fabric** polished to the launch-appropriate scope: provider bridge, Supervisor, privacy context compiler, governed conversations/tools, memory/R2 foundations, schemas/evals; no AI money authority.
 - **§5.16 full polish:** checklist library (all launch trades’ common problems), photo overlays on every relevant upload, **Chatwoot**, **Formbricks**, **Supabase Realtime** status, confidence/missing-info UI, **Cal.com** slots (non-emergency), **PostHog** flags/analytics.
 - **§6.9–6.10:** **n8n + Temporal + BullMQ**; Metabase for ops BI.
 - Dual native apps cost accepted (C-5 / D-17).
@@ -2737,7 +3402,7 @@ Each carries an owner, a deadline relative to phase, and the cost of deciding la
 | D-15a | **Restricted-SKU rules: refrigerant requires buyer certification, or is not listed** | Product / Legal | **Phase 1** | Selling refrigerant to an uncertified buyer is a criminal offence, and auto A/C regas is high-demand (§7.9) |
 | D-16 | Towing partnership exclusivity and liability during a tow *(PRD Q-6)* | BD | Before Phase 4 | Uninsured liability during dispatch |
 | D-17 | **Customer surfaces: Android + iOS + web + WhatsApp; admin separate** *(C-5 resolved; supersedes PWA-only)* | Product | Phase 1 | Dual native apps raise build/staffing cost vs prior PWA-only path — accepted; scope and hire for two customer native apps (§8.1–8.3) |
-| D-18 | **AI provider:** Gemini = sole reasoning brain via LiteLLM; Claude (or other) = gateway outage fallback only; HF/CPU organs; AI in MVP as ops copilot + guided intake / clientAssessment; Spare AI = performance/CRM only *(C-1, §5.14–5.15)* | Eng | Phase 1 | Vendor lock-in and outage exposure (§5.10) `[CHANGED]` `[FOUNDER]` |
+| D-18 | **AI provider (provider exclusivity superseded by D-61):** original Gemini-only choice is replaced by D-61 Provider Bridge + Hermes model policy. Deterministic/HF/CPU organs and typed capabilities remain; provider/model is configurable and manager eligibility explicit. | Eng | Superseded by D-61 | Preserve quality/privacy/authority without hardcoding one provider `[CHANGED D-61]` |
 | D-19 | Data-protection licence (tiered, from US$50), DPO appointment and certification, and the **cross-border transfer notification and authorisation** | Legal / DPO | **Phase 0–1** | Operating unlicensed carries up to seven years. POTRAZ requires notification, authorisation *and* express consent before any transfer abroad — and how long that takes is the largest unknown in the plan. Start the application early; it gates the external AI tiers (§7.6) |
 | D-20 | **All trades in scope; Projects designed in MVP with client "coming soon" + admin toggle** *(C-2, C-3 resolved — reversed prior Phase 3 gate)* | Founder | — | Resolved |
 | D-21 | **Core exchange: not accepted** *(cancelled)* | Product | — | Do not build reverse logistics for cores |
@@ -2749,13 +3414,13 @@ Each carries an owner, a deadline relative to phase, and the cost of deciding la
 | D-27 | **Dual-domain gateway / auth landing:** unauthenticated landing = **sign-in** (+ create account); Shop → `dialaspare.co.zw` / Services → `dialatech.co.zw` only on **authenticated** home; optional session restore + respectful welcome-back; **Rive** (not Lottie) for auth home / light branded sign-in — **not** anonymous Shop\|Services; no voice | Product | Before open launch | Customer entry UX (§1.4, §6.2) `[CHANGED]` `[FOUNDER]` |
 | D-28 | **Messaging:** Resend = transactional; Brevo = promo/CRM; consent/unsubscribe per §7.5 | Eng / Ops | Phase 1 | Channel cost and consumer law (§4.6) `[CHANGED]` `[FOUNDER]` |
 | D-29 | **Automation stack:** **n8n + Temporal + BullMQ** (Inngest rejected); all launch-mandatory with single customer release | Eng | Before open launch | Durable money/fiscal + ops workflows (§6.9–§6.10) `[CHANGED]` `[FOUNDER]` |
-| D-30 | **Spare AI scope:** performance analysis + CRM only; internal ops agents OK (same `packages/ai`); no agentic storefront; AI-assisted shipping (Cursor/Claude Code) adopted | Founder / Eng | — | Resolved (§5.14–5.15) `[CHANGED]` `[FOUNDER]` |
+| D-30 | **Spare AI scope (anti-agentic restriction superseded by D-61):** deterministic Meili/catalogue/fitment/pricing/order services remain the selling SoR, but a governed Hermes concierge may conversationally orchestrate those services. Performance/CRM intelligence remains in scope. | Founder / Eng | Superseded in part by D-61 | Conversational commerce without model-owned commerce truth `[CHANGED D-61]` |
 | D-31 | **Images:** **Sharp** only (imgproxy rejected) for ZW mobile data | Eng | Before open launch | Bandwidth (§3.2, §6.10) `[CHANGED]` `[FOUNDER]` |
-| D-32 | **AI privacy:** omit name/phone/address/ID from outbound model payloads; Presidio for free-text scrub only | Eng | Phase 1 | Corrects prior "tokenise CRM fields" wording (§5.7) `[CHANGED]` `[FOUNDER]` |
-| D-33 | **AI composition model is canonical:** one ERP package `packages/ai`; Gemini sole brain; organs = privacy/sensors/match/context/Zod/Langfuse/**Promptfoo**; public capabilities only; siblings (Meili, Sharp, Resend/Brevo, Rive, n8n/Temporal/BullMQ) stay out of module | Founder / Eng | — | Resolved (§5.15, §6.10) `[FOUNDER]` `[CHANGED]` |
+| D-32 | **AI privacy:** omit/minimize direct identity; Presidio for accidental free-text PII. **D-61 extends this with opaque subject IDs, PII Vault, purpose-scoped Privacy Context Compiler, Egress Firewall, provider data-class eligibility, memory ACLs and separate Health isolation.** | Eng / DPO | Phase 1 | Privacy-by-design; pseudonymisation is not a regulatory exemption (§5.7, §6.24.5, §7.6) `[CHANGED D-61]` |
+| D-33 | **AI composition (provider exclusivity superseded by D-61):** `packages/ai` remains typed capability/model composition with privacy/sensors/match/context/Zod/Langfuse/Promptfoo. D-61 adds Hermes Supervisor/provider/memory/tool/intelligence orchestration above it; no unrestricted raw model endpoint. | Founder / Eng | Extended by D-61 | One governed AI fabric without second business SoR `[CHANGED D-61]` |
 | D-34 | **Safe-self-help policy:** allowlist only (e.g. fuel lid); never dangerous DIY; `requiresProfessional` + book/emergency CTA otherwise | Product / Safety | — | Resolved (§5.15) `[FOUNDER]` |
 | D-35 | **Experience enhancers launch-mandatory at full polish** (§5.16): checklists (AI-drafted library pipeline), photo overlays, Chatwoot, Formbricks, Realtime, confidence UI, **Cal.com**, **PostHog** — single customer launch; post-launch = small tweaks only. Canonical picks §6.10 | Founder / Product / Eng | Before open launch | CX / diagnosis (§5.16, §8.1) `[CHANGED]` `[FOUNDER]` |
-| D-36 | **Canonical tool consolidation** (§6.10): one winner per overlapping job (Rive, Sharp, BullMQ, Promptfoo, PostHog, Cal.com, Meilisearch, Chatwoot, Formbricks, Metabase, Gemini, LiteLLM) | Founder / Eng | — | Resolved `[NEW]` `[FOUNDER]` |
+| D-36 | **Canonical tool consolidation** (§6.10): Rive, Sharp, BullMQ, Promptfoo, PostHog, Cal.com, Meilisearch, Chatwoot, Formbricks, Metabase remain. **LLM-provider winner is superseded by D-61 Provider Bridge/Hermes**; do not hardcode provider exclusivity. | Founder / Eng | Extended by D-61 | Consolidate functions while allowing governed provider portability `[CHANGED D-61]` |
 | D-37 | **Single polished customer launch** — no multi-phase public MVP ladder; Gates 0–3 are internal readiness only (§8.1) | Founder | — | Resolved `[NEW]` `[FOUNDER]` |
 | D-38 | **Storefront / marketplace UX stitch kit locked** (§6.2.1, §6.10): Spare web = Mercur B2C storefront (+ Your Next Store or Nimara polish); Tech web = **FixItNow primary** (+ NearServe, Homezy); supplier = Mercur vendor-panel; Android shopping = CoolMallKotlin (+ Dukkan); iOS shopping = tunacosgun/eCommerce (+ Pow); technician arch = Now in Android; tokens = Style Dictionary; motion = Rive; web primitives = shadcn/ui (+ Magic UI gateway-only); **fitment/PIM schema reference = SandPIM** (`autopartsource/sandpim`, MIT — ACES/PIES cross-check only, not SoR, not customer UI). **UI donors only** (except SandPIM = catalogue schema reference) — DIAL ERP remains SoR. Reject Expo/RN customer shells (C-5). Licence-check FixItNow/NearServe/Homezy/CoolMall/Dukkan before Gate 1 | Founder / Product / Eng | Before scaffolding / Gate 1 | Amazing UX + fitment schema discipline without orphaning native + compliance stack `[NEW]` `[FOUNDER]` |
 | D-39 | **Development Agent Pack mandatory** — `DIAL_Development_Agent_Pack.md` is Part 9 companion: env catalog, Meili `spare_offers_v1` schema, Postgres table inventory, screen→UX-donor map, adapter stubs (Paynow/WhatsApp/FDMS), RLS matrix, scaffold trains T0–T9, do-not-reopen research table. Agents must not repeat base tool/UX/compliance research already settled in v4. Scaffolding **may** start; customer-open launch still requires Appendix C | Founder / Eng | Before first scaffold PR | Cuts development-phase research thrash `[NEW]` `[FOUNDER]` |
@@ -2783,6 +3448,8 @@ Each carries an owner, a deadline relative to phase, and the cost of deciding la
 | D-58 | **D-2 agency confirmed + D-51 owned-stock discarded** — Founder clarifies DIAL is an **agent**. Marketplace Spare + Tech = agency only. **Discard** D-51 DIAL-owned / principal SKU track (no `DIAL_OWNED` offers, owned inventory/COGS, Sold-by-DIAL principal path in MVP). Protects agency characterisation for FDMS/VAT. FDMS virtual API (**D-40a**) proceeds on **agency receipt model**; e-invoices/electronic receipts reflect tax; WA payments use same ERP `fdms_outbox` / fiscal tracking as web. Reintroduce owned stock only via new D-log + counsel | Founder / Tax / Product / Eng / Finance | Immediate; FDMS agency scaffold unblocked for characterisation | Owned principal SKUs undermine agent status; wrong FDMS party on receipt `[NEW]` `[FOUNDER]` |
 | D-59 | **Agency FDMS receipt model + in-house Gateway** — From founder tax discussion: preserve agency; registered goods **VAT-inclusive** (supplier remits goods VAT); DIAL VAT on **commission/fees** only; informal = **no** goods VAT / never principal VAT; B2B formal-only + buyer TIN for Valid invoices; no GMV VAT split-pot; tech tax via WHT/ITF263 (D-50). **Build** ZIMRA Virtual Gateway adapter in `packages/tax` (outbox, fiscal day, reconcile). CloudESD/PSP signer = optional `FdmsSigner` if onboarding delayed — not SoR. Receipt classes: `DIAL_FEE`, `GOODS_FORMAL` (on-behalf / supplier seller), `GOODS_INFORMAL` (no goods VAT fiscal). E-invoice + WA receipt links reflect tax. Closes grill FDMS buy-vs-build OPEN | Founder / Tax / Eng / Finance | With T5 money/fiscal; WA shares outbox | Wrong receipt party = agency break / B2B input-tax failure `[NEW]` `[FOUNDER]` |
 | D-60 | **Open-issue locks** — **IMTT = DIAL opex** (not customer price line); GL `imtt_expense`; PSP/escrow mediated legs typically attract IMTT (FI remits/may recover) — negotiate fees + counsel on leg opex, no customer surcharge. **C-4** Paynow-first escrow ask. **B2C informal visible** at launch (B2B hide D-49). **Flash-Lite P1**. **COD settle = USD** (ZiG indicative). Meta WA = ops launch gate. Comprehensive WA template register in companion §12 | Founder / Finance / Tax / Product / Eng / Ops | Immediate | Customer-facing IMTT kills price edge; COD/FX ambiguity; unowned OPENs thrash Plan `[NEW]` `[FOUNDER]` |
+
+| D-61 | **Hermes Business Agent Fabric + R2 Extended Memory + Provider Bridge + Quantum Intelligence** — Adopt. DIAL uses Hermes as persistent business reasoning/orchestration above authoritative domain systems; deterministic Supervisor owns run state/leases/checkpoints/approvals/provider policy/recovery; opaque subject IDs + PII Vault + Privacy Context Compiler/Egress Firewall; R2 for large-object/archive/RAG/trajectory/evidence/analytical snapshots only; permissioned MCP Tool Bus H0–H4; configurable API-key + approved subscription-backed providers including OpenAI Codex/ChatGPT OAuth and approved Claude/Claude Code paths; managerEligible allowlist; governed cross-unit conversations/operations; D-54 Quantum BI extension with evidence labels, profitability Opportunity Engine, supplier/stakeholder intelligence and measured outcomes. **Supersedes only** earlier Gemini-only / anti-agentic restrictions (D-18/D-30/D-33/D-36); preserves money, privacy, official WA, maps, security, agency/WHT/fiscal, D-52, D-54 and human/publish gates. Canonical engineering: §6.24. | Founder / Eng / Product / Ops / DPO | Integrate now; T0–T9 overlay §6.24.20 | Prevents Hermes/provider/privacy/intelligence work being silently omitted as a side document `[NEW]` `[FOUNDER]` |
 
 ---
 
@@ -2822,6 +3489,7 @@ v4 is the product and architecture authority. It is **not** by itself a complete
 | May agents auto-publish checklist/AI revisions, skip Promptfoo/human promote, treat Command Centre Simulated as live money control, or invent ad-hoc KPIs without MetricContract? | **No** — D-54 (Factory learning + CC metric contracts; Simulated never auto-pays) |
 | May agents vendor full agency-agents / anthropics/skills / diagram-design asset trees, install Rapid Prototyper culture, or copy Anthropic ToS docx/pdf skills into the monorepo? | **No** — D-55 (selective habits + thin dial skills only; companion locked adopted) |
 | May agents skip plan-phase grill on money/WA/maps/AI/dual-capacity/Catalogue Factory/Intelligence, or merge `packages/ai` without `dial-ai-capability-review`? | **No** — D-56 (grill in Plan; AI capability audit before merge; Flash-Lite stays P1) |
+| May agents treat Hermes as a standalone bot, expose raw PII/production SQL, use R2 as a transactional DB, silently downgrade manager models, or bypass domain services/approval gates? | **No — D-61 §6.24.** Hermes is the governed business-agent fabric behind Supervisor/privacy/tool boundaries; provider-configurable, not authority-configurable. |
 | May the product open to customers? | **Only** when Appendix C bold items + §8.1 gates are green (escrow, FDMS, POTRAZ, tax opinion, etc.) |
 
 ### 9.2 What was audited as “enough” vs “missing” before the pack
@@ -2837,7 +3505,7 @@ v4 is the product and architecture authority. It is **not** by itself a complete
 
 ### 9.3 Authority order
 
-1. This consolidated plan (v4) — product, legal, architecture decisions  
+1. This consolidated plan (v4, including **D-61 §6.24**) — product, legal, architecture decisions
 2. `DIAL_Development_Agent_Pack.md` — scaffolding contracts  
 3. `AGENTS.md` + `.cursor/rules/*.mdc` — always-on agent enforcement (**D-47**)  
 4. Blueprint + checklist library + stitch/WA/promotions companions — extended detail  
@@ -2891,4 +3559,3 @@ Required for any offer with `condition = used`. This is what makes a used-part m
 Extends the checklist common to both source documents. Items in **bold** are new here and each one blocks launch.
 
 Company structure · supplier contracts (including net-price terms, oversell fee, bond, statement format, **conformity-certificate references and collectable indemnity**, **and for used spares: warranty, returns, and genuineness**) · technician agreements (**including contractor framework reviewed against the actual workflow, evidence obligations, six-month parts-and-labour warranty, and per-trade credential gates**) · **mechanic/trade account agreement (paid channel — approved)** · customer terms (**including guarantee caps, fitment-guarantee fault split, used-part grade definitions, AI-preliminary-estimate disclaimer until §5.9 gates, consent language, COD terms and ban policy, and a seven-day cancellation policy that does not attempt to exclude the statutory right**) · **thorough Terms & Conditions live in the legal compliance module (§3.8)** · **payment-provider escrow agreement (Job Reserve hold-and-release on instruction; IMTT structuring discussion documented)** · **tax treatment opinion: VAT at 15.5%, fiscalisation, deemed supplier** · **VAT registration active and FDMS virtual device registered, tested end to end, with a fiscal-day close worker running — ZIMRA fiscalisation hard requirement** · **buyer VAT/TIN capture live at checkout** · **withholding-tax procedure at payout, with tax-clearance verification in the payment run and cumulative per-payee tracking** · **Job Reserve via PSP escrow live (not DIAL operating account)** · **currency-of-record and display policy** · **POTRAZ data controller licence issued and DPO appointed, certified and notified** · **cross-border transfer notified and authorised, express separate consent implemented with a working manual fallback, redaction pipeline live (omit identity fields from AI payloads; Presidio on free text), transfer register maintained** · **retention schedule enforced by a running job** · **exchange-control classification of foreign AI/cloud spend confirmed in writing, and recurring contracts registered** · **product and public liability insurance bound, sized to a worst-case engine or fire claim** · **group personal accident cover for technicians on DIAL jobs** · **returns pipeline live, not planned** · **restricted-SKU controls live (refrigerant buyer certification, or not listed)** · branded workwear · verification SOPs (**including trade-test class, ZERA and Ozone Office checks, re-verification clock, and manager's-choice admin flag**) · dispute policy and evidence deadlines · catalogue standards and chassis-code table · **Meilisearch catalogue search live; dual-entry Select Vehicle / Browse EPC; no reverse-engineered EPC/TecDoc scrape** · **Sharp image optimisation (imgproxy rejected)** · **no core-exchange flows** · **buffer stock not required** · **Projects ERP designed; client UX "coming soon" or toggle-gated** · **domains secured: dialaspare.co.zw, dialatech.co.zw; main Dial gateway = sign-in landing, Shop|Services only when authenticated (optional session restore + respectful welcome-back)** · **trademark filings** · **Resend transactional + Brevo promo/CRM with consent/unsubscribe** · **guarantee provision funded and booked** · **published claim-statistics commitment** · **eighteen-item electronic disclosure list audited across Android, iOS, web and WhatsApp customer flows, with a mandatory order-review step in each** · **marketing opt-in/opt-out compliant with the unsolicited-communications rules** · **MVP English-only UI; optional AI text translator for problem description only; no voice UX** · **Spare = direct storefront; Tech guide bot + deterministic emergency path** · security testing (**D-48:** Threat Dragon models for money/webhook paths; Semgrep CE + Checkov CI green; Renovate dep hygiene; Strix staging pentest before customer-open where authorized) · **RLS policy test suite green** · **restore drill completed** · operational dashboards (**including ops-minutes and money dashboards**) · **AI evaluation gates passed for every customer-visible capability; no AI price shown to customers until gates pass** · **human-review path for every adverse automated decision** · **incident runbooks for the five named scenarios** · supplier CSV format documentation · sourcing reserve and refund terms · towing-partner SLA and liability agreement (Phase 4) · IPEC aggregator or agent position confirmed with the underwriter's SLA filed (Phase 4). `[CHANGED]` `[FOUNDER]`
-

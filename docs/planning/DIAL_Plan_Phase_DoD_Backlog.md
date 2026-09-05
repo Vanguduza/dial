@@ -2,7 +2,7 @@
 
 **Purpose:** Near-complete feature DoD before Build (dial-tracer-slice / D-52).  
 **Steer:** **D-2 = agency (D-58)**; **D-51 owned stock discarded**. Customer-open still Appendix C; FDMS live credentials may stub until Phase-0.  
-**Rules:** No stub-as-MVP; MVP locks (D-37, D-41, D-57, D-58, D-59, D-60, …) in DoD from day one — **not** D-51.  
+**Rules:** No stub-as-MVP; MVP/platform locks (D-37, D-41, D-57, D-58, D-59, D-60, **D-61**, …) in DoD from day one — **not** D-51.
 **Ticket hygiene:** Assigned to **Dev Manager** (Blueprint §8.0 / Cursor prompt) — open E1a or E2a with DoD + owner before parallel trains.  
 **No code scaffold** here — docs/tickets only.
 
@@ -18,11 +18,11 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 | Grill | Topic 1; **D-2 = agency**; owned stock discarded |
 | Channels | web checkout · WA pay/status · native pay · admin money ops |
 | Thin vertical **E1a** | Freeze OfferSnapshot (USD) → PSP authorize → webhook capture → ledger → **FiscalReceiptQueued** (agency) |
-| Thin vertical **E1b** | Daily ZiG rate → EcoCash ZiG payable + x_rate_id |
+| Thin vertical **E1b** | Daily ZiG rate → EcoCash ZiG payable + `fx_rate_id` |
 
 ### Feature DoD checklist
 
-- [ ] mountMinor + currency end-to-end
+- [ ] `amountMinor` + currency end-to-end
 - [ ] PspAdapter stubs Paynow/ContiPay/EcoCash/PayPal/COD/escrow — D-43
 - [ ] JobReserve state machine tests
 - [ ] Webhook signature + idempotency; duplicate no-op
@@ -98,11 +98,11 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 ---
 
-## E4 — packages/ai MVP capabilities
+## E4 — packages/ai typed capabilities + D-61 compatibility
 
 | Field | Content |
 | --- | --- |
-| Locks | C-1, §5.7–5.15, D-32, D-54, D-56 |
+| Locks | C-1, §5.7–5.15, **§6.24**, D-32, D-54, D-56, **D-61** |
 | Thin vertical **E4a** | `guidedIntake` → JobAssessment row only (no price) |
 
 ### Feature DoD checklist
@@ -114,7 +114,10 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 - [ ] Langfuse / `AiInvocation` cost + correction hooks
 - [ ] `dial-ai-capability-review` audit before merge — D-56
 - [ ] Factory promote still human + Promptfoo — D-54
-- [ ] Flash-Lite optional P1 — **not** on critical path (OPEN parked)
+- [ ] Flash-Lite optional P1 — **not** on critical path
+- [ ] D-61 provider-independent capability boundary; no hardcoded sole provider
+- [ ] Context enters through purpose/privacy policy; no raw identity
+- [ ] If exposed through Hermes, tool call maps H0–H4 and domain service remains SoR
 
 **Evidence:** P + A (capability review)
 
@@ -143,7 +146,7 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 | Field | Content |
 | --- | --- |
-| Locks | D-54 |
+| Locks | D-54, **D-61** |
 | Thin vertical **E6a** | One checklist shadow → Promptfoo fail → no promote; one Actual KPI with MetricContract |
 
 ### Feature DoD checklist
@@ -160,10 +163,43 @@ Evidence codes: T tests/typecheck · W webhook replay · P Promptfoo · S screen
 
 ---
 
+---
+
+## E7 — Hermes Business Agent Fabric + R2 + Provider Bridge + Quantum Intelligence (D-61)
+
+| Field | Content |
+| --- | --- |
+| Locks | **D-61**, D-32, D-40, D-47/48, D-52, D-54, D-58–D-60 |
+| Grill | **New D-61 Topic 7 required before code** — Supervisor → provider/manager → privacy/memory/R2 → tools → intelligence/stakeholders |
+| Thin vertical **E7a** | Deterministic Supervisor + provider-policy stub + opaque subject/context compiler + one H0 read-only tool + R2 manifest/fake archive + run audit |
+| Channels | internal test first; no customer-facing production traffic in E7a |
+
+### Feature DoD checklist
+
+- [ ] Play stays RUNNING across at least two work items; batch completion does not stop supervisor
+- [ ] Pause/Resume/Stop/E-stop state-machine tests; E-stop fences H2+ writes
+- [ ] Lease expiry + fencing-token stale-worker recovery
+- [ ] Idempotency/checkpoint/retry test after uncertain worker interruption
+- [ ] Provider adapter is configuration; no domain hardcode
+- [ ] managerEligible deny test — manager task cannot silently downgrade
+- [ ] API-key provider stub + supported OAuth/CLI bridge interfaces; no copied browser cookies/session tokens
+- [ ] Opaque subject ID + minimum-purpose `AiContextPackage`
+- [ ] Privacy Egress deny test for direct identity / prohibited data class
+- [ ] Health cross-domain negative test
+- [ ] H0 read tool executes through ToolCallEnvelope + object AuthZ; no raw SQL tool
+- [ ] R2 object manifest + checksum/archive fake; R2 never source of current business state
+- [ ] Run/tool/policy/provider provenance persisted in audit fixture
+- [ ] Epistemic label + evidence contract for one deterministic management insight
+- [ ] Supplier benchmark cohort/confidentiality policy type/test exists before supplier-facing output
+- [ ] `dial-ai-capability-review` + `dial-grill-locks` + D-52 matrix evidence before merge
+
+**Matrix:** Tracer matrices §E
+
 ## Next actions
 
-1. ~~Confirm grill counsel OPENs~~ — product locks closed through **D-60**; commercial Phase-0 parallel.  
-2. ~~Completion matrices filled with AC rows + thin vertical names~~.  
-3. Optional: Promptfoo outline + D-57 negative display cases.  
-4. **Dev Manager (Blueprint §8.0):** close **ticket hygiene** — open owned **E2a** or **E1a** with DoD + owner; then Build.  
-5. Customer-open still needs Appendix C — not unblocked by ticket hygiene alone.
+1. Product/commercial locks remain closed through D-60; **D-61 is now a new canonical platform lock, not a new unresolved product choice**.
+2. Run `dial-grill-locks` **Topic 7 / D-61** against master §6.24 and fill any missing E7a DoD/matrix assumptions before code.
+3. Dev Manager reconstructs repo state from Git/code/tests; T0 is implemented, but most domain packages including Hermes are not.
+4. Open/own one tracer ticket. Existing **E2a/E1a** remain valid business-path priorities; **E7a** is the D-61 foundation slice and may proceed in dependency-safe order/parallel only after ticket ownership is clear. Do not flood empty packages.
+5. First fresh build session reruns install/typecheck/test/build in its own environment; historical T0-green documentation is not a substitute for current verification.
+6. Customer-open still needs Appendix C; D-61 does not bypass POTRAZ/PSP/FDMS/tax/Meta launch gates.

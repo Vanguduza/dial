@@ -2,7 +2,7 @@
 
 **Mandatory companion to `DIAL_Consolidated_Plan_v4.md`.** Locked by founder decision **D-39** / Part 9. Cursor agents (and human engineers) must read this pack **before scaffolding** so base research is not repeated in the development phase.
 
-**Authority order when documents conflict:** `DIAL_Consolidated_Plan_v4.md` wins on product, compliance, and architecture decisions. This pack wins on **scaffolding contracts** (env names, index schemas, screen inventories, adapter stubs, acceptance checks) unless a later D-log row supersedes it. Companion UX/checklist detail: `DIAL_Build_Blueprint_and_Cursor_Prompt.md`, `DIAL_Diagnostic_Checklist_Library.md`. Deep OSS/payment/delivery stitch: `DIAL_Deep_Engineering_and_OSS_Stitch.md` (D-43 / D-44 / **D-45** / **D-46** / **D-53** §8). Cursor engineering hygiene (**D-47**): `AGENTS.md` + `.cursor/rules/` + `.cursor/skills/` + `DIAL_Cursor_Rules_and_Skills.md`; rationale companions `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`. Security toolchain (**D-48**): `DIAL_Security_Toolchain.md` + `docs/security/README.md`. Agency + B2B hide informal (**D-49**), tech-hire 30% WHT (**D-50**), DIAL-owned stock dual capacity (**D-51 discarded by D-58**), tracer sequencing + feature DoD (**D-52**), v7-2 platform extensions (**D-53**), Intelligence Factory + Command Centre metrics (**D-54**), external skills utilization (**D-55**), plan-phase grill + AI capability merge gate (**D-56**), Spare USD browse + ZiG-at-checkout + WA EcoCash/COD buttons (**D-57**): v4 §0.2 / D-log / `DIAL_v7_2_Adopted_Platform_Extensions.md` / `DIAL_External_Skills_Repos_Utilization.md`.
+**Authority order when documents conflict:** `DIAL_Consolidated_Plan_v4.md` wins on product, compliance, and architecture decisions. This pack wins on **scaffolding contracts** (env names, index schemas, screen inventories, adapter stubs, acceptance checks) unless a later D-log row supersedes it. Companion UX/checklist detail: `DIAL_Build_Blueprint_and_Cursor_Prompt.md`, `DIAL_Diagnostic_Checklist_Library.md`. Deep OSS/payment/delivery stitch: `DIAL_Deep_Engineering_and_OSS_Stitch.md` (D-43 / D-44 / **D-45** / **D-46** / **D-53** §8). Cursor engineering hygiene (**D-47**): `AGENTS.md` + `.cursor/rules/` + `.cursor/skills/` + `DIAL_Cursor_Rules_and_Skills.md`; rationale companions `DIAL_Lazy_Developer_Playbook_Adaptations.md`, `DIAL_AIHero_Adaptations.md`. Security toolchain (**D-48**): `DIAL_Security_Toolchain.md` + `docs/security/README.md`. Agency + B2B hide informal (**D-49**), tech-hire 30% WHT (**D-50**), DIAL-owned stock dual capacity (**D-51 discarded by D-58**), tracer sequencing + feature DoD (**D-52**), v7-2 platform extensions (**D-53**), Intelligence Factory + Command Centre metrics (**D-54**), external skills utilization (**D-55**), plan-phase grill + AI capability merge gate (**D-56**), Spare USD browse + ZiG-at-checkout + WA EcoCash/COD buttons (**D-57**), **Hermes Business Agent Fabric / R2 / Provider Bridge / Quantum Intelligence (D-61)**: v4 §0.2 / D-log / `DIAL_v7_2_Adopted_Platform_Extensions.md` / `DIAL_External_Skills_Repos_Utilization.md`.
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Dimension | Status for development |
 | --- | --- |
-| Strategy, trades, gateway UX, AI rules, money spine, compliance research | **Strong in v4** — do not re-research |
+| Strategy, trades, gateway UX, AI/Hermes rules, money spine, compliance research | **Strong in v4 including D-61 §6.24** — do not re-research |
 | Monorepo map, events, state machines, workflows, admin modules | **Strong in v4 §6.11–6.23** — implement, do not redesign |
 | UX donor repos (Mercur, FixItNow, CoolMall, etc.) | **Locked D-38 / §6.2.1** — pattern UI only |
 | Checklists for launch trades | **Authored** in `DIAL_Diagnostic_Checklist_Library.md` (42) |
@@ -52,8 +52,9 @@
 23. **D-58** — **D-2 agency confirmed**; **discard D-51** owned-stock principal track; FDMS on agency receipt model; no `DIAL_OWNED` offers/inventory
 24. **D-59** — Agency FDMS receipt types (`DIAL_FEE` / `GOODS_FORMAL` / `GOODS_INFORMAL`); **in-house** ZIMRA Virtual Gateway default; CloudESD optional `FdmsSigner` only; e-invoices + WA share outbox
 25. **D-60** — IMTT = DIAL opex (not customer price); COD settle USD; B2C informal visible; Flash-Lite P1; C-4 Paynow-first; WA templates §12
+26. **D-61** — master §6.24 is canonical: deterministic Hermes Supervisor; provider-configurable models; opaque subject IDs + Privacy Context Compiler/Egress Firewall; R2 extended memory; H0–H4 Tool Bus; cross-unit governed conversations; Quantum Business Intelligence + Profitability Opportunities + supplier/stakeholder intelligence. **This is in the master, not an optional companion.**
 
-**Do not** re-open: Expo/RN customer apps, Lottie, Inngest, Typesense, imgproxy, agentic Spare shop, AI customer prices before §5.9 gates, SandPIM as runtime SoR, Mercur/Medusa as money ledger, **OfferKit/Medusa as live promotion SoR** (pattern into `@dial/promotions` only — D-42), cash-out of promo credit, deferring §10 WA Flows past open launch, **Google Maps / Mapbox as sole distance or courier-map SoR** (MapLibre + OSRM/VROOM — D-44), Fleetbase/Navigator as delivery runtime SoR (AGPL pattern-only — **D-45** job SoR is `packages/delivery`), skipping D-47 Cursor hygiene for multi-agent scaffolds, replacing D-47 IDOR/RLS CI with Semgrep/Strix alone, dual Dependabot+Renovate *version* bots (**D-48** = Renovate primary), **marketplace-wide principal/reseller** or informal→B2B **visibility/sales** (**D-49**), designing tech payouts as if **30% WHT disappears** (**D-50**), reintroducing discarded D-51 `DIAL_OWNED` principal SKUs without new D-log (**D-58**), treating tracer/stub as MVP-complete or merging without feature DoD / channel matrix (**D-52**), **v7-2 as plan SoR**, Train 0–10 replacing **T0–T9**, Unleash/OR-Tools as SoR, CERTIFIED–DORMANT as public multi-phase MVP, or AI/`pricing-intelligence` writing payable amounts (**D-53**), auto-publish checklist/AI without human+Promptfoo, Command Centre Simulated as live money control, or ad-hoc KPIs without MetricContract (**D-54**), full agency-agents / anthropics/skills / diagram-design asset tree dumps or Anthropic ToS document-skill vendoring (**D-55**), skipping plan-phase grill or merging `packages/ai` without capability review (**D-56**), dual-displaying ZiG on Spare browse/cart or converting without ops-audited daily rate / skipping WA EcoCash+COD checkout buttons (**D-57**).
+**Do not** re-open: Expo/RN customer apps, Lottie, Inngest, Typesense, imgproxy, **unrestricted agentic commerce that bypasses D-61 governance**, AI customer prices before §5.9 gates, SandPIM as runtime SoR, Mercur/Medusa as money ledger, **OfferKit/Medusa as live promotion SoR** (pattern into `@dial/promotions` only — D-42), cash-out of promo credit, deferring §10 WA Flows past open launch, **Google Maps / Mapbox as sole distance or courier-map SoR** (MapLibre + OSRM/VROOM — D-44), Fleetbase/Navigator as delivery runtime SoR (AGPL pattern-only — **D-45** job SoR is `packages/delivery`), skipping D-47 Cursor hygiene for multi-agent scaffolds, replacing D-47 IDOR/RLS CI with Semgrep/Strix alone, dual Dependabot+Renovate *version* bots (**D-48** = Renovate primary), **marketplace-wide principal/reseller** or informal→B2B **visibility/sales** (**D-49**), designing tech payouts as if **30% WHT disappears** (**D-50**), reintroducing discarded D-51 `DIAL_OWNED` principal SKUs without new D-log (**D-58**), treating tracer/stub as MVP-complete or merging without feature DoD / channel matrix (**D-52**), **v7-2 as plan SoR**, Train 0–10 replacing **T0–T9**, Unleash/OR-Tools as SoR, CERTIFIED–DORMANT as public multi-phase MVP, or AI/`pricing-intelligence` writing payable amounts (**D-53**), auto-publish checklist/AI without human+Promptfoo, Command Centre Simulated as live money control, or ad-hoc KPIs without MetricContract (**D-54**), full agency-agents / anthropics/skills / diagram-design asset tree dumps or Anthropic ToS document-skill vendoring (**D-55**), skipping plan-phase grill or merging `packages/ai` without capability review (**D-56**), dual-displaying ZiG on Spare browse/cart or converting without ops-audited daily rate / skipping WA EcoCash+COD checkout buttons (**D-57**), hardcoding Gemini-only after D-61, raw PII/identity resolution to Hermes, R2 as transaction truth, raw SQL/service-role tools, unmanaged model downgrade, cross-domain Health leakage, supplier-confidential benchmark leakage, or treating model/simulation narratives as facts (**D-61**).
 
 ---
 
@@ -89,6 +90,8 @@ Copy into PR checklist / Cursor rules:
 26. **D-2 agency + discard owned stock (D-58):** DIAL is **agent**; no DIAL-owned principal SKUs; agency FDMS/e-invoice tax model; WA payments share ERP `fdms_outbox`.
 27. **Agency FDMS + in-house Gateway (D-59):** registered goods VAT-inclusive (supplier remits); DIAL VAT on fees only; informal no goods VAT fiscal; B2B buyer TIN; build Gateway adapter; CloudESD optional only.
 28. **IMTT + open locks (D-60):** never put IMTT on customer prices; GL expense; COD settle USD; B2C informal visible; Flash-Lite P1; Paynow-first escrow ask.
+
+29. **Hermes Business Agent Fabric (D-61):** deterministic Supervisor controls actual autonomous runtime; models are provider-configurable behind managerEligible/data-class policy; opaque subject IDs + purpose-scoped context + Egress Firewall; R2 = archive/large-object/analytics, not DB truth; Tool Bus H0–H4, no raw SQL/PII vault/PSP secrets; Health isolated; D-54 MetricContract/evidence/Actual-vs-Simulated rules extended by profitability/supplier intelligence.
 
 ### 2.1 Lazy Developer hygiene (D-47 — mandatory)
 
@@ -280,17 +283,40 @@ N8N_API_KEY=
 INTERNAL_API_SECRET=
 ```
 
-### 6.5 AI
+### 6.5 AI / Hermes / R2 (D-61)
 
 ```bash
+# Existing optional gateway / typed AI capabilities
 LITELLM_BASE_URL=
 LITELLM_API_KEY=
-GEMINI_API_KEY=                     # preferably only inside LiteLLM
+
+# Provider Bridge — server-side only; actual secrets should resolve via secretRef/secret store
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GEMINI_API_KEY=                     # optional provider, no longer sole-brain lock
+HERMES_BASE_URL=http://127.0.0.1:8000
+HERMES_API_KEY=                     # per-profile/internal; never NEXT_PUBLIC_
+HERMES_MANAGER_PROFILE=dial-manager
+HERMES_CONTROL_ENABLED=true
+
+# Subscription/OAuth credentials are managed by the approved Hermes/CLI auth stores,
+# not copied into .env or the database as browser cookies/session tokens.
+
+# Cloudflare R2 — use scoped S3 credentials, not account-wide master credentials
+R2_ENDPOINT=
+R2_BUCKET=
+R2_ACCESS_KEY_ID=
+R2_SECRET_ACCESS_KEY=
+R2_REGION=auto
+R2_PREFIX=dial-hermes
+
 LANGFUSE_PUBLIC_KEY=
 LANGFUSE_SECRET_KEY=
 LANGFUSE_HOST=
 PROMPTFOO_CONFIG=packages/ai/evals/promptfooconfig.yaml
 ```
+
+`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, R2 keys, Hermes API keys and any OAuth/CLI credential files are **secret**. Provider connection rows store `secretRef`, never credential plaintext. OpenAI Codex/ChatGPT OAuth and approved Claude/Claude Code paths follow master §6.24.4; do not invent an unofficial subscription API.
 
 ### 6.6 Payments (Paynow stub → live; D-43 multi-method)
 
@@ -453,6 +479,16 @@ Implement as migrations under `supabase/migrations` (or equivalent). Names are c
 
 ---
 
+**D-61 additions (reuse equivalents if already introduced by an earlier migration):**
+
+| Area | Tables |
+| --- | --- |
+| Hermes supervisor | `hermes_control_state`, `hermes_workers`, `hermes_work_items`, `hermes_work_item_attempts`, `hermes_runs`, `hermes_run_steps`, `hermes_run_checkpoints`, `hermes_approvals` |
+| AI provider bridge | `ai_provider_connections`, `ai_model_policies`, `ai_routing_policies`, `ai_usage_rollups`, `ai_provider_health` |
+| Privacy/memory/R2 | `subject_aliases`, `privacy_tokens`, `ai_context_packages`, `ai_egress_decisions`, `memory_facts`, `memory_fact_versions`, `memory_access_events`, `r2_object_manifest` |
+| Hermes skills/routines | `hermes_skill_versions`, `hermes_skill_evaluations`, `hermes_skill_promotions`, `hermes_routines`, `hermes_routine_runs` |
+| Intelligence | extend D-54 `metric_contracts`; add `metric_observations`, `operational_alerts`, `business_insights`, `insight_evidence`, `business_opportunities`, `opportunity_outcomes`, `forecast_runs`, `simulation_runs`, `stakeholder_reports`, `stakeholder_report_recipients`, `supplier_benchmark_cohorts` |
+
 ## 8. Meilisearch index — `spare_offers_v1`
 
 Configure **settings before** bulk indexing.
@@ -587,6 +623,8 @@ Queue-first modules A–P in v4 §6.17 — do not invent a second IA. Include Pr
 
 **D-54 Command Centre depth:** every KPI tile registers a `MetricContract` (id, source, calculation, thresholds, ownerRole); Data→Metrics→Alert→Decision→Action; severity→recommended permissioned actions; Simulated watermark; no ad-hoc duplicate KPI formulas.
 
+**D-61 Hermes + Quantum Intelligence:** extend the same `admin-web` IA with Enterprise Command Centre; Profitability Opportunities; Cross-Unit Synergy; Executive Brief; Decision Inbox; Evidence Viewer; Forecasts/Scenario Lab; Hermes Control Room/Worker Fleet/Queues/Runs/Approvals/Incident/Recovery/Routines/Skills/Memory/R2; Provider Connections/Model Inventory/Manager Chair/Routing/Usage/Privacy Eligibility/Health; Privacy Control Centre/Consent/Egress/Rights/Retention; domain intelligence screens. Supplier portal adds Demand/Forecast/Catalogue Opportunities/Performance/Quality/Geography/Benchmarks/Recommendations/Reports. Customer account adds AI & Personalization / What DIAL Remembers / memory-consent-rights surfaces. Use progressive disclosure; no god-dashboard.
+
 **Cost & health (D-47):** admin (or Metabase embed) must surface AI/LiteLLM + cloud + SMS/WhatsApp spend with alert thresholds and kill-switch links to rate limits (v4 §5.11). Complements Appendix C ops dashboards — does not replace compliance gates.
 
 **Orders & delivery (D-45):** dispatch board (`delivery_jobs` FIFO queue + live offers); order/shipment detail with **live MapLibre map** of the assigned driver’s `courier_locations` (Supabase Realtime); assignment-event timeline; manual override assign. This is the primary management live-track surface (customer track is read-only on the same channel).
@@ -645,7 +683,9 @@ Prefix `/api/v1`. Auth via Supabase JWT unless webhook.
 | Suppliers | upload stock, heartbeat, confirm order, coop propose/ack |
 | Admin queues | list/claim/resolve pending_review, disputes, four-eyes, promo approve |
 | Webhooks | `/webhooks/paynow/result`, `/webhooks/contipay`, `/webhooks/ecocash`, `/webhooks/paypal`, `/webhooks/psp/*`, `/webhooks/whatsapp`, `/webhooks/fdms` |
-| AI | `POST /ai/guided-intake`, `/ai/client-assessment`, `/ai/ops-draft-quote` only — no generic chat |
+| AI/Hermes | Existing typed AI capability routes remain. Governed conversation/run routes may be added **only** through D-61 gateway/Supervisor/privacy/tool policy — no unrestricted raw model endpoint. |
+
+**D-61 API families (master §6.24.14):** `/internal/hermes/control/*`, `/internal/hermes/workers|queues|runs/*`; `/admin/ai/providers|models|routing|usage|limits`; `/internal/identity/*`, `/internal/privacy/*`, `/privacy/me/*`; `/internal/memory/*`, `/internal/storage/*`; `/admin/hermes/profiles|skills|routines`; `/admin/mcp/servers/*`, `/internal/tools/*`; `/internal/conversations/*`, `/staff/conversations/inbox`; `/admin/intelligence/*`, `/internal/intelligence/*`; `/supplier/intelligence/*`; and permissioned `/internal/hermes/{domain}/*` façades.
 
 Idempotency-Key required on pay, payout, fiscal, failover.
 
@@ -708,7 +748,7 @@ export interface FdmsAdapter {
 ```
 
 ```ts
-// adapters/gemini via packages/ai — only through LiteLLM; Zod-validate outputs
+// D-61: packages/ai-provider-bridge → provider adapters / approved Hermes OAuth or CLI bridges; domain code never hardcodes provider. Zod/policy/privacy still validate.
 ```
 
 Maps: **self-hosted Nominatim + OSRM + VROOM**; courier/client/admin maps = **MapLibre** (D-44). Do **not** use Google Maps as sole distance or courier-map SoR. Commercial tile CDN only as optional visual fallback (Blueprint I-2 / stitch doc §3). Dispatch/assignment SoR = **`packages/delivery`** (D-45); algorithm donor = AWS Last Mile Hyperlocal MIT-0 (D-45a / stitch §3.9), not Fleetbase.
@@ -732,6 +772,10 @@ Roles: `customer`, `technician`, `supplier`, `admin`, `service_role` (server).
 | courier_locations | track own active shipment (read) | — (courier role: insert own) | — | all |
 | delivery_assignment_events | — | — | — | all |
 | ai_invocations | — | — | — | all; insert via service |
+| Hermes runs/control | own conversation summary only via API | supplier own scoped report/conversation only | supplier own scoped report only | role-scoped; write controls require ops/admin policy |
+| memory_facts / privacy | own safe summaries/rights via API | assigned-job scope only | own tenant scope only | DPO/admin role-scoped; Health separately restricted |
+| supplier intelligence | — | — | own exact + approved aggregate benchmark only | portfolio view by role |
+| r2_object_manifest | own object metadata only through signed API | assigned evidence only | own document refs | role-scoped; presign service enforces object AuthZ |
 | outbox | — | — | — | service only |
 
 CI must run RLS tests (Appendix C). Service role never in mobile/web bundles.
@@ -774,16 +818,16 @@ Agents close a train only when AC pass.
 
 | Train | Done when |
 | --- | --- |
-| T0 Foundation | Monorepo boots; apps render shell; tokens compile; CI lint/typecheck; **Semgrep dial hard-fail + Checkov HIGH+ workflows present (D-48)**; Renovate config or Mend App noted |
-| T1 Identity | Sign-in/up; auth home Shop\|Services; RLS tests green on profiles |
+| T0 Foundation | Monorepo boots; apps render shell; tokens compile; CI lint/typecheck; **Semgrep dial hard-fail + Checkov HIGH+ workflows present (D-48)**; Renovate config; **D-61 Supervisor/provider/privacy/R2/tool/insight contracts planned/compile when sliced; no client secrets** |
+| T1 Identity | Sign-in/up; auth home Shop\|Services; RLS tests green; **D-61 opaque subject ID/context-policy + Supervisor/managerEligible unit tests** |
 | T2 Catalogue+Search | Migrations for catalogue/offers (**no owned inventory — D-58**); Meili settings incl. `offerSource` / `supplierFormality`; stub docs searchable; B2B Meili filter excludes informal; SandPIM notes linked in ADR; **Catalogue Factory ingest/review stubs + `search_no_result_events` (D-53)** |
 | T3 Spare UI | Mercur-patterned browse/PDP/cart against stub API; no supplierId in client payloads; checkout seller disclosure agency supplier (D-58); **USD-only browse/cart display (D-57)**; ZiG only on pay-step mock; WA FLOW_SPARE_CHECKOUT EcoCash+COD **required buttons** (D-57) |
 | T4 Tech UI | FixItNow-patterned intake/book; emergency path bypasses AI; checklist runner loads 1 automotive + 1 emergency checklist |
 | T5 Money spine | Ledger tables; Paynow + ContiPay/EcoCash/PayPal/COD adapter stubs; JobReserve state machine unit tests; Threat Dragon models under `ThreatDragonModels/` (Job Reserve + related); **`itf263_records` + `withholding_balances` stubs and tech-payout WHT decision path (D-50)**; **tech economics / Take-Home UI stub (D-53)**; **`fx_daily_rates` + admin Daily ZiG rate stub + checkout conversion persists `fx_rate_id` (D-57)**; **FDMS agency receipt types + Gateway adapter stub (D-59)** |
 | T6 Jobs | Classification + assignment eligibility tests; quote from rate card only; **`job_class_definitions` + `trade_definitions` lifecycle stubs; Value Score snapshot read path (D-53)** |
-| T7 AI | guidedIntake + opsDraftQuote behind Zod; Promptfoo smoke; no price in customer assessment; **Intelligence Factory shadow/promote metadata stubs; capability rename = commercial-forecast / pricing-draft-assist only — never money writer (D-53)**; **checklist outcome loop + outcome-weighted dataset versioning ACs (D-54 §13)** |
-| T8 Polish | Chatwoot/Cal.com/Formbricks/PostHog wired or mocked; Rive greeting optional; **Command Centre MetricContract registry stubs + Actual vs Simulated banner (D-54 §14)** |
-| T9 Hardening | Degradation tests §6.22; restore drill doc; Metabase views stub; **AuthZ/IDOR + webhook AC** (Appendix A.1); bundle secret grep; security headers/CORS allowlist; cost/health dashboard stub; Semgrep community packs hard-fail after baseline; Strix staging runbook exercised when staging URL + `STRIX_ENABLED` (**D-48**); **Simulated→payout path forbidden integration test (D-54)** |
+| T7 AI | guidedIntake + opsDraftQuote behind Zod; Promptfoo smoke; no price in customer assessment; **D-54 Factory/checklist outcome loop**; **D-61 governed Hermes skill/routine promotion, R2 analytical snapshot, Opportunity Engine v1 with epistemic/evidence schema; no provider hardcode/money write** |
+| T8 Polish | Chatwoot/Cal.com/Formbricks/PostHog wired or mocked; Rive optional; **D-54 MetricContract + Actual/Simulated**; **D-61 Hermes Control/Provider/Privacy/Executive Opportunity/Supplier Intelligence surfaces + Evidence Viewer; benchmark cohort suppression tests** |
+| T9 Hardening | Degradation tests §6.22; restore drill; AuthZ/IDOR/webhooks; secret grep; D-48 hardening; **Simulated→payout forbidden**; **D-61 real Play/Pause/Resume/Stop/E-stop, stale-lease/fencing recovery, provider failover/quota/no-manager, prompt-injection/PII/cross-tenant, Health isolation, R2 restore/legal-hold and cross-unit tracer tests** |
 
 **D-53 overlay (not a new train number):** Commercial Simulation service may scaffold after T5 money spine exists; prefer post-dogfood calibration. Do **not** renumber to Train 0–10.
 
@@ -820,7 +864,7 @@ Customer-open requires Appendix C + §8.1 gates — not T-train alone.
 | Spare UX donor | Mercur B2C | D-38 |
 | Tech UX donor | FixItNow primary | D-38 |
 | Fitment PIM reference | SandPIM (schema only) | D-38 |
-| AI brain | Gemini sole | C-1, D-18 |
+| AI/provider architecture | D-61 Provider Bridge + Hermes; manager eligibility explicit; D-18 Gemini exclusivity superseded | D-61 / §6.24 |
 | Voice | None | D-23 |
 | Cores / buffer SKUs | Not accepted / not required | D-21, D-22 |
 | Withholding | **30% tech-hire WHT enforced** — ITF263 hard preference; `withholding_balances`; do not assume WHT disappears | §7.2, D-50 (D-3 counsel parallel) |
@@ -840,6 +884,8 @@ Customer-open requires Appendix C + §8.1 gates — not T-train alone.
 | External skills utilization | Thin dial-diagram-editorial; agency payments/evidence habits; anthropics anatomy + dial-webapp-recon; no full tree vendors | D-55 |
 | Plan-phase grill + AI capability gate | `dial-grill-locks` in Plan; `dial-ai-capability-review` before `packages/ai` merge; slim AGENTS + evals + T0 affirmed; Flash-Lite P1 | D-56 |
 | Spare USD browse / ZiG checkout | Display USD on PLP/PDP/search/cart; ZiG only at pay step from ops daily rate; admin Daily ZiG rate + audit; WA EcoCash+COD buttons | D-57 |
+
+| Hermes / provider / R2 / quantum intelligence | Provider-configurable behind Supervisor; opaque IDs/privacy compiler; R2 archive not DB; H0–H4; evidence/epistemic labels; supplier confidentiality; no silent manager downgrade | D-61 / master §6.24 |
 
 ### 16.1 Optional donors (D-46) — high-value only
 
@@ -887,11 +933,324 @@ dial-ai-capability-review before packages/ai merge; Flash-Lite stays P1.
 Spare USD browse + ZiG-at-checkout (**D-57**): displayCurrency=USD on catalogue/cart;
 ZiG only at pay step from ops daily fx_daily_rates; admin Daily ZiG rate + audit;
 WA EcoCash + COD via required checkout buttons/CTAs (not free-text only).
+D-61 master §6.24 is mandatory: Hermes Business Agent Fabric + deterministic Supervisor,
+provider-configurable manager/specialist/auxiliary models, privacy context compiler + opaque
+subject IDs, R2 extended memory, H0-H4 tool policy, governed cross-unit conversations,
+Quantum Business Intelligence/profitability opportunities/supplier intelligence. Never expose
+raw PII/SQL/PSP secrets; never use R2 as transaction truth; never silently downgrade manager work.
 ```
 
 ---
 
-## 18. Gap log — what this pack intentionally does not invent
+## 18. D-61 implementation overlay — Hermes Business Agent Fabric (mandatory)
+
+This section is a scaffolding contract for master §6.24. It **does not create a second product source of truth**. If this pack conflicts with master §6.24 / D-61, the master wins.
+
+### 18.1 Physical implementation awareness
+
+The repository was still at a **T0 foundation scaffold** when D-61 was absorbed. Do not infer implementation from the size of the planning docs. Before coding, inspect the tree and Git history. At D-61 integration time the concrete code was limited to:
+
+- `apps/gateway-web` Next.js shell;
+- `packages/shared` (including money primitives/tests);
+- `packages/design-tokens`;
+- `packages/promotions`;
+- planning/security/Threat Dragon/CI scaffolding.
+
+The broad domain topology in v4 §6.12 and D-61 §6.24 is a **target architecture**, not evidence those packages/services already exist.
+
+### 18.2 Recommended D-61 package/service layout
+
+Create only when the owning tracer ticket reaches that layer; do not mass-scaffold empty packages.
+
+```text
+packages/
+  ai/                    typed model capabilities/evals
+  hermes-contracts/      run/work/profile/control DTOs
+  ai-provider-bridge/    provider auth/model/route abstractions
+  ai-policy/             H0-H4, data-class, provider/model eligibility
+  memory-contracts/      scoped memory facts/context packages
+  r2-storage/            object manifest/storage interface
+  metric-contracts/      reuse/extend D-54 MetricContract types
+  insight-contracts/     evidence/insight/opportunity/report types
+  mcp-contracts/         typed tool/capability contracts
+
+services/ or worker apps only when deployment needs justify them:
+  hermes-supervisor/     deterministic state/lease/recovery controller
+  hermes-gateway/        Hermes runtime adapter/internal Runs API boundary
+  privacy-context/       context compiler/egress firewall worker where split needed
+  intelligence-worker/   deep analytics/forecast/report jobs where split needed
+```
+
+Prefer a module/package inside the existing monorepo until a separate deployable service has a real operational reason.
+
+### 18.3 Supervisor minimum vertical
+
+First Supervisor slice must prove real control semantics with a fake/no-side-effect work item before adding business writes:
+
+- control state table/interface;
+- Play latches RUNNING across multiple queued items;
+- Pause stops acquisition after safe checkpoint;
+- Resume continues from checkpoint;
+- Stop drains/releases lease;
+- Emergency Stop fences H2+ writes;
+- lease expiry + fencing token recovery;
+- idempotency key checked on retry;
+- worker heartbeat/stale detection;
+- immutable run-step/audit record.
+
+### 18.4 Provider bridge contract
+
+Do not put provider secrets in domain packages or `.env` names copied into client apps.
+
+Minimum provider adapter:
+
+```ts
+export type AiAuthMode = 'API_KEY' | 'OAUTH' | 'CLI_BRIDGE' | 'CUSTOM'
+export type AiRole = 'MANAGER' | 'SPECIALIST' | 'AUXILIARY'
+
+export interface AiProviderConnection {
+  id: string
+  providerType: string
+  authMode: AiAuthMode
+  accountLabel: string
+  enabled: boolean
+  secretRef?: string
+  allowedDataClasses: string[]
+  fallbackPriority: number
+  maxConcurrentRuns?: number
+}
+
+export interface AiModelPolicy {
+  providerConnectionId: string
+  modelId: string
+  role: AiRole
+  enabled: boolean
+  managerEligible: boolean
+  toolsAllowed: string[]
+  dataClassesAllowed: string[]
+  maxRunCostMinorUsd?: bigint
+  latencySloMs?: number
+}
+```
+
+Supported provider paths are configuration:
+
+- OpenAI API key;
+- OpenAI Codex/ChatGPT OAuth through the approved Hermes path where supported;
+- Anthropic API key;
+- Hermes Anthropic OAuth only when current Hermes/account/billing conditions allow it;
+- supervised Claude Code Bridge authenticated through official Claude Code login for eligible async/complex work;
+- optional Codex CLI Bridge authenticated through official Codex login.
+
+Never scrape browser cookies/session tokens or implement an unofficial subscription API. Subscription quota/auth health is observed, not assumed. High-impact manager work may not silently fall back to a non-manager-eligible model.
+
+### 18.5 Privacy/memory contracts
+
+Minimum context DTO:
+
+```ts
+export interface AiContextPackage {
+  id: string
+  subjectId?: string             // opaque CUS_/SUP_/VEN_/TECH_...
+  actorId: string
+  purpose: string
+  domain: string
+  dataClasses: string[]
+  memoryFactIds: string[]
+  entityRefs: string[]
+  expiresAt: string
+  payload: unknown               // minimum required, already filtered
+  policyDecisionId: string
+}
+```
+
+Required invariants:
+
+- no generic identity-resolution tool for Hermes;
+- provider receives only classes allowed by provider/model policy;
+- every memory fact has purpose/domain/sensitivity/provenance/expiry/access policy;
+- Health is deny-by-default from ordinary commerce profiles;
+- model response egress is scanned for accidental PII;
+- memory deletion/restriction honours subject-rights workflow and legal-hold/retention rules.
+
+### 18.6 R2 storage contract
+
+```ts
+export interface ObjectManifest {
+  id: string
+  bucket: string
+  objectKey: string
+  subjectId?: string
+  domain: string
+  contentType: string
+  sha256: string
+  sizeBytes: bigint
+  dataClass: string
+  retentionPolicyId: string
+  legalHold: boolean
+  sourceEventId?: string
+  indexState: 'pending'|'indexed'|'failed'|'not_required'
+  deletionState: 'active'|'scheduled'|'deleted'|'held'
+}
+```
+
+Rules: opaque IDs in keys; checksum on write/read when required; DB manifest and object state must reconcile; R2 is not transaction truth; lifecycle follows ratified retention policy; legal hold wins.
+
+### 18.7 Tool action envelope
+
+```ts
+export type HermesActionClass = 'H0'|'H1'|'H2'|'H3'|'H4'
+
+export interface ToolCallEnvelope<T = unknown> {
+  toolCallId: string
+  runId: string
+  actorId: string
+  profileId: string
+  capability: string
+  entityRefs: string[]
+  purpose: string
+  actionClass: HermesActionClass
+  idempotencyKey: string
+  policyDecisionId: string
+  arguments: T
+  requestedAt: string
+}
+```
+
+No raw SQL/production admin/file-shell tool in customer/supplier/staff business profiles. H3 requires explicit commitment confirmation; H4 must invoke existing privileged/four-eyes/domain workflows.
+
+### 18.8 Intelligence contracts
+
+Extend D-54 `MetricContract` rather than creating ad-hoc KPI definitions.
+
+Minimum insight/opportunity shape:
+
+```ts
+export type EpistemicLabel =
+  | 'FACT' | 'DERIVED_METRIC' | 'CORRELATION' | 'FORECAST'
+  | 'HYPOTHESIS' | 'SIMULATION' | 'RECOMMENDATION' | 'DECISION'
+
+export interface BusinessInsight {
+  id: string
+  domain: string
+  title: string
+  epistemicLabel: EpistemicLabel
+  metricIds: string[]
+  evidenceIds: string[]
+  evidenceStrength: number
+  confidence?: number
+  probableCauses?: unknown[]
+  contradictingEvidence?: unknown[]
+  recommendedActionKeys?: string[]
+  datasetVersion?: string
+  providerId?: string
+  modelId?: string
+  skillPromptVersion?: string
+  generatedAt: string
+  expiresAt?: string
+}
+
+export interface BusinessOpportunity {
+  id: string
+  opportunityType: string
+  insightId: string
+  expectedRevenueUpliftMinor?: bigint
+  expectedCostReductionMinor?: bigint
+  expectedMarginUpliftMinor?: bigint
+  currency?: string
+  confidenceLow?: number
+  confidenceMid?: number
+  confidenceHigh?: number
+  implementationEffort: string
+  riskLevel: string
+  ownerRole: string
+  outcomeTrackingId?: string
+}
+```
+
+Supplier benchmarks add cohort-size/dominance/confidentiality policy before exposure.
+
+### 18.9 D-61 screen additions to `admin-web` / stakeholder surfaces
+
+Add into the existing IA, not a second admin product:
+
+**Executive:** Enterprise Command Centre, Profitability Opportunities, Cross-Unit Synergy, Executive Brief, Decision Inbox, Evidence Viewer, Forecasts, Scenario Lab.
+
+**Hermes Ops:** Control Room, Worker Fleet, Queue Monitor, Run Explorer, Approval Inbox, Incident/Recovery, Routines, Skills Registry/Evaluation, Memory Ops, R2 Archive Ops.
+
+**AI Settings:** Provider Connections, OpenAI/Codex, Claude, Model Inventory, Manager Chair Policy, Routing/Fallback, Usage/Limits/Cost, Privacy Eligibility, Health/Reauth.
+
+**Privacy:** Privacy Control Centre, Consent Ledger, Egress Firewall, Rights Queue, Identity Link Review, Sensitive-Domain Policy, Audit Explorer, Retention.
+
+**Domain intelligence:** Spare/Catalogue/Fitment, Tech/Capacity, Groceries/Rounds, Care, Health Ops, Logistics, Vendor/Supplier, Finance/Reconciliation, Support/Growth.
+
+**Supplier portal:** Intelligence Home, Demand/Forecast, Catalogue/Stock Opportunities, Performance/SLA, Quality/Returns, Geography, Aggregated Benchmarks, Recommendations, Reports/Feedback.
+
+**Customer:** AI & Personalization, Connected Channels, What DIAL Remembers, Memory/Notification Preferences, Consent/Privacy, data rights, human handoff explanation.
+
+### 18.10 D-61 route additions
+
+Implement only as required by tracer slices; contract names follow master §6.24.14:
+
+- `/internal/hermes/control/*`, `/workers`, `/queues`, `/runs/*`, work-item retry/cancel;
+- `/admin/ai/providers|models|routing|usage|limits` + provider test/OAuth/reauth/failover;
+- `/internal/identity/*` + `/internal/privacy/*` + `/privacy/me/*` rights/consent;
+- `/internal/memory/*` + `/internal/storage/*`;
+- `/admin/hermes/profiles|skills|routines`;
+- `/admin/mcp/servers/*` + `/internal/tools/*`;
+- `/internal/conversations/*` + `/staff/conversations/inbox`;
+- `/admin/intelligence/*` + `/internal/intelligence/*`;
+- `/supplier/intelligence/*`;
+- `/internal/hermes/{domain}/*` façades into existing DIAL services.
+
+### 18.11 RLS/AuthZ additions
+
+Add roles/scopes rather than granting Hermes service-role freedom:
+
+- customer: own privacy/consent/memory summaries; no raw `ai_invocations`/other subjects;
+- supplier/vendor: own supplier intelligence/report rows only; aggregate benchmarks only through policy-filtered view/API;
+- staff/admin: role-scoped operational insights; sensitive domains require explicit role;
+- DPO/privacy role: rights queue/consent/egress audit as policy permits;
+- Hermes service identity: only capability-specific database/API grants; no unrestricted table access;
+- Health service/profile: separate schema/roles/policies where required;
+- R2 presign service: object-manifest policy + subject/domain check before URL issue.
+
+Every API still performs object-level authorization above RLS.
+
+### 18.12 D-61 acceptance overlay by train
+
+| Train | Additional D-61 acceptance |
+| --- | --- |
+| T0 | D-61 contracts compile; no separate Hermes SoR doc required; Threat Dragon D-61 data-flow model planned; no secret refs in clients |
+| T1 | opaque subject ID + context-policy types; Supervisor state-machine unit tests; managerEligible policy unit tests |
+| T2 | R2 manifest/storage fake + archive/checksum tests; Spare/catalogue read-tool contract; B2B/privacy filters preserved |
+| T3 | customer conversational entry may be mocked through governed gateway; cannot bypass Meili/catalogue/pricing/order APIs |
+| T4 | Tech conversation uses deterministic emergency short-circuit + scoped asset/job context |
+| T5 | finance analyzer is read-only; H4 test proves no Hermes journal/reserve write; provider settings/usage surface stub |
+| T6 | Tech/Care/logistics tool façades + action-class/AuthZ tests; Health isolation negative tests |
+| T7 | D-54 Factory + Hermes skill promotion/replay; R2 analytical snapshot; Opportunity Engine v1 with epistemic/evidence schema |
+| T8 | Command Centre + supplier intelligence + evidence viewer + Actual/Simulated watermark; cohort suppression tests |
+| T9 | Play/Pause/Resume/Stop/E-stop integration; stale lease recovery; provider failover/quota/no-manager tests; prompt injection/PII/cross-tenant adversarial suite; R2 restore/legal hold; end-to-end cross-unit tracer; outcome tracking |
+
+### 18.13 Do-not-reopen additions
+
+- Do not return to a hardcoded Gemini-only architecture; D-61 supersedes provider exclusivity.
+- Do not interpret provider configurability as permission to silently use a low-tier model for manager work.
+- Do not expose raw PII or a general identity-resolution tool to Hermes.
+- Do not use R2 as transaction/current-state truth.
+- Do not expose production SQL/service-role/PSP credentials through MCP/tools.
+- Do not build a second money/pricing/catalogue/job/order/health SoR in Hermes.
+- Do not merge Health memory into a universal customer memory blob.
+- Do not expose another supplier's confidential metrics in supplier benchmarking.
+- Do not treat a model narrative as a KPI; every important KPI references `MetricContract`.
+- Do not treat forecasts/hypotheses/simulations as facts.
+- Do not allow Simulated → production money/control.
+- Do not let Hermes self-modify business policy/skills into production without D-54/D-61 eval + human promotion.
+- Do not confuse DIAL Hermes business orchestration with DDE/Cursor/Claude/Codex development orchestration.
+
+---
+
+## 19. Gap log — what this pack intentionally does not invent
 
 Agents must **not** invent these as facts; wait for founder/counsel/ops inputs:
 
@@ -906,6 +1265,6 @@ When blocked, implement interface + fake adapter + tests.
 
 ---
 
-*End of Development Agent Pack v1.0 — locked via v4 D-39; extended by D-53 / D-54 / D-55 / D-56 / D-57.*
+*End of Development Agent Pack v1.0 — locked via v4 D-39; extended through **D-61**. D-61 authority is consolidated in master §6.24; this pack carries implementation/scaffold contracts only.*
 
 **D-58:** D-2 agency confirmed; D-51 owned-stock discarded — no DIAL_OWNED scaffold.
